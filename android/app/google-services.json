@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "983500952462",
+    "firebase_url": "https://baduk-8a3a6-default-rtdb.firebaseio.com",
+    "project_id": "baduk-8a3a6",
+    "storage_bucket": "baduk-8a3a6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983500952462:android:a66be69fa119be6cff8adf",
+        "android_client_info": {
+          "package_name": "com.example.go"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "983500952462-d66piqv14tvkhftu7h4ifq531e813qqp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.go",
+            "certificate_hash": "11ff18e67ca55f0b0dc137d351bb136cdc6f67f2"
+          }
+        },
+        {
+          "client_id": "983500952462-p1upu5nu2bis5565bj6nbqu3iqsp5209.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKSJG5bNeWPERTocmlSm3hnmozJf_f5XQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "983500952462-p1upu5nu2bis5565bj6nbqu3iqsp5209.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
