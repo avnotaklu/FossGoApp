@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go/game.dart';
@@ -14,6 +15,7 @@ import 'utils.dart';
 
 // ignore: must_be_immutable
 class GameData extends InheritedWidget {
+  final User curUser;
   final List<Player> _players;
   Map<String, int> _turn;
   final Widget mChild;
@@ -22,7 +24,8 @@ class GameData extends InheritedWidget {
       {required List<Player> pplayer,
       required int pturn,
       required this.mChild,
-      required this.match})
+      required this.match,
+      required this.curUser})
       : _players = pplayer,
         _turn = {'val': pturn},
         super(child: mChild);
@@ -33,11 +36,11 @@ class GameData extends InheritedWidget {
     // turn = turn %2 == 0 ? 1 : 0;
     var thisGame =
         MultiplayerData.of(context)?.database.child('game').child(match.id);
-    thisGame?.update({'turn': turn.toString()});
     thisGame
         ?.child('moves')
         .update({(match.turn).toString(): position.toString()});
     turn += 1;
+    thisGame?.update({'turn': turn.toString()});
     UiData.timerController[turn % 2].start();
   }
 
@@ -163,8 +166,6 @@ class StoneLogic extends InheritedWidget {
       }
     });
   }
-
-  // TODO implement ko
 
   // Hack
   checkInsertable(Position position) {

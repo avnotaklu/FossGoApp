@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:go/blocs/auth_bloc.dart';
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
 
 class GameScreen extends StatelessWidget {
   static const title = 'Grid List';
-  GameMatch? match = null;
+  GameMatch? match;
 
   @override
   GameScreen(this.match);
@@ -50,26 +51,35 @@ class GameScreen extends StatelessWidget {
 
     print("getting started");
 
-    if (match == null) {
-      var str = authBloc.currentUser.listen((user) {
+    authBloc.currentUser.listen((user) {
+      if (match == null) {
         print("hurray");
         var newPlace = MultiplayerData.of(context)?.game_ref.push();
-        match = GameMatch(9, 9, 5 * 60, newPlace.key, {1: user?.uid, 0: user?.uid});
+        match = GameMatch(9, 9, 5 * 60, newPlace.key, {0: user?.uid , 1: null}); // Don't delete default values 0 or 1
+                                                                                      // Json parser depends on it.
         newPlace.set(match?.toJson());
-        game = Game(0, match as GameMatch);
-      });
-    }
-    else game = Game(0, match as GameMatch);
-
+        // game = Game(0, match as GameMatch);
+      } else {
+        if (match?.uid[1] == null) {
+          match?.uid[1] = user?.uid;
+          MultiplayerData.of(context)?.gameRef.child(match?.id.toString()).child('uid').update({ 1.toString() : user?.uid.toString()});
+        }
+      }
+    });
 
     return StreamBuilder(
       stream: authBloc.currentUser,
       builder: (context, snapshot) => Scaffold(
         appBar: AppBar(
           title: const Text(title),
+          actions : <Widget>[
+            TextButton(onPressed: authBloc.logout,child: Text("logout")),
+          ],
         ),
         backgroundColor: Colors.green,
-        body: game,
+        body: snapshot.hasData
+            ? Game(0, match as GameMatch, snapshot.data as User)
+            : Text("current user not detected"),
       ),
     );
   }

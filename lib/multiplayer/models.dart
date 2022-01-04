@@ -26,30 +26,43 @@ class GameMatch {
         cols = int.parse(json['cols']),
         time = int.parse(json['time']),
         id = json['id'],
-        uid = {0: json['uid'][0].toString(), 1: json['uid'][1].toString()},
+        // uid = {0: json['uid'][0].toString(), 1: json['uid'][1].toString()},
+//         uid = Map.fromIterable(json['uid'], key: (v) => v[0], value: (v) => v[1]);
         // uid = {json['uid'].keys : json['uid'].values},
+        uid = Map<int?,String?>.from(json["uid"].asMap().map((i,element) => MapEntry(i as int,json['uid'][i].toString() as String))),
+
         runStatus = json['runStatus'] == "true" ? true : false,
         _turn = int.parse(json['turn']) {
     json['moves']?.forEach((v) {
       if (v != null) {
-        if(v == "null") {moves.add(null);}
-        else
-        moves.add(Position.fromString(v));
+        if (v == "null") {
+          moves.add(null);
+        } else
+          moves.add(Position.fromString(v));
       }
     });
 
     Map<int?, Position?> clusterRefer = {};
     json['playgroundMap']?.forEach((k, v) {
       var currentClusterID = int.parse(v.split(' ')[1]);
-      var previousClusterTrackingPosition= clusterRefer[currentClusterID];
-      playgroundMap[previousClusterTrackingPosition]?.cluster.data.add(Position.fromString(k));
+      var previousClusterTrackingPosition = clusterRefer[currentClusterID];
+      playgroundMap[previousClusterTrackingPosition]
+          ?.cluster
+          .data
+          .add(Position.fromString(k));
 
       clusterRefer[currentClusterID] = Position.fromString(k);
 
-      playgroundMap[clusterRefer[currentClusterID] as Position] = Stone(int.parse(v.split(' ')[0]) == 0 ? Colors.black : Colors.white , clusterRefer[currentClusterID] as Position);
-      playgroundMap[clusterRefer[currentClusterID] as Position]?.cluster = playgroundMap[previousClusterTrackingPosition]?.cluster ?? playgroundMap[clusterRefer[currentClusterID] as Position]?.cluster as Cluster;
-      playgroundMap[clusterRefer[currentClusterID] as Position]?.cluster.freedoms = int.parse(v.split(' ')[2]);
-
+      playgroundMap[clusterRefer[currentClusterID] as Position] = Stone(
+          int.parse(v.split(' ')[0]) == 0 ? Colors.black : Colors.white,
+          clusterRefer[currentClusterID] as Position);
+      playgroundMap[clusterRefer[currentClusterID] as Position]?.cluster =
+          playgroundMap[previousClusterTrackingPosition]?.cluster ??
+              playgroundMap[clusterRefer[currentClusterID] as Position]?.cluster
+                  as Cluster;
+      playgroundMap[clusterRefer[currentClusterID] as Position]
+          ?.cluster
+          .freedoms = int.parse(v.split(' ')[2]);
     });
   }
 

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go/multiplayer/models.dart';
@@ -16,8 +17,9 @@ class Game extends StatelessWidget {
   int playerTurn = 0;
   Board board;
   GameMatch match;
+  User curUser;
 
-  Game(this.playerTurn, this.match) // Board
+  Game(this.playerTurn, this.match,this.curUser) // Board
       : board = Board(match.rows,match.cols,match.playgroundMap) {
     print('moves');
     match.moves.forEach((element) {print(element.toString());});
@@ -30,6 +32,7 @@ class Game extends StatelessWidget {
     // return StatefulBuilder(
     return SizedBox(
         child: GameData(
+          curUser: curUser,
           match: match,
       pplayer: players,
       pturn: playerTurn,

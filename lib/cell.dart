@@ -52,7 +52,7 @@ class _CellState extends State<Cell> {
           return GestureDetector(
             onTap: () {
               MultiplayerData.of(context)?.move_ref.set({'pos' :  widget.position.toString()});
-              if (StoneLogic.of(context)?.playground_Map[widget.position] == null) {
+              if ((StoneLogic.of(context)?.playground_Map[widget.position] == null) && (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == GameData.of(context)?.curUser.uid) {
                 setState(() {
                   if (StoneLogic.of(context)?.handleStoneUpdate(widget.position, context) ??  true) // TODO revisit this and make sure it does the right thing
                   {

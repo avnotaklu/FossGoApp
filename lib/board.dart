@@ -113,6 +113,7 @@ class StoneLayoutGrid extends StatefulWidget {
 class _StoneLayoutGridState extends State<StoneLayoutGrid> {
   void fetchNewStoneFromDB() {
     print('hello');
+
     MultiplayerData.of(context)
         ?.database
         .child('game')
@@ -123,6 +124,7 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
       // final data = Map<String?, String?>.from(event.snapshot.value ?? {null: null});
       final data = event.snapshot.value;
       if (data.last != null && data.last != "null") {
+        // aA
 
         final pos = Position(int.parse(data.last!.split(' ')[0]),
             int.parse(data.last!.split(' ')[1]));
@@ -136,6 +138,17 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
           });
         }
       }
+    });
+    MultiplayerData.of(context)
+        ?.database
+        .child('game')
+        .child(GameData.of(context)!.match.id)
+        .child('turn')
+        .onValue
+        .listen((event) {
+      // final data = Map<String?, String?>.from(event.snapshot.value ?? {null: null});
+      final data = event.snapshot.value;
+      GameData.of(context)?.match.turn = int.parse(data);
     });
   }
 
