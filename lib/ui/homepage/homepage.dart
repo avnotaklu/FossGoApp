@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:async/async.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:go/game.dart';
+import 'package:go/playfield/game.dart';
 import 'package:go/gameplay.dart';
 import 'package:go/main.dart';
-import 'package:go/multiplayer/models.dart';
+import 'package:go/utils/models.dart';
 
 class HomePage extends StatefulWidget {
   bool joiningGame = false;

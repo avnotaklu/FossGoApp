@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:go/gameplay.dart';
-import 'package:go/stone.dart';
-import 'package:go/utils.dart';
+import 'package:go/playfield/stone.dart';
+import 'package:go/utils/position.dart';
 import 'dart:convert';
 
 class GameMatch {

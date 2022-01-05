@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go/game.dart';
+import 'package:go/playfield/game.dart';
 import 'package:go/gameplay.dart';
-import 'package:go/player.dart';
+import 'package:go/utils/player.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:flutter/services.dart';

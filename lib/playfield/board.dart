@@ -1,12 +1,12 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:go/game.dart';
+import 'package:go/playfield/game.dart';
 import 'stone.dart';
-import 'utils.dart';
-import 'player.dart';
+import '../utils/position.dart';
+import '../utils/player.dart';
 import 'cell.dart';
-import 'gameplay.dart';
+import '../gameplay.dart';
 
 class Board extends StatefulWidget {
   late int rows, cols;
@@ -111,7 +111,7 @@ class StoneLayoutGrid extends StatefulWidget {
 }
 
 class _StoneLayoutGridState extends State<StoneLayoutGrid> {
-  void fetchNewStoneFromDB() {
+  void fetchNewStoneFromDB() { // TODO put this function in a better place, it has no relation to board
     print('hello');
 
     MultiplayerData.of(context)
@@ -121,10 +121,8 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
         .child('moves')
         .onValue
         .listen((event) {
-      // final data = Map<String?, String?>.from(event.snapshot.value ?? {null: null});
       final data = event.snapshot.value;
       if (data.last != null && data.last != "null") {
-        // aA
 
         final pos = Position(int.parse(data.last!.split(' ')[0]),
             int.parse(data.last!.split(' ')[1]));

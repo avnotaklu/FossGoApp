@@ -4,16 +4,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:go/blocs/auth_bloc.dart';
-import 'package:go/game.dart';
-import 'package:go/multiplayer/models.dart';
+import 'package:go/services/auth_bloc.dart';
+import 'package:go/playfield/game.dart';
+import 'package:go/utils/models.dart';
 import 'package:go/ui/game_ui.dart';
 import 'package:provider/provider.dart';
 
-import 'player.dart';
-import 'stone.dart';
+import 'utils/player.dart';
+import 'playfield/stone.dart';
 import 'ui/game_ui.dart';
-import 'utils.dart';
+import 'utils/position.dart';
 
 // ignore: must_be_immutable
 class GameData extends InheritedWidget {

@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
-import 'player.dart';
-import 'gameplay.dart';
+import '../utils/player.dart';
+import '../gameplay.dart';
 import 'stone.dart';
-import 'utils.dart';
+import '../utils/position.dart';
 
 class Cell extends StatefulWidget {
   Position position;

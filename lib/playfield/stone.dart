@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go/utils.dart';
+import 'package:go/utils/position.dart';
 import 'package:flutter/foundation.dart';
-import 'gameplay.dart';
+import '../gameplay.dart';
 
 class Stone extends StatelessWidget {
   Color? color;
@@ -35,7 +35,7 @@ class Stone extends StatelessWidget {
           Container(
               decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           // widget.cluster,
-          Text(StoneLogic.of(context)?.playground_Map[cluster.data.first]?.cluster.freedoms.toString() as String),
+          Text(StoneLogic.of(context)?.playground_Map[cluster.data.first]?.cluster.freedoms.toString()?? ""),
         ],
         // Text(widget.cluster.freedoms.toString())
       ),

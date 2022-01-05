@@ -1,9 +1,9 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:go/blocs/auth_bloc.dart';
-import 'package:go/game.dart';
-import 'package:go/homepage/homepage.dart';
+import 'package:go/services/auth_bloc.dart';
+import 'package:go/playfield/game.dart';
+import 'package:go/ui/homepage/homepage.dart';
 import 'package:go/main.dart';
 import 'package:go/services/auth.dart';
 import 'package:provider/provider.dart';
