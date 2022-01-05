@@ -32,7 +32,6 @@ class Game extends StatelessWidget {
     // return StatefulBuilder(
     return SizedBox(
         child: GameData(
-          curUser: curUser,
           match: match,
       pplayer: players,
       pturn: playerTurn,

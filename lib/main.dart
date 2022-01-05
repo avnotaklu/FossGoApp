@@ -26,13 +26,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider(
         create: (context) => AuthBloc(),
-        child: MultiplayerData(
-          database: FirebaseDatabase.instance.reference(),
-          mChild: MaterialApp(home: SignIn(), routes: <String, WidgetBuilder>{
-            '/GameScreen': (BuildContext context) => GameScreen.createGame(),
-            '/HomePage': (BuildContext context) => HomePage(),
-          }),
-        ));
+        builder: (context,child) => StreamBuilder(
+            stream: Provider.of<AuthBloc>(context, listen: false).currentUser,
+            builder: (context, snapshot) {
+              return snapshot.data != null ? 
+              MultiplayerData(
+                curUser : snapshot.data,
+                database: FirebaseDatabase.instance.reference(),
+                mChild:
+                    MaterialApp(home: SignIn(), routes: <String, WidgetBuilder>{
+                  '/GameScreen': (BuildContext context) =>
+                      GameScreen.createGame(),
+                  '/HomePage': (BuildContext context) => HomePage(),
+                }),
+              ) : Text("hello");
+            }));
   }
 }
 
@@ -55,14 +63,19 @@ class GameScreen extends StatelessWidget {
       if (match == null) {
         print("hurray");
         var newPlace = MultiplayerData.of(context)?.game_ref.push();
-        match = GameMatch(9, 9, 5 * 60, newPlace.key, {0: user?.uid , 1: null}); // Don't delete default values 0 or 1
-                                                                                      // Json parser depends on it.
+        match = GameMatch(9, 9, 5 * 60, newPlace.key,
+            {0: user?.uid, 1: null}); // Don't delete default values 0 or 1
+        // Json parser depends on it.
         newPlace.set(match?.toJson());
         // game = Game(0, match as GameMatch);
       } else {
         if (match?.uid[1] == null) {
           match?.uid[1] = user?.uid;
-          MultiplayerData.of(context)?.gameRef.child(match?.id.toString()).child('uid').update({ 1.toString() : user?.uid.toString()});
+          MultiplayerData.of(context)
+              ?.gameRef
+              .child(match?.id.toString())
+              .child('uid')
+              .update({1.toString(): user?.uid.toString()});
         }
       }
     });
@@ -72,8 +85,8 @@ class GameScreen extends StatelessWidget {
       builder: (context, snapshot) => Scaffold(
         appBar: AppBar(
           title: const Text(title),
-          actions : <Widget>[
-            TextButton(onPressed: authBloc.logout,child: Text("logout")),
+          actions: <Widget>[
+            TextButton(onPressed: authBloc.logout, child: Text("logout")),
           ],
         ),
         backgroundColor: Colors.green,

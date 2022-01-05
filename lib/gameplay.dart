@@ -4,9 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:go/blocs/auth_bloc.dart';
 import 'package:go/game.dart';
 import 'package:go/multiplayer/models.dart';
 import 'package:go/ui/game_ui.dart';
+import 'package:provider/provider.dart';
 
 import 'player.dart';
 import 'stone.dart';
@@ -15,7 +17,6 @@ import 'utils.dart';
 
 // ignore: must_be_immutable
 class GameData extends InheritedWidget {
-  final User curUser;
   final List<Player> _players;
   Map<String, int> _turn;
   final Widget mChild;
@@ -25,7 +26,7 @@ class GameData extends InheritedWidget {
       required int pturn,
       required this.mChild,
       required this.match,
-      required this.curUser})
+      })
       : _players = pplayer,
         _turn = {'val': pturn},
         super(child: mChild);
@@ -69,13 +70,14 @@ class MultiplayerData extends InheritedWidget {
   final moveRef;
   final gameRef;
   final firestoreInstance;
+  final curUser;
 
-  MultiplayerData({required this.mChild, required this.database})
+  MultiplayerData(
+      {required this.curUser, required this.mChild, required this.database})
       : firestoreInstance = FirebaseFirestore.instance,
         moveRef = database.child('move'),
         gameRef = database.child('game'),
-        super(child: mChild) {}
-
+        super(child: mChild);
   get move_ref => moveRef;
   get game_ref => gameRef;
 
@@ -326,26 +328,33 @@ class StoneLogic extends InheritedWidget {
       // var tmp2 = tmp1.cast<int,dynamic>;
 
       map_ref?.update(LinkedHashMap.from(playground_Map.map(
-        (a, b) => MapEntry(a.toString(), () {
-          return b?.color == null
-              ? null : () {
-          int currentClusterTracker = 0;
-          int currentClusterFreedoms = 0;
-          for (var i in tmpClusterRefer.keys) {
-            if (!(playground_Map[tmpClusterRefer[i]]?.cluster.data.contains(a) ?? false)) {
-              clusterTopTracker++;
-              currentClusterTracker = clusterTopTracker;
-            } else {
-              currentClusterTracker = i;
-              break;
-            }
-          }
-          clusterTopTracker = 0;
-          tmpClusterRefer[currentClusterTracker] = a;
-               return ((b?.color == Colors.black ? 0 : 1).toString() +
-                  " $currentClusterTracker ${playground_Map[a]?.cluster.freedoms}");
-              }.call();
-        }.call()),
+        (a, b) => MapEntry(
+            a.toString(),
+            () {
+              return b?.color == null
+                  ? null
+                  : () {
+                      int currentClusterTracker = 0;
+                      int currentClusterFreedoms = 0;
+                      for (var i in tmpClusterRefer.keys) {
+                        if (!(playground_Map[tmpClusterRefer[i]]
+                                ?.cluster
+                                .data
+                                .contains(a) ??
+                            false)) {
+                          clusterTopTracker++;
+                          currentClusterTracker = clusterTopTracker;
+                        } else {
+                          currentClusterTracker = i;
+                          break;
+                        }
+                      }
+                      clusterTopTracker = 0;
+                      tmpClusterRefer[currentClusterTracker] = a;
+                      return ((b?.color == Colors.black ? 0 : 1).toString() +
+                          " $currentClusterTracker ${playground_Map[a]?.cluster.freedoms}");
+                    }.call();
+            }.call()),
       )));
       return true;
     }
