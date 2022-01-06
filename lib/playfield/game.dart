@@ -1,11 +1,14 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:go/playfield/stone.dart';
 import 'package:go/services/auth_bloc.dart';
 import 'package:go/utils/models.dart';
 import 'package:go/ui/game_ui.dart';
+import 'package:go/utils/position.dart';
 import 'package:provider/provider.dart';
 import 'dart:core';
 import '../gameplay.dart';
@@ -22,9 +25,9 @@ class Game extends StatelessWidget {
   GameMatch match;
 
   Game(this.playerTurn, this.match) // Board
-      : board = Board(match.rows, match.cols, match.playgroundMap) {
+      : board = Board(match.rows as int, match.cols as int, match.playgroundMap as Map<Position?,Stone?>) {
     print('moves');
-    match.moves.forEach((element) {
+    match.moves?.forEach((element) {
       print(element.toString());
     });
     print('moves');

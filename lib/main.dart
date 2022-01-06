@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:/share/share.dart';
+import 'constants/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -62,106 +63,157 @@ class GameScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
 
-    authBloc.currentUser.listen((user) {
-      if (match == null) {
-        print("hurray");
-        var newPlace = MultiplayerData.of(context)?.game_ref.push();
-        match = GameMatch(9, 9, 5 * 60, newPlace.key,
-            {0: user?.uid, 1: null}); // Don't delete default values 0 or 1
-        // Json parser depends on it.
-        newPlace.set(match?.toJson());
-        // game = Game(0, match as GameMatch);
-      } else {
-        if (match?.uid[1] == null) {
-          match?.uid[1] = user?.uid;
-          MultiplayerData.of(context)
-              ?.gameRef
-              .child(match?.id.toString())
-              .child('uid')
-              .update({1.toString(): user?.uid.toString()});
-        }
-      }
-    });
+    var newPlace;
+    if (match == null) {
+      match = GameMatch.empty();
+      newPlace = MultiplayerData.of(context)?.game_ref.push();
+      match?.id = newPlace.key.toString();
+      newPlace.set(match?.toJson());
+    }
+    else {
+      newPlace = MultiplayerData.of(context)?.game_ref.child(match?.id.toString());
+    }
+//     authBloc.currentUser.listen((user) {
+//       if (match == null) {
+//         print("hurray");
+//         var newPlace = MultiplayerData.of(context)?.game_ref.push();
+//         // match = GameMatch(9, 9, 5 * 60, newPlace.key,
+//         //     {0: user?.uid, 1: null}); // Don't delete default values 0 or 1
+//         // // Json parser depends on it.
+//         // newPlace.set(match?.toJson());
+//         // game = Game(0, match as GameMatch);
+//       } else {
+//         if (match?.uid?[1] == null) {
+//           match?.uid?[1] = user?.uid;
+//           MultiplayerData.of(context)
+//               ?.gameRef
+//               .child(match?.id.toString())
+//               .child('uid')
+//               .update({1.toString(): user?.uid.toString()});
+//         }
+//       }
+//     });
 
-    return Stack(children: [
-      Positioned.fill(
-          child: Container(
-        child: FractionallySizedBox(
-            widthFactor: 0.9,
-            heightFactor: 0.6,
-            child: Dialog(
-                backgroundColor: Colors.blue,
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      const Expanded(
-                        flex: 2,
-                        child: Text(
-                          "Choose color of your stone",
-                          style: TextStyle(color: Colors.black, fontSize: 20),
-                        ),
+    var curBoardSize = Constants.boardsizes[0];
+    return Positioned.fill(
+        child: Container(
+      child: FractionallySizedBox(
+          widthFactor: 0.9,
+          heightFactor: 0.6,
+          child: Dialog(
+              backgroundColor: Colors.blue,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    const Expanded(
+                      flex: 2,
+                      child: Text(
+                        "Choose color of your stone",
+                        style: TextStyle(color: Colors.black, fontSize: 20),
                       ),
-                      Expanded(
-                          flex: 1,
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Container(),
-                                Expanded(
-                                    child: Stone(Colors.black, Position(0, 0))),
-                                Expanded(
-                                    child: Stone(Colors.white, Position(0, 0)))
-                              ])),
-                      Expanded(
-                        flex: 5,
+                    ),
+                    Expanded(
+                        flex: 1,
                         child: Row(
-                          children: [
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              IconButton(
+                                  onPressed: () => {
+                                        match?.uid[0] =
+                                            MultiplayerData.of(context)
+                                                ?.curUser
+                                                .uid
+                                                .toString()
+                                      },
+                                  icon: Expanded(
+                                      child:
+                                          Stone(Colors.black, Position(0, 0)))),
+                              IconButton(
+                                  onPressed: () => {
+                                        match?.uid[1] =
+                                            MultiplayerData.of(context)
+                                                ?.curUser
+                                                .uid
+                                                .toString()
+                                      },
+                                  icon: Expanded(
+                                      child:
+                                          Stone(Colors.white, Position(0, 0)))),
+                            ])),
+                    StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) =>
                             Expanded(
-                                flex: 1,
-                                child: DropdownButton(
-                                    hint: Text("Board Size"), items: [])),
-                            Expanded(
-                                flex: 1,
-                                child: Row(children: [
+                              flex: 5,
+                              child: Row(
+                                children: [
                                   Expanded(
-                                    flex: 2,
-                                    child: ElevatedButton(
-                                      child: Container(child: Text("Time")),
-                                      onPressed: () => showDialog(
-                                        context: context,
-                                        builder: (context) => Center(
-                                          child: FractionallySizedBox(
-                                            heightFactor: 0.8,
-                                            widthFactor: 1.0,
-                                            child: Dialog(
-                                              child: CupertinoTimerPicker(
-                                                  mode: CupertinoTimerPickerMode
-                                                      .hms,
-                                                  onTimerDurationChanged:
-                                                      (value) {
-                                                    debugPrint("hello");
-                                                    match?.time =
-                                                        value.inSeconds;
-                                                  }),
+                                      flex: 1,
+                                      child: DropdownButton(
+                                        value: curBoardSize,
+                                        hint: Text("Board Size"),
+                                        items: Constants.boardsizes
+                                            .map((String items) {
+                                          return DropdownMenuItem(
+                                            value: items,
+                                            child: Text(items),
+                                          );
+                                        }).toList(),
+                                        onChanged: (String? newValue) {
+                                          curBoardSize = newValue ?? "null";
+                                          match?.rows = int.parse(
+                                              newValue!.split("x")[0]);
+                                          match?.cols = int.parse(
+                                              newValue!.split("x")[1]);
+                                        },
+                                      )),
+                                  Expanded(
+                                      flex: 1,
+                                      child: Row(children: [
+                                        Expanded(
+                                          flex: 2,
+                                          child: ElevatedButton(
+                                            child:
+                                                Container(child: Text("Time")),
+                                            onPressed: () => showDialog(
+                                              context: context,
+                                              builder: (context) => Center(
+                                                child: FractionallySizedBox(
+                                                  heightFactor: 0.8,
+                                                  widthFactor: 1.0,
+                                                  child: Dialog(
+                                                    child: CupertinoTimerPicker(
+                                                        mode:
+                                                            CupertinoTimerPickerMode
+                                                                .hms,
+                                                        onTimerDurationChanged:
+                                                            (value) {
+                                                          debugPrint("hello");
+                                                          match?.time =
+                                                              value.inSeconds;
+                                                        }),
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                ])),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Row(children: [
-                          // ElevatedButton(onPressed: () => Share.share(match?.id ?? "null"),child: Container(child: Text("Share"),),),
-                          ElevatedButton(
-                            style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.white)),
-                            onPressed: () {
+                                      ])),
+                                ],
+                              ),
+                            )),
+                    Expanded(
+                      flex: 2,
+                      child: Row(children: [
+                        // ElevatedButton(onPressed: () => Share.share(match?.id ?? "null"),child: Container(child: Text("Share"),),),
+                        ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.white)),
+                          onPressed: () {
+                            newPlace.set(match?.toJson());
+                            if ((match?.isComplete() ?? false) &&
+                                ((match?.bothPlayers().contains(null) ==
+                                    false))) {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute<void>(
@@ -169,14 +221,22 @@ class GameScreen extends StatelessWidget {
                                       Game(0, match as GameMatch),
                                 ),
                               );
-                            },
-                            child: Container(),
-                          ),
-                        ]),
-                      ),
-                    ]))),
-        decoration: BoxDecoration(color: Colors.green),
-      )),
-    ]);
+                            } else {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) =>
+                                      const Text("Match wasn't created"),
+                                ),
+                              );
+                            }
+                          },
+                          child: Container(),
+                        ),
+                      ]),
+                    ),
+                  ]))),
+      decoration: BoxDecoration(color: Colors.green),
+    ));
   }
 }

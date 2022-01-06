@@ -9,18 +9,19 @@ import 'dart:convert';
 
 class GameMatch {
   bool runStatus = true;
-  Map<int?, String?> uid;
-  int rows;
-  int cols;
-  List<Position?> moves = [];
-  Map<Position, Stone?> playgroundMap = {}; // int gives player id
-  String id;
-  int time;
-  int _turn;
+  Map<int?, String?> uid = {};
+  int? rows;
+  int? cols;
+  List<Position?>? moves = [];
+  Map<Position, Stone?>? playgroundMap = {}; // int gives player id
+  String? id;
+  int? time;
+  int _turn = 0;
 
   GameMatch(this.rows, this.cols, this.time, this.id,
-      [this.uid = const {null: null}])
-      : _turn = 0;
+      [this.uid = const {null: null}]);
+     
+  GameMatch.empty();
   GameMatch.fromJson(Map<dynamic, dynamic> json)
       : rows = int.parse(json['rows']),
         cols = int.parse(json['cols']),
@@ -36,9 +37,9 @@ class GameMatch {
     json['moves']?.forEach((v) {
       if (v != null) {
         if (v == "null") {
-          moves.add(null);
+          moves?.add(null);
         } else
-          moves.add(Position.fromString(v));
+          moves?.add(Position.fromString(v));
       }
     });
 
@@ -46,21 +47,21 @@ class GameMatch {
     json['playgroundMap']?.forEach((k, v) {
       var currentClusterID = int.parse(v.split(' ')[1]);
       var previousClusterTrackingPosition = clusterRefer[currentClusterID];
-      playgroundMap[previousClusterTrackingPosition]
+      playgroundMap?[previousClusterTrackingPosition]
           ?.cluster
           .data
           .add(Position.fromString(k));
 
       clusterRefer[currentClusterID] = Position.fromString(k);
 
-      playgroundMap[clusterRefer[currentClusterID] as Position] = Stone(
+      playgroundMap?[clusterRefer[currentClusterID] as Position] = Stone(
           int.parse(v.split(' ')[0]) == 0 ? Colors.black : Colors.white,
           clusterRefer[currentClusterID] as Position);
-      playgroundMap[clusterRefer[currentClusterID] as Position]?.cluster =
-          playgroundMap[previousClusterTrackingPosition]?.cluster ??
-              playgroundMap[clusterRefer[currentClusterID] as Position]?.cluster
+      playgroundMap?[clusterRefer[currentClusterID] as Position]?.cluster =
+          playgroundMap?[previousClusterTrackingPosition]?.cluster ??
+              playgroundMap?[clusterRefer[currentClusterID] as Position]?.cluster
                   as Cluster;
-      playgroundMap[clusterRefer[currentClusterID] as Position]
+      playgroundMap?[clusterRefer[currentClusterID] as Position]
           ?.cluster
           .freedoms = int.parse(v.split(' ')[2]);
     });
@@ -87,6 +88,14 @@ class GameMatch {
 
   set turn(dynamic val) {
     _turn = val;
+  }
+
+  bool isComplete() {
+    return !toJson().values.contains(null);
+  }
+
+  List<String?> bothPlayers() {
+    return [uid[0],uid[1]];
   }
 }
 

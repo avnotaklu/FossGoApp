@@ -36,7 +36,7 @@ class GameData extends InheritedWidget {
     UiData.timerController[turn % 2].pause();
     // turn = turn %2 == 0 ? 1 : 0;
     var thisGame =
-        MultiplayerData.of(context)?.database.child('game').child(match.id);
+        MultiplayerData.of(context)?.database.child('game').child(match.id as String);
     thisGame
         ?.child('moves')
         .update({(match.turn).toString(): position.toString()});
@@ -46,7 +46,7 @@ class GameData extends InheritedWidget {
   }
 
   DatabaseReference? getMatch(BuildContext context) {
-    return MultiplayerData.of(context)?.database.child('game').child(match.id);
+    return MultiplayerData.of(context)?.database.child('game').child(match.id as String);
   }
 
   get turn => match.turn;
@@ -310,7 +310,7 @@ class StoneLogic extends InheritedWidget {
     var map_ref = MultiplayerData.of(context)
         ?.database
         .child('game')
-        .child(GameData.of(context)!.match.id)
+        .child(GameData.of(context)!.match.id as String)
         .child('playgroundMap');
 
     if (checkInsertable(position)) {

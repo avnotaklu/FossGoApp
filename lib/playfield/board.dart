@@ -117,7 +117,7 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
     MultiplayerData.of(context)
         ?.database
         .child('game')
-        .child(GameData.of(context)!.match.id)
+        .child(GameData.of(context)!.match.id as String)
         .child('moves')
         .onValue
         .listen((event) {
@@ -140,7 +140,7 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
     MultiplayerData.of(context)
         ?.database
         .child('game')
-        .child(GameData.of(context)!.match.id)
+        .child(GameData.of(context)!.match.id as String)
         .child('turn')
         .onValue
         .listen((event) {

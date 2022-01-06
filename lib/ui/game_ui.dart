@@ -127,7 +127,7 @@ class _TimeWatchState extends State<TimeWatch> {
   Widget build(BuildContext context) {
     return Countdown(
       controller: widget.mController,
-      seconds: GameData.of(context)!.match.time,
+      seconds: GameData.of(context)!.match.time as int, 
       build: (BuildContext context, double time) => Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
