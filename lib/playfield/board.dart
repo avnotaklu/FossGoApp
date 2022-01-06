@@ -6,7 +6,7 @@ import 'stone.dart';
 import '../utils/position.dart';
 import '../utils/player.dart';
 import 'cell.dart';
-import '../gameplay.dart';
+import '../gameplay/logic.dart';
 
 class Board extends StatefulWidget {
   late int rows, cols;

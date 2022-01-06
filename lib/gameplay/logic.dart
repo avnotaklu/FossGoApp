@@ -10,10 +10,10 @@ import 'package:go/utils/models.dart';
 import 'package:go/ui/game_ui.dart';
 import 'package:provider/provider.dart';
 
-import 'utils/player.dart';
-import 'playfield/stone.dart';
-import 'ui/game_ui.dart';
-import 'utils/position.dart';
+import '../utils/player.dart';
+import '../playfield/stone.dart';
+import '../ui/game_ui.dart';
+import '../utils/position.dart';
 
 // ignore: must_be_immutable
 class GameData extends InheritedWidget {
@@ -80,6 +80,10 @@ class MultiplayerData extends InheritedWidget {
         super(child: mChild);
   get move_ref => moveRef;
   get game_ref => gameRef;
+
+  getCurGameRef(String id){
+    return gameRef.child(id);
+  }
 
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) {

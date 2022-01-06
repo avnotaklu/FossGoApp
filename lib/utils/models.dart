@@ -2,26 +2,26 @@ import 'dart:developer';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:go/gameplay.dart';
+import 'package:go/gameplay/logic.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/position.dart';
 import 'dart:convert';
 
 class GameMatch {
-  bool runStatus = true;
+  bool runStatus = false;
   Map<int?, String?> uid = {};
   int? rows;
   int? cols;
   List<Position?>? moves = [];
   Map<Position, Stone?>? playgroundMap = {}; // int gives player id
-  String? id;
+  String id;
   int? time;
   int _turn = 0;
 
   GameMatch(this.rows, this.cols, this.time, this.id,
       [this.uid = const {null: null}]);
      
-  GameMatch.empty();
+  GameMatch.empty(this.id);
   GameMatch.fromJson(Map<dynamic, dynamic> json)
       : rows = int.parse(json['rows']),
         cols = int.parse(json['cols']),
@@ -30,7 +30,7 @@ class GameMatch {
         // uid = {0: json['uid'][0].toString(), 1: json['uid'][1].toString()},
 //         uid = Map.fromIterable(json['uid'], key: (v) => v[0], value: (v) => v[1]);
         // uid = {json['uid'].keys : json['uid'].values},
-        uid = Map<int?,String?>.from(json["uid"].asMap().map((i,element) => MapEntry(i as int,json['uid'][i].toString() as String))),
+        uid = Map<int?,String?>.from(json["uid"].asMap().map((i,element) => MapEntry(i as int,element.toString()))),// TODO make sure element works in this line changed from json['uid'][id]
 
         runStatus = json['runStatus'] == "true" ? true : false,
         _turn = int.parse(json['turn']) {
@@ -94,7 +94,7 @@ class GameMatch {
     return !toJson().values.contains(null);
   }
 
-  List<String?> bothPlayers() {
+  get  bothPlayers {
     return [uid[0],uid[1]];
   }
 }

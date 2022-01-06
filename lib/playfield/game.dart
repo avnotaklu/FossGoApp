@@ -11,7 +11,7 @@ import 'package:go/ui/game_ui.dart';
 import 'package:go/utils/position.dart';
 import 'package:provider/provider.dart';
 import 'dart:core';
-import '../gameplay.dart';
+import '../gameplay/logic.dart';
 
 import '../utils/player.dart';
 import 'board.dart';
