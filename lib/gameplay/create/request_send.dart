@@ -23,14 +23,27 @@ class CreateGame extends StatelessWidget {
   Widget build(BuildContext context) {
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
     var newPlace = MultiplayerData.of(context)?.getCurGameRef(match.id);
-    // if (match != null) {
-    //   Navigator.pushReplacement(
-    //     context,
-    //     MaterialPageRoute<void>(
-    //         builder: (BuildContext context) => GameRecieve(match: match as GameMatch,)),
-    //   );
-    // }
-    match.uid = {0: null, 1: null};
+
+    if (match.bothPlayers.contains(null) == false) {
+      print("both players have enterd");
+    }
+
+    if (match.bothPlayers.any((element) => element != null) &&
+        match.bothPlayers.contains(null)) {
+      return ElevatedButton(
+          onPressed: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute<void>(
+                    builder: (BuildContext context) => GameRecieve(
+                          match: match as GameMatch,
+                          newPlace: newPlace,
+                        )),
+              ),
+          child: Container(
+            child: const Text("Enter Game"),
+          ));
+    }
+    // match.uid = {0: null, 1: null};
     newPlace.set(match.toJson());
 //     authBloc.currentUser.listen((user) {
 //       if (match == null) {
@@ -170,55 +183,67 @@ class CreateGame extends StatelessWidget {
                                 ],
                               ),
                             )),
-                    Expanded(
-                      flex: 2,
-                      child: Row(children: [
-                        ElevatedButton(
-                          onPressed: () => Share.share(match.id),
-                          child: Container(
-                            child: Text("Share"),
-                          ),
-                        ),
-                        ElevatedButton(
-                          style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all(Colors.white)),
-                          onPressed: () {
-                            newPlace.set(match.toJson());
-                            if (match.isComplete()) {
-                              MultiplayerData.of(context)
-                                  ?.getCurGameRef(match.id)
-                                  .child('uid')
-                                  .onValue
-                                  .listen((event) {
-                                print(event.snapshot.value.toString());
-                                match.uid =
-                               Map<int?,String?>.from(event.snapshot.value.asMap().map((i,element) => MapEntry(i as int,element.toString())));
-                                if (match.bothPlayers.contains(null) == false) {
-                                  Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute<void>(
-                                        builder: (BuildContext context) =>
-                                            Game(0, match),
-                                      ));
-                                }
-                              });
-                            } else {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (BuildContext context) =>
-                                      const Text("Match wasn't created"),
-                                ),
-                              );
-                            }
-                          },
-                          child: Container(),
-                        ),
-                      ]),
-                    ),
+                    EnterAndShareMatchButton(match, newPlace),
                   ]))),
       decoration: BoxDecoration(color: Colors.green),
     ));
+  }
+}
+
+class EnterAndShareMatchButton extends StatelessWidget {
+  final match;
+  final newPlace;
+  EnterAndShareMatchButton(this.match, this.newPlace);
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+
+    return Expanded(
+      flex: 2,
+      child: Row(children: [
+        ElevatedButton(
+          onPressed: () => Share.share(match.id),
+          child: Container(
+            child: Text("Share"),
+          ),
+        ),
+        ElevatedButton(
+          style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(Colors.white)),
+          onPressed: () {
+            newPlace.set(match.toJson());
+            if (match.isComplete()) {
+              MultiplayerData.of(context)
+                  ?.getCurGameRef(match.id)
+                  .child('uid')
+                  .onValue
+                  .listen((event) {
+                print(event.snapshot.value.toString());
+                match.uid = Map<int?, String?>.from(event.snapshot.value
+                    .asMap()
+                    .map((i, element) =>
+                        MapEntry(i as int, element.toString())));
+                if (match.bothPlayers.contains(null) == false) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => Game(0, match),
+                      ));
+                }
+              });
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (BuildContext context) =>
+                      const Text("Match wasn't created"),
+                ),
+              );
+            }
+          },
+          child: Container(),
+        ),
+      ]),
+    );
   }
 }
