@@ -25,7 +25,13 @@ class CreateGame extends StatelessWidget {
     var newPlace = MultiplayerData.of(context)?.getCurGameRef(match.id);
 
     if (match.bothPlayers.contains(null) == false) {
-      print("both players have enterd");
+      if(match.uid.containsValue(MultiplayerData.of(context)?.curUser.uid.toString()))
+      {
+        return Game(0, match);
+      }
+      return Container(
+            child: const Text("Game has already been created and two players have already entered"),
+          );
     }
 
     if (match.bothPlayers.any((element) => element != null) &&
