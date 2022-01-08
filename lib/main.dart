@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:go/gameplay/create/request_send.dart';
+import 'package:go/gameplay/create/create_game.dart';
 import 'package:share/share.dart';
 // import 'package:/share/share.dart';
 import 'constants/constants.dart' as Constants;

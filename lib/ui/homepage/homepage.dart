@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:async/async.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/create/request_send.dart';
+import 'package:go/gameplay/create/create_game.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/gameplay/logic.dart';
 import 'package:go/main.dart';
@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                                                 child:
                                                     CircularProgressIndicator()));
                                       }
-                                    } catch (FirebaseException) {
+                                    } catch (FirebaseException) {// TODO sometimes this exception is caused catch it correctly
                                       return Center(
                                           child: Container(
                                               width: 40,
