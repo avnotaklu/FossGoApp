@@ -53,41 +53,52 @@ class _HomePageState extends State<HomePage> {
                                 builder: (BuildContext context,
                                     StateSetter setState) {
                               GameMatch? match;
-                              var matchBuilder = MultiplayerData.of(context)
-                                  ?.database
-                                  .child('game')
-                                  .child(_controller.text)
-                                  .orderByKey()
-                                  .get()
-                                  .then((value) {
-                                match = GameMatch.fromJson(value.value);
+                              var matchBuilder =
+                                  MultiplayerData.of(context)
+                                      ?.database
+                                      .child('game')
+                                      .child(_controller.text)
+                                      .orderByKey()
+                                      .get()
+                                      .then((value) {
+                                match = GameMatch.fromJson(value.value as Map);
                                 return match;
-                              });
+                              }).asStream();
 
-                              return FutureBuilder(
-                                  future: matchBuilder,
+                              return StreamBuilder(
+                                  stream: matchBuilder,
                                   builder: (context,
                                       AsyncSnapshot<GameMatch?> snapshot) {
                                     // if (snapshot.data != null) { return GameScreen(snapshot.data); } // this is correct as it will not allow match to be null when joining game as expected
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                      return CreateGame(snapshot.data ??
-                                          GameMatch.empty(
-                                            MultiplayerData.of(context)
-                                                    ?.game_ref
-                                                    .push()
-                                                    .key
-                                                    .toString()
-                                                as String, // TODO this fails when new game id can't be created in database
-                                          ));
-                                    } // this checks only connection match can be null not ideal
-                                    else
+                                    try {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.done) {
+                                        return CreateGame(snapshot.data ??
+                                            GameMatch.empty(
+                                              MultiplayerData.of(context)
+                                                      ?.game_ref
+                                                      .push()
+                                                      .key
+                                                      .toString()
+                                                  as String, // TODO this fails when new game id can't be created in database
+                                            ));
+                                      } else
+                                      {
+                                        return Center(
+                                            child: Container(
+                                                width: 40,
+                                                height: 50,
+                                                child:
+                                                    CircularProgressIndicator()));
+                                      }
+                                    } catch (FirebaseException) {
                                       return Center(
                                           child: Container(
                                               width: 40,
                                               height: 50,
                                               child:
                                                   CircularProgressIndicator()));
+                                    }
                                   });
                             }),
                           ),

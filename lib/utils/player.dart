@@ -2,6 +2,6 @@ import 'package:flutter/material.dart';
 
 class Player
 {
-  Color ?mColor;
-  Player(this.mColor);
+  final Color ?mColor;
+  const Player(this.mColor);
 }

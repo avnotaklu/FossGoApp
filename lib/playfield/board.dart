@@ -111,7 +111,8 @@ class StoneLayoutGrid extends StatefulWidget {
 }
 
 class _StoneLayoutGridState extends State<StoneLayoutGrid> {
-  void fetchNewStoneFromDB() { // TODO put this function in a better place, it has no relation to board
+  void fetchNewStoneFromDB() {
+    // TODO put this function in a better place, it has no relation to board
     print('hello');
 
     MultiplayerData.of(context)
@@ -121,33 +122,30 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
         .child('moves')
         .onValue
         .listen((event) {
-      final data = event.snapshot.value;
+      final data = event.snapshot.value as List;
       if (data.last != null && data.last != "null") {
-
         final pos = Position(int.parse(data.last!.split(' ')[0]),
             int.parse(data.last!.split(' ')[1]));
         if (StoneLogic.of(context)?.playground_Map[pos] == null) {
-          setState(() {
-            if (StoneLogic.of(context)?.handleStoneUpdate(pos, context) ??
-                true) {
-              print("illegel");
-              GameData.of(context)?.toggleTurn(context, pos);
-            }
-          });
+          if (StoneLogic.of(context)?.handleStoneUpdate(pos, context) ?? true) {
+            print("illegel");
+            GameData.of(context)?.toggleTurn(context, pos);
+            setState(() {});
+          }
         }
       }
     });
-    MultiplayerData.of(context)
-        ?.database
-        .child('game')
-        .child(GameData.of(context)!.match.id as String)
-        .child('turn')
-        .onValue
-        .listen((event) {
-      // final data = Map<String?, String?>.from(event.snapshot.value ?? {null: null});
-      final data = event.snapshot.value;
-      GameData.of(context)?.match.turn = int.parse(data);
-    });
+    // MultiplayerData.of(context)
+    //     ?.database
+    //     .child('game')
+    //     .child(GameData.of(context)!.match.id as String)
+    //     .child('turn')
+    //     .onValue
+    //     .listen((event) {
+    //   // final data = Map<String?, String?>.from(event.snapshot.value ?? {null: null});
+    //   final data = event.snapshot.value;
+    //   GameData.of(context)?.match.turn = int.parse(data as String);
+    // });
   }
 
   @override
