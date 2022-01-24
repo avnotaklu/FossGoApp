@@ -15,7 +15,7 @@ import 'package:share/share.dart';
 
 class CreateGame extends StatelessWidget {
   static const title = 'Grid List';
-  GameMatch match;
+  GameMatch? match;
 
   // ignore: use_key_in_widget_constructors
   CreateGame(this.match);
@@ -24,12 +24,20 @@ class CreateGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
-    var newPlace = MultiplayerData.of(context)?.getCurGameRef(match.id);
+    var newPlace;
+    if (match != null) {
+      var newPlace = MultiplayerData.of(context)?.getCurGameRef(match!.id);
+    } else {
+      newPlace = MultiplayerData.of(context)?.game_ref.push();
+    }
 
-    if (match.bothPlayers.contains(null) == false) {
-      if (match.uid
-          .containsValue(MultiplayerData.of(context)?.curUser.uid.toString())) {
-        return Game(0, match);
+    if ((match?.bothPlayers.contains(null) ?? true) == false) {
+      // BOTH players have entered game in database
+      assert(match != null);
+      if (match?.uid.containsValue(
+              MultiplayerData.of(context)?.curUser.uid.toString()) ??
+          false) {
+        return Game(0, match as GameMatch, false);
       }
       return Container(
         child: const Text(
@@ -37,8 +45,9 @@ class CreateGame extends StatelessWidget {
       );
     }
 
-    if (match.bothPlayers.any((element) => element != null) &&
-        match.bothPlayers.contains(null)) {
+    if ((match?.bothPlayers.any((element) => element != null) ?? false) &&
+        match?.bothPlayers.contains(null)) {
+      // One Player, Sender has entered game in database
       return ElevatedButton(
           onPressed: () => Navigator.pushReplacement(
                 context,
@@ -52,40 +61,12 @@ class CreateGame extends StatelessWidget {
             child: const Text("Enter Game"),
           ));
     }
-    // match.uid = {0: null, 1: null};
-    newPlace.set(match.toJson());
-//     authBloc.currentUser.listen((user) {
-//       if (match == null) {
-//         print("hurray");
-//         var newPlace = MultiplayerData.of(context)?.game_ref.push();
-//         // match = GameMatch(9, 9, 5 * 60, newPlace.key,
-//         //     {0: user?.uid, 1: null}); // Don't delete default values 0 or 1
-//         // // Json parser depends on it.
-//         // newPlace.set(match.toJson());
-//         // game = Game(0, match as GameMatch);
-//       } else {
-//         if (match.uid?[1] == null) {
-//           match.uid?[1] = user?.uid;
-//           MultiplayerData.of(context)
-//               ?.gameRef
-//               .child(match.id.toString())
-//               .child('uid')
-//               .update({1.toString(): user?.uid.toString()});
-//         }
-//       }
-//     });
-
-    MultiplayerData.of(context)
-        ?.database
-        .child('game')
-        .child(match.id as String)
-        .child('uid')
-        .onValue
-        .listen((event) {
-      print("hello");
-    });
 
     var curBoardSize = Constants.boardsizes[0];
+    int mRows = 9; // TODO find a way to do this without these defaults
+    int mCols = 9;
+    Map<int, String?> mUid = {};
+    int mTime = 300;
     return BackgroundScreenWithDialog(
         child:
             Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
@@ -102,13 +83,13 @@ class CreateGame extends StatelessWidget {
               Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
             IconButton(
                 onPressed: () => {
-                      match.uid[0] =
+                      mUid[0] =
                           MultiplayerData.of(context)?.curUser.uid.toString(),
                     },
                 icon: Expanded(child: Stone(Colors.black, Position(0, 0)))),
             IconButton(
                 onPressed: () => {
-                      match.uid[1] =
+                      mUid[1] =
                           MultiplayerData.of(context)?.curUser.uid.toString()
                     },
                 icon: Expanded(child: Stone(Colors.white, Position(0, 0)))),
@@ -131,8 +112,9 @@ class CreateGame extends StatelessWidget {
                           }).toList(),
                           onChanged: (String? newValue) {
                             curBoardSize = newValue ?? "null";
-                            match.rows = int.parse(newValue!.split("x")[0]);
-                            match.cols = int.parse(newValue.split("x")[1]);
+                            mRows = int.parse(newValue!.split("x")[0]);
+                            mCols = int.parse(newValue.split("x")[1]);
+                            setState(() => curBoardSize = newValue);
                           },
                         )),
                     Expanded(
@@ -152,8 +134,7 @@ class CreateGame extends StatelessWidget {
                                       child: CupertinoTimerPicker(
                                           mode: CupertinoTimerPickerMode.hms,
                                           onTimerDurationChanged: (value) {
-                                            debugPrint("hello");
-                                            match.time = value.inSeconds;
+                                            mTime = value.inSeconds;
                                           }),
                                     ),
                                   ),
@@ -167,12 +148,19 @@ class CreateGame extends StatelessWidget {
               )),
       // EnterGameButton(match, newPlace),
       ElevatedButton(
-          onPressed: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute<void>(
-                builder: (BuildContext context) => RequestSend(match),
-              )),
-          child: Container())
+        onPressed: () => Navigator.pushReplacement(context,
+            MaterialPageRoute<void>(builder: (BuildContext context) {
+          match = GameMatch(
+              id: newPlace.key.toString(),
+              rows: mRows,
+              cols: mCols,
+              time: mTime,
+              uid: mUid);
+          newPlace.set(match?.toJson());
+          return RequestSend(match!);
+        })),
+        child: const Text("Create"),
+      ),
     ]));
   }
 }

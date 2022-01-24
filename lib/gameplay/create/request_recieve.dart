@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/logic.dart';
+import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/models.dart';
 import 'package:go/utils/position.dart';
@@ -44,5 +45,54 @@ class RequestRecieve extends StatelessWidget {
       Expanded(flex: 4, child: Container()),
       Expanded(flex: 3, child: EnterGameButton(match, newPlace)),
     ]));
+  }
+}
+
+
+class EnterGameButton extends StatelessWidget {
+  final match;
+  final newPlace;
+  EnterGameButton(this.match, this.newPlace);
+  @override
+  Widget build(BuildContext context) {
+
+    return Expanded(
+      flex: 2,
+      child: ElevatedButton(
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(Colors.white)),
+        onPressed: () {
+          newPlace.set(match.toJson());
+          if (match.isComplete()) {
+            MultiplayerData.of(context)
+                ?.getCurGameRef(match.id)
+                .child('uid')
+                .onValue
+                .listen((event) {
+              print(event.snapshot.value.toString());
+              match.uid = Map<int?, String?>.from(event.snapshot.value
+                  .asMap()
+                  .map((i, element) => MapEntry(i as int, element.toString())));
+              if (match.bothPlayers.contains(null) == false) {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) => Game(0, match, false),
+                    ));
+              }
+            });
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) =>
+                    const Text("Match wasn't created"),
+              ),
+            );
+          }
+        },
+        child: Container(),
+      ),
+    );
   }
 }

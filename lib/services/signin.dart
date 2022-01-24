@@ -18,7 +18,6 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   @override
   void initState() {
-    // TODO: implement initState
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
     authBloc.currentUser.listen((user) {
       if (user != null) {
@@ -32,7 +31,6 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     final authBloc = Provider.of<AuthBloc>(context);
-    // TODO: implement build
     return Scaffold(
       body: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [

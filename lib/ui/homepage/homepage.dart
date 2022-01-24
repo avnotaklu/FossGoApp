@@ -22,7 +22,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     debugPrint(
         "first line ${MultiplayerData.of(context)?.database.toString()}");
-    // TODO: implement build
     return Scaffold(
       body: Center(
         child: Column(
@@ -53,14 +52,13 @@ class _HomePageState extends State<HomePage> {
                                 builder: (BuildContext context,
                                     StateSetter setState) {
                               GameMatch? match;
-                              var matchBuilder =
-                                  MultiplayerData.of(context)
-                                      ?.database
-                                      .child('game')
-                                      .child(_controller.text)
-                                      .orderByKey()
-                                      .get()
-                                      .then((value) {
+                              var matchBuilder = MultiplayerData.of(context)
+                                  ?.database
+                                  .child('game')
+                                  .child(_controller.text)
+                                  .orderByKey()
+                                  .get()
+                                  .then((value) {
                                 match = GameMatch.fromJson(value.value as Map);
                                 return match;
                               }).asStream();
@@ -73,16 +71,8 @@ class _HomePageState extends State<HomePage> {
                                     try {
                                       if (snapshot.connectionState ==
                                           ConnectionState.done) {
-                                        return CreateGame(snapshot.data ??
-                                            GameMatch.empty(
-                                              MultiplayerData.of(context)
-                                                      ?.game_ref
-                                                      .push()
-                                                      .key
-                                                      .toString()
-                                                  as String, // TODO this fails when new game id can't be created in database
-                                            ));
-                                      } else
+                                        return CreateGame(snapshot.data);
+                                      }
                                       {
                                         return Center(
                                             child: Container(
@@ -91,7 +81,8 @@ class _HomePageState extends State<HomePage> {
                                                 child:
                                                     CircularProgressIndicator()));
                                       }
-                                    } catch (FirebaseException) {// TODO sometimes this exception is caused catch it correctly
+                                    } catch (FirebaseException) {
+                                      // TODO sometimes this exception is caused catch it correctly
                                       return Center(
                                           child: Container(
                                               width: 40,

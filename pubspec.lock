@@ -261,6 +261,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  ntp:
+    dependency: "direct main"
+    description:
+      name: ntp
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   path:
     dependency: transitive
     description:
@@ -346,9 +353,11 @@ packages:
   timer_count_down:
     dependency: "direct main"
     description:
-      name: timer_count_down
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: master
+      resolved-ref: "6773ad75f42ccb43427a5eb47e16dfee66ab1669"
+      url: "git@github.com:avnotaklu/simple_count_down.git"
+    source: git
     version: "2.2.0"
   typed_data:
     dependency: transitive

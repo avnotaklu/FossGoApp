@@ -8,60 +8,73 @@ import 'package:go/utils/position.dart';
 import 'dart:convert';
 
 class GameMatch {
+  List<DateTime?> lastMoveDateTime = [];
+  DateTime? startTime;
   bool runStatus = false;
   Map<int?, String?> uid = {};
-  int? rows;
-  int? cols;
-  List<Position?>? moves = [];
-  Map<Position, Stone?>? playgroundMap = {}; // int gives player id
+  int rows;
+  int cols;
+  List<Position?> moves = [];
+  Map<Position, Stone?> playgroundMap = {}; // int gives player id
   String id;
-  int? time;
+  int time;
   int _turn = 0;
 
-  GameMatch(this.rows, this.cols, this.time, this.id,
-      [this.uid = const {null: null}]);
-     
-  GameMatch.empty(this.id);
+  GameMatch(
+      {required this.rows,
+      required this.cols,
+      required this.time,
+      required this.id,
+      required this.uid});
+
   GameMatch.fromJson(Map<dynamic, dynamic> json)
-      : rows = int.parse(json['rows']),
+      : startTime = DateTime.parse(json['startTime']),
+        rows = int.parse(json['rows']),
         cols = int.parse(json['cols']),
         time = int.parse(json['time']),
         id = json['id'],
         // uid = {0: json['uid'][0].toString(), 1: json['uid'][1].toString()},
 //         uid = Map.fromIterable(json['uid'], key: (v) => v[0], value: (v) => v[1]);
         // uid = {json['uid'].keys : json['uid'].values},
-        uid = Map<int?,String?>.from(json["uid"].asMap().map((i,element) => MapEntry(i as int,element.toString()))),// TODO make sure element works in this line changed from json['uid'][id]
+        uid = Map<int?, String?>.from(json["uid"].asMap().map((i, element) =>
+            MapEntry(
+                i as int,
+                element
+                    .toString()))), // TODO make sure element works in this line changed from json['uid'][id]
 
         runStatus = json['runStatus'] == "true" ? true : false,
         _turn = int.parse(json['turn']) {
     json['moves']?.forEach((v) {
       if (v != null) {
         if (v == "null") {
-          moves?.add(null);
+          moves.add(null);
         } else
-          moves?.add(Position.fromString(v));
+          moves.add(Position.fromString(v));
       }
+    });
+    json['lastMoveDateTime']?.forEach((v) {
+      lastMoveDateTime.add(DateTime.parse(v));
     });
 
     Map<int?, Position?> clusterRefer = {};
     json['playgroundMap']?.forEach((k, v) {
       var currentClusterID = int.parse(v.split(' ')[1]);
       var previousClusterTrackingPosition = clusterRefer[currentClusterID];
-      playgroundMap?[previousClusterTrackingPosition]
+      playgroundMap[previousClusterTrackingPosition]
           ?.cluster
           .data
           .add(Position.fromString(k));
 
       clusterRefer[currentClusterID] = Position.fromString(k);
 
-      playgroundMap?[clusterRefer[currentClusterID] as Position] = Stone(
+      playgroundMap[clusterRefer[currentClusterID] as Position] = Stone(
           int.parse(v.split(' ')[0]) == 0 ? Colors.black : Colors.white,
           clusterRefer[currentClusterID] as Position);
-      playgroundMap?[clusterRefer[currentClusterID] as Position]?.cluster =
-          playgroundMap?[previousClusterTrackingPosition]?.cluster ??
-              playgroundMap?[clusterRefer[currentClusterID] as Position]?.cluster
+      playgroundMap[clusterRefer[currentClusterID] as Position]?.cluster =
+          playgroundMap[previousClusterTrackingPosition]?.cluster ??
+              playgroundMap[clusterRefer[currentClusterID] as Position]?.cluster
                   as Cluster;
-      playgroundMap?[clusterRefer[currentClusterID] as Position]
+      playgroundMap[clusterRefer[currentClusterID] as Position]
           ?.cluster
           .freedoms = int.parse(v.split(' ')[2]);
     });
@@ -80,6 +93,14 @@ class GameMatch {
         'moves': moves,
         'turn': _turn.toString(),
         'playgroundMap': json.decode(playgroundMap.toString()),
+        'startTime': startTime.toString(),
+        'lastMoveDateTime': (() {
+          List<String> lastMoveDateTimeString = [];
+          lastMoveDateTime.forEach((element) {
+            lastMoveDateTimeString.add(element.toString());
+          });
+          return lastMoveDateTimeString;
+        }).call()
       };
 
   get turn {
@@ -94,8 +115,8 @@ class GameMatch {
     return !toJson().values.contains(null);
   }
 
-  get  bothPlayers {
-    return [uid[0],uid[1]];
+  get bothPlayers {
+    return [uid[0], uid[1]];
   }
 }
 

@@ -16,6 +16,7 @@ import 'package:go/utils/position.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:ntp/ntp.dart';
 
 import 'playfield/game.dart';
 import 'gameplay/logic.dart';
@@ -46,7 +47,6 @@ class MyApp extends StatelessWidget {
                           }),
                     )
                   : MaterialApp(home: SignIn());
-
             }));
   }
 }

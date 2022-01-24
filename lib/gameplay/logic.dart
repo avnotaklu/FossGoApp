@@ -7,12 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:go/services/auth_bloc.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/utils/models.dart';
-import 'package:go/ui/game_ui.dart';
+import 'package:go/ui/gameui/game_ui.dart';
+import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
+import 'package:timer_count_down/timer_controller.dart';
 
 import '../utils/player.dart';
 import '../playfield/stone.dart';
-import '../ui/game_ui.dart';
+import '../ui/gameui/game_ui.dart';
 import '../utils/position.dart';
 
 // ignore: must_be_immutable
@@ -20,40 +22,65 @@ class GameData extends InheritedWidget {
   final List<Player> _players;
   Map<String, int> _turn;
   final Widget mChild;
+  ValueNotifier<Position?> lastMoveNotifier = ValueNotifier<Position?>(null);
 
-  GameData(
-      {required List<Player> pplayer,
-      required int pturn,
-      required this.mChild,
-      required this.match,
-      })
-      : _players = pplayer,
+  final List<CountdownController>? _controller = [
+    CountdownController(autoStart: false),
+    CountdownController(autoStart: false)
+  ];
+  GameData({
+    required List<Player> pplayer,
+    required int pturn,
+    required this.mChild,
+    required this.match,
+  })  : _players = pplayer,
         _turn = {'val': pturn},
         super(child: mChild);
 
   final GameMatch match;
+
+  newMovePlayed(BuildContext context, DateTime timeOfPlay) {
+    var thisGame = MultiplayerData.of(context)
+        ?.database
+        .child('game')
+        .child(match.id as String);
+
+    thisGame
+        ?.child('lastMoveDateTime')
+        .update({(turn%2).toString(): timeOfPlay.toString()});
+  }
+
   toggleTurn(BuildContext context, Position? position) {
-    UiData.timerController[turn % 2].pause();
+    lastMoveNotifier.value = GameData.of(context)?.match.moves.last;
+    GameData.of(context)?.timerController[turn % 2]?.pause();
     // turn = turn %2 == 0 ? 1 : 0;
-    var thisGame =
-        MultiplayerData.of(context)?.database.child('game').child(match.id as String);
+    var thisGame = MultiplayerData.of(context)
+        ?.database
+        .child('game')
+        .child(match.id as String);
     thisGame
         ?.child('moves')
         .update({(match.turn).toString(): position.toString()});
     turn += 1;
     thisGame?.update({'turn': turn.toString()});
-    UiData.timerController[turn % 2].start();
+    GameData.of(context)?.timerController[turn % 2]?.start();
   }
 
   DatabaseReference? getMatch(BuildContext context) {
-    return MultiplayerData.of(context)?.database.child('game').child(match.id as String);
+    return MultiplayerData.of(context)
+        ?.database
+        .child('game')
+        .child(match.id as String);
   }
 
   get turn => match.turn;
   set turn(dynamic val) => match.turn = val;
 
   get gametime => match.time;
-  get turnPlayerColor => [_players[0].mColor, _players[1].mColor];
+  // get turnPlayerColor => [_players[0].mColor, _players[1].mColor];
+  // Gives color of player with turn
+  get turnPlayerColor => _players[turn%2].mColor;
+  get timerController => _controller;
 
   @override
   bool updateShouldNotify(GameData oldWidget) {
@@ -81,7 +108,7 @@ class MultiplayerData extends InheritedWidget {
   get move_ref => moveRef;
   get game_ref => gameRef;
 
-  getCurGameRef(String id){
+  getCurGameRef(String id) {
     return gameRef.child(id);
   }
 
@@ -308,8 +335,8 @@ class StoneLogic extends InheritedWidget {
     _position = position;
     Position? thisCurrentCell = position;
     playground_Map[thisCurrentCell] = Stone(
-        (GameData.of(context)?.turnPlayerColor[GameData.of(context)?.turn % 2]),
-        position); // Shouldn't have to access turnPlayerColor with turn, it should figure this out internally
+        (GameData.of(context)?.turnPlayerColor),
+        position);
 
     var map_ref = MultiplayerData.of(context)
         ?.database
@@ -360,6 +387,7 @@ class StoneLogic extends InheritedWidget {
                     }.call();
             }.call()),
       )));
+      GameData.of(context)?.match.moves.add(position);
       return true;
     }
 

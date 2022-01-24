@@ -135,17 +135,6 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
         }
       }
     });
-    // MultiplayerData.of(context)
-    //     ?.database
-    //     .child('game')
-    //     .child(GameData.of(context)!.match.id as String)
-    //     .child('turn')
-    //     .onValue
-    //     .listen((event) {
-    //   // final data = Map<String?, String?>.from(event.snapshot.value ?? {null: null});
-    //   final data = event.snapshot.value;
-    //   GameData.of(context)?.match.turn = int.parse(data as String);
-    // });
   }
 
   @override
