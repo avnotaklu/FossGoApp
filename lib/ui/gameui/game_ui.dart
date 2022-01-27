@@ -5,7 +5,7 @@ import 'package:go/playfield/game.dart';
 import 'package:go/gameplay/logic.dart';
 import 'package:go/ui/gameui/player_card.dart';
 import 'package:go/ui/gameui/time_watch.dart';
-import 'package:go/utils/models.dart';
+import 'package:go/models/game_match.dart';
 import 'package:go/utils/player.dart';
 import 'package:go/utils/position.dart';
 import 'package:ntp/ntp.dart';

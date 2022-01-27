@@ -3,7 +3,7 @@ import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/logic.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
-import 'package:go/utils/models.dart';
+import 'package:go/models/game_match.dart';
 import 'package:go/utils/position.dart';
 import 'create_game.dart';
 import 'package:go/constants/constants.dart' as Constants;
@@ -37,7 +37,7 @@ class RequestRecieve extends StatelessWidget {
             Text("You are playing"),
             Expanded(
               child: Stone(
-                  Constants.players[recieversTurn].mColor, Position(0, 0)),
+                  Constants.playerColors[recieversTurn], Position(0, 0)),
             ),
           ],
         ),

@@ -8,9 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/services/auth_bloc.dart';
-import 'package:go/utils/models.dart';
+import 'package:go/models/game_match.dart';
 import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/utils/position.dart';
+import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
 import 'dart:core';
@@ -29,8 +30,7 @@ class Game extends StatelessWidget {
   bool enteredAsGameCreator;
 
   Game(this.playerTurn, this.match, this.enteredAsGameCreator) // Board
-      : board = Board(match.rows as int, match.cols as int,
-            match.playgroundMap as Map<Position?, Stone?>) {
+      : board = Board(match.rows as int, match.cols as int, match.playgroundMap as Map<Position?, Stone?>) {
     match.moves.forEach((element) {
       print(element.toString());
     });
@@ -40,8 +40,8 @@ class Game extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // return StatefulBuilder(
-    StreamController<bool> controller = StreamController<
-        bool>.broadcast(); // TODO improve this so that stream controller and stream itself are one part not seperate like this
+    StreamController<bool> controller =
+        StreamController<bool>.broadcast(); // TODO improve this so that stream controller and stream itself are one part not seperate like this
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
@@ -57,8 +57,7 @@ class Game extends StatelessWidget {
         pturn: playerTurn,
         mChild: StatefulBuilder(
           builder: (context, setState) {
-            var checkGameStateStream =
-                checkGameEnterable(context, match, controller).listen((event) {
+            var checkGameStateStream = checkGameEnterable(context, match, controller).listen((event) {
               if (event == true) {
                 if (enteredAsGameCreator) {
                   NTP.now().then((value) => {
@@ -68,9 +67,12 @@ class Game extends StatelessWidget {
                         //               ?.getCurGameRef(GameData.of(context)?.match.id as String)
                         //               //?.game_ref
                         //               .child('lastMoveDateTime')
-                        match.lastMoveDateTime.add(value),
-                        match.lastMoveDateTime.add(value),
-                        MultiplayerData.of(context)?.getCurGameRef(match.id).set(match.toJson()),
+                        match.lastTimeAndDate.add(TimeAndDuration(value,Duration(seconds: match.time))),
+                        match.lastTimeAndDate.add(TimeAndDuration(value,Duration(seconds: match.time))),
+
+                        MultiplayerData.of(context)
+                            ?.getCurGameRef(match.id)
+                            .set(match.toJson()), // TODO Instead of writing entire match again write only changed values
                         setState(() => match = match),
                         controller.close(),
                       });

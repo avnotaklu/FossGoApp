@@ -20,7 +20,7 @@ import 'package:ntp/ntp.dart';
 
 import 'playfield/game.dart';
 import 'gameplay/logic.dart';
-import 'utils/models.dart';
+import 'models/game_match.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,11 +40,9 @@ class MyApp extends StatelessWidget {
                   ? MultiplayerData(
                       curUser: snapshot.data,
                       database: FirebaseDatabase.instance.reference(),
-                      mChild: MaterialApp(
-                          home: HomePage(),
-                          routes: <String, WidgetBuilder>{
-                            '/HomePage': (BuildContext context) => HomePage(),
-                          }),
+                      mChild: MaterialApp(home: HomePage(), routes: <String, WidgetBuilder>{
+                        '/HomePage': (BuildContext context) => HomePage(),
+                      }),
                     )
                   : MaterialApp(home: SignIn());
             }));

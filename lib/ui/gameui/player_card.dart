@@ -19,7 +19,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.5),
-            color: Constants.players[widget.player].mColor,
+            color: Constants.playerColors[widget.player],
           ),
           child: Column(
             children: [

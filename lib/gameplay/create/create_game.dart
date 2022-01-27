@@ -8,7 +8,7 @@ import 'package:go/gameplay/logic.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/services/auth_bloc.dart';
-import 'package:go/utils/models.dart';
+import 'package:go/models/game_match.dart';
 import 'package:go/utils/position.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
@@ -26,7 +26,7 @@ class CreateGame extends StatelessWidget {
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
     var newPlace;
     if (match != null) {
-      var newPlace = MultiplayerData.of(context)?.getCurGameRef(match!.id);
+      newPlace = MultiplayerData.of(context)?.getCurGameRef(match!.id);
     } else {
       newPlace = MultiplayerData.of(context)?.game_ref.push();
     }

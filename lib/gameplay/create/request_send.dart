@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/playfield/game.dart';
-import 'package:go/utils/models.dart';
+import 'package:go/models/game_match.dart';
 import 'package:share/share.dart';
 
 class RequestSend extends StatelessWidget {
