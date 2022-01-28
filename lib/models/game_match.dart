@@ -35,10 +35,7 @@ class GameMatch {
         // uid = {0: json['uid'][0].toString(), 1: json['uid'][1].toString()},
 //         uid = Map.fromIterable(json['uid'], key: (v) => v[0], value: (v) => v[1]);
         // uid = {json['uid'].keys : json['uid'].values},
-        uid = Map<int?, String?>.from(json["uid"]
-            .asMap()
-            .map((i, element) => MapEntry(i as int, element.toString()))), // TODO make sure element works in this line changed from json['uid'][id]
-
+        uid = uidFromJson(json['uid']),
         runStatus = json['runStatus'] == "true" ? true : false,
         _turn = int.parse(json['turn']) {
     json['moves']?.forEach((v) {
@@ -74,7 +71,7 @@ class GameMatch {
         'cols': cols.toString(),
         'time': time.toString(),
         'id': id,
-        'uid': {0.toString(): uid[0]?.toString(), 1.toString(): uid[1]?.toString()},
+        'uid': Map<String, String>.from(uid.map((key, value) => MapEntry(key.toString(), value.toString()))),
         'runStatus': runStatus.toString(),
         'moves': moves,
         'turn': _turn.toString(),
@@ -110,6 +107,14 @@ class GameMatch {
 
   get bothPlayers {
     return [uid[0], uid[1]];
+  }
+
+  static uidFromJson(List<Object?> uid) {
+    var result = Map<int?, String?>.from(uid.asMap().map<int,String>((i, element) {
+        return MapEntry(i as int, element.toString());
+    })); // TODO make sure element works in this line changed from json['uid'][id]
+    result.removeWhere((key, value) => value == "null");
+    return result;
   }
 }
 

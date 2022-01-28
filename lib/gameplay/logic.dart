@@ -72,7 +72,14 @@ class GameData extends InheritedWidget {
   getclientPlayer(BuildContext context) {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
-    return match.uid.keys.firstWhere((k) => match.uid[k] == MultiplayerData.of(context)?.curUser.uid, orElse: () => null);
+    try {
+      return match.uid.keys.firstWhere((k) => match.uid[k] == MultiplayerData.of(context)?.curUser.uid, orElse: () {
+        throw TypeError;
+      });
+    } on TypeError {
+      throw ("current client not found");
+    }
+    ;
   }
 
   @override

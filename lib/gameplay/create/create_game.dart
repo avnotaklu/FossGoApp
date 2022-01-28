@@ -83,14 +83,14 @@ class CreateGame extends StatelessWidget {
               Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
             IconButton(
                 onPressed: () => {
-                      mUid[0] =
-                          MultiplayerData.of(context)?.curUser.uid.toString(),
+                      mUid.clear(),
+                      mUid[0] = MultiplayerData.of(context)?.curUser.uid.toString(),
                     },
                 icon: Expanded(child: Stone(Colors.black, Position(0, 0)))),
             IconButton(
                 onPressed: () => {
-                      mUid[1] =
-                          MultiplayerData.of(context)?.curUser.uid.toString()
+                      mUid.clear(),
+                      mUid[1] = MultiplayerData.of(context)?.curUser.uid.toString()
                     },
                 icon: Expanded(child: Stone(Colors.white, Position(0, 0)))),
           ])),

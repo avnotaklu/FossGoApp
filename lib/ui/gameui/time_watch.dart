@@ -117,7 +117,7 @@ class _TimeWatchState extends State<TimeWatch> {
         if (lastMoveDateTime.connectionState == ConnectionState.active) {
           WidgetsBinding.instance?.addPostFrameCallback((__) {
             // after seconds have been modified then do the stuff
-            GameData.of(context)?.timerController[widget.player].restart(); // This restarts with new seconds widget.value
+            GameData.of(context)?.timerController[widget.player].reset(); // This restarts with new seconds widget.value
           });
           //List<DateTime> lastMoveDateTimes = List.castFrom(
           //   lastMoveDateTimeSnapshot.data?.snapshot.value as List);

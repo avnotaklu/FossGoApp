@@ -26,18 +26,11 @@ class BackgroundScreenWithDialog extends StatelessWidget {
 }
 
 /// This reads match from database and assigns it to match if all conditions of entering game are met returns true;
-Stream<bool> checkGameEnterable(
-    BuildContext context, GameMatch match, StreamController<bool> controller) {
+Stream<bool> checkGameEnterable(BuildContext context, GameMatch match, StreamController<bool> controller) {
   if (match.isComplete()) {
     bool gameEnterable = false;
-    var changeStream = MultiplayerData.of(context)
-        ?.getCurGameRef(match.id)
-        .child('uid')
-        .onValue
-        .listen((event) {
-      match.uid = Map<int?, String?>.from(event.snapshot.value
-          .asMap()
-          .map((i, element) => MapEntry(i as int, element.toString())));
+    var changeStream = MultiplayerData.of(context)?.getCurGameRef(match.id).child('uid').onValue.listen((event) {
+      match.uid = GameMatch.uidFromJson(event.snapshot.value);
       if (match.bothPlayers.contains(null) == false) {
         // gameEnterable = true;
         controller.add(true);
