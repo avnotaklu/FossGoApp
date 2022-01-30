@@ -25,7 +25,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
             children: [
               GameData.of(context)?.match.uid[widget.player] == null
                   ? Center(child: CircularProgressIndicator())
-                  : TimeWatch(
+                  : GameTimer(
                       GameData.of(context)?.timerController[widget.player],
                       pplayer: widget.player,
                     ),

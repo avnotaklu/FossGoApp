@@ -34,11 +34,11 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   share: ^2.0.4
+  web_socket_channel: ^2.1.0
   timer_count_down:
     git: 
       url : git@github.com:avnotaklu/simple_count_down.git
       ref : master
-  web_socket_channel: ^2.1.0
   ntp: ^2.0.0
   # firebase_core: ^1.8.0
   firebase_core: ^1.11.0

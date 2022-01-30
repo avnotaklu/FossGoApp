@@ -23,22 +23,20 @@ class TimeUpdateHandler {
   }
 }
 
-class TimeWatch extends StatefulWidget {
-  StreamController<List<TimeAndDuration>> _updateController = StreamController<List<TimeAndDuration>>.broadcast();
-
+class GameTimer extends StatefulWidget {
   StreamController<List<TimeAndDuration>> changeController = StreamController.broadcast();
 
   CountdownController mController;
   @override
-  State<TimeWatch> createState() => _TimeWatchState();
-  TimeWatch(controller, {required pplayer})
+  State<GameTimer> createState() => _GameTimerState();
+  GameTimer(controller, {required pplayer})
       : mController = controller,
         player = pplayer;
   int player;
   ValueNotifier<TimeAndDuration?> lastMoveNotifier = ValueNotifier<TimeAndDuration?>(null);
 }
 
-class _TimeWatchState extends State<TimeWatch> {
+class _GameTimerState extends State<GameTimer> {
   streamUpdatedTime() {
     MultiplayerData.of(context)
         ?.database
@@ -46,7 +44,6 @@ class _TimeWatchState extends State<TimeWatch> {
         .child(GameData.of(context)?.match.id as String)
         .child('lastTimeAndDuration')
         .child(GameData.of(context)?.getclientPlayer(context) == 0 ? 1.toString() : 0.toString())
-
         .onValue
         .listen((changeEvent) {
       MultiplayerData.of(context)
@@ -54,21 +51,37 @@ class _TimeWatchState extends State<TimeWatch> {
           .child('game')
           .child(GameData.of(context)!.match.id as String)
           .child('lastTimeAndDuration')
-          .onValue
-          .listen((dataEvent) {
+          .orderByKey()
+          .get()
+          .then((dataEvent) {
         if (changeEvent.snapshot.value != null) {
-          if (dataEvent.snapshot.value != null) {
+          if (dataEvent.value != null) {
             if (GameData.of(context)?.turn % 2 != widget.player) {
               List<TimeAndDuration> lastMoveDateTime = [];
-              (dataEvent.snapshot.value as List).forEach((element) {
+              (dataEvent.value as List).forEach((element) {
                 lastMoveDateTime.add(TimeAndDuration.fromString(element));
               });
 
-              widget._updateController.add(lastMoveDateTime);
+              GameData.of(context)!.updateController.add(lastMoveDateTime);
             }
           }
         }
       });
+      //   .onValue
+      //   .listen((dataEvent) {
+      // if (changeEvent.snapshot.value != null) {
+      //   if (dataEvent.snapshot.value != null) {
+      //     if (GameData.of(context)?.turn % 2 != widget.player) {
+      //       List<TimeAndDuration> lastMoveDateTime = [];
+      //       (dataEvent.snapshot.value as List).forEach((element) {
+      //         lastMoveDateTime.add(TimeAndDuration.fromString(element));
+      //       });
+
+      //       widget._updateController.add(lastMoveDateTime);
+      //     }
+      //   }
+      // }
+      // });
     });
   }
 
@@ -107,7 +120,7 @@ class _TimeWatchState extends State<TimeWatch> {
     //     //return StreamBuilder<List.filled(2, GameData.of(context)?.match.startTime)>(
 
     return StreamBuilder<List<TimeAndDuration>>(
-      stream: widget._updateController.stream,
+      stream: GameData.of(context)!.updateController.stream,
       // stream: MultiplayerData.of(context)
       // ?.getCurGameRef(GameData.of(context)?.match.id as String)
       // ?.game_ref
@@ -115,10 +128,10 @@ class _TimeWatchState extends State<TimeWatch> {
       // .onValue,
       builder: (context, AsyncSnapshot<List<TimeAndDuration>> lastMoveDateTime) {
         if (lastMoveDateTime.connectionState == ConnectionState.active) {
-          WidgetsBinding.instance?.addPostFrameCallback((__) {
-            // after seconds have been modified then do the stuff
-            GameData.of(context)?.timerController[widget.player].reset(); // This restarts with new seconds widget.value
-          });
+          // WidgetsBinding.instance?.addPostFrameCallback((__) {
+          //   // after seconds have been modified then do the stuff
+          //   GameData.of(context)?.timerController[widget.player].reset(); // This restarts with new seconds widget.value
+          // });
           //List<DateTime> lastMoveDateTimes = List.castFrom(
           //   lastMoveDateTimeSnapshot.data?.snapshot.value as List);
           print("value changed in timewatch");
@@ -126,22 +139,7 @@ class _TimeWatchState extends State<TimeWatch> {
               future: NTP.now(),
               builder: (context, dateTimeNowsnapshot) {
                 if (dateTimeNowsnapshot.connectionState == ConnectionState.done) {
-                  Duration updatedTimeBeforeNewMoveForBothPlayers = Duration(seconds: 0);
-                  try {
-                    updatedTimeBeforeNewMoveForBothPlayers = lastMoveDateTime.data?[widget.player].datetime.difference(
-                      lastMoveDateTime.data?[widget.player == 0 ? 1 : 0].datetime,
-                    );
-                  } catch (err) {}
-
-                  Duration updatedTime = (lastMoveDateTime.data?[widget.player].duration);
-                  try {
-                    updatedTime = ((GameData.of(context)?.turn % 2) == 0 ? 1 : 0) ==
-                            widget.player // FIXME This is async so turn can probably change in different order which will cause issues
-                        ? (lastMoveDateTime.data?[widget.player].duration) - updatedTimeBeforeNewMoveForBothPlayers
-                        : (lastMoveDateTime.data?[widget.player].duration) -
-                            ((dateTimeNowsnapshot.data?.difference(lastMoveDateTime.data?[widget.player == 0 ? 1 : 0].datetime) ??
-                                updatedTimeBeforeNewMoveForBothPlayers));
-                  } catch (err) {}
+                  //var updatedTime = calculateCorrectTime(lastMoveDateTime.data, widget.player, dateTimeNowsnapshot.data, context);
                   // lastMoveDateTimeSnapshot.data[widget.player].difference(GameData.of(context)?.match.startTime)
                   // (Duration(seconds: GameData.of(context)!.match.time) -
                   //         (snapshot.data ?? DateTime.now()).difference(
@@ -149,58 +147,94 @@ class _TimeWatchState extends State<TimeWatch> {
                   //                 DateTime.now()))
                   //     .inSeconds;
 
-                  DatabaseReference thisGame = MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)?.match.id as String);
-                  updateDurationInDatabase(thisGame, updatedTime, GameData.of(context)?.turn % 2);
-                  return Countdown(
-                    controller: widget.mController,
-                    // seconds: GameData.of(context)!.match.time,
-                    seconds: updatedTime.inSeconds > 0 ? updatedTime.inSeconds : 0,
-                    build: (BuildContext context, double time) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            (time.toInt() ~/ 60).toString(),
-                            style: TextStyle(
-                              fontSize: 25,
-                              color: Constants.playerColors[widget.player == 0 ? 1 : 0],
-                            ),
-                          ),
-                          Text(
-                            ':',
-                            style: TextStyle(
-                              fontSize: 25,
-                              color: Constants.playerColors[widget.player == 0 ? 1 : 0],
-                            ),
-                          ),
-                          Text((time.toInt() % 60).toString(),
-                              style: TextStyle(
-                                fontSize: 25,
-                                color: Constants.playerColors[widget.player == 0 ? 1 : 0],
-                              )),
-                        ],
-                      );
-                    },
-                    interval: const Duration(milliseconds: 100),
-                    onFinished: () {
-                      print('Timer is done!');
-                    },
-                  );
+                  print("${lastMoveDateTime.data?[widget.player].duration.toString()} = ${widget.player.toString()}");
+                  // GameData.of(context)!.timers[widget.player]!.time = lastMoveDateTime.data?[widget.player].duration;
+                  // return GameData.of(context)!.timers[widget.player]!;
+                  return PlayerCountdownTimer( controller: widget.mController, time: lastMoveDateTime.data?[widget.player].duration, player: widget.player);
                 } else
                 //if(lastMoveDateTimeSnapshot.connectionState == ConnectionState.waiting)
                 {
-                  return SizedBox.shrink();
+                  // return SizedBox.shrink();
+                  // GameData.of(context)!.timers[widget.player]!.time = Duration(seconds:  GameData.of(context)!.match.time - 5);
+                  return PlayerCountdownTimer( controller: widget.mController, time: Duration(seconds: GameData.of(context)!.match.time), player: widget.player);
+                  // return GameData.of(context)!.timers[widget.player]!;
                 }
               });
         } else
         //if(lastMoveDateTimeSnapshot.connectionState == ConnectionState.waiting)
         {
-          return SizedBox.shrink();
+          // return SizedBox.shrink();
+            //GameData.of(context)!.timers[widget.player]!.time = Duration(seconds:  GameData.of(context)!.match.time - 5);
+                return PlayerCountdownTimer( controller: widget.mController, time: Duration(seconds: GameData.of(context)!.match.time), player: widget.player);
+          /// return GameData.of(context)!.timers[widget.player]!;
+          // return PlayerCountdownTimer(
+          //     controller: widget.mController, time: Duration(seconds: GameData.of(context)!.match.time), player: widget.player);
         }
       },
     );
     //   },
     // );
+  }
+}
+
+class PlayerCountdownTimer extends StatefulWidget {
+  PlayerCountdownTimer({
+    Key? key,
+    required this.controller,
+    required this.time,
+    required this.player,
+  }) : super(key: key);
+
+  final int player;
+  Duration time;
+  final CountdownController controller;
+
+  @override
+  State<PlayerCountdownTimer> createState() => _PlayerCountdownTimerState();
+}
+
+class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance?.addPostFrameCallback((__) {
+    // after seconds have been modified then do the stuff
+    GameData.of(context)?.timerController[widget.player].reset(); // This restarts with new seconds value
+    });
+    return Countdown(
+      controller: widget.controller,
+      // seconds: GameData.of(context)!.match.time,
+      seconds: widget.time.inSeconds > 0 ? widget.time.inSeconds : 0,
+      build: (BuildContext context, double time) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              (time.toInt() ~/ 60).toString(),
+              style: TextStyle(
+                fontSize: 25,
+                color: Constants.playerColors[widget.player == 0 ? 1 : 0],
+              ),
+            ),
+            Text(
+              ':',
+              style: TextStyle(
+                fontSize: 25,
+                color: Constants.playerColors[widget.player == 0 ? 1 : 0],
+              ),
+            ),
+            Text((time.toInt() % 60).toString(),
+                style: TextStyle(
+                  fontSize: 25,
+                  color: Constants.playerColors[widget.player == 0 ? 1 : 0],
+                )),
+          ],
+        );
+      },
+      interval: const Duration(milliseconds: 100),
+      onFinished: () {
+        print('Timer is done!');
+      },
+    );
   }
 }

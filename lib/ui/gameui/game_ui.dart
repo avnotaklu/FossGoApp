@@ -46,13 +46,6 @@ class _GameUiState extends State<GameUi> {
 
   @override
   Widget build(BuildContext context) {
-    if (GameData.of(context)!.match.startTime != null &&
-        !widget.blackTimerStarted) {
-      if (GameData.of(context)?.timerController[0].onStart != null) {
-        GameData.of(context)?.timerController[0].start();
-        widget.blackTimerStarted = true;
-      }
-    }
     // return LayoutBuilder(
     // builder: (BuildContext context, BoxConstraints constraints){
     int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;

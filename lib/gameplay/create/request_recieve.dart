@@ -70,9 +70,7 @@ class EnterGameButton extends StatelessWidget {
                 .onValue
                 .listen((event) {
               print(event.snapshot.value.toString());
-              match.uid = Map<int?, String?>.from(event.snapshot.value
-                  .asMap()
-                  .map((i, element) => MapEntry(i as int, element.toString())));
+              match.uid = GameMatch.uidFromJson(event.snapshot.value);
               if (match.bothPlayers.contains(null) == false) {
                 Navigator.pushReplacement(
                     context,

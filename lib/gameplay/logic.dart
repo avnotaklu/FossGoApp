@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,6 +9,7 @@ import 'package:go/services/auth_bloc.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/ui/gameui/game_ui.dart';
+import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/utils/core_utils.dart';
 import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
@@ -25,8 +27,9 @@ class GameData extends InheritedWidget {
   final List<Player> _players;
   Map<String, int> _turn;
   final Widget mChild;
-  ValueNotifier<Position?> lastMoveNotifier = ValueNotifier<Position?>(null);
+  StreamController<List<TimeAndDuration>> updateController = StreamController<List<TimeAndDuration>>.broadcast();
 
+  List<PlayerCountdownTimer?> timers = [null, null];
   final List<CountdownController>? _controller = [CountdownController(autoStart: false), CountdownController(autoStart: false)];
   GameData({
     required List<Player> pplayer,
@@ -35,17 +38,51 @@ class GameData extends InheritedWidget {
     required this.match,
   })  : _players = pplayer,
         _turn = {'val': pturn},
-        super(child: mChild);
+        super(child: mChild) {
+    timers = [
+      PlayerCountdownTimer(controller: _controller![0], time: Duration(seconds: match.time), player: 0),
+      PlayerCountdownTimer(controller: _controller![1], time: Duration(seconds: match.time), player: 1)
+    ];
+  }
 
   final GameMatch match;
 
+  bool movePlayed = false;
   newMovePlayed(BuildContext context, DateTime timeOfPlay) {
-    DatabaseReference thisGame = MultiplayerData.of(context)!.database.child('game').child(match.id as String);
-    updateTimeInDatabase(thisGame, timeOfPlay, turn % 2);
+    assert(getPlayerWithTurn.turn == getclientPlayer(context)); // The rest of the function depends on it
+    updateTimeInDatabase(context, timeOfPlay, getclientPlayer(context));
+    movePlayed = true;
+    MultiplayerData.of(context)
+        ?.database
+        .child('game')
+        .child(match.id as String)
+        .child('lastTimeAndDuration')
+        //.child(getPlayerWithoutTurn.toString())
+        .orderByKey()
+        .get()
+        .then((dataEvent) {
+      if (dataEvent.value != null) {
+        List<TimeAndDuration?> lastMoveDateTime = [null, null];
+        lastMoveDateTime[0] = TimeAndDuration.fromString((dataEvent.value as List)[0]);
+        lastMoveDateTime[1] = TimeAndDuration.fromString((dataEvent.value as List)[1]);
+        lastMoveDateTime[getclientPlayer(context)] = TimeAndDuration(timeOfPlay, lastMoveDateTime[getclientPlayer(context)]!.duration);
+        Duration updatedTime = calculateCorrectTime(lastMoveDateTime, getclientPlayer(context), null, context);
+        lastMoveDateTime[getclientPlayer(context)] = (TimeAndDuration(timeOfPlay, updatedTime));
+        updateDurationInDatabase(
+            context, updatedTime, getclientPlayer(context)); // FIXME? this was changed from turn % 2 idk if this breaks something
+        lastMoveDateTime.forEach((element) {
+          print(element.toString());
+        });
+        GameData.of(context)!.updateController.add(lastMoveDateTime as List<TimeAndDuration>);
+      }
+    });
+
+    // if (GameData.of(context)?.match.uid[widget.player] == MultiplayerData.of(context)?.curUser.uid &&
+    //     (GameData.of(context)!.movePlayed)) {
+    // GameData.of(context)!.movePlayed = false;
   }
 
   toggleTurn(BuildContext context, Position? position) {
-    lastMoveNotifier.value = GameData.of(context)?.match.moves.last;
     GameData.of(context)?.timerController[turn % 2]?.pause();
     // turn = turn %2 == 0 ? 1 : 0;
     var thisGame = MultiplayerData.of(context)?.database.child('game').child(match.id as String);
@@ -79,7 +116,6 @@ class GameData extends InheritedWidget {
     } on TypeError {
       throw ("current client not found");
     }
-    ;
   }
 
   @override

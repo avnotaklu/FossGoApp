@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Flutter-Launch-All",
+        "dependsOn": [
+          "Flutter-Launch-Realmi",
+          "Flutter-Launch-Emulator"
+        ]
+      },
+      {
+        "label": "Flutter-Launch-iOS",
+        "type": "shell",
+        "command": "flutter run -d 'iPhone 11' "
+      },
+      {
+        "label": "Flutter-Launch-Realmi",
+        "type": "shell",
+        "command": "flutter run -d '11a7e31e' "
+      },
+      {
+        "label": "Flutter-Launch-Emulator",
+        "type": "shell",
+        "command": "flutter run -d 'emulator-5554' ",
+      }
+    ]
+  }
