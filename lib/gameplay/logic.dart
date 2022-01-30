@@ -73,7 +73,7 @@ class GameData extends InheritedWidget {
         lastMoveDateTime.forEach((element) {
           print(element.toString());
         });
-        GameData.of(context)!.updateController.add(lastMoveDateTime as List<TimeAndDuration>);
+        GameData.of(context)!.updateController.add(List<TimeAndDuration>.from(lastMoveDateTime) );
       }
     });
 
