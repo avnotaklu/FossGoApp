@@ -47,6 +47,24 @@ class GameData extends InheritedWidget {
 
   final GameMatch match;
 
+  correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime) {
+    NTP.now().then((value) {
+      //var updatedTime = calculateCorrectTime(lastMoveDateTime.data, widget.player, dateTimeNowsnapshot.data, context);
+      // lastMoveDateTimeSnapshot.data[widget.player].difference(GameData.of(context)?.match.startTime)
+      // (Duration(seconds: GameData.of(context)!.match.time) -
+      //         (snapshot.data ?? DateTime.now()).difference(
+      //             GameData.of(context)?.match.startTime ??
+      //                 DateTime.now()))
+      //     .inSeconds;
+      Duration durationAfterTimeElapsedCorrection = calculateCorrectTime(lastMoveDateTime, GameData.of(context)?.getPlayerWithTurn.turn, value, context);
+
+      lastMoveDateTime[GameData.of(context)?.getPlayerWithTurn.turn] =
+          (TimeAndDuration(lastMoveDateTime[GameData.of(context)?.getPlayerWithTurn.turn]?.datetime, durationAfterTimeElapsedCorrection));
+
+      GameData.of(context)!.updateController.add(List<TimeAndDuration>.from(lastMoveDateTime));
+    });
+  }
+
   bool movePlayed = false;
   newMovePlayed(BuildContext context, DateTime timeOfPlay) {
     assert(getPlayerWithTurn.turn == getclientPlayer(context)); // The rest of the function depends on it
@@ -73,7 +91,25 @@ class GameData extends InheritedWidget {
         lastMoveDateTime.forEach((element) {
           print(element.toString());
         });
-        GameData.of(context)!.updateController.add(List<TimeAndDuration>.from(lastMoveDateTime) );
+
+        correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime);
+        // });
+        // builder: (context, dateTimeNowsnapshot) {
+        //   if (dateTimeNowsnapshot.connectionState == ConnectionState.done) {
+        //var updatedTime = calculateCorrectTime(lastMoveDateTime.data, widget.player, dateTimeNowsnapshot.data, context);
+        // lastMoveDateTimeSnapshot.data[widget.player].difference(GameData.of(context)?.match.startTime)
+        // (Duration(seconds: GameData.of(context)!.match.time) -
+        //         (snapshot.data ?? DateTime.now()).difference(
+        //             GameData.of(context)?.match.startTime ??
+        //                 DateTime.now()))
+        //     .inSeconds;
+        // if(widget.player == GameData.of(context)?.getPlayerWithTurn.turn)
+        // {
+        //   Duration durationAfterTimeElapsedCorrection = calculateCorrectTime(lastMoveDateTime.data, widget.player, dateTimeNowsnapshot.data, context);
+        // return PlayerCountdownTimer( controller: widget.mController, time: durationAfterTimeElapsedCorrection , player: widget.player);
+
+        // }
+
       }
     });
 
@@ -105,6 +141,18 @@ class GameData extends InheritedWidget {
   get getPlayerWithTurn => _players[turn % 2];
   get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
   get timerController => _controller;
+
+  getRemotePlayer(BuildContext context) {
+    //   match.uid.(MultiplayerData.of(context)?.curUser);
+    // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
+    try {
+      return match.uid.keys.firstWhere((k) => match.uid[k] != MultiplayerData.of(context)?.curUser.uid, orElse: () {
+        throw TypeError;
+      });
+    } on TypeError {
+      throw ("current client not found");
+    }
+  }
 
   getclientPlayer(BuildContext context) {
     //   match.uid.(MultiplayerData.of(context)?.curUser);

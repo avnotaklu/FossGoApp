@@ -59,9 +59,8 @@ class Game extends StatelessWidget {
           builder: (context, setState) {
             var checkGameStateStream = checkGameEnterable(context, match, controller).listen((event) {
               if (event == true) {
-                
                 // assert(GameData.of(context)?.timerController[0].onStart != null);
-                
+
                 if (enteredAsGameCreator) {
                   // this sets time so only should be called by one player
                   NTP.now().then((value) => {
@@ -77,7 +76,7 @@ class Game extends StatelessWidget {
                         MultiplayerData.of(context)
                             ?.getCurGameRef(match.id)
                             .set(match.toJson()), // TODO Instead of writing entire match again write only changed values
-                        GameData.of(context)?.timerController[0].start(),
+                        GameData.of(context)!.timerController[0].start(),
                         setState(() => match = match),
                       });
                 }
@@ -86,7 +85,7 @@ class Game extends StatelessWidget {
 
                 if (GameData.of(context)!.match.startTime == null) {
                   MultiplayerData.of(context)?.getCurGameRef(match.id).child('startTime').onValue.listen((snaphot) {
-                    match.startTime = DateTime.parse(snaphot.snapshot.value) ;
+                    match.startTime = DateTime.parse(snaphot.snapshot.value);
                     // MultiplayerData.of(context)
                     //               ?.getCurGameRef(GameData.of(context)?.match.id as String)
                     //               //?.game_ref
