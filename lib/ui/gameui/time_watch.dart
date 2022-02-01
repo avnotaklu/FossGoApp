@@ -132,7 +132,7 @@ class _GameTimerState extends State<GameTimer> {
           //   // after seconds have been modified then do the stuff
           //   GameData.of(context)?.timerController[widget.player].reset(); // This restarts with new seconds widget.value
           // });
-          //List<DateTime> lastMoveDateTimes = List.castFrom(
+          // List<DateTime> lastMoveDateTimes = List.castFrom(
           //   lastMoveDateTimeSnapshot.data?.snapshot.value as List);
           print("value changed in timewatch");
           return FutureBuilder<DateTime>(
@@ -146,13 +146,19 @@ class _GameTimerState extends State<GameTimer> {
                   //             GameData.of(context)?.match.startTime ??
                   //                 DateTime.now()))
                   //     .inSeconds;
+                  if(widget.player == GameData.of(context)?.getPlayerWithTurn.turn)
+                  {
+                    Duration durationAfterTimeElapsedCorrection = calculateCorrectTime(lastMoveDateTime.data, widget.player, dateTimeNowsnapshot.data, context);
+                  return PlayerCountdownTimer( controller: widget.mController, time: durationAfterTimeElapsedCorrection , player: widget.player);
+
+                  }
 
                   print("${lastMoveDateTime.data?[widget.player].duration.toString()} = ${widget.player.toString()}");
                   // GameData.of(context)!.timers[widget.player]!.time = lastMoveDateTime.data?[widget.player].duration;
                   // return GameData.of(context)!.timers[widget.player]!;
                   return PlayerCountdownTimer( controller: widget.mController, time: lastMoveDateTime.data?[widget.player].duration, player: widget.player);
                 } else
-                //if(lastMoveDateTimeSnapshot.connectionState == ConnectionState.waiting)
+                // if(lastMoveDateTimeSnapshot.connectionState == ConnectionState.waiting)
                 {
                   // return SizedBox.shrink();
                   // GameData.of(context)!.timers[widget.player]!.time = Duration(seconds:  GameData.of(context)!.match.time - 5);
@@ -203,7 +209,8 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
     return Countdown(
       controller: widget.controller,
       // seconds: GameData.of(context)!.match.time,
-      seconds: widget.time.inSeconds > 0 ? widget.time.inSeconds : 0,
+      
+      seconds: widget.time.inMicroseconds > 0 ? widget.time.inMicroseconds : 0,
       build: (BuildContext context, double time) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -231,7 +238,9 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
           ],
         );
       },
+
       interval: const Duration(milliseconds: 100),
+
       onFinished: () {
         print('Timer is done!');
       },

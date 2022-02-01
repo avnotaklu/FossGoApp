@@ -21,6 +21,7 @@ class _SignInState extends State<SignIn> {
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
     authBloc.currentUser.listen((user) {
       if (user != null) {
+        print("got user");
         Navigator.of(context).pushReplacementNamed(
         '/HomePage',  
         );

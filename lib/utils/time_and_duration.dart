@@ -55,7 +55,7 @@ calculateCorrectTime(lastMoveDateTime, player, dateTimeNowsnapshot, context) {
     updatedTime = ((GameData.of(context)?.turn % 2) == 0 ? 1 : 0) ==
             player // FIXME This is async so turn can probably change in different order which will cause issues
         ? (lastMoveDateTime[player].duration) - updatedTimeBeforeNewMoveForBothPlayers.abs()
-        : (lastMoveDateTime[player].duration) - ((dateTimeNowsnapshot[player == 0 ? 1 : 0].datetime) ?? Duration(seconds: 0));
+        : (lastMoveDateTime[player].duration) - ((lastMoveDateTime[player == 0 ? 1 : 0].datetime.difference(dateTimeNowsnapshot)).abs() ?? Duration(seconds: 0));
   } catch (err) {}
   return updatedTime.abs();
 }
