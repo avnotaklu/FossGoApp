@@ -37,6 +37,11 @@ class GameTimer extends StatefulWidget {
 }
 
 class _GameTimerState extends State<GameTimer> {
+  // @override
+  // initState() {
+  //   super.initState();
+  // }
+
   streamUpdatedTime() {
     MultiplayerData.of(context)
         ?.database
@@ -89,6 +94,7 @@ class _GameTimerState extends State<GameTimer> {
   @override
   Widget build(BuildContext context) {
     streamUpdatedTime();
+    //streamUpdatedTime();
     // try {
     //   widget.val.value = GameData.of(context)?.match.moves.last;
     //   if (!widget.val.hasListeners) {

@@ -20,25 +20,25 @@ class TimeAndDuration {
   get duration => _duration;
 }
 
-updateTimeInDatabase(BuildContext context, DateTime time, int player) {
+updateTimeInDatabase(List<TimeAndDuration?> lastMoveDateTime, BuildContext context, DateTime time, int player) {
   print("putting" + time.toString());
   DatabaseReference ref = MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)?.match.id as String);
   ref.child('lastTimeAndDuration').child((player).toString()).orderByKey().get().then((value) {
     print(value);
     ref
         .child('lastTimeAndDuration')
-        .update({(player).toString(): TimeAndDuration(time, TimeAndDuration.fromString(value.value as String).duration).toString()});
+        .update({(player).toString(): TimeAndDuration(time, lastMoveDateTime[player]!.duration).toString()});
   });
 }
 
-updateDurationInDatabase(BuildContext context, Duration dur, int player) {
+updateDurationInDatabase(List<TimeAndDuration?> lastMoveDateTime, BuildContext context, Duration dur, int player) {
   DatabaseReference ref = MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)?.match.id as String);
   ref.child('lastTimeAndDuration').child((player).toString()).orderByKey().get().then((value) {
     print(value);
     print("putting" + TimeAndDuration.fromString(value.value as String)._time.toString());
     ref
         .child('lastTimeAndDuration')
-        .update({(player).toString(): TimeAndDuration(TimeAndDuration.fromString(value.value as String)._time, dur).toString()});
+        .update({(player).toString(): TimeAndDuration(lastMoveDateTime[player]!._time , dur).toString()});
   });
 }
 

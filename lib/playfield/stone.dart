@@ -32,16 +32,14 @@ class Stone extends StatelessWidget {
     return Container(
       child: Stack(
         children: [
-          Container(
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          Container(decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           // widget.cluster,
-          Text(StoneLogic.of(context)?.playground_Map[cluster.data.first]?.cluster.freedoms.toString()?? ""),
+          Text(StoneLogic.of(context)?.stoneAt(cluster.data.first)?.cluster.freedoms.toString() ?? ""),
         ],
         // Text(widget.cluster.freedoms.toString())
       ),
     );
   }
-  
 }
 
 class Cluster {

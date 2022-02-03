@@ -66,9 +66,8 @@ class GameData extends InheritedWidget {
   }
 
   bool movePlayed = false;
-  newMovePlayed(BuildContext context, DateTime timeOfPlay) {
+  newMovePlayed(BuildContext context, DateTime timeOfPlay, Position? playPosition) {
     assert(getPlayerWithTurn.turn == getclientPlayer(context)); // The rest of the function depends on it
-    updateTimeInDatabase(context, timeOfPlay, getclientPlayer(context));
     movePlayed = true;
     MultiplayerData.of(context)
         ?.database
@@ -83,48 +82,40 @@ class GameData extends InheritedWidget {
         List<TimeAndDuration?> lastMoveDateTime = [null, null];
         lastMoveDateTime[0] = TimeAndDuration.fromString((dataEvent.value as List)[0]);
         lastMoveDateTime[1] = TimeAndDuration.fromString((dataEvent.value as List)[1]);
+
+
         lastMoveDateTime[getclientPlayer(context)] = TimeAndDuration(timeOfPlay, lastMoveDateTime[getclientPlayer(context)]!.duration);
         Duration updatedTime = calculateCorrectTime(lastMoveDateTime, getclientPlayer(context), null, context);
         lastMoveDateTime[getclientPlayer(context)] = (TimeAndDuration(timeOfPlay, updatedTime));
-        updateDurationInDatabase(
-            context, updatedTime, getclientPlayer(context)); // FIXME? this was changed from turn % 2 idk if this breaks something
+
+        updateTimeInDatabase(lastMoveDateTime, context, timeOfPlay, getclientPlayer(context));
+        updateDurationInDatabase(lastMoveDateTime, context, updatedTime, getclientPlayer(context));
+        // FIXME? this was changed from turn % 2 idk if this breaks something
+        updateMoveIntoDatabase(context, playPosition);
+
+
         lastMoveDateTime.forEach((element) {
           print(element.toString());
         });
 
+
         correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime);
-        // });
-        // builder: (context, dateTimeNowsnapshot) {
-        //   if (dateTimeNowsnapshot.connectionState == ConnectionState.done) {
-        //var updatedTime = calculateCorrectTime(lastMoveDateTime.data, widget.player, dateTimeNowsnapshot.data, context);
-        // lastMoveDateTimeSnapshot.data[widget.player].difference(GameData.of(context)?.match.startTime)
-        // (Duration(seconds: GameData.of(context)!.match.time) -
-        //         (snapshot.data ?? DateTime.now()).difference(
-        //             GameData.of(context)?.match.startTime ??
-        //                 DateTime.now()))
-        //     .inSeconds;
-        // if(widget.player == GameData.of(context)?.getPlayerWithTurn.turn)
-        // {
-        //   Duration durationAfterTimeElapsedCorrection = calculateCorrectTime(lastMoveDateTime.data, widget.player, dateTimeNowsnapshot.data, context);
-        // return PlayerCountdownTimer( controller: widget.mController, time: durationAfterTimeElapsedCorrection , player: widget.player);
-
-        // }
-
       }
     });
-
-    // if (GameData.of(context)?.match.uid[widget.player] == MultiplayerData.of(context)?.curUser.uid &&
-    //     (GameData.of(context)!.movePlayed)) {
-    // GameData.of(context)!.movePlayed = false;
   }
 
-  toggleTurn(BuildContext context, Position? position) {
-    GameData.of(context)?.timerController[turn % 2]?.pause();
-    // turn = turn %2 == 0 ? 1 : 0;
+  updateMoveIntoDatabase(BuildContext context, Position? position){
     var thisGame = MultiplayerData.of(context)?.database.child('game').child(match.id as String);
     thisGame?.child('moves').update({(match.turn).toString(): position.toString()});
+    thisGame?.update({'turn': (turn + 1).toString()});
+  }
+
+
+  toggleTurn(BuildContext context) {
+    GameData.of(context)?.timerController[turn % 2]?.pause();
+
     turn += 1;
-    thisGame?.update({'turn': turn.toString()});
+    // turn = turn %2 == 0 ? 1 : 0;
     GameData.of(context)?.timerController[turn % 2]?.start();
   }
 
@@ -207,12 +198,23 @@ class StoneLogic extends InheritedWidget {
   final Widget mChild;
   final int rows;
   final int cols;
-  Map<Position?, Stone?> _playgroundMap = {};
+  Map<Position?, ValueNotifier<Stone?>> _playgroundMap = {};
   Stone? _teststone;
   Position? _position;
 
   Position? koDelete;
   Position? koInsert;
+
+  ValueNotifier<Stone?> stoneNotifierAt(Position)
+  {
+    return playground_Map[Position]!;
+  }
+
+
+  Stone? stoneAt(Position pos)
+  {
+    return playground_Map[pos]?.value;
+  }
 
   // Database update
   Map<int, Position?> tmpClusterRefer = {};
@@ -220,11 +222,12 @@ class StoneLogic extends InheritedWidget {
 
   // Constructor
   StoneLogic({required Map<Position?, Stone?> playgroundMap, required this.mChild, required this.rows, required this.cols})
-      : _playgroundMap = playgroundMap,
-        super(child: mChild);
+      // : _playgroundMap = Map.from(playgroundMap)
+       : super(child: mChild)
+        {_playgroundMap = Map<Position?, ValueNotifier<Stone?>>.from(playgroundMap.map((key, value) => MapEntry(key, ValueNotifier(value))));}
 
   // Getters
-  get playground_Map => _playgroundMap;
+  Map<Position?, ValueNotifier<Stone?>> get playground_Map => _playgroundMap; // TODO maybe Position? can be just Position
   get teststone => _teststone;
 
   // Inheritance Widget related functions
@@ -239,14 +242,15 @@ class StoneLogic extends InheritedWidget {
   // Helper functions
   printEntireGrid() {
     playground_Map.forEach((i, j) {
-      debugPrint(" ${i?.x} ${i?.y} => color : ${j?.color.toString()} ${j?.cluster.freedoms.toString()}");
+      debugPrint(" ${i?.x} ${i?.y} => color : ${j.value?.color.toString()} ${j.value?.cluster.freedoms.toString()}");
     });
   }
 
   getClusterFromPosition(Position pos) {
-    return _playgroundMap[pos]?.cluster;
+    return _playgroundMap[pos]?.value?.cluster;
   }
 
+/// returns true if not out of bounds
   checkOutofBounds(Position pos) {
     return pos.x > -1 && pos.x < rows && pos.y < cols && pos.y > -1;
   }
@@ -262,7 +266,7 @@ class StoneLogic extends InheritedWidget {
         // {
         //   _playgroundMap[curpos]?.cluster.freedoms += 1;
         // }
-        if (_playgroundMap[neighbor]?.color != _playgroundMap[curpos]?.color) {
+        if (_playgroundMap[neighbor]?.value?.color != _playgroundMap[curpos]?.value?.color) {
           getClusterFromPosition(neighbor)?.freedoms -= 1;
           if (traversed[curpos] == null)
             traversed[curpos] = [getClusterFromPosition(neighbor)];
@@ -282,11 +286,11 @@ class StoneLogic extends InheritedWidget {
     doActionOnNeighbors(
         position,
         (curpos, neighbor) => {
-              if (_playgroundMap[neighbor] != null)
+              if (stoneAt(neighbor) != null)
                 {
                   if (!insertable)
                     {
-                      if (_playgroundMap[neighbor]?.color == _playgroundMap[curpos]?.color)
+                      if (_playgroundMap[neighbor]?.value?.color == _playgroundMap[curpos]?.value?.color)
                         insertable = !(getClusterFromPosition(neighbor).freedoms == 1)
                       else
                         insertable = getClusterFromPosition(neighbor)?.freedoms == 1,
@@ -307,13 +311,13 @@ class StoneLogic extends InheritedWidget {
   calculateFreedomForPosition(Position position) {
     doActionOnNeighbors(position, (Position curpos, Position neighbor) {
       // if( _playgroundMap[neighbor] == null && checkOutofBounds(neighbor) && alreadyAdded.contains(neighbor) == false)//  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
-      if (_playgroundMap[neighbor] == null &&
+      if (stoneAt(neighbor)== null &&
           checkOutofBounds(neighbor) &&
           ((traversed[neighbor]?.contains(getClusterFromPosition(curpos)) ?? false) == false))
       //  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
       // neighbor are the possible free position here unlike recalculateFreedomsForNeighborsOfDeleted where deletedStonePosition is the free position and neighbors are possible clusters for which we will increment freedoms
       {
-        _playgroundMap[curpos]?.cluster.freedoms += 1;
+        stoneAt(curpos)?.cluster.freedoms += 1;
         traversed[neighbor] = [getClusterFromPosition(curpos)];
       }
     });
@@ -329,18 +333,18 @@ class StoneLogic extends InheritedWidget {
   // --- Step 1
   addAllOfNeighborToCurpos(Position curpos, Position? neighbor) // done on all neighbors
   {
-    if (neighbor != null && _playgroundMap[neighbor]?.color == _playgroundMap[curpos]?.color) {
+    if (neighbor != null && _playgroundMap[neighbor]?.value?.color == _playgroundMap[curpos]?.value?.color) {
       // If neighbor isn't null and both neighbor and curpos both have same color
       for (var i in getClusterFromPosition(neighbor)?.data) {
         // add all of neighbors Position to cluster of curpos
-        _playgroundMap[curpos]?.cluster.data.add(i);
+        _playgroundMap[curpos]?.value?.cluster.data.add(i);
       }
     }
   }
 
   updateAllInTheClusterWithCorrectCluster(Cluster correctCluster) {
     for (var i in correctCluster.data) {
-      _playgroundMap[i]?.cluster = correctCluster;
+      _playgroundMap[i]?.value?.cluster = correctCluster;
     }
   }
   // Step 1 ---
@@ -349,7 +353,7 @@ class StoneLogic extends InheritedWidget {
   // Traversed key gives the empty freedom point position and value is the list of cluster that has recieved freedom from that point
   Map<Position?, List<Cluster?>?> traversed = {null: null}; // TODO Find a way to do this without making this data member
   deleteStonesInDeletableCluster(Position curpos, Position neighbor) {
-    if (_playgroundMap[neighbor]?.color != _playgroundMap[curpos]?.color && _playgroundMap[neighbor]?.cluster.freedoms == 1) {
+    if (_playgroundMap[neighbor]?.value?.color != _playgroundMap[curpos]?.value?.color && _playgroundMap[neighbor]?.value?.cluster.freedoms == 1) {
       for (var i in getClusterFromPosition(neighbor).data) {
         // This supposedly works because a
         // position where delete occurs in such a way that ko is possible
@@ -366,7 +370,7 @@ class StoneLogic extends InheritedWidget {
           koDelete = neighbor;
         }
 
-        _playgroundMap[i] = null;
+        _playgroundMap[i]?.value = null;
         recalculateFreedomsForNeighborsOfDeleted(i);
       }
     }
@@ -394,7 +398,7 @@ class StoneLogic extends InheritedWidget {
   bool handleStoneUpdate(Position position, BuildContext context) {
     _position = position;
     Position? thisCurrentCell = position;
-    playground_Map[thisCurrentCell] = Stone(GameData.of(context)?.getPlayerWithTurn.mColor, position);
+    playground_Map[thisCurrentCell]?.value = Stone(GameData.of(context)?.getPlayerWithTurn.mColor, position);
 
     var map_ref = MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id as String).child('playgroundMap');
 
@@ -416,13 +420,13 @@ class StoneLogic extends InheritedWidget {
         (a, b) => MapEntry(
             a.toString(),
             () {
-              return b?.color == null
+              return stoneAt(a!)?.color == null
                   ? null
                   : () {
                       int currentClusterTracker = 0;
                       int currentClusterFreedoms = 0;
                       for (var i in tmpClusterRefer.keys) {
-                        if (!(playground_Map[tmpClusterRefer[i]]?.cluster.data.contains(a) ?? false)) {
+                        if (!(playground_Map[tmpClusterRefer[i]]?.value?.cluster.data.contains(a) ?? false)) {
                           clusterTopTracker++;
                           currentClusterTracker = clusterTopTracker;
                         } else {
@@ -432,7 +436,7 @@ class StoneLogic extends InheritedWidget {
                       }
                       clusterTopTracker = 0;
                       tmpClusterRefer[currentClusterTracker] = a;
-                      return ((b?.color == Colors.black ? 0 : 1).toString() + " $currentClusterTracker ${playground_Map[a]?.cluster.freedoms}");
+                      return ((stoneAt(a)?.color == Colors.black ? 0 : 1).toString() + " $currentClusterTracker ${playground_Map[a]?.value?.cluster.freedoms}");
                     }.call();
             }.call()),
       )));
@@ -440,7 +444,7 @@ class StoneLogic extends InheritedWidget {
       return true;
     }
 
-    playground_Map[thisCurrentCell] = null;
+    playground_Map[thisCurrentCell]?.value = null;
     return false;
   }
 

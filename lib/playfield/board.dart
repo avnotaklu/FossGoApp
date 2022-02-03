@@ -35,8 +35,7 @@ class _BoardState extends State<Board> {
   @override
   Widget build(BuildContext context) {
     double stoneInset = 20;
-    double stoneSpacing =
-        2; // Don't make spacing so large that to get that spacing Stones start to move out of position
+    double stoneSpacing = 2; // Don't make spacing so large that to get that spacing Stones start to move out of position
 
     //double boardInset = stoneInsetstoneSpacing;
     return Center(
@@ -50,12 +49,10 @@ class _BoardState extends State<Board> {
               builder: (BuildContext context, StateSetter setState) {
                 return Stack(
                   children: [
-                    BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows,
-                        widget.cols, stoneInset)),
+                    BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset)),
                     StoneLayoutGrid(
-                        GridInfo(constraints, stoneSpacing, widget.rows,
-                            widget.cols, stoneInset),
-                        StoneLogic.of(context)?.playground_Map),
+                      GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset),
+                    ),
                   ],
                 );
               },
@@ -73,8 +70,7 @@ class GridInfo {
   double stoneInset;
   int rows;
   int cols;
-  GridInfo(this.constraints, this.stoneSpacing, this.rows, this.cols,
-      this.stoneInset);
+  GridInfo(this.constraints, this.stoneSpacing, this.rows, this.cols, this.stoneInset);
 }
 
 class BorderGrid extends StatelessWidget {
@@ -84,14 +80,10 @@ class BorderGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
-      padding: EdgeInsets.all(info.stoneInset +
-          (((info.constraints.maxWidth / info.rows) / 2) - info.stoneSpacing)),
+      padding: EdgeInsets.all(info.stoneInset + (((info.constraints.maxWidth / info.rows) / 2) - info.stoneSpacing)),
       itemCount: (info.rows - 1) * (info.cols - 1),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: (info.rows - 1),
-          childAspectRatio: 1,
-          crossAxisSpacing: 0,
-          mainAxisSpacing: 0),
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: (info.rows - 1), childAspectRatio: 1, crossAxisSpacing: 0, mainAxisSpacing: 0),
       itemBuilder: (context, index) => Container(
         height: 10,
         width: 10,
@@ -103,9 +95,9 @@ class BorderGrid extends StatelessWidget {
 
 class StoneLayoutGrid extends StatefulWidget {
   GridInfo info;
-  Map<Position?, Stone?> playgroundMap = {null: null};
+  // Map<Position?, ValueNotifier<Stone>?> playgroundMap = {null: null}; // TODO whats this {null : null} assigned probably changeable
 
-  StoneLayoutGrid(this.info, this.playgroundMap);
+  StoneLayoutGrid(this.info /*, this.playgroundMap*/);
   @override
   State<StoneLayoutGrid> createState() => _StoneLayoutGridState();
 }
@@ -115,21 +107,14 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
     // TODO put this function in a better place, it has no relation to board
     print('hello');
 
-    MultiplayerData.of(context)
-        ?.database
-        .child('game')
-        .child(GameData.of(context)!.match.id as String)
-        .child('moves')
-        .onValue
-        .listen((event) {
+    MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id as String).child('moves').onValue.listen((event) {
       final data = event.snapshot.value as List;
       if (data.last != null && data.last != "null") {
-        final pos = Position(int.parse(data.last!.split(' ')[0]),
-            int.parse(data.last!.split(' ')[1]));
-        if (StoneLogic.of(context)?.playground_Map[pos] == null) {
-          if (StoneLogic.of(context)?.handleStoneUpdate(pos, context) ?? true) {
+        final pos = Position(int.parse(data.last!.split(' ')[0]), int.parse(data.last!.split(' ')[1]));
+        if (StoneLogic.of(context)!.stoneAt(pos)  == null) {
+          if (StoneLogic.of(context)!.handleStoneUpdate(pos, context)) {
             print("illegel");
-            GameData.of(context)?.toggleTurn(context, pos);
+            GameData.of(context)?.toggleTurn(context); // FIXME pos was passed to toggleTurn idk if that broke anything
             setState(() {});
           }
         }
@@ -155,8 +140,7 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
         width: 10,
         child: Stack(
           children: [
-            Cell(Position(((index) ~/ widget.info.cols),
-                ((index) % widget.info.rows).toInt())),
+            Cell(Position(((index) ~/ widget.info.cols), ((index) % widget.info.rows).toInt())),
           ],
         ),
       ),

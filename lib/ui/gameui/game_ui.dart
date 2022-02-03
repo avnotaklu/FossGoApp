@@ -90,8 +90,8 @@ class _GameUiState extends State<GameUi> {
             ),
             onPressed: () => {
               NTP.now().then((value) {
-                GameData.of(context)?.newMovePlayed(context, value);
-                GameData.of(context)?.toggleTurn(context, null);
+                GameData.of(context)?.newMovePlayed(context, value, null);
+                GameData.of(context)?.toggleTurn(context);
               })
             },
             child: Text("Pass"),
