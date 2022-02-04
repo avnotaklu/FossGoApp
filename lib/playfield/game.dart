@@ -24,12 +24,11 @@ import 'package:go/constants/constants.dart' as Constants;
 class Game extends StatelessWidget {
   var players = List<Player>.filled(2, Player(0, Colors.black), growable: false); // TODO this is early idk why i did this
 
-  int playerTurn = 0;
   Board board;
   GameMatch match;
   bool enteredAsGameCreator;
 
-  Game(this.playerTurn, this.match, this.enteredAsGameCreator) // Board
+  Game(this.match, this.enteredAsGameCreator) // Board
       : board = Board(match.rows as int, match.cols as int, match.playgroundMap as Map<Position?, Stone?>) {
     match.moves.forEach((element) {
       print(element.toString());
@@ -54,7 +53,6 @@ class Game extends StatelessWidget {
       body: GameData(
         match: match,
         pplayer: players,
-        pturn: playerTurn,
         mChild: StatefulBuilder(
           builder: (context, setState) {
             var checkGameStateStream = checkGameEnterable(context, match, controller).listen((event) {
@@ -71,7 +69,7 @@ class Game extends StatelessWidget {
                         MultiplayerData.of(context)
                             ?.getCurGameRef(match.id)
                             .set(match.toJson()), // TODO Instead of writing entire match again write only changed values
-                        GameData.of(context)!.timerController[0].start(),
+                        GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start(),
                         setState(() => match = match),
                       });
                 }
@@ -85,7 +83,7 @@ class Game extends StatelessWidget {
                     match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
                     match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
 
-                    GameData.of(context)?.timerController[0].start();
+                        GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
                     setState(() => match = match);
                   });
                 }

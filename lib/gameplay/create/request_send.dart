@@ -48,7 +48,7 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
                           context,
                           MaterialPageRoute<void>(
                             builder: (BuildContext context) =>
-                                Game(0, widget.match, true),
+                                Game(widget.match, true),
                           ));
                     },
                     child: Container(

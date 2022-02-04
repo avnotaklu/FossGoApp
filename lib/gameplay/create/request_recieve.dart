@@ -75,7 +75,7 @@ class EnterGameButton extends StatelessWidget {
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute<void>(
-                      builder: (BuildContext context) => Game(0, match, false),
+                      builder: (BuildContext context) => Game(match, false),
                     ));
               }
             });

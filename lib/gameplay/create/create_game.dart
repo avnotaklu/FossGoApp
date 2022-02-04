@@ -37,7 +37,7 @@ class CreateGame extends StatelessWidget {
       if (match?.uid.containsValue(
               MultiplayerData.of(context)?.curUser.uid.toString()) ??
           false) {
-        return Game(0, match as GameMatch, false);
+        return Game(match as GameMatch, false);
       }
       return Container(
         child: const Text(

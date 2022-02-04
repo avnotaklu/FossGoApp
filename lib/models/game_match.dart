@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go/gameplay/logic.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/core_utils.dart';
+import 'package:go/utils/database_strings.dart';
 import 'package:go/utils/position.dart';
 import 'dart:convert';
 
@@ -46,8 +47,8 @@ class GameMatch {
           moves.add(Position.fromString(v));
       }
     });
+    lastTimeAndDate.clear();
     json['lastTimeAndDuration']?.forEach((v) {
-      lastTimeAndDate.clear();
       lastTimeAndDate.add(TimeAndDuration.fromString(v));
     });
 
@@ -76,7 +77,7 @@ class GameMatch {
         'runStatus': runStatus.toString(),
         'moves': moves,
         'turn': _turn.toString(),
-        'playgroundMap': json.decode(playgroundMap.toString()),
+        'playgroundMap': (playgroundMapToString(playgroundMap)),
         'startTime': startTime.toString(),
         'playersTimeLeft': (() {
           List<String> playersTimeLeftString = [];
@@ -111,8 +112,8 @@ class GameMatch {
   }
 
   static uidFromJson(List<Object?> uid) {
-    var result = Map<int?, String?>.from(uid.asMap().map<int,String>((i, element) {
-        return MapEntry(i as int, element.toString());
+    var result = Map<int?, String?>.from(uid.asMap().map<int, String>((i, element) {
+      return MapEntry(i as int, element.toString());
     })); // TODO make sure element works in this line changed from json['uid'][id]
     result.removeWhere((key, value) => value == "null");
     return result;

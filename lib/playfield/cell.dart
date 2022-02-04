@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
+import 'package:go/utils/database_strings.dart';
 import 'package:ntp/ntp.dart';
 import '../utils/player.dart';
 import '../gameplay/logic.dart';
@@ -67,7 +68,9 @@ class _CellState extends State<Cell> {
                   NTP.now().then((value) {
                     GameData.of(context)?.newMovePlayed(context, value, widget.position);
                     GameData.of(context)?.toggleTurn(context);
-                    StoneLogic.of(context)?.updatePlaygroundMapInDatabase(context);
+                    var map_ref =
+                        MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id as String).child('playgroundMap');
+                    map_ref!.update(playgroundMapToString(Map<Position?,Stone?>.from(StoneLogic.of(context)!.playground_Map.map((key, value) => MapEntry(key, value.value)))));
                   });
                 }
               }); // changeColor();

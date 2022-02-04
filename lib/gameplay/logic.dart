@@ -34,7 +34,6 @@ class GameData extends InheritedWidget {
   }
 
   final List<Player> _players;
-  Map<String, int> _turn;
   final Widget mChild;
   StreamController<List<TimeAndDuration>> updateController = StreamController<List<TimeAndDuration>>.broadcast();
 
@@ -42,11 +41,9 @@ class GameData extends InheritedWidget {
   final List<CountdownController>? _controller = [CountdownController(autoStart: false), CountdownController(autoStart: false)];
   GameData({
     required List<Player> pplayer,
-    required int pturn,
     required this.mChild,
     required this.match,
   })  : _players = pplayer,
-        _turn = {'val': pturn},
         super(child: mChild) {
     timers = [
       PlayerCountdownTimer(controller: _controller![0], time: Duration(seconds: match.time), player: 0),
@@ -139,8 +136,8 @@ class GameData extends InheritedWidget {
   get gametime => match.time;
   // get turnPlayerColor => [_players[0].mColor, _players[1].mColor];
   // Gives color of player with turn
-  get getPlayerWithTurn => _players[turn % 2];
-  get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
+  Player get getPlayerWithTurn => _players[turn % 2];
+  Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
   get timerController => _controller;
 
   getRemotePlayer(BuildContext context) {
@@ -245,8 +242,7 @@ class StoneLogic extends InheritedWidget {
     });
   }
 
-  Map<int, Position?> tmpClusterRefer = {};
-  int clusterTopTracker = 0;
+
 
   // Constructor
   StoneLogic({required Map<Position?, Stone?> playgroundMap, required this.mChild, required this.rows, required this.cols})
@@ -449,35 +445,6 @@ class StoneLogic extends InheritedWidget {
 
     playground_Map[thisCurrentCell]?.value = null;
     return false;
-  }
-
-  void updatePlaygroundMapInDatabase(BuildContext context) async {
-    var map_ref = MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id as String).child('playgroundMap');
-    map_ref?.update(LinkedHashMap.from(playground_Map.map(
-      (a, b) => MapEntry(
-          a.toString(),
-          () {
-            return stoneAt(a!)?.color == null
-                ? null
-                : () {
-                    int currentClusterTracker = 0;
-                    int currentClusterFreedoms = 0;
-                    for (var i in tmpClusterRefer.keys) {
-                      if (!(playground_Map[tmpClusterRefer[i]]?.value?.cluster.data.contains(a) ?? false)) {
-                        clusterTopTracker++;
-                        currentClusterTracker = clusterTopTracker;
-                      } else {
-                        currentClusterTracker = i;
-                        break;
-                      }
-                    }
-                    clusterTopTracker = 0;
-                    tmpClusterRefer[currentClusterTracker] = a;
-                    return ((stoneAt(a)?.color == Colors.black ? 0 : 1).toString() +
-                        " $currentClusterTracker ${playground_Map[a]?.value?.cluster.freedoms}");
-                  }.call();
-          }.call()),
-    )));
   }
 
   doActionOnNeighbors(Position thisCell, Function(Position, Position) doAction) {
