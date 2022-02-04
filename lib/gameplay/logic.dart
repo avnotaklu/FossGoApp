@@ -24,6 +24,15 @@ import 'package:go/constants/constants.dart' as Constants;
 
 // ignore: must_be_immutable
 class GameData extends InheritedWidget {
+  // Call only once after the game has started which is checked by checkGameEnterable
+  bool hasGameStarted = false;
+  onGameStart(context) {
+    if (!GameData.of(context)!.hasGameStarted) {
+      hasGameStarted = true;
+      StoneLogic.of(context)!.fetchNewStoneFromDB(context);
+    }
+  }
+
   final List<Player> _players;
   Map<String, int> _turn;
   final Widget mChild;
@@ -56,7 +65,9 @@ class GameData extends InheritedWidget {
       //             GameData.of(context)?.match.startTime ??
       //                 DateTime.now()))
       //     .inSeconds;
-      Duration durationAfterTimeElapsedCorrection = calculateCorrectTime(lastMoveDateTime, GameData.of(context)?.getPlayerWithTurn.turn, value, context);
+      print("player with turn" + GameData.of(context)!.getPlayerWithTurn.turn.toString());
+      Duration durationAfterTimeElapsedCorrection =
+          calculateCorrectTimeFromNow(lastMoveDateTime, GameData.of(context)?.getPlayerWithTurn.turn, value, context);
 
       lastMoveDateTime[GameData.of(context)?.getPlayerWithTurn.turn] =
           (TimeAndDuration(lastMoveDateTime[GameData.of(context)?.getPlayerWithTurn.turn]?.datetime, durationAfterTimeElapsedCorrection));
@@ -69,47 +80,46 @@ class GameData extends InheritedWidget {
   newMovePlayed(BuildContext context, DateTime timeOfPlay, Position? playPosition) {
     assert(getPlayerWithTurn.turn == getclientPlayer(context)); // The rest of the function depends on it
     movePlayed = true;
-    MultiplayerData.of(context)
-        ?.database
-        .child('game')
-        .child(match.id as String)
-        .child('lastTimeAndDuration')
-        //.child(getPlayerWithoutTurn.toString())
-        .orderByKey()
-        .get()
-        .then((dataEvent) {
-      if (dataEvent.value != null) {
-        List<TimeAndDuration?> lastMoveDateTime = [null, null];
-        lastMoveDateTime[0] = TimeAndDuration.fromString((dataEvent.value as List)[0]);
-        lastMoveDateTime[1] = TimeAndDuration.fromString((dataEvent.value as List)[1]);
+    // MultiplayerData.of(context)
+    //     ?.database
+    //     .child('game')
+    //     .child(match.id as String)
+    //     .child('lastTimeAndDuration')
+    //     //.child(getPlayerWithoutTurn.toString())
+    //     .orderByKey()
+    //     .get()
+    //     .then((dataEvent) {
 
+    // if (dataEvent.value != null) {
+    // List<TimeAndDuration?> lastMoveDateTime = [null, null];
+    List<TimeAndDuration?> lastMoveDateTime = [...match.lastTimeAndDate];
+    // lastMoveDateTime[0] = TimeAndDuration.fromString((dataEvent.value as List)[0]);
+    // lastMoveDateTime[1] = TimeAndDuration.fromString((dataEvent.value as List)[1]);
 
-        lastMoveDateTime[getclientPlayer(context)] = TimeAndDuration(timeOfPlay, lastMoveDateTime[getclientPlayer(context)]!.duration);
-        Duration updatedTime = calculateCorrectTime(lastMoveDateTime, getclientPlayer(context), null, context);
-        lastMoveDateTime[getclientPlayer(context)] = (TimeAndDuration(timeOfPlay, updatedTime));
+    lastMoveDateTime[getclientPlayer(context)] = TimeAndDuration(timeOfPlay, lastMoveDateTime[getclientPlayer(context)]!.duration);
+    Duration updatedTime = calculateCorrectTime(lastMoveDateTime, getclientPlayer(context), null, context);
+    lastMoveDateTime[getclientPlayer(context)] = (TimeAndDuration(timeOfPlay, updatedTime));
 
-        updateTimeInDatabase(lastMoveDateTime, context, timeOfPlay, getclientPlayer(context));
-        updateDurationInDatabase(lastMoveDateTime, context, updatedTime, getclientPlayer(context));
-        // FIXME? this was changed from turn % 2 idk if this breaks something
-        updateMoveIntoDatabase(context, playPosition);
+    // updateTimeInDatabase(lastMoveDateTime, context, timeOfPlay, getclientPlayer(context));
+    // updateDurationInDatabase(lastMoveDateTime, context, updatedTime, getclientPlayer(context));
+    updateTimeAndDurationInDatabase(context, lastMoveDateTime[getclientPlayer(context)] as TimeAndDuration, getclientPlayer(context));
+    updateMoveIntoDatabase(context, playPosition);
 
-
-        lastMoveDateTime.forEach((element) {
-          print(element.toString());
-        });
-
-
-        correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime);
-      }
+    lastMoveDateTime.forEach((element) {
+      print(element.toString());
     });
+
+    correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime);
+    match.lastTimeAndDate = [...lastMoveDateTime];
+    //}
+    // });
   }
 
-  updateMoveIntoDatabase(BuildContext context, Position? position){
+  updateMoveIntoDatabase(BuildContext context, Position? position) {
     var thisGame = MultiplayerData.of(context)?.database.child('game').child(match.id as String);
     thisGame?.child('moves').update({(match.turn).toString(): position.toString()});
     thisGame?.update({'turn': (turn + 1).toString()});
   }
-
 
   toggleTurn(BuildContext context) {
     GameData.of(context)?.timerController[turn % 2]?.pause();
@@ -205,26 +215,45 @@ class StoneLogic extends InheritedWidget {
   Position? koDelete;
   Position? koInsert;
 
-  ValueNotifier<Stone?> stoneNotifierAt(Position)
-  {
+  ValueNotifier<Stone?> stoneNotifierAt(Position) {
     return playground_Map[Position]!;
   }
 
-
-  Stone? stoneAt(Position pos)
-  {
+  Stone? stoneAt(Position pos) {
     return playground_Map[pos]?.value;
   }
 
   // Database update
+  // this function wouldn't work in any other inherited widget because it requires StoneLogic which is built later than other inherited widgets.
+  void fetchNewStoneFromDB(context) {
+    // TODO put this function in a better place, it has no relation to board
+    print('hello');
+
+    MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)!.match.id as String).child('moves').onValue.listen((event) {
+      // TODO unnecessary listen move even when move is played by clientPlayer even though (StoneLogic.of(context)!.stoneAt(pos)  == null) stops it from doing anything stupid
+      final data = event.snapshot.value as List;
+      if (data.last != null && data.last != "null") {
+        final pos = Position(int.parse(data.last!.split(' ')[0]), int.parse(data.last!.split(' ')[1]));
+        if (StoneLogic.of(context)!.stoneAt(pos) == null) {
+          if (StoneLogic.of(context)!.handleStoneUpdate(pos, context)) {
+            print("illegel");
+            GameData.of(context)?.toggleTurn(context); // FIXME pos was passed to toggleTurn idk if that broke anything
+            // setState(() {});
+          }
+        }
+      }
+    });
+  }
+
   Map<int, Position?> tmpClusterRefer = {};
   int clusterTopTracker = 0;
 
   // Constructor
   StoneLogic({required Map<Position?, Stone?> playgroundMap, required this.mChild, required this.rows, required this.cols})
       // : _playgroundMap = Map.from(playgroundMap)
-       : super(child: mChild)
-        {_playgroundMap = Map<Position?, ValueNotifier<Stone?>>.from(playgroundMap.map((key, value) => MapEntry(key, ValueNotifier(value))));}
+      : super(child: mChild) {
+    _playgroundMap = Map<Position?, ValueNotifier<Stone?>>.from(playgroundMap.map((key, value) => MapEntry(key, ValueNotifier(value))));
+  }
 
   // Getters
   Map<Position?, ValueNotifier<Stone?>> get playground_Map => _playgroundMap; // TODO maybe Position? can be just Position
@@ -250,7 +279,7 @@ class StoneLogic extends InheritedWidget {
     return _playgroundMap[pos]?.value?.cluster;
   }
 
-/// returns true if not out of bounds
+  /// returns true if not out of bounds
   checkOutofBounds(Position pos) {
     return pos.x > -1 && pos.x < rows && pos.y < cols && pos.y > -1;
   }
@@ -311,7 +340,7 @@ class StoneLogic extends InheritedWidget {
   calculateFreedomForPosition(Position position) {
     doActionOnNeighbors(position, (Position curpos, Position neighbor) {
       // if( _playgroundMap[neighbor] == null && checkOutofBounds(neighbor) && alreadyAdded.contains(neighbor) == false)//  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
-      if (stoneAt(neighbor)== null &&
+      if (stoneAt(neighbor) == null &&
           checkOutofBounds(neighbor) &&
           ((traversed[neighbor]?.contains(getClusterFromPosition(curpos)) ?? false) == false))
       //  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
@@ -400,8 +429,6 @@ class StoneLogic extends InheritedWidget {
     Position? thisCurrentCell = position;
     playground_Map[thisCurrentCell]?.value = Stone(GameData.of(context)?.getPlayerWithTurn.mColor, position);
 
-    var map_ref = MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id as String).child('playgroundMap');
-
     if (checkInsertable(position)) {
       // if stone can be inserted at this position
       koDelete = null;
@@ -416,36 +443,41 @@ class StoneLogic extends InheritedWidget {
       // Map<String,dynamic> tmp1;
       // var tmp2 = tmp1.cast<int,dynamic>;
 
-      map_ref?.update(LinkedHashMap.from(playground_Map.map(
-        (a, b) => MapEntry(
-            a.toString(),
-            () {
-              return stoneAt(a!)?.color == null
-                  ? null
-                  : () {
-                      int currentClusterTracker = 0;
-                      int currentClusterFreedoms = 0;
-                      for (var i in tmpClusterRefer.keys) {
-                        if (!(playground_Map[tmpClusterRefer[i]]?.value?.cluster.data.contains(a) ?? false)) {
-                          clusterTopTracker++;
-                          currentClusterTracker = clusterTopTracker;
-                        } else {
-                          currentClusterTracker = i;
-                          break;
-                        }
-                      }
-                      clusterTopTracker = 0;
-                      tmpClusterRefer[currentClusterTracker] = a;
-                      return ((stoneAt(a)?.color == Colors.black ? 0 : 1).toString() + " $currentClusterTracker ${playground_Map[a]?.value?.cluster.freedoms}");
-                    }.call();
-            }.call()),
-      )));
       GameData.of(context)?.match.moves.add(position);
       return true;
     }
 
     playground_Map[thisCurrentCell]?.value = null;
     return false;
+  }
+
+  void updatePlaygroundMapInDatabase(BuildContext context) async {
+    var map_ref = MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id as String).child('playgroundMap');
+    map_ref?.update(LinkedHashMap.from(playground_Map.map(
+      (a, b) => MapEntry(
+          a.toString(),
+          () {
+            return stoneAt(a!)?.color == null
+                ? null
+                : () {
+                    int currentClusterTracker = 0;
+                    int currentClusterFreedoms = 0;
+                    for (var i in tmpClusterRefer.keys) {
+                      if (!(playground_Map[tmpClusterRefer[i]]?.value?.cluster.data.contains(a) ?? false)) {
+                        clusterTopTracker++;
+                        currentClusterTracker = clusterTopTracker;
+                      } else {
+                        currentClusterTracker = i;
+                        break;
+                      }
+                    }
+                    clusterTopTracker = 0;
+                    tmpClusterRefer[currentClusterTracker] = a;
+                    return ((stoneAt(a)?.color == Colors.black ? 0 : 1).toString() +
+                        " $currentClusterTracker ${playground_Map[a]?.value?.cluster.freedoms}");
+                  }.call();
+          }.call()),
+    )));
   }
 
   doActionOnNeighbors(Position thisCell, Function(Position, Position) doAction) {

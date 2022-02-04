@@ -67,6 +67,7 @@ class _CellState extends State<Cell> {
                   NTP.now().then((value) {
                     GameData.of(context)?.newMovePlayed(context, value, widget.position);
                     GameData.of(context)?.toggleTurn(context);
+                    StoneLogic.of(context)?.updatePlaygroundMapInDatabase(context);
                   });
                 }
               }); // changeColor();

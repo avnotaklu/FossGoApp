@@ -25,10 +25,17 @@ updateTimeInDatabase(List<TimeAndDuration?> lastMoveDateTime, BuildContext conte
   DatabaseReference ref = MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)?.match.id as String);
   ref.child('lastTimeAndDuration').child((player).toString()).orderByKey().get().then((value) {
     print(value);
-    ref
-        .child('lastTimeAndDuration')
-        .update({(player).toString(): TimeAndDuration(time, lastMoveDateTime[player]!.duration).toString()});
+    ref.child('lastTimeAndDuration').update({(player).toString(): TimeAndDuration(time, lastMoveDateTime[player]!.duration).toString()});
   });
+}
+
+updateTimeAndDurationInDatabase(BuildContext context, TimeAndDuration timeAndDuration, int player) {
+  DatabaseReference ref = MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)?.match.id as String);
+// ref.child('lastTimeAndDuration').child((player).toString()).orderByKey().get().then((value) {
+//     print(value);
+//     print("putting" + TimeAndDuration.fromString(value.value as String)._time.toString());
+  ref.child('lastTimeAndDuration').update({(player).toString(): timeAndDuration.toString()});
+  //});
 }
 
 updateDurationInDatabase(List<TimeAndDuration?> lastMoveDateTime, BuildContext context, Duration dur, int player) {
@@ -36,9 +43,7 @@ updateDurationInDatabase(List<TimeAndDuration?> lastMoveDateTime, BuildContext c
   ref.child('lastTimeAndDuration').child((player).toString()).orderByKey().get().then((value) {
     print(value);
     print("putting" + TimeAndDuration.fromString(value.value as String)._time.toString());
-    ref
-        .child('lastTimeAndDuration')
-        .update({(player).toString(): TimeAndDuration(lastMoveDateTime[player]!._time , dur).toString()});
+    ref.child('lastTimeAndDuration').update({(player).toString(): TimeAndDuration(lastMoveDateTime[player]!._time, dur).toString()});
   });
 }
 
@@ -52,10 +57,19 @@ calculateCorrectTime(lastMoveDateTime, player, dateTimeNowsnapshot, context) {
 
   Duration updatedTime = (lastMoveDateTime[player].duration);
   try {
-    updatedTime = ((GameData.of(context)?.turn % 2) == 0 ? 1 : 0) ==
-            player // FIXME This is async so turn can probably change in different order which will cause issues
-        ? (lastMoveDateTime[player].duration) - updatedTimeBeforeNewMoveForBothPlayers.abs()
-        : (lastMoveDateTime[player].duration) - ((lastMoveDateTime[player == 0 ? 1 : 0].datetime.difference(dateTimeNowsnapshot)).abs() ?? Duration(seconds: 0));
+    updatedTime = /*((GameData.of(context)?.turn % 2) == 0 ? 1 : 0)*/
+        // player // FIXME This is async so turn can probably change in different order which will cause issues
+        (lastMoveDateTime[player].duration) - updatedTimeBeforeNewMoveForBothPlayers.abs();
+    //: (lastMoveDateTime[player].duration) - ((lastMoveDateTime[player == 0 ? 1 : 0].datetime.difference(dateTimeNowsnapshot)).abs() ?? Duration(seconds: 0));
+  } catch (err) {}
+  return updatedTime.abs();
+}
+
+calculateCorrectTimeFromNow(lastMoveDateTime, player, dateTimeNowsnapshot, context) {
+  var updatedTime;
+  try {
+    updatedTime = (lastMoveDateTime[player].duration) -
+        ((lastMoveDateTime[player == 0 ? 1 : 0].datetime.difference(dateTimeNowsnapshot)).abs() ?? Duration(seconds: 0));
   } catch (err) {}
   return updatedTime.abs();
 }

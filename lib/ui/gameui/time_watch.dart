@@ -68,6 +68,8 @@ class _GameTimerState extends State<GameTimer> {
               });
 
               GameData.of(context)!.correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime);
+
+              GameData.of(context)?.match.lastTimeAndDate = [...lastMoveDateTime];
               // GameData.of(context)!.updateController.add(lastMoveDateTime);
             }
           }

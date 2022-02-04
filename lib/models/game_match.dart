@@ -47,6 +47,7 @@ class GameMatch {
       }
     });
     json['lastTimeAndDuration']?.forEach((v) {
+      lastTimeAndDate.clear();
       lastTimeAndDate.add(TimeAndDuration.fromString(v));
     });
 

@@ -59,19 +59,14 @@ class Game extends StatelessWidget {
           builder: (context, setState) {
             var checkGameStateStream = checkGameEnterable(context, match, controller).listen((event) {
               if (event == true) {
-                // assert(GameData.of(context)?.timerController[0].onStart != null);
-
                 if (enteredAsGameCreator) {
                   // this sets time so only should be called by one player
+                  var lastTimeAndDate;
                   NTP.now().then((value) => {
-                        // match.startTime = value.add(Duration(seconds: 10)),
                         match.startTime = value,
-                        // MultiplayerData.of(context)
-                        //               ?.getCurGameRef(GameData.of(context)?.match.id as String)
-                        //               //?.game_ref
-                        //               .child('lastMoveDateTime')
-                        match.lastTimeAndDate.add(TimeAndDuration(value, Duration(seconds: match.time))),
-                        match.lastTimeAndDate.add(TimeAndDuration(value, Duration(seconds: match.time))),
+                        match.lastTimeAndDate.clear(),
+                        match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time))),
+                        match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time))),
 
                         MultiplayerData.of(context)
                             ?.getCurGameRef(match.id)
@@ -86,10 +81,7 @@ class Game extends StatelessWidget {
                 if (GameData.of(context)!.match.startTime == null) {
                   MultiplayerData.of(context)?.getCurGameRef(match.id).child('startTime').onValue.listen((snaphot) {
                     match.startTime = DateTime.parse(snaphot.snapshot.value);
-                    // MultiplayerData.of(context)
-                    //               ?.getCurGameRef(GameData.of(context)?.match.id as String)
-                    //               //?.game_ref
-                    //               .child('lastMoveDateTime')
+                        match.lastTimeAndDate.clear();
                     match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
                     match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
 
