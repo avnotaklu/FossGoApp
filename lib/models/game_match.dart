@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/core_utils.dart';
 import 'package:go/utils/database_strings.dart';
@@ -43,8 +42,9 @@ class GameMatch {
       if (v != null) {
         if (v == "null") {
           moves.add(null);
-        } else
+        } else {
           moves.add(Position.fromString(v));
+        }
       }
     });
     lastTimeAndDate.clear();
@@ -81,16 +81,16 @@ class GameMatch {
         'startTime': startTime.toString(),
         'playersTimeLeft': (() {
           List<String> playersTimeLeftString = [];
-          playersTimeLeftString.forEach((element) {
+          for (var element in playersTimeLeftString) {
             playersTimeLeftString.add(element.toString());
-          });
+          }
           return playersTimeLeftString;
         }).call(),
         'lastTimeAndDuration': (() {
           List<String> lastTimeAndDateString = [];
-          lastTimeAndDate.forEach((element) {
+          for (var element in lastTimeAndDate) {
             lastTimeAndDateString.add(element.toString());
-          });
+          }
           return lastTimeAndDateString;
         }).call()
       };
@@ -113,7 +113,7 @@ class GameMatch {
 
   static uidFromJson(List<Object?> uid) {
     var result = Map<int?, String?>.from(uid.asMap().map<int, String>((i, element) {
-      return MapEntry(i as int, element.toString());
+      return MapEntry(i, element.toString());
     })); // TODO make sure element works in this line changed from json['uid'][id]
     result.removeWhere((key, value) => value == "null");
     return result;

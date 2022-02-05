@@ -30,7 +30,7 @@ class StoneLogic extends InheritedWidget {
     // TODO put this function in a better place, it has no relation to board
     print('hello');
 
-    MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)!.match.id as String).child('moves').onValue.listen((event) {
+    MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)!.match.id).child('moves').onValue.listen((event) {
       // TODO unnecessary listen move even when move is played by clientPlayer even though (StoneLogic.of(context)!.stoneAt(pos)  == null) stops it from doing anything stupid
       final data = event.snapshot.value as List;
       if (data.last != null && data.last != "null") {
@@ -97,10 +97,11 @@ class StoneLogic extends InheritedWidget {
         // }
         if (_playgroundMap[neighbor]?.value?.color != _playgroundMap[curpos]?.value?.color) {
           getClusterFromPosition(neighbor)?.freedoms -= 1;
-          if (traversed[curpos] == null)
+          if (traversed[curpos] == null) {
             traversed[curpos] = [getClusterFromPosition(neighbor)];
-          else
+          } else {
             traversed[curpos]!.add(getClusterFromPosition(neighbor));
+          }
         }
       }
     });

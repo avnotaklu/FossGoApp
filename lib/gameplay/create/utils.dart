@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/models/game_match.dart';
@@ -11,8 +10,9 @@ import 'package:share/share.dart';
 class BackgroundScreenWithDialog extends StatelessWidget {
   @override
   final Widget child;
-  BackgroundScreenWithDialog({required this.child});
+  const BackgroundScreenWithDialog({required this.child});
 
+  @override
   Widget build(BuildContext context) {
     return Positioned.fill(
         child: Container(
@@ -21,7 +21,7 @@ class BackgroundScreenWithDialog extends StatelessWidget {
         heightFactor: 0.6,
         child: Dialog(backgroundColor: Colors.blue, child: child),
       ),
-      decoration: BoxDecoration(color: Colors.green),
+      decoration: const BoxDecoration(color: Colors.green),
     ));
   }
 }

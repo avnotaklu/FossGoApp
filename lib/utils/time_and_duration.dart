@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/utils/core_utils.dart';
@@ -50,7 +49,7 @@ updateDurationInDatabase(List<TimeAndDuration?> lastMoveDateTime, BuildContext c
 }
 
 calculateCorrectTime(lastMoveDateTime, player, dateTimeNowsnapshot, context) {
-  Duration updatedTimeBeforeNewMoveForBothPlayers = Duration(seconds: 0);
+  Duration updatedTimeBeforeNewMoveForBothPlayers = const Duration(seconds: 0);
   try {
     updatedTimeBeforeNewMoveForBothPlayers = lastMoveDateTime[player].datetime.difference(
           lastMoveDateTime[player == 0 ? 1 : 0].datetime,
@@ -71,7 +70,7 @@ calculateCorrectTimeFromNow(lastMoveDateTime, player, dateTimeNowsnapshot, conte
   var updatedTime;
   try {
     updatedTime = (lastMoveDateTime[player].duration) -
-        ((lastMoveDateTime[player == 0 ? 1 : 0].datetime.difference(dateTimeNowsnapshot)).abs() ?? Duration(seconds: 0));
+        ((lastMoveDateTime[player == 0 ? 1 : 0].datetime.difference(dateTimeNowsnapshot)).abs() ?? const Duration(seconds: 0));
   } catch (err) {}
   return updatedTime.abs();
 }

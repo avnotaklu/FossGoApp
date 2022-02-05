@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/request_recieve.dart';
 import 'package:go/gameplay/create/request_send.dart';
 import 'package:go/gameplay/create/utils.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
@@ -104,7 +103,7 @@ class CreateGame extends StatelessWidget {
                         flex: 1,
                         child: DropdownButton(
                           value: curBoardSize,
-                          hint: Text("Board Size"),
+                          hint: const Text("Board Size"),
                           items: Constants.boardsizes.map((String items) {
                             return DropdownMenuItem(
                               value: items,
@@ -124,7 +123,7 @@ class CreateGame extends StatelessWidget {
                           Expanded(
                             flex: 2,
                             child: ElevatedButton(
-                              child: Container(child: Text("Time")),
+                              child: Container(child: const Text("Time")),
                               onPressed: () => showDialog(
                                 context: context,
                                 builder: (context) => Center(

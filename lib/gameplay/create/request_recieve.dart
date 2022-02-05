@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
@@ -16,10 +15,11 @@ class RequestRecieve extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int recieversTurn = (() {
-      if (match.uid[0] == null)
+      if (match.uid[0] == null) {
         return 0;
-      else
+      } else {
         return 1;
+      }
     }).call();
 
     // assert(match.uid[recieversTurn] == null);
@@ -35,7 +35,7 @@ class RequestRecieve extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text("You are playing"),
+            const Text("You are playing"),
             Expanded(
               child: Stone(
                   Constants.playerColors[recieversTurn], Position(0, 0)),
@@ -53,7 +53,7 @@ class RequestRecieve extends StatelessWidget {
 class EnterGameButton extends StatelessWidget {
   final match;
   final newPlace;
-  EnterGameButton(this.match, this.newPlace);
+  const EnterGameButton(this.match, this.newPlace);
   @override
   Widget build(BuildContext context) {
 

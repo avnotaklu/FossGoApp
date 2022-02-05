@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/playfield/game.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/ui/gameui/player_card.dart';
 import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/models/game_match.dart';
@@ -17,6 +16,7 @@ import 'package:flutter/services.dart';
 class GameUi extends StatefulWidget {
   @override
   bool blackTimerStarted = false;
+  @override
   State<GameUi> createState() => _GameUiState();
 }
 
@@ -77,7 +77,7 @@ class _GameUiState extends State<GameUi> {
                 ElevatedButton(
                     onPressed: () => Clipboard.setData(
                         ClipboardData(text: GameData.of(context)?.match.id)),
-                    child: Text('copy game id'))
+                    child: const Text('copy game id'))
                 // SizedBox(width: constraints.maxWidth/3 - constraints.maxWidth/5,),
               ],
             ),
@@ -95,7 +95,7 @@ class _GameUiState extends State<GameUi> {
                 GameData.of(context)?.toggleTurn(context);
               })
             },
-            child: Text("Pass"),
+            child: const Text("Pass"),
           ),
         ],
       ),
@@ -116,7 +116,7 @@ class OnlineCountdownTimer extends StatefulWidget {
 class _OnlineCountdownTimerState extends State<OnlineCountdownTimer> {
   @override
   Widget build(BuildContext context) {
-    Timer.periodic(Duration(seconds: 1), (timer) {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
       NTP.now().asStream().asBroadcastStream().listen((value) {
         widget.time = Duration(seconds: GameData.of(context)!.match.time) -
             (value).difference(GameData.of(context)?.match.startTime ?? value);

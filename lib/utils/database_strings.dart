@@ -1,25 +1,24 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/position.dart';
 
-playgroundMapToString(Map<Position?,Stone?> playground_Map) {
+playgroundMapToString(Map<Position?,Stone?> playgroundMap) {
   Map<int, Position?> tmpClusterRefer = {};
   int clusterTopTracker = 0;
   return Map<String,Object?>.from(
-    playground_Map.map(
+    playgroundMap.map(
       (a, b) => MapEntry(
           a.toString(),
           () {
-            return playground_Map[a]?.color == null
+            return playgroundMap[a]?.color == null
                 ? null
                 : () {
                     int currentClusterTracker = 0;
                     int currentClusterFreedoms = 0;
                     for (var i in tmpClusterRefer.keys) {
-                      if (!(playground_Map[tmpClusterRefer[i]]?.cluster.data.contains(a) ?? false)) {
+                      if (!(playgroundMap[tmpClusterRefer[i]]?.cluster.data.contains(a) ?? false)) {
                         clusterTopTracker++;
                         currentClusterTracker = clusterTopTracker;
                       } else {
@@ -29,8 +28,8 @@ playgroundMapToString(Map<Position?,Stone?> playground_Map) {
                     }
                     clusterTopTracker = 0;
                     tmpClusterRefer[currentClusterTracker] = a;
-                    return (( playground_Map[a]?.color == Colors.black ? 0 : 1).toString() +
-                        " $currentClusterTracker ${playground_Map[a]?.cluster.freedoms}");
+                    return (( playgroundMap[a]?.color == Colors.black ? 0 : 1).toString() +
+                        " $currentClusterTracker ${playgroundMap[a]?.cluster.freedoms}");
                   }.call();
           }.call()),
     ),

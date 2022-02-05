@@ -4,8 +4,8 @@ import 'package:async/async.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/create_game.dart';
+import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/playfield/game.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/main.dart';
 import 'package:go/models/game_match.dart';
 
@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(
               height: 100,
             ),
-            ElevatedButton(onPressed: () => 0, child: Text("create game")),
+            ElevatedButton(onPressed: () => 0, child: const Text("create game")),
             ElevatedButton(
                 onPressed: () => setState(() {
                       widget.joiningGame = true;
@@ -74,8 +74,8 @@ class _HomePageState extends State<HomePage> {
                                         return CreateGame(snapshot.data);
                                       }
                                       {
-                                        return Center(
-                                            child: Container(
+                                        return const Center(
+                                            child: SizedBox(
                                                 width: 40,
                                                 height: 50,
                                                 child:
@@ -83,8 +83,8 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } catch (FirebaseException) {
                                       // TODO sometimes this exception is caused catch it correctly
-                                      return Center(
-                                          child: Container(
+                                      return const Center(
+                                          child: SizedBox(
                                               width: 40,
                                               height: 50,
                                               child:
@@ -95,7 +95,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       )),
-                      child: Text("enter game"),
+                      child: const Text("enter game"),
                     ),
                   ])
                 : const SizedBox.shrink(),

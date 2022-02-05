@@ -7,7 +7,6 @@ import 'stone.dart';
 import '../utils/position.dart';
 import '../utils/player.dart';
 import 'cell.dart';
-import '../gameplay/logic.dart';
 
 class Board extends StatefulWidget {
   late int rows, cols;
@@ -20,8 +19,9 @@ class Board extends StatefulWidget {
         var tmpPos = Position(i, j);
         if (stonePos.keys.contains(tmpPos)) {
           playgroundMap[Position(i, j)] = stonePos[tmpPos];
-        } else
+        } else {
           playgroundMap[Position(i, j)] = null;
+        }
       }
     }
   }
@@ -80,6 +80,7 @@ class BorderGrid extends StatelessWidget {
   GridInfo info;
   BorderGrid(this.info);
 
+  @override
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
@@ -119,7 +120,7 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
         crossAxisSpacing: widget.info.stoneSpacing,
         mainAxisSpacing: widget.info.stoneSpacing,
       ),
-      itemBuilder: (context, index) => Container(
+      itemBuilder: (context, index) => SizedBox(
         height: 10,
         width: 10,
         child: Stack(

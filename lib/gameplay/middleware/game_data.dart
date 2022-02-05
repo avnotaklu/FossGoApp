@@ -92,9 +92,9 @@ class GameData extends InheritedWidget {
     updateTimeAndDurationInDatabase(context, lastMoveDateTime[getclientPlayer(context)] as TimeAndDuration, getclientPlayer(context));
     updateMoveIntoDatabase(context, playPosition);
 
-    lastMoveDateTime.forEach((element) {
+    for (var element in lastMoveDateTime) {
       print(element.toString());
-    });
+    }
 
     correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime);
     match.lastTimeAndDate = [...lastMoveDateTime];
@@ -103,7 +103,7 @@ class GameData extends InheritedWidget {
   }
 
   updateMoveIntoDatabase(BuildContext context, Position? position) {
-    var thisGame = MultiplayerData.of(context)?.database.child('game').child(match.id as String);
+    var thisGame = MultiplayerData.of(context)?.database.child('game').child(match.id);
     thisGame?.child('moves').update({(match.turn).toString(): position.toString()});
     thisGame?.update({'turn': (turn + 1).toString()});
   }
@@ -117,7 +117,7 @@ class GameData extends InheritedWidget {
   }
 
   DatabaseReference? getMatch(BuildContext context) {
-    return MultiplayerData.of(context)?.database.child('game').child(match.id as String);
+    return MultiplayerData.of(context)?.database.child('game').child(match.id);
   }
 
   get turn => match.turn;

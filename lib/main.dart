@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:go/services/auth_bloc.dart';
 import 'package:go/playfield/board.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/ui/homepage/homepage.dart';
 import 'package:go/services/signin.dart';
 import 'package:go/playfield/stone.dart';
@@ -20,7 +19,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:ntp/ntp.dart';
 
 import 'playfield/game.dart';
-import 'gameplay/logic.dart';
 import 'models/game_match.dart';
 
 void main() async {

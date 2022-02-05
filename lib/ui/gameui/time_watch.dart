@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/playfield/game.dart';
@@ -15,7 +14,7 @@ import 'package:go/constants/constants.dart' as Constants;
 
 class TimeUpdateHandler {
   Stream<TimeAndDuration> changeStream;
-  StreamController<TimeAndDuration> _updateController;
+  final StreamController<TimeAndDuration> _updateController;
   TimeUpdateHandler(this.changeStream) : _updateController = StreamController<TimeAndDuration>.broadcast();
 
   streamUpdatedTime(TimeAndDuration val) {
@@ -56,7 +55,7 @@ class _GameTimerState extends State<GameTimer> {
       MultiplayerData.of(context)
           ?.database
           .child('game')
-          .child(GameData.of(context)!.match.id as String)
+          .child(GameData.of(context)!.match.id)
           .child('lastTimeAndDuration')
           .orderByKey()
           .get()
@@ -65,9 +64,9 @@ class _GameTimerState extends State<GameTimer> {
           if (dataEvent.value != null) {
             if (GameData.of(context)?.turn % 2 != widget.player) {
               List<TimeAndDuration> lastMoveDateTime = [];
-              (dataEvent.value as List).forEach((element) {
+              for (var element in (dataEvent.value as List)) {
                 lastMoveDateTime.add(TimeAndDuration.fromString(element));
-              });
+              }
 
               GameData.of(context)!.correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime);
 
@@ -222,7 +221,7 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
     return Countdown(
       controller: widget.controller,
       // seconds: GameData.of(context)!.match.time,
-      duration: widget.time > Duration(seconds: 0) ? widget.time : Duration(seconds: 0),
+      duration: widget.time > const Duration(seconds: 0) ? widget.time : const Duration(seconds: 0),
       build: (BuildContext context, double time) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,

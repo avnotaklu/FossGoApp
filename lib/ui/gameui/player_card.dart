@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/constants/constants.dart' as Constants;
@@ -25,7 +24,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
           child: Column(
             children: [
               GameData.of(context)?.match.uid[widget.player] == null
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : GameTimer(
                       GameData.of(context)?.timerController[widget.player],
                       pplayer: widget.player,

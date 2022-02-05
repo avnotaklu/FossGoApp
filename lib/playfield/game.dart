@@ -17,7 +17,6 @@ import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
 import 'dart:core';
-import '../gameplay/logic.dart';
 
 import '../utils/player.dart';
 import 'board.dart';
@@ -31,10 +30,10 @@ class Game extends StatelessWidget {
   bool enteredAsGameCreator;
 
   Game(this.match, this.enteredAsGameCreator) // Board
-      : board = Board(match.rows as int, match.cols as int, match.playgroundMap as Map<Position?, Stone?>) {
-    match.moves.forEach((element) {
+      : board = Board(match.rows, match.cols, match.playgroundMap) {
+    for (var element in match.moves) {
       print(element.toString());
-    });
+    }
     players[0] = Player(0, Colors.black);
     players[1] = Player(1, Colors.white);
   }

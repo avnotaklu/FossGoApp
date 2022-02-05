@@ -2,10 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
+import 'package:go/gameplay/middleware/game_data.dart';
+import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/utils/database_strings.dart';
 import 'package:ntp/ntp.dart';
 import '../utils/player.dart';
-import '../gameplay/logic.dart';
 import 'stone.dart';
 import '../utils/position.dart';
 
@@ -45,7 +47,7 @@ class _CellState extends State<Cell> {
   Widget build(BuildContext context) {
     final Stream<Stone?> _bids = (() async* {
       // await Future<void>.delayed(const Duration(seconds: 0));
-      yield StoneLogic.of(context)?.stoneAt(widget.position) as Stone?;
+      yield StoneLogic.of(context)?.stoneAt(widget.position);
     })();
 
     return ValueListenableBuilder<Stone?>(
@@ -68,9 +70,9 @@ class _CellState extends State<Cell> {
                   NTP.now().then((value) {
                     GameData.of(context)?.newMovePlayed(context, value, widget.position);
                     GameData.of(context)?.toggleTurn(context);
-                    var map_ref =
-                        MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id as String).child('playgroundMap');
-                    map_ref!.update(playgroundMapToString(Map<Position?,Stone?>.from(StoneLogic.of(context)!.playground_Map.map((key, value) => MapEntry(key, value.value)))));
+                    var mapRef =
+                        MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id).child('playgroundMap');
+                    mapRef!.update(playgroundMapToString(Map<Position?,Stone?>.from(StoneLogic.of(context)!.playground_Map.map((key, value) => MapEntry(key, value.value)))));
                   });
                 }
               }); // changeColor();
@@ -78,7 +80,7 @@ class _CellState extends State<Cell> {
           },
           child: Stack(
             children: [
-              dyn as Stone? ??
+              dyn ??
                   Container(
                     decoration: const BoxDecoration(color: Colors.transparent),
                   ),
