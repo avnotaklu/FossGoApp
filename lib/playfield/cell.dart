@@ -2,10 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
+import 'package:go/gameplay/middleware/game_data.dart';
+import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/utils/database_strings.dart';
 import 'package:ntp/ntp.dart';
 import '../utils/player.dart';
-import '../gameplay/logic.dart';
 import 'stone.dart';
 import '../utils/position.dart';
 

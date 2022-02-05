@@ -1,13 +1,12 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/playfield/game.dart';
 import 'stone.dart';
 import '../utils/position.dart';
 import '../utils/player.dart';
 import 'cell.dart';
-import '../gameplay/logic.dart';
-
 class Board extends StatefulWidget {
   late int rows, cols;
   Map<Position?, Stone?> playgroundMap = {};

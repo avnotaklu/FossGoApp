@@ -1,14 +1,8 @@
-import 'dart:async';
-import 'dart:io';
-import 'package:async/async.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/create_game.dart';
-import 'package:go/playfield/game.dart';
-import 'package:go/gameplay/logic.dart';
-import 'package:go/main.dart';
 import 'package:go/models/game_match.dart';
 
+import 'package:go/gameplay/middleware/multiplayer_data.dart';
 class HomePage extends StatefulWidget {
   bool joiningGame = false;
   String joinedGame = '';

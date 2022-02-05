@@ -1,14 +1,13 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/logic.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/position.dart';
 
-playgroundMapToString(Map<Position?,Stone?> playground_Map) {
+playgroundMapToString(Map<Position?, Stone?> playground_Map) {
   Map<int, Position?> tmpClusterRefer = {};
   int clusterTopTracker = 0;
-  return Map<String,Object?>.from(
+  return Map<String, Object?>.from(
     playground_Map.map(
       (a, b) => MapEntry(
           a.toString(),
@@ -29,7 +28,7 @@ playgroundMapToString(Map<Position?,Stone?> playground_Map) {
                     }
                     clusterTopTracker = 0;
                     tmpClusterRefer[currentClusterTracker] = a;
-                    return (( playground_Map[a]?.color == Colors.black ? 0 : 1).toString() +
+                    return ((playground_Map[a]?.color == Colors.black ? 0 : 1).toString() +
                         " $currentClusterTracker ${playground_Map[a]?.cluster.freedoms}");
                   }.call();
           }.call()),

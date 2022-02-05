@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/utils/position.dart';
 import 'package:flutter/foundation.dart';
-import '../gameplay/logic.dart';
 
 class Stone extends StatelessWidget {
   Color? color;
