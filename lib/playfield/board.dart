@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/playfield/game.dart';
 import 'stone.dart';
 import '../utils/position.dart';
