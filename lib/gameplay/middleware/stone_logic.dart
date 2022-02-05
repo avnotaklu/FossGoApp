@@ -3,9 +3,6 @@ import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/position.dart';
-import 'package:go/gameplay/middleware/game_data.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
-import 'package:go/gameplay/middleware/stone_logic.dart';
 class StoneLogic extends InheritedWidget {
   final Widget mChild;
   final int rows;

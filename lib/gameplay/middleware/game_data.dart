@@ -10,9 +10,6 @@ import 'package:go/utils/position.dart';
 import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
 import 'package:timer_count_down/timer_controller.dart';
-import 'package:go/gameplay/middleware/game_data.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
-import 'package:go/gameplay/middleware/stone_logic.dart';
 
 class GameData extends InheritedWidget {
   final List<Player> _players;
