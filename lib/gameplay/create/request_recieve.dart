@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
+import 'package:go/gameplay/logic.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/utils/position.dart';
+import 'create_game.dart';
 import 'package:go/constants/constants.dart' as Constants;
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 
 class RequestRecieve extends StatelessWidget {
   GameMatch match;
@@ -22,10 +23,12 @@ class RequestRecieve extends StatelessWidget {
 
     // assert(match.uid[recieversTurn] == null);
 
-    match.uid[recieversTurn] = MultiplayerData.of(context)?.curUser.uid.toString();
+    match.uid[recieversTurn] =
+        MultiplayerData.of(context)?.curUser.uid.toString();
 
     return BackgroundScreenWithDialog(
-        child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        child:
+            Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
       Expanded(
         flex: 3,
         child: Row(
@@ -33,7 +36,8 @@ class RequestRecieve extends StatelessWidget {
           children: [
             Text("You are playing"),
             Expanded(
-              child: Stone(Constants.playerColors[recieversTurn], Position(0, 0)),
+              child: Stone(
+                  Constants.playerColors[recieversTurn], Position(0, 0)),
             ),
           ],
         ),
@@ -44,20 +48,27 @@ class RequestRecieve extends StatelessWidget {
   }
 }
 
+
 class EnterGameButton extends StatelessWidget {
   final match;
   final newPlace;
   EnterGameButton(this.match, this.newPlace);
   @override
   Widget build(BuildContext context) {
+
     return Expanded(
       flex: 2,
       child: ElevatedButton(
-        style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.white)),
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(Colors.white)),
         onPressed: () {
           newPlace.set(match.toJson());
           if (match.isComplete()) {
-            MultiplayerData.of(context)?.getCurGameRef(match.id).child('uid').onValue.listen((event) {
+            MultiplayerData.of(context)
+                ?.getCurGameRef(match.id)
+                .child('uid')
+                .onValue
+                .listen((event) {
               print(event.snapshot.value.toString());
               match.uid = GameMatch.uidFromJson(event.snapshot.value);
               if (match.bothPlayers.contains(null) == false) {
@@ -72,7 +83,8 @@ class EnterGameButton extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute<void>(
-                builder: (BuildContext context) => const Text("Match wasn't created"),
+                builder: (BuildContext context) =>
+                    const Text("Match wasn't created"),
               ),
             );
           }

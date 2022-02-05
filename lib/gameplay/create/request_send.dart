@@ -6,7 +6,7 @@ import 'package:share/share.dart';
 
 class RequestSend extends StatelessWidget {
   final GameMatch match;
-  const RequestSend(this.match);
+  RequestSend(this.match);
   @override
   Widget build(BuildContext context) {
     return BackgroundScreenWithDialog(
@@ -52,7 +52,7 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
                           ));
                     },
                     child: Container(
-                      child: const Text("Share"),
+                      child: Text("Share"),
                     ),
                   ),
                   widget.circularIndicator ?? Container(),

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go/gameplay/logic.dart';
 import 'package:go/utils/core_utils.dart';
 
 import 'package:firebase_database/firebase_database.dart';
 
-import 'package:go/gameplay/middleware/game_data.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 class TimeAndDuration {
   final DateTime _time;
   final Duration _duration;

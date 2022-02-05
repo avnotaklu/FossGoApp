@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go/playfield/game.dart';
+import 'package:go/gameplay/logic.dart';
 import 'package:go/ui/gameui/player_card.dart';
 import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/models/game_match.dart';
@@ -12,8 +13,6 @@ import 'package:timer_count_down/timer_count_down.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:flutter/services.dart';
 
-import 'package:go/gameplay/middleware/game_data.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 class GameUi extends StatefulWidget {
   @override
   bool blackTimerStarted = false;

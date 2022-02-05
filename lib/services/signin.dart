@@ -8,6 +8,7 @@ import 'package:go/main.dart';
 import 'package:go/services/auth.dart';
 import 'package:provider/provider.dart';
 
+import '../gameplay/logic.dart';
 
 class SignIn extends StatefulWidget {
   @override

@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/request_recieve.dart';
 import 'package:go/gameplay/create/request_send.dart';
 import 'package:go/gameplay/create/utils.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/logic.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/services/auth_bloc.dart';
@@ -14,9 +13,6 @@ import 'package:go/utils/position.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 
-import 'package:go/gameplay/middleware/game_data.dart';
-import 'package:go/gameplay/middleware/stone_logic.dart';
-import 'package:go/gameplay/middleware/game_data.dart';
 class CreateGame extends StatelessWidget {
   static const title = 'Grid List';
   GameMatch? match;
