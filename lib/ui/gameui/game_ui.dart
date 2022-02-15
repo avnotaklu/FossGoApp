@@ -14,7 +14,6 @@ import 'package:timer_count_down/timer_controller.dart';
 import 'package:flutter/services.dart';
 
 class GameUi extends StatefulWidget {
-  @override
   bool blackTimerStarted = false;
   @override
   State<GameUi> createState() => _GameUiState();
@@ -50,55 +49,55 @@ class _GameUiState extends State<GameUi> {
     // return LayoutBuilder(
     // builder: (BuildContext context, BoxConstraints constraints){
     int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;
-    return Expanded(
-      child: Column(
-        children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                const SizedBox(
-                  width: 20,
-                ),
-
-                PlayerDataUi(pplayer: 0),
-                const SizedBox(
-                  width: 20,
-                ),
-                PlayerDataUi(pplayer: 1),
-
-                const SizedBox(
-                  width: 20,
-                ),
-                // OnlineCountdownTimer(
-                //     duration:
-                //         Duration(seconds: UiData.of(context)!.match.time)),
-
-                ElevatedButton(
-                    onPressed: () => Clipboard.setData(
-                        ClipboardData(text: GameData.of(context)?.match.id)),
-                    child: const Text('copy game id'))
-                // SizedBox(width: constraints.maxWidth/3 - constraints.maxWidth/5,),
-              ],
-            ),
+    return Column(
+      children: [
+        Expanded(
+          flex: 9,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Spacer(),
+              Expanded(flex: 5, child: PlayerDataUi(pplayer: 0)),
+              Spacer(),
+              Expanded(flex: 5, child: PlayerDataUi(pplayer: 1)),
+              Spacer(),
+            ],
           ),
-          Container(
-            height: 100,
+        ),
+        Spacer(),
+        Expanded(
+          flex: 3,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Spacer(),
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                  ),
+                  onPressed: () => {
+                    NTP.now().then((value) {
+                      GameData.of(context)?.newMovePlayed(context, value, null);
+                      GameData.of(context)?.toggleTurn(context);
+                    })
+                  },
+                  child: const Text("Pass"),
+                ),
+              ),
+              Spacer(),
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                    onPressed: () => Clipboard.setData(ClipboardData(text: GameData.of(context)?.match.id)), child: const Text('game id')),
+              ),
+              Spacer(),
+            ],
           ),
-          ElevatedButton(
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            ),
-            onPressed: () => {
-              NTP.now().then((value) {
-                GameData.of(context)?.newMovePlayed(context, value, null);
-                GameData.of(context)?.toggleTurn(context);
-              })
-            },
-            child: const Text("Pass"),
-          ),
-        ],
-      ),
+        ),
+        Spacer(),
+      ],
     );
   }
 }
@@ -118,8 +117,7 @@ class _OnlineCountdownTimerState extends State<OnlineCountdownTimer> {
   Widget build(BuildContext context) {
     Timer.periodic(const Duration(seconds: 1), (timer) {
       NTP.now().asStream().asBroadcastStream().listen((value) {
-        widget.time = Duration(seconds: GameData.of(context)!.match.time) -
-            (value).difference(GameData.of(context)?.match.startTime ?? value);
+        widget.time = Duration(seconds: GameData.of(context)!.match.time) - (value).difference(GameData.of(context)?.match.startTime ?? value);
         setState(() {});
       });
     });

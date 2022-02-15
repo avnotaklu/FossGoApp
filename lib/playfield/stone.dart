@@ -30,15 +30,17 @@ class Stone extends StatelessWidget {
     // }
 
     return Container(
-      child: Stack(
-        children: [
-          Container(decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-          // widget.cluster,
-          Text(StoneLogic.of(context)?.stoneAt(cluster.data.first)?.cluster.freedoms.toString() ?? ""),
-        ],
+        // child: Stack(
+        // children: [
+        // Container(
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle)
+        // ),
+        // widget.cluster,
+        // Text(StoneLogic.of(context)?.stoneAt(cluster.data.first)?.cluster.freedoms.toString() ?? ""),
+        // ],
         // Text(widget.cluster.freedoms.toString())
-      ),
-    );
+        // ),
+        );
   }
 }
 

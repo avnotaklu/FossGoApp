@@ -15,23 +15,19 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.5),
-            color: Constants.playerColors[widget.player],
-          ),
-          child: Column(
-            children: [
-              GameData.of(context)?.match.uid[widget.player] == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : GameTimer(
-                      GameData.of(context)?.timerController[widget.player],
-                      pplayer: widget.player,
-                    ),
-            ],
-          ),
-        ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.5),
+        color: Constants.playerColors[widget.player],
+      ),
+      child: Column(
+        children: [
+          GameData.of(context)?.match.uid[widget.player] == null
+              ? const Center(child: CircularProgressIndicator())
+              : GameTimer(
+                  GameData.of(context)?.timerController[widget.player],
+                  pplayer: widget.player,
+                ),
+        ],
       ),
     );
   }

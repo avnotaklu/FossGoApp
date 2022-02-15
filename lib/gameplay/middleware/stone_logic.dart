@@ -27,7 +27,6 @@ class StoneLogic extends InheritedWidget {
   // Database update
   // this function wouldn't work in any other inherited widget because it requires StoneLogic which is built later than other inherited widgets.
   void fetchNewStoneFromDB(context) {
-    // TODO put this function in a better place, it has no relation to board
     print('hello');
 
     MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)!.match.id).child('moves').onValue.listen((event) {

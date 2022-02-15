@@ -44,12 +44,12 @@ class Game extends StatelessWidget {
         StreamController<bool>.broadcast(); // TODO improve this so that stream controller and stream itself are one part not seperate like this
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(Constants.title),
-        actions: <Widget>[
-          TextButton(onPressed: authBloc.logout, child: const Text("logout")),
-        ],
-      ),
+      // appBar: AppBar(
+      //   toolbarHeight: kToolbarHeight / 2,
+      //   actions: <Widget>[
+      //     TextButton(onPressed: authBloc.logout, child: const Text("logout")),
+      //   ],
+      // ),
       backgroundColor: Colors.green,
       body: GameData(
         match: match,
@@ -80,11 +80,11 @@ class Game extends StatelessWidget {
                 if (GameData.of(context)!.match.startTime == null) {
                   MultiplayerData.of(context)?.getCurGameRef(match.id).child('startTime').onValue.listen((snaphot) {
                     match.startTime = DateTime.parse(snaphot.snapshot.value);
-                        match.lastTimeAndDate.clear();
+                    match.lastTimeAndDate.clear();
                     match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
                     match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
 
-                        GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
+                    GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
                     setState(() => match = match);
                   });
                 }
@@ -93,10 +93,22 @@ class Game extends StatelessWidget {
                 controller.close();
               }
             });
-            return Column(children: [
-              board,
-              GameUi(),
-            ]);
+            return Stack(
+              children: [
+                Container(
+                  //color: Colors.black,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade700,
+                    //image: DecorationImage(image: AssetImage(Constants.assets['table']!), fit: BoxFit.fitHeight, repeat: ImageRepeat.repeatY),
+                  ),
+                ),
+                Column(children: [
+                  Expanded(flex: 18, child: Board(match.rows, match.cols, match.playgroundMap)),
+                  Spacer(),
+                  Expanded(flex: 12, child: GameUi()),
+                ]),
+              ],
+            );
           },
         ),
       ),
