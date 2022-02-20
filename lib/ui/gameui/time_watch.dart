@@ -43,6 +43,7 @@ class _GameTimerState extends State<GameTimer> {
   //   super.initState();
   // }
 
+  // FIXME: this doesn't update time when moves are played too fast
   streamUpdatedTime() {
     MultiplayerData.of(context)
         ?.database
@@ -62,17 +63,18 @@ class _GameTimerState extends State<GameTimer> {
           .then((dataEvent) {
         if (changeEvent.snapshot.value != null) {
           if (dataEvent.value != null) {
-            if (GameData.of(context)?.turn % 2 != widget.player) {
-              List<TimeAndDuration> lastMoveDateTime = [];
-              for (var element in (dataEvent.value as List)) {
-                lastMoveDateTime.add(TimeAndDuration.fromString(element));
+              if (GameData.of(context)?.turn % 2 != widget.player) {
+                List<TimeAndDuration> lastMoveDateTime = [];
+                for (var element in (dataEvent.value as List)) {
+                  lastMoveDateTime.add(TimeAndDuration.fromString(element));
+                }
+
+                GameData.of(context)!
+                    .correctTurnPlayerTimeAndAddToUpdateController(GameData.of(context)!.getPlayerWithTurn.turn, context, lastMoveDateTime);
+
+                GameData.of(context)?.match.lastTimeAndDate = [...lastMoveDateTime];
+                // GameData.of(context)!.updateController.add(lastMoveDateTime);
               }
-
-              GameData.of(context)!.correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime);
-
-              GameData.of(context)?.match.lastTimeAndDate = [...lastMoveDateTime];
-              // GameData.of(context)!.updateController.add(lastMoveDateTime);
-            }
           }
         }
       });

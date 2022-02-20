@@ -1,10 +1,13 @@
-
 import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
+import 'package:go/gameplay/stages/before_start_stage.dart';
+import 'package:go/gameplay/stages/gameplay_stage.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/utils/player.dart';
@@ -14,12 +17,17 @@ import 'package:ntp/ntp.dart';
 import 'package:timer_count_down/timer_controller.dart';
 
 class GameData extends InheritedWidget {
+  Stage curStage;
+
   // Call only once after the game has started which is checked by checkGameEnterable
   bool hasGameStarted = false;
   onGameStart(context) {
+    assert(match != null);
+    GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
+    GameData.of(context)!.curStage = GameplayStage();
     if (!GameData.of(context)!.hasGameStarted) {
       hasGameStarted = true;
-      StoneLogic.of(context)!.fetchNewStoneFromDB(context);
+      StoneLogic.of(context)?.fetchNewStoneFromDB(context);
     }
   }
 
@@ -33,6 +41,7 @@ class GameData extends InheritedWidget {
     required List<Player> pplayer,
     required this.mChild,
     required this.match,
+    required this.curStage,
   })  : _players = pplayer,
         super(child: mChild) {
     timers = [
@@ -42,8 +51,11 @@ class GameData extends InheritedWidget {
   }
 
   final GameMatch match;
+  bool listenNewMove = false;
 
-  correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime) {
+  // Turn player timer needs to be corrected because the player with last turn has sent correct time
+  // from database but current player has some lag that needs to be corrected
+  correctTurnPlayerTimeAndAddToUpdateController(int turn, context, lastMoveDateTime) {
     NTP.now().then((value) {
       //var updatedTime = calculateCorrectTime(lastMoveDateTime.data, widget.player, dateTimeNowsnapshot.data, context);
       // lastMoveDateTimeSnapshot.data[widget.player].difference(GameData.of(context)?.match.startTime)
@@ -52,12 +64,11 @@ class GameData extends InheritedWidget {
       //             GameData.of(context)?.match.startTime ??
       //                 DateTime.now()))
       //     .inSeconds;
-      print("player with turn" + GameData.of(context)!.getPlayerWithTurn.turn.toString());
-      Duration durationAfterTimeElapsedCorrection =
-          calculateCorrectTimeFromNow(lastMoveDateTime, GameData.of(context)?.getPlayerWithTurn.turn, value, context);
 
-      lastMoveDateTime[GameData.of(context)?.getPlayerWithTurn.turn] =
-          (TimeAndDuration(lastMoveDateTime[GameData.of(context)?.getPlayerWithTurn.turn]?.datetime, durationAfterTimeElapsedCorrection));
+      print("player with turn" + turn.toString());
+      Duration durationAfterTimeElapsedCorrection = calculateCorrectTimeFromNow(lastMoveDateTime, turn, value, context);
+
+      lastMoveDateTime[turn] = (TimeAndDuration(lastMoveDateTime[turn]?.datetime, durationAfterTimeElapsedCorrection));
 
       GameData.of(context)!.updateController.add(List<TimeAndDuration>.from(lastMoveDateTime));
     });
@@ -65,7 +76,10 @@ class GameData extends InheritedWidget {
 
   bool movePlayed = false;
   newMovePlayed(BuildContext context, DateTime timeOfPlay, Position? playPosition) {
-    assert(getPlayerWithTurn.turn == getclientPlayer(context)); // The rest of the function depends on it
+    // Check if newMovePlayed ends game
+    // this happens when there are two consecutive passes
+
+    // assert(getPlayerWithTurn.turn == getclientPlayer(context)); // The rest of the function depends on it
     movePlayed = true;
     // MultiplayerData.of(context)
     //     ?.database
@@ -96,8 +110,10 @@ class GameData extends InheritedWidget {
       print(element.toString());
     }
 
-    correctRemoteUserTimeAndAddToUpdateController(context, lastMoveDateTime);
+    // turn hasn't been updated here so without turn is actually the player with turn
+    correctTurnPlayerTimeAndAddToUpdateController(GameData.of(context)!.getPlayerWithoutTurn.turn, context, lastMoveDateTime);
     match.lastTimeAndDate = [...lastMoveDateTime];
+    match.moves.add(playPosition);
     //}
     // });
   }
@@ -114,6 +130,7 @@ class GameData extends InheritedWidget {
     turn += 1;
     // turn = turn %2 == 0 ? 1 : 0;
     GameData.of(context)?.timerController[turn % 2]?.start();
+    listenNewMove = true;
   }
 
   DatabaseReference? getMatch(BuildContext context) {
@@ -134,7 +151,7 @@ class GameData extends InheritedWidget {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
     try {
-      return match.uid.keys.firstWhere((k) => match.uid[k] != MultiplayerData.of(context)?.curUser.uid, orElse: () {
+      return match.uid.keys.firstWhere((k) => match.uid[k] != MultiplayerData.of(context)?.curUser!.uid, orElse: () {
         throw TypeError;
       });
     } on TypeError {
@@ -146,7 +163,7 @@ class GameData extends InheritedWidget {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
     try {
-      return match.uid.keys.firstWhere((k) => match.uid[k] == MultiplayerData.of(context)?.curUser.uid, orElse: () {
+      return match.uid.keys.firstWhere((k) => match.uid[k] == MultiplayerData.of(context)?.curUser!.uid, orElse: () {
         throw TypeError;
       });
     } on TypeError {

@@ -43,3 +43,11 @@ const Map<String, List<Position>> boardCircleDecoration = {
 //     // }));
 //   }
 // }
+
+VisualTheme defaultTheme = VisualTheme(Colors.grey.shade700);
+
+class VisualTheme {
+  final Color backgroundColor;
+
+  const VisualTheme(this.backgroundColor);
+}

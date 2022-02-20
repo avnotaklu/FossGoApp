@@ -1,8 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
+import 'package:go/utils/player.dart';
 import 'package:go/utils/position.dart';
 
 class StoneLogic extends InheritedWidget {
@@ -29,23 +30,30 @@ class StoneLogic extends InheritedWidget {
   void fetchNewStoneFromDB(context) {
     print('hello');
 
-    MultiplayerData.of(context)!.database.child('game').child(GameData.of(context)!.match.id).child('moves').onValue.listen((event) {
-      // TODO unnecessary listen move even when move is played by clientPlayer even though (StoneLogic.of(context)!.stoneAt(pos)  == null) stops it from doing anything stupid
-      final data = event.snapshot.value as List;
-      if (data.last != null && data.last != "null") {
-        final pos = Position(int.parse(data.last!.split(' ')[0]), int.parse(data.last!.split(' ')[1]));
-        if (StoneLogic.of(context)!.stoneAt(pos) == null) {
-          if (StoneLogic.of(context)!.handleStoneUpdate(pos, context)) {
-            print("illegel");
-            GameData.of(context)?.toggleTurn(context); // FIXME pos was passed to toggleTurn idk if that broke anything
-            // setState(() {});
+    MultiplayerData.of(context)?.curGameReferences?.moves.onValue.listen((event) {
+      // TODO: unnecessary listen move even when move is played by clientPlayer even though (StoneLogic.of(context)!.stoneAt(pos)  == null) stops it from doing anything stupid
+      print(GameData.of(context)!.listenNewMove);
+      final data = event.snapshot.value as List?;
+      if (data?.last != null) {
+        if (data?.last != "null") {
+          final pos = Position(int.parse(data!.last!.split(' ')[0]), int.parse(data.last!.split(' ')[1]));
+          if (StoneLogic.of(context)!.stoneAt(pos) == null) {
+            if (StoneLogic.of(context)!.handleStoneUpdate(pos, context)) {
+              print("illegel");
+              GameData.of(context)?.toggleTurn(context); // FIXME pos was passed to toggleTurn idk if that broke anything
+              // setState(() {});
+            }
+          }
+        } else {
+          if (data!.length > GameData.of(context)!.turn) {
+            GameData.of(context)?.match.moves.add(null);
+            GameData.of(context)?.toggleTurn(context);
           }
         }
       }
+      GameData.of(context)!.listenNewMove = false;
     });
   }
-
-
 
   // Constructor
   StoneLogic({required Map<Position?, Stone?> playgroundMap, required this.mChild, required this.rows, required this.cols})
@@ -261,4 +269,86 @@ class StoneLogic extends InheritedWidget {
     var colMinusOne = Position(thisCell.x, thisCell.y - 1);
     doAction(thisCell, colMinusOne);
   }
+
+  // Scoring
+
+  calculateFinalScore() {
+    // REPRESENTATION
+    // * -> white stone
+    // # -> black stone
+    // 0 -> emtpy
+
+    // DATA
+    // list of allAreas
+    // map of positions with areas /* WE CAN IGNORE THE POSITIONS WITH STONES AND ONLY ENTER EMPTY POSITIONs
+
+    // STEP 1
+    // There will be a list of areas -> allAreas
+    // we start from first and move in one direction let A
+    // at start we put the first empty group of places in curArea and push it in allAreas
+    // encountering a stone we terminate the curArea for this iteration in this direction and if(curArea.owner == null and !isDame) put color of the stone in curArea.color
+    // else if curArea.color = someone then check if that someone is equal to the stone.color we encountered if false isDame = true, owner = null
+
+    // encountering empty place next curArea will start from that place
+    // and next element will be pushed in allAreas in next index
+    // and so on
+    // STEP 2
+    // start from first index of this iteration
+    // for any empty area found we will look immediately up and if that place is empty put cur place into area at that place and set that area to curArea
+
+    // for case like * 0 0 0 *
+    //               * 0 * * *
+    // this will work
+
+    // for : * 0 0 0 * 2
+    //       0 0 * * * 1
+    //       A B C D E
+
+    // this wont work because stone at A1 wouldn't get updated
+    // so start moving back one by one until you reach a stone or bounds and put into every place curArea
+
+    // calculate like this till end
+
+    //AREA {
+    /* value amount of stones */
+    /* isDame bool if dame*/
+    /* owner -> Player */
+    //}
+
+    Map<Position, Area> areaMap = {Position(0, 0): Area()};
+    Area? curArea = areaMap[Position(0, 0)];
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        curArea = curArea ?? areaMap[Position(i - 1, j)] ?? Area();
+
+        if (playground_Map[Position(i, j)]!.value == null) {
+          curArea?.value += 1;
+          areaMap[Position(i, j)] = curArea!;
+          if (playground_Map[Position(i, j - 1)]!.value == null && areaMap[Position(i, j - 1)] != curArea) {
+            for (int k = j - 1; k >= 0 && playground_Map[Position(i, k)]!.value == null; k--) {
+              curArea?.value += 1;
+              areaMap[Position(i, k)] = curArea;
+            }
+          }
+          // add tempArea to CurrentArea
+        } else if (curArea?.owner != playground_Map[Position(i, j)]!.value?.color) {
+          curArea!.isDame = true;
+          curArea.owner = null;
+          curArea = null;
+        }
+      }
+      curArea = null;
+    }
+  }
+}
+
+class Area {
+  int value;
+  Color? owner;
+  bool isDame;
+  Area.from(this.value, this.isDame, this.owner);
+  Area()
+      : value = 0,
+        isDame = false,
+        owner = null;
 }

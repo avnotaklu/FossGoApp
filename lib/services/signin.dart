@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/services/auth_bloc.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/ui/homepage/homepage.dart';
@@ -20,8 +21,9 @@ class _SignInState extends State<SignIn> {
     authBloc.currentUser.listen((user) {
       if (user != null) {
         print("got user");
+        MultiplayerData?.of(context)?.setUser = user;
         Navigator.of(context).pushReplacementNamed(
-        '/HomePage',  
+          '/HomePage',
         );
       }
     });

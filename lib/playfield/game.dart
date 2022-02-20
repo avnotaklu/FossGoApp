@@ -4,10 +4,14 @@ import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/stages/before_start_stage.dart';
+import 'package:go/gameplay/stages/gameplay_stage.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/services/auth_bloc.dart';
 import 'package:go/models/game_match.dart';
@@ -25,11 +29,12 @@ import 'package:go/constants/constants.dart' as Constants;
 class Game extends StatelessWidget {
   var players = List<Player>.filled(2, Player(0, Colors.black), growable: false); // TODO this is early idk why i did this
 
+  Stage curStage;
   Board board;
   GameMatch match;
   bool enteredAsGameCreator;
 
-  Game(this.match, this.enteredAsGameCreator) // Board
+  Game(this.match, this.enteredAsGameCreator, this.curStage) // Board
       : board = Board(match.rows, match.cols, match.playgroundMap) {
     for (var element in match.moves) {
       print(element.toString());
@@ -52,6 +57,7 @@ class Game extends StatelessWidget {
       // ),
       backgroundColor: Colors.green,
       body: GameData(
+        curStage: curStage,
         match: match,
         pplayer: players,
         mChild: StatefulBuilder(
@@ -66,11 +72,13 @@ class Game extends StatelessWidget {
                         match.lastTimeAndDate.clear(),
                         match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time))),
                         match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time))),
+                        match.runStatus = true,
 
-                        MultiplayerData.of(context)
-                            ?.getCurGameRef(match.id)
+                        MultiplayerData.of(context)!
+                            .curGameReferences!
+                            .game
                             .set(match.toJson()), // TODO Instead of writing entire match again write only changed values
-                        GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start(),
+                        GameData.of(context)!.onGameStart(context),
                         setState(() => match = match),
                       });
                 }
@@ -78,13 +86,15 @@ class Game extends StatelessWidget {
                 // if game enterable start timer of black
 
                 if (GameData.of(context)!.match.startTime == null) {
-                  MultiplayerData.of(context)?.getCurGameRef(match.id).child('startTime').onValue.listen((snaphot) {
-                    match.startTime = DateTime.parse(snaphot.snapshot.value);
+                  MultiplayerData.of(context)?.curGameReferences?.startTime.onValue.listen((snaphot) {
+                    match.startTime = DateTime.parse(snaphot.snapshot.value as String);
                     match.lastTimeAndDate.clear();
                     match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
                     match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
+                    match.runStatus = true;
 
-                    GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
+                    GameData.of(context)!.onGameStart(context);
+
                     setState(() => match = match);
                   });
                 }
@@ -98,7 +108,7 @@ class Game extends StatelessWidget {
                 Container(
                   //color: Colors.black,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade700,
+                    color: Constants.defaultTheme.backgroundColor,
                     //image: DecorationImage(image: AssetImage(Constants.assets['table']!), fit: BoxFit.fitHeight, repeat: ImageRepeat.repeatY),
                   ),
                 ),

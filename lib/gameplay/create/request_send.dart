@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
+import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/models/game_match.dart';
 import 'package:share/share.dart';
@@ -27,7 +29,6 @@ class ShareGameIDButton extends StatefulWidget {
 class _ShareGameIDButtonState extends State<ShareGameIDButton> {
   @override
   Widget build(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -35,28 +36,27 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
         Expanded(flex: 10, child: Container()),
         Expanded(
             flex: 2,
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      if (widget.match.isComplete()) {
-                        Share.share(widget.match.id);
-                      }
+            child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+              ElevatedButton(
+                onPressed: () {
+                  MultiplayerData.of(context)!.createGameDatabaseRefs(widget.match.id);
 
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) =>
-                                Game(widget.match, true),
-                          ));
-                    },
-                    child: Container(
-                      child: const Text("Share"),
-                    ),
-                  ),
-                  widget.circularIndicator ?? Container(),
-                ])),
+                  if (widget.match.isComplete()) {
+                    Share.share(widget.match.id);
+                  }
+
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => Game(widget.match, true, BeforeStartStage()),
+                      ));
+                },
+                child: Container(
+                  child: const Text("Share"),
+                ),
+              ),
+              widget.circularIndicator ?? Container(),
+            ])),
         Expanded(flex: 1, child: Container()),
       ],
     );

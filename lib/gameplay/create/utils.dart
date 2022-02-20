@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
@@ -21,7 +22,7 @@ class BackgroundScreenWithDialog extends StatelessWidget {
         heightFactor: 0.6,
         child: Dialog(backgroundColor: Colors.blue, child: child),
       ),
-      decoration: const BoxDecoration(color: Colors.green),
+      decoration: BoxDecoration(color: Constants.defaultTheme.backgroundColor),
     ));
   }
 }
@@ -30,8 +31,8 @@ class BackgroundScreenWithDialog extends StatelessWidget {
 Stream<bool> checkGameEnterable(BuildContext context, GameMatch match, StreamController<bool> controller) {
   if (match.isComplete()) {
     bool gameEnterable = false;
-    var changeStream = MultiplayerData.of(context)?.getCurGameRef(match.id).child('uid').onValue.listen((event) {
-      match.uid = GameMatch.uidFromJson(event.snapshot.value);
+    var changeStream = MultiplayerData.of(context)?.game_ref.child(match.id).child('uid').onValue.listen((event) {
+      match.uid = GameMatch.uidFromJson(event.snapshot.value as List<Object?>);
       if (match.bothPlayers.contains(null) == false) {
         // gameEnterable = true;
         controller.add(true);

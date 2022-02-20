@@ -5,6 +5,7 @@ import 'package:go/gameplay/create/request_recieve.dart';
 import 'package:go/gameplay/create/request_send.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/services/auth_bloc.dart';
@@ -26,7 +27,12 @@ class CreateGame extends StatelessWidget {
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
     var newPlace;
     if (match != null) {
-      newPlace = MultiplayerData.of(context)?.getCurGameRef(match!.id);
+      try {
+        MultiplayerData.of(context)!.createGameDatabaseRefs(match!.id);
+        newPlace = MultiplayerData.of(context)?.curGameReferences!.game;
+      } catch (Exception) {
+        throw "couldn't start game";
+      }
     } else {
       newPlace = MultiplayerData.of(context)?.game_ref.push();
     }
@@ -34,19 +40,15 @@ class CreateGame extends StatelessWidget {
     if ((match?.bothPlayers.contains(null) ?? true) == false) {
       // BOTH players have entered game in database
       assert(match != null);
-      if (match?.uid.containsValue(
-              MultiplayerData.of(context)?.curUser.uid.toString()) ??
-          false) {
-        return Game(match as GameMatch, false);
+      if (match?.uid.containsValue(MultiplayerData.of(context)?.curUser!.uid.toString()) ?? false) {
+        return Game(match as GameMatch, false, GameplayStage());
       }
       return Container(
-        child: const Text(
-            "Game has already been created and two players have already entered"),
+        child: const Text("Game has already been created and two players have already entered"),
       );
     }
 
-    if ((match?.bothPlayers.any((element) => element != null) ?? false) &&
-        match?.bothPlayers.contains(null)) {
+    if ((match?.bothPlayers.any((element) => element != null) ?? false) && match?.bothPlayers.contains(null)) {
       // One Player, Sender has entered game in database
       return ElevatedButton(
           onPressed: () => Navigator.pushReplacement(
@@ -68,8 +70,7 @@ class CreateGame extends StatelessWidget {
     Map<int, String?> mUid = {};
     int mTime = 300;
     return BackgroundScreenWithDialog(
-        child:
-            Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
       const Expanded(
         flex: 2,
         child: Text(
@@ -79,19 +80,15 @@ class CreateGame extends StatelessWidget {
       ),
       Expanded(
           flex: 1,
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+          child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
             IconButton(
                 onPressed: () => {
                       mUid.clear(),
-                      mUid[0] = MultiplayerData.of(context)?.curUser.uid.toString(),
+                      mUid[0] = MultiplayerData.of(context)?.curUser!.uid.toString(),
                     },
                 icon: Expanded(child: Stone(Colors.black, Position(0, 0)))),
             IconButton(
-                onPressed: () => {
-                      mUid.clear(),
-                      mUid[1] = MultiplayerData.of(context)?.curUser.uid.toString()
-                    },
+                onPressed: () => {mUid.clear(), mUid[1] = MultiplayerData.of(context)?.curUser!.uid.toString()},
                 icon: Expanded(child: Stone(Colors.white, Position(0, 0)))),
           ])),
       StatefulBuilder(
@@ -148,14 +145,8 @@ class CreateGame extends StatelessWidget {
               )),
       // EnterGameButton(match, newPlace),
       ElevatedButton(
-        onPressed: () => Navigator.pushReplacement(context,
-            MaterialPageRoute<void>(builder: (BuildContext context) {
-          match = GameMatch(
-              id: newPlace.key.toString(),
-              rows: mRows,
-              cols: mCols,
-              time: mTime,
-              uid: mUid);
+        onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (BuildContext context) {
+          match = GameMatch(id: newPlace.key.toString(), rows: mRows, cols: mCols, time: mTime, uid: mUid);
           newPlace.set(match?.toJson());
           return RequestSend(match!);
         })),

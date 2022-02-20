@@ -111,7 +111,7 @@ class GameMatch {
     return [uid[0], uid[1]];
   }
 
-  static uidFromJson(List<Object?> uid) {
+  static Map<int?, String?> uidFromJson(List<Object?> uid) {
     var result = Map<int?, String?>.from(uid.asMap().map<int, String>((i, element) {
       return MapEntry(i, element.toString());
     })); // TODO make sure element works in this line changed from json['uid'][id]

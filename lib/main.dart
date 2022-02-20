@@ -32,18 +32,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider(
         create: (context) => AuthBloc(),
-        builder: (context, child) => StreamBuilder(
+        builder: (context, child) => StreamBuilder<User?>(
             stream: Provider.of<AuthBloc>(context).currentUser,
             builder: (context, snapshot) {
-              return snapshot.data != null
-                  ? MultiplayerData(
-                      curUser: snapshot.data,
-                      database: FirebaseDatabase.instance.reference(),
-                      mChild: MaterialApp(home: HomePage(), routes: <String, WidgetBuilder>{
-                        '/HomePage': (BuildContext context) => HomePage(),
-                      }),
-                    )
-                  : MaterialApp(home: SignIn());
+              return MultiplayerData(
+                curUser: snapshot.data,
+                database: FirebaseDatabase.instance.ref(),
+                mChild: MaterialApp(home: snapshot.data != null ? HomePage() : SignIn(), routes: <String, WidgetBuilder>{
+                  '/HomePage': (BuildContext context) => HomePage(),
+                }),
+              );
             }));
   }
 }

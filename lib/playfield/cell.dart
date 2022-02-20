@@ -55,28 +55,29 @@ class _CellState extends State<Cell> {
       builder: (BuildContext context, dyn, wid) {
         return GestureDetector(
           onTap: () {
-            // MultiplayerData.of(context)
-            //     ?.move_ref
-            //     .set({'pos': widget.position.toString()});
-            if ((StoneLogic.of(context)?.stoneAt(widget.position) == null) &&
-                (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid) {
-              // If position is null and this is users turn, place stone
-              setState(() {
-                if (StoneLogic.of(context)?.handleStoneUpdate(widget.position, context) ??
-                    true) // TODO revisit this and make sure it does the right thing
-                {
-                  debugPrint("toggling");
-                  // MultiplayerData.of(context)?.database.child('game').child('')
-                  NTP.now().then((value) {
-                    GameData.of(context)?.newMovePlayed(context, value, widget.position);
-                    GameData.of(context)?.toggleTurn(context);
-                    var mapRef =
-                        MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id).child('playgroundMap');
-                    mapRef!.update(playgroundMapToString(Map<Position?,Stone?>.from(StoneLogic.of(context)!.playground_Map.map((key, value) => MapEntry(key, value.value)))));
-                  });
-                }
-              }); // changeColor();
-            }
+            setState(() {
+              GameData.of(context)!.curStage.onClickCell(widget.position, context);
+              // MultiplayerData.of(context)
+              //     ?.move_ref
+              //     .set({'pos': widget.position.toString()});
+              // if ((StoneLogic.of(context)?.stoneAt(widget.position) == null) &&
+              //     (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser!.uid) {
+              //   // If position is null and this is users turn, place stone
+              //   if (StoneLogic.of(context)?.handleStoneUpdate(widget.position, context) ??
+              //       true) // TODO revisit this and make sure it does the right thing
+              //   {
+              //     debugPrint("toggling");
+              //     // MultiplayerData.of(context)?.database.child('game').child('')
+              //     NTP.now().then((value) {
+              //       GameData.of(context)?.newMovePlayed(context, value, widget.position);
+              //       GameData.of(context)?.toggleTurn(context);
+              //       var mapRef = MultiplayerData.of(context)?.database.child('game').child(GameData.of(context)!.match.id).child('playgroundMap');
+              //       mapRef!.update(playgroundMapToString(
+              //           Map<Position?, Stone?>.from(StoneLogic.of(context)!.playground_Map.map((key, value) => MapEntry(key, value.value)))));
+              //     });
+              //   }
+              // }
+            });
           },
           child: Stack(
             children: [
