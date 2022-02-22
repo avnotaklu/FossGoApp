@@ -63,7 +63,7 @@ class _GameTimerState extends State<GameTimer> {
           .then((dataEvent) {
         if (changeEvent.snapshot.value != null) {
           if (dataEvent.value != null) {
-              if (GameData.of(context)?.turn % 2 != widget.player) {
+              if (GameData.of(context)!.turn % 2 != widget.player) {
                 List<TimeAndDuration> lastMoveDateTime = [];
                 for (var element in (dataEvent.value as List)) {
                   lastMoveDateTime.add(TimeAndDuration.fromString(element));

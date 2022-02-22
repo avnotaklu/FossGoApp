@@ -2,7 +2,10 @@ import 'dart:ffi';
 
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
+import 'package:go/gameplay/middleware/game_data.dart';
+import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/playfield/game.dart';
 import 'stone.dart';
 import '../utils/position.dart';
@@ -47,32 +50,34 @@ class _BoardState extends State<Board> {
             playgroundMap: widget.playgroundMap,
             rows: widget.rows,
             cols: widget.cols,
-            mChild: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                print("${constraints.maxHeight}, ${constraints.maxWidth}");
-                return Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
-                      child: AspectRatio(
-                        aspectRatio: 1.0,
-                        child: Container(
-                          height: constraints.maxHeight,
-                          width: constraints.maxWidth,
-                          //color: Colors.black,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(image: AssetImage(Constants.assets['board']!), fit: BoxFit.fill),
+            mChild: ScoreCalculation(
+              mChild: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  print("${constraints.maxHeight}, ${constraints.maxWidth}");
+                  return Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
+                        child: AspectRatio(
+                          aspectRatio: 1.0,
+                          child: Container(
+                            height: constraints.maxHeight,
+                            width: constraints.maxWidth,
+                            //color: Colors.black,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(image: AssetImage(Constants.assets['board']!), fit: BoxFit.fill),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset)),
-                    StoneLayoutGrid(
-                      GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset),
-                    ),
-                  ],
-                );
-              },
+                      BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset)),
+                      StoneLayoutGrid(
+                        GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           );
         },
@@ -121,39 +126,42 @@ class StoneLayoutGrid extends StatefulWidget {
 
 class _StoneLayoutGridState extends State<StoneLayoutGrid> {
   @override
+  @override
   Widget build(BuildContext context) {
     StoneLogic.of(context)!.fetchNewStoneFromDB(context);
-    return GridView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.all(widget.info.stoneInset),
-      itemCount: (widget.info.rows) * (widget.info.cols),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: (widget.info.rows),
-        childAspectRatio: 1,
-        crossAxisSpacing: widget.info.stoneSpacing,
-        mainAxisSpacing: widget.info.stoneSpacing,
-      ),
-      itemBuilder: (context, index) => SizedBox(
-        height: 10,
-        width: 10,
-        child: Stack(
-          children: [
-            Constants.boardCircleDecoration["${widget.info.rows}x${widget.info.rows}"]!
-                    .contains(Position(((index) ~/ widget.info.cols), ((index) % widget.info.rows).toInt()))
-                ? Center(
-                    child: FractionallySizedBox(
-                      heightFactor: 0.3,
-                      widthFactor: 0.3,
-                      child: Container(
-                        decoration: BoxDecoration(color: Colors.black, shape: BoxShape.circle),
-                      ),
-                    ),
-                  )
-                : SizedBox.shrink(),
-            Cell(Position(((index) ~/ widget.info.cols), ((index) % widget.info.rows).toInt())),
-          ],
-        ),
-      ),
-    );
+    return ValueListenableBuilder<Stage>(
+        valueListenable: GameData.of(context)!.curStageNotifier,
+        builder: (context, stage, idk) => GridView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.all(widget.info.stoneInset),
+              itemCount: (widget.info.rows) * (widget.info.cols),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: (widget.info.rows),
+                childAspectRatio: 1,
+                crossAxisSpacing: widget.info.stoneSpacing,
+                mainAxisSpacing: widget.info.stoneSpacing,
+              ),
+              itemBuilder: (context, index) => SizedBox(
+                height: 10,
+                width: 10,
+                child: Stack(
+                  children: [
+                    Constants.boardCircleDecoration["${widget.info.rows}x${widget.info.rows}"]!
+                            .contains(Position(((index) ~/ widget.info.cols), ((index) % widget.info.rows).toInt()))
+                        ? Center(
+                            child: FractionallySizedBox(
+                              heightFactor: 0.3,
+                              widthFactor: 0.3,
+                              child: Container(
+                                decoration: BoxDecoration(color: Colors.black, shape: BoxShape.circle),
+                              ),
+                            ),
+                          )
+                        : SizedBox.shrink(),
+                    Cell(Position(((index) ~/ widget.info.cols), ((index) % widget.info.rows).toInt())),
+                  ],
+                ),
+              ),
+            ));
   }
 }

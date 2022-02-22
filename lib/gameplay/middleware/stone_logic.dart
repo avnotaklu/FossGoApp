@@ -1,6 +1,9 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/player.dart';
@@ -21,7 +24,10 @@ class StoneLogic extends InheritedWidget {
     return playground_Map[Position]!;
   }
 
-  Stone? stoneAt(Position pos) {
+  Stone? stoneAt(Position? pos) {
+    if (pos == null) {
+      return null;
+    }
     return playground_Map[pos]?.value;
   }
 
@@ -49,6 +55,9 @@ class StoneLogic extends InheritedWidget {
             GameData.of(context)?.match.moves.add(null);
             GameData.of(context)?.toggleTurn(context);
           }
+        }
+        if (data.reversed.elementAt(0) == "null" && data.reversed.elementAt(1) == "null") {
+          GameData.of(context)!.cur_stage = GameEndStage(context);
         }
       }
       GameData.of(context)!.listenNewMove = false;
@@ -87,7 +96,7 @@ class StoneLogic extends InheritedWidget {
   }
 
   /// returns true if not out of bounds
-  checkOutofBounds(Position pos) {
+  checkIfInsideBounds(Position pos) {
     return pos.x > -1 && pos.x < rows && pos.y < cols && pos.y > -1;
   }
 
@@ -133,7 +142,7 @@ class StoneLogic extends InheritedWidget {
                         insertable = getClusterFromPosition(neighbor)?.freedoms == 1,
                     }
                 }
-              else if (checkOutofBounds(neighbor))
+              else if (checkIfInsideBounds(neighbor))
                 {
                   insertable = true,
                 }
@@ -149,7 +158,7 @@ class StoneLogic extends InheritedWidget {
     doActionOnNeighbors(position, (Position curpos, Position neighbor) {
       // if( _playgroundMap[neighbor] == null && checkOutofBounds(neighbor) && alreadyAdded.contains(neighbor) == false)//  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
       if (stoneAt(neighbor) == null &&
-          checkOutofBounds(neighbor) &&
+          checkIfInsideBounds(neighbor) &&
           ((traversed[neighbor]?.contains(getClusterFromPosition(curpos)) ?? false) == false))
       //  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
       // neighbor are the possible free position here unlike recalculateFreedomsForNeighborsOfDeleted where deletedStonePosition is the free position and neighbors are possible clusters for which we will increment freedoms
@@ -232,7 +241,10 @@ class StoneLogic extends InheritedWidget {
 
   // Deletion ---
 
-  bool handleStoneUpdate(Position position, BuildContext context) {
+  bool handleStoneUpdate(Position? position, BuildContext context) {
+    if (position == null) {
+      return true;
+    }
     _position = position;
     Position? thisCurrentCell = position;
     playground_Map[thisCurrentCell]?.value = Stone(GameData.of(context)?.getPlayerWithTurn.mColor, position);
@@ -259,7 +271,7 @@ class StoneLogic extends InheritedWidget {
     return false;
   }
 
-  doActionOnNeighbors(Position thisCell, Function(Position, Position) doAction) {
+  static doActionOnNeighbors(Position thisCell, Function(Position curPos, Position neighbor) doAction) {
     var rowPlusOne = Position(thisCell.x + 1, thisCell.y);
     doAction(thisCell, rowPlusOne);
     var rowMinusOne = Position(thisCell.x - 1, thisCell.y);
@@ -272,7 +284,26 @@ class StoneLogic extends InheritedWidget {
 
   // Scoring
 
-  calculateFinalScore() {
+  // Extend outward by checking all neighbors approach
+
+}
+
+class Area {
+  Set<Position?> spaces = {};
+  // int value;
+  int get value => spaces.length;
+  Color? owner;
+  bool isDame;
+  Area.from(this.isDame, this.owner);
+  Area()
+      : isDame = false,
+        owner = null;
+}
+
+
+
+  // Failed approach in this i started from 0 0 and went horizontaly till end then next row and so on
+/* calculateFinalScore() {
     // REPRESENTATION
     // * -> white stone
     // # -> black stone
@@ -316,39 +347,72 @@ class StoneLogic extends InheritedWidget {
     //}
 
     Map<Position, Area> areaMap = {Position(0, 0): Area()};
+    List<Area> result;
+
     Area? curArea = areaMap[Position(0, 0)];
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
-        curArea = curArea ?? areaMap[Position(i - 1, j)] ?? Area();
+        // if curArea doesn't have an owner and isn't dame and is empty place then update owner
 
         if (playground_Map[Position(i, j)]!.value == null) {
+          curArea = areaMap[Position(i - 1, j)] ?? curArea ?? Area();
           curArea?.value += 1;
+          curArea.spaces.add(Position(i, j));
           areaMap[Position(i, j)] = curArea!;
-          if (playground_Map[Position(i, j - 1)]!.value == null && areaMap[Position(i, j - 1)] != curArea) {
+          updateOwnerWhenReachingNewEmptyArea(areaMap, i, j);
+          if (playground_Map[Position(i, j - 1)]?.value == null && areaMap[Position(i, j - 1)] != curArea) {
             for (int k = j - 1; k >= 0 && playground_Map[Position(i, k)]!.value == null; k--) {
               curArea?.value += 1;
+              curArea.spaces.add(Position(i, k));
               areaMap[Position(i, k)] = curArea;
             }
           }
-          // add tempArea to CurrentArea
-        } else if (curArea?.owner != playground_Map[Position(i, j)]!.value?.color) {
-          curArea!.isDame = true;
-          curArea.owner = null;
+        } else {
+          curArea = curArea ?? Area();
+          updateOwnerWhenExitingEmptyArea(areaMap, i, j);
+          // Check if next place bounding stone has color other than than the current area's owner
+          if (curArea?.owner != null &&
+              curArea?.owner != playground_Map[Position(i, j)]?.value?.color &&
+              playground_Map[Position(i, j)]?.value?.color != null) {
+            curArea?.isDame = true;
+            curArea?.owner = null;
+            curArea = null;
+          }
           curArea = null;
         }
       }
       curArea = null;
     }
+    return areaMap;
   }
-}
 
-class Area {
-  int value;
-  Color? owner;
-  bool isDame;
-  Area.from(this.value, this.isDame, this.owner);
-  Area()
-      : value = 0,
-        isDame = false,
-        owner = null;
-}
+  bool updateOwnerWhenExitingEmptyArea(Map<Position, Area> areaMap, int i, int j) {
+    if (!checkIfInsideBounds(Position(i, j))) {
+      return false;
+    }
+    if (areaMap[Position(i, j - 1)] == null) {
+      return false;
+    }
+    if (areaMap[Position(i, j - 1)]?.owner == null && !areaMap[Position(i, j - 1)]!.isDame && playground_Map[Position(i, j)]!.value != null) {
+      areaMap[Position(i, j - 1)]?.owner = playground_Map[Position(i, j)]?.value?.color;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bool updateOwnerWhenReachingNewEmptyArea(Map<Position, Area> areaMap, int i, int j) {
+    if (!checkIfInsideBounds(Position(i, j - 1))) {
+      return false;
+    }
+    if (areaMap[Position(i, j)] == null) {
+      return false;
+    }
+    if (areaMap[Position(i, j)]?.owner == null && !areaMap[Position(i, j)]!.isDame && playground_Map[Position(i, j - 1)]!.value != null) {
+      areaMap[Position(i, j)]?.owner = playground_Map[Position(i, j - 1)]?.value?.color;
+      return true;
+    } else {
+      return false;
+    }
+  }  
+*/ */

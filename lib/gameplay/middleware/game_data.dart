@@ -17,14 +17,14 @@ import 'package:ntp/ntp.dart';
 import 'package:timer_count_down/timer_controller.dart';
 
 class GameData extends InheritedWidget {
-  Stage curStage;
+  ValueNotifier<Stage> curStageNotifier;
 
   // Call only once after the game has started which is checked by checkGameEnterable
   bool hasGameStarted = false;
   onGameStart(context) {
     assert(match != null);
     GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
-    GameData.of(context)!.curStage = GameplayStage();
+    GameData.of(context)!.curStageNotifier = ValueNotifier(GameplayStage());
     if (!GameData.of(context)!.hasGameStarted) {
       hasGameStarted = true;
       StoneLogic.of(context)?.fetchNewStoneFromDB(context);
@@ -36,14 +36,16 @@ class GameData extends InheritedWidget {
   StreamController<List<TimeAndDuration>> updateController = StreamController<List<TimeAndDuration>>.broadcast();
 
   List<PlayerCountdownTimer?> timers = [null, null];
-  final List<CountdownController>? _controller = [CountdownController(autoStart: false), CountdownController(autoStart: false)];
+  final List<CountdownController> _controller = [CountdownController(autoStart: false), CountdownController(autoStart: false)];
   GameData({
     required List<Player> pplayer,
     required this.mChild,
     required this.match,
-    required this.curStage,
+    required Stage curStage,
   })  : _players = pplayer,
+        curStageNotifier = ValueNotifier(BeforeStartStage()),
         super(child: mChild) {
+    curStageNotifier.value = curStage;
     timers = [
       PlayerCountdownTimer(controller: _controller![0], time: Duration(seconds: match.time), player: 0),
       PlayerCountdownTimer(controller: _controller![1], time: Duration(seconds: match.time), player: 1)
@@ -52,6 +54,19 @@ class GameData extends InheritedWidget {
 
   final GameMatch match;
   bool listenNewMove = false;
+
+  // GETTERS
+  int get turn => match.turn;
+  set turn(dynamic val) => match.turn = val;
+  Stage get cur_stage => curStageNotifier.value;
+  set cur_stage(Stage stage) {
+    curStageNotifier.value = stage;
+  }
+
+  int get gametime => match.time;
+  Player get getPlayerWithTurn => _players[turn % 2];
+  Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
+  List<CountdownController> get timerController => _controller;
 
   // Turn player timer needs to be corrected because the player with last turn has sent correct time
   // from database but current player has some lag that needs to be corrected
@@ -137,16 +152,6 @@ class GameData extends InheritedWidget {
     return MultiplayerData.of(context)?.database.child('game').child(match.id);
   }
 
-  get turn => match.turn;
-  set turn(dynamic val) => match.turn = val;
-
-  get gametime => match.time;
-  // get turnPlayerColor => [_players[0].mColor, _players[1].mColor];
-  // Gives color of player with turn
-  Player get getPlayerWithTurn => _players[turn % 2];
-  Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
-  get timerController => _controller;
-
   getRemotePlayer(BuildContext context) {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
@@ -173,7 +178,7 @@ class GameData extends InheritedWidget {
 
   @override
   bool updateShouldNotify(GameData oldWidget) {
-    return oldWidget.turn != turn;
+    return oldWidget.turn != turn || oldWidget.curStageNotifier != curStageNotifier;
   }
 
   static GameData? of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<GameData>();

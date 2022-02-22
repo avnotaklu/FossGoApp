@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
+import 'package:go/gameplay/stages/game_end_stage.dart';
+import 'package:go/playfield/game.dart';
 import 'package:go/utils/database_strings.dart';
 import 'package:ntp/ntp.dart';
 import '../utils/player.dart';
@@ -56,7 +58,7 @@ class _CellState extends State<Cell> {
         return GestureDetector(
           onTap: () {
             setState(() {
-              GameData.of(context)!.curStage.onClickCell(widget.position, context);
+              GameData.of(context)!.cur_stage.onClickCell(widget.position, context);
               // MultiplayerData.of(context)
               //     ?.move_ref
               //     .set({'pos': widget.position.toString()});
@@ -79,14 +81,8 @@ class _CellState extends State<Cell> {
               // }
             });
           },
-          child: Stack(
-            children: [
-              dyn ??
-                  Container(
-                    decoration: const BoxDecoration(color: Colors.transparent),
-                  ),
-            ],
-          ),
+          //child: GameData.of(context)!.curStage.drawCell(widget.position,dyn),
+          child: GameData.of(context)!.cur_stage.drawCell(widget.position, dyn),
         );
       },
     );
