@@ -24,7 +24,7 @@ class GameData extends InheritedWidget {
   onGameStart(context) {
     assert(match != null);
     GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
-    GameData.of(context)!.curStageNotifier = ValueNotifier(GameplayStage());
+    GameData.of(context)!.curStageNotifier.value = GameplayStage();
     if (!GameData.of(context)!.hasGameStarted) {
       hasGameStarted = true;
       StoneLogic.of(context)?.fetchNewStoneFromDB(context);
@@ -43,12 +43,11 @@ class GameData extends InheritedWidget {
     required this.match,
     required Stage curStage,
   })  : _players = pplayer,
-        curStageNotifier = ValueNotifier(BeforeStartStage()),
+        curStageNotifier = ValueNotifier(curStage),
         super(child: mChild) {
-    curStageNotifier.value = curStage;
     timers = [
-      PlayerCountdownTimer(controller: _controller![0], time: Duration(seconds: match.time), player: 0),
-      PlayerCountdownTimer(controller: _controller![1], time: Duration(seconds: match.time), player: 1)
+      PlayerCountdownTimer(controller: _controller[0], time: Duration(seconds: match.time), player: 0),
+      PlayerCountdownTimer(controller: _controller[1], time: Duration(seconds: match.time), player: 1)
     ];
   }
 
@@ -60,6 +59,8 @@ class GameData extends InheritedWidget {
   set turn(dynamic val) => match.turn = val;
   Stage get cur_stage => curStageNotifier.value;
   set cur_stage(Stage stage) {
+    cur_stage.disposeStage();
+
     curStageNotifier.value = stage;
   }
 
@@ -112,13 +113,13 @@ class GameData extends InheritedWidget {
     // lastMoveDateTime[0] = TimeAndDuration.fromString((dataEvent.value as List)[0]);
     // lastMoveDateTime[1] = TimeAndDuration.fromString((dataEvent.value as List)[1]);
 
-    lastMoveDateTime[getclientPlayer(context)] = TimeAndDuration(timeOfPlay, lastMoveDateTime[getclientPlayer(context)]!.duration);
-    Duration updatedTime = calculateCorrectTime(lastMoveDateTime, getclientPlayer(context), null, context);
-    lastMoveDateTime[getclientPlayer(context)] = (TimeAndDuration(timeOfPlay, updatedTime));
+    lastMoveDateTime[getClientPlayer(context)!] = TimeAndDuration(timeOfPlay, lastMoveDateTime[getClientPlayer(context)!]!.duration);
+    Duration updatedTime = calculateCorrectTime(lastMoveDateTime, getClientPlayer(context), null, context);
+    lastMoveDateTime[getClientPlayer(context)!] = (TimeAndDuration(timeOfPlay, updatedTime));
 
     // updateTimeInDatabase(lastMoveDateTime, context, timeOfPlay, getclientPlayer(context));
     // updateDurationInDatabase(lastMoveDateTime, context, updatedTime, getclientPlayer(context));
-    updateTimeAndDurationInDatabase(context, lastMoveDateTime[getclientPlayer(context)] as TimeAndDuration, getclientPlayer(context));
+    updateTimeAndDurationInDatabase(context, lastMoveDateTime[getClientPlayer(context)!] as TimeAndDuration, getClientPlayer(context)!);
     updateMoveIntoDatabase(context, playPosition);
 
     for (var element in lastMoveDateTime) {
@@ -140,11 +141,11 @@ class GameData extends InheritedWidget {
   }
 
   toggleTurn(BuildContext context) {
-    GameData.of(context)?.timerController[turn % 2]?.pause();
+    GameData.of(context)?.timerController[turn % 2].pause();
 
     turn += 1;
     // turn = turn %2 == 0 ? 1 : 0;
-    GameData.of(context)?.timerController[turn % 2]?.start();
+    GameData.of(context)?.timerController[turn % 2].start();
     listenNewMove = true;
   }
 
@@ -152,7 +153,7 @@ class GameData extends InheritedWidget {
     return MultiplayerData.of(context)?.database.child('game').child(match.id);
   }
 
-  getRemotePlayer(BuildContext context) {
+  int? getRemotePlayer(BuildContext context) {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
     try {
@@ -164,7 +165,7 @@ class GameData extends InheritedWidget {
     }
   }
 
-  getclientPlayer(BuildContext context) {
+  int? getClientPlayer(BuildContext context) {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
     try {

@@ -48,6 +48,25 @@ class Cluster {
   Set<Position> data;
   Cluster(this.data);
   int freedoms = 0;
+
+  @override
+  bool operator ==(other) {
+    if (other is! Cluster) {
+      return false;
+    }
+    return other.data == data && other.freedoms == freedoms;
+  }
+
+  @override
+  int get hashCode => data.hashCode ^ freedoms.hashCode;
+
+  Position smallestPosition() {
+    Position smallest = data.first;
+    for (Position pos in data) {
+      smallest = smallest < pos ? pos : smallest;
+    }
+    return smallest;
+  }
 }
 
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
@@ -74,7 +75,7 @@ class EnterGameButton extends StatelessWidget {
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute<void>(
-                      builder: (BuildContext context) => Game(match, false, GameplayStage()),
+                      builder: (BuildContext context) => Game(match, false, BeforeStartStage()),
                     ));
               }
             });

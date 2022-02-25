@@ -5,10 +5,10 @@ import 'package:go/playfield/stone.dart';
 import 'package:go/utils/position.dart';
 
 class BeforeStartStage extends Stage {
-  const BeforeStartStage();
+  BeforeStartStage();
 
   @override
-  Widget drawCell(Position position,Stone? stone) {
+  Widget drawCell(Position position, Stone? stone) {
     // TODO: implement drawCell
     return Container(
       color: Colors.transparent,
@@ -18,5 +18,10 @@ class BeforeStartStage extends Stage {
   @override
   onClickCell(Position? position, BuildContext context) {
     // Before game do nothing on click on cell
+    throw UnimplementedError();
+  }
+
+  @override
+  disposeStage() {
   }
 }

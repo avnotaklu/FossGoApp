@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:go/gameplay/middleware/game_data.dart';
 
 class MultiplayerData extends InheritedWidget {
   final Widget mChild;
@@ -51,4 +52,7 @@ class GameDatabaseReferences {
   DatabaseReference get startTime => thisGame.child("startTime");
   DatabaseReference get time => thisGame.child("time");
   DatabaseReference get turn => thisGame.child("turn");
+  DatabaseReference get removedClusters => thisGame.child("removedClusters");
+  DatabaseReference? myRemovedCluster(context) => removedClusters.child(GameData.of(context)!.getClientPlayer(context).toString());
+  DatabaseReference remoteRemovedCluster(context) => removedClusters.child(GameData.of(context)!.getRemotePlayer(context).toString());
 }

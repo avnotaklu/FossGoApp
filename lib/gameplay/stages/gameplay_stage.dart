@@ -3,15 +3,13 @@ import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/stage.dart';
-import 'package:go/playfield/cell.dart';
-import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/database_strings.dart';
 import 'package:go/utils/position.dart';
 import 'package:ntp/ntp.dart';
 
 class GameplayStage extends Stage {
-  const GameplayStage();
+  GameplayStage();
 
   @override
   Widget drawCell(Position position, Stone? stone) {
@@ -51,5 +49,10 @@ class GameplayStage extends Stage {
         });
       }
     }
+  }
+
+  @override
+  disposeStage() {
+    // TODO: implement disposeStage
   }
 }

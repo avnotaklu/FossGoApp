@@ -11,14 +11,21 @@ import 'dart:convert';
 import 'package:go/utils/time_and_duration.dart';
 
 class GameMatch {
+  /// time and date of last move played by players. In database it's stored as TimeAndDuration string
   List<TimeAndDuration?> lastTimeAndDate = [];
-  List<Duration?> playersTimeLeft = [];
+
   DateTime? startTime;
+
+  /// this is true when game is being played GameplayStage and ScoreCalculationStage both have runStatus of true. BeforeGameStart has runStatus of false.
   bool runStatus = false;
+
+
   Map<int?, String?> uid = {};
   int rows;
   int cols;
+  /// moves is the list of moves played. In database position are stored in {x y} format and iff move is pass then it is stored as "null"
   List<Position?> moves = [];
+  /// playground map stores the entire map of stones. In database this is stored in {player cluster freedoms} format to avoid rebuilding entire table of freedoms for each cluster on each load
   Map<Position, Stone?> playgroundMap = {}; // int gives player id
   String id;
   int time;

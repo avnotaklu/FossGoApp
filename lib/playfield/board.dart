@@ -51,6 +51,8 @@ class _BoardState extends State<Board> {
             rows: widget.rows,
             cols: widget.cols,
             mChild: ScoreCalculation(
+              widget.rows,
+              widget.cols,
               mChild: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   print("${constraints.maxHeight}, ${constraints.maxWidth}");
@@ -126,6 +128,12 @@ class StoneLayoutGrid extends StatefulWidget {
 
 class _StoneLayoutGridState extends State<StoneLayoutGrid> {
   @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    context.dependOnInheritedWidgetOfExactType<ScoreCalculation>();
+  }
+
   @override
   Widget build(BuildContext context) {
     StoneLogic.of(context)!.fetchNewStoneFromDB(context);

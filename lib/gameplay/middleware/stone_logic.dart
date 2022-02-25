@@ -3,7 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
-import 'package:go/gameplay/stages/game_end_stage.dart';
+import 'package:go/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/player.dart';
@@ -16,6 +16,7 @@ class StoneLogic extends InheritedWidget {
   Map<Position?, ValueNotifier<Stone?>> _playgroundMap = {};
   Stone? _teststone;
   Position? _position;
+  var newStoneStream;
 
   Position? koDelete;
   Position? koInsert;
@@ -33,10 +34,9 @@ class StoneLogic extends InheritedWidget {
 
   // Database update
   // this function wouldn't work in any other inherited widget because it requires StoneLogic which is built later than other inherited widgets.
-  void fetchNewStoneFromDB(context) {
+  fetchNewStoneFromDB(context) {
     print('hello');
-
-    MultiplayerData.of(context)?.curGameReferences?.moves.onValue.listen((event) {
+    return MultiplayerData.of(context)?.curGameReferences?.moves.onValue.listen((event) {
       // TODO: unnecessary listen move even when move is played by clientPlayer even though (StoneLogic.of(context)!.stoneAt(pos)  == null) stops it from doing anything stupid
       print(GameData.of(context)!.listenNewMove);
       final data = event.snapshot.value as List?;
@@ -57,7 +57,7 @@ class StoneLogic extends InheritedWidget {
           }
         }
         if (data.reversed.elementAt(0) == "null" && data.reversed.elementAt(1) == "null") {
-          GameData.of(context)!.cur_stage = GameEndStage(context);
+          GameData.of(context)!.cur_stage = ScoreCalculationStage(context);
         }
       }
       GameData.of(context)!.listenNewMove = false;

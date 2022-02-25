@@ -50,7 +50,7 @@ class _GameTimerState extends State<GameTimer> {
         .child('game')
         .child(GameData.of(context)?.match.id as String)
         .child('lastTimeAndDuration')
-        .child(GameData.of(context)?.getclientPlayer(context) == 0 ? 1.toString() : 0.toString())
+        .child(GameData.of(context)?.getClientPlayer(context) == 0 ? 1.toString() : 0.toString())
         .onValue
         .listen((changeEvent) {
       MultiplayerData.of(context)
