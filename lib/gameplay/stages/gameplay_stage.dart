@@ -1,18 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
+import 'package:go/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/playfield/stone.dart';
+import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/utils/database_strings.dart';
 import 'package:go/utils/position.dart';
 import 'package:ntp/ntp.dart';
 
-class GameplayStage extends Stage {
-  GameplayStage();
+// class GameplayStage extends Stage<GameplayStage> {
+class GameplayStage extends Stage{
+  var listenNewStone;
+
+  GameplayStage() {}
 
   @override
-  Widget drawCell(Position position, Stone? stone) {
+  GameplayStage get stage => this;
+  @override
+  void initializeWhenAllMiddlewareAvailable(context) {
+    listenNewStone = fetchNewStoneFromDB(context);
+    ScoreCalculation.of(context)!.calculateScore(context);
+  }
+
+  fetchNewStoneFromDB(context) {
+    print('hello');
+    return MultiplayerData.of(context)?.curGameReferences?.moves.onValue.listen((event) {
+      // TODO: unnecessary listen move even when move is played by clientPlayer even though (StoneLogic.of(context)!.stoneAt(pos)  == null) stops it from doing anything stupid
+      print(GameData.of(context)!.listenNewMove);
+      final data = event.snapshot.value as List?;
+      if (data?.last != null) {
+        if (data?.last != "null") {
+          final pos = Position(int.parse(data!.last!.split(' ')[0]), int.parse(data.last!.split(' ')[1]));
+          if (StoneLogic.of(context)!.stoneAt(pos) == null) {
+            if (StoneLogic.of(context)!.handleStoneUpdate(pos, context)) {
+              print("illegel");
+              GameData.of(context)?.toggleTurn(context); // FIXME pos was passed to toggleTurn idk if that broke anything
+              // setState(() {});
+            }
+          }
+        } else {
+          if (data!.length > GameData.of(context)!.turn) {
+            GameData.of(context)?.match.moves.add(null);
+            GameData.of(context)?.toggleTurn(context);
+          }
+        }
+        if (data.reversed.elementAt(0) == "null" && data.reversed.elementAt(1) == "null") {
+          GameData.of(context)!.cur_stage = ScoreCalculationStage(context);
+        }
+      }
+      GameData.of(context)!.listenNewMove = false;
+    });
+  }
+
+  @override
+  List<Widget> buttons() {
+    return [Pass(), CopyId()];
+  }
+
+  @override
+  Widget drawCell(Position position, Stone? stone, BuildContext context) {
     return Stack(
       children: [
         stone ??

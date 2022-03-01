@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
             builder: (context, snapshot) {
               return MultiplayerData(
                 curUser: snapshot.data,
-                database: FirebaseDatabase.instance.ref(),
+                database: FirebaseDatabase.instance.reference(),
                 mChild: MaterialApp(home: snapshot.data != null ? HomePage() : SignIn(), routes: <String, WidgetBuilder>{
                   '/HomePage': (BuildContext context) => HomePage(),
                 }),

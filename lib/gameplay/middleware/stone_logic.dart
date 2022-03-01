@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
@@ -32,37 +33,12 @@ class StoneLogic extends InheritedWidget {
     return playground_Map[pos]?.value;
   }
 
+  // Getters
+  Map<Position?, ValueNotifier<Stone?>> get playground_Map => _playgroundMap; // TODO maybe Position? can be just Position
+  get teststone => _teststone;
+
   // Database update
   // this function wouldn't work in any other inherited widget because it requires StoneLogic which is built later than other inherited widgets.
-  fetchNewStoneFromDB(context) {
-    print('hello');
-    return MultiplayerData.of(context)?.curGameReferences?.moves.onValue.listen((event) {
-      // TODO: unnecessary listen move even when move is played by clientPlayer even though (StoneLogic.of(context)!.stoneAt(pos)  == null) stops it from doing anything stupid
-      print(GameData.of(context)!.listenNewMove);
-      final data = event.snapshot.value as List?;
-      if (data?.last != null) {
-        if (data?.last != "null") {
-          final pos = Position(int.parse(data!.last!.split(' ')[0]), int.parse(data.last!.split(' ')[1]));
-          if (StoneLogic.of(context)!.stoneAt(pos) == null) {
-            if (StoneLogic.of(context)!.handleStoneUpdate(pos, context)) {
-              print("illegel");
-              GameData.of(context)?.toggleTurn(context); // FIXME pos was passed to toggleTurn idk if that broke anything
-              // setState(() {});
-            }
-          }
-        } else {
-          if (data!.length > GameData.of(context)!.turn) {
-            GameData.of(context)?.match.moves.add(null);
-            GameData.of(context)?.toggleTurn(context);
-          }
-        }
-        if (data.reversed.elementAt(0) == "null" && data.reversed.elementAt(1) == "null") {
-          GameData.of(context)!.cur_stage = ScoreCalculationStage(context);
-        }
-      }
-      GameData.of(context)!.listenNewMove = false;
-    });
-  }
 
   // Constructor
   StoneLogic({required Map<Position?, Stone?> playgroundMap, required this.mChild, required this.rows, required this.cols})
@@ -70,10 +46,6 @@ class StoneLogic extends InheritedWidget {
       : super(child: mChild) {
     _playgroundMap = Map<Position?, ValueNotifier<Stone?>>.from(playgroundMap.map((key, value) => MapEntry(key, ValueNotifier(value))));
   }
-
-  // Getters
-  Map<Position?, ValueNotifier<Stone?>> get playground_Map => _playgroundMap; // TODO maybe Position? can be just Position
-  get teststone => _teststone;
 
   // Inheritance Widget related functions
   @override

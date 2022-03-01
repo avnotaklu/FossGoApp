@@ -30,7 +30,7 @@ apply plugin: 'com.google.gms.google-services'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     signingConfigs {
         debug {
             storeFile file("/mnt/30D8EED6D8EE997C/Software/linux/Android/avdVirtualDevices/.android/debug.keystore")
@@ -52,9 +52,13 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        configurations.all {
+            resolutionStrategy { force 'androidx.core:core-ktx:1.6.0' }
+        }
         applicationId "com.example.go"
             minSdkVersion 21 
-            targetSdkVersion 30
+            targetSdkVersion 31
+            buildToolsVersion "30.0.0"
             versionCode flutterVersionCode.toInteger()
             versionName flutterVersionName
     }

@@ -2,5 +2,5 @@
 Go game (baduk) implemented with flutter
 
 ## What's done
-  * gameplay(except final score calculation)
+  * complete gameplay
   * game joins with game id

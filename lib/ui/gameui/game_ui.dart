@@ -2,6 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
+import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/middleware/score_calculation.dart';
+import 'package:go/gameplay/stages/game_end_stage.dart';
+import 'package:go/gameplay/stages/score_calculation_stage.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/ui/gameui/player_card.dart';
 import 'package:go/ui/gameui/time_watch.dart';
@@ -49,57 +54,42 @@ class _GameUiState extends State<GameUi> {
     // return LayoutBuilder(
     // builder: (BuildContext context, BoxConstraints constraints){
     int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;
-    return Column(
-      children: [
-        Expanded(
-          flex: 9,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Spacer(),
-              Expanded(flex: 5, child: PlayerDataUi(pplayer: 0)),
-              Spacer(),
-              Expanded(flex: 5, child: PlayerDataUi(pplayer: 1)),
-              Spacer(),
-            ],
-          ),
-        ),
-        Spacer(),
-        Expanded(
-          flex: 3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Spacer(),
-              Expanded(
-                flex: 1,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+    return ValueListenableBuilder<Stage>(
+        valueListenable: GameData.of(context)!.curStageNotifier,
+        builder: (context, stage, idk) => Column(
+              children: [
+                Expanded(
+                  flex: 9,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Spacer(),
+                      Expanded(flex: 5, child: PlayerDataUi(pplayer: 0)),
+                      Spacer(),
+                      Expanded(flex: 5, child: PlayerDataUi(pplayer: 1)),
+                      Spacer(),
+                    ],
                   ),
-                  onPressed: () => {
-                    NTP.now().then((value) {
-                      GameData.of(context)!.cur_stage.onClickCell(null, context);
-                      // GameData.of(context)?.newMovePlayed(context, value, null);
-                      // GameData.of(context)?.toggleTurn(context);
-                    })
-                  },
-                  child: const Text("Pass"),
                 ),
-              ),
-              Spacer(),
-              Expanded(
-                flex: 1,
-                child: ElevatedButton(
-                    onPressed: () => Clipboard.setData(ClipboardData(text: GameData.of(context)?.match.id)), child: const Text('game id')),
-              ),
-              Spacer(),
-            ],
-          ),
-        ),
-        Spacer(),
-      ],
-    );
+                Spacer(),
+                Expanded(
+                  flex: 3,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Spacer(),
+                      // GameData.of(context)!.cur_stage.buttons()[0],
+                      GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? const Accept() : const Pass(),
+                      Spacer(),
+                      GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? const ContinueGame() : const CopyId(),
+                      // GameData.of(context)!.cur_stage.buttons()[1],
+                      Spacer(),
+                    ],
+                  ),
+                ),
+                Spacer(),
+              ],
+            ));
   }
 }
 
@@ -126,6 +116,86 @@ class _OnlineCountdownTimerState extends State<OnlineCountdownTimer> {
       children: [
         Text((widget.time.toString())),
       ],
+    );
+  }
+}
+
+class Pass extends StatelessWidget {
+  const Pass({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: 1,
+      child: ElevatedButton(
+        style: ButtonStyle(
+          foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+        ),
+        onPressed: () => {
+          NTP.now().then((value) {
+            GameData.of(context)!.cur_stage.onClickCell(null, context);
+            // GameData.of(context)?.newMovePlayed(context, value, null);
+            // GameData.of(context)?.toggleTurn(context);
+          })
+        },
+        child: const Text("Pass"),
+      ),
+    );
+  }
+}
+
+class Accept extends StatelessWidget {
+  const Accept({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ButtonStyle(
+        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+      ),
+      onPressed: () {
+        MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(true);
+        // GameData.of(context).acceptFinal();
+        MultiplayerData.of(context)!
+            .curGameReferences!
+            .finalRemovedClusters
+            .set(GameMatch.removedClusterToJson(ScoreCalculation.of(context)!.virtualRemovedCluster));
+
+        ScoreCalculation.of(context)!.stoneRemovalAccepted.add(GameData.of(context)!.getClientPlayer(context) as int);
+        ScoreCalculation.of(context)!.onGameEnd(context, ScoreCalculation.of(context)!.virtualRemovedCluster);
+      },
+      child: const Text("Accept"),
+    );
+  }
+}
+
+class ContinueGame extends StatelessWidget {
+  const ContinueGame({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ButtonStyle(
+        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+      ),
+      onPressed: () {
+        MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(false);
+        // GameData.of(context).acceptFinal();
+        MultiplayerData.of(context)!.curGameReferences!.finalRemovedClusters.remove();
+      },
+      child: const Text("Continue Game"),
+    );
+  }
+}
+
+class CopyId extends StatelessWidget {
+  const CopyId({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: 1,
+      child: ElevatedButton(onPressed: () => Clipboard.setData(ClipboardData(text: GameData.of(context)?.match.id)), child: const Text("game id")),
     );
   }
 }

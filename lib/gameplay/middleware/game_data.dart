@@ -23,11 +23,10 @@ class GameData extends InheritedWidget {
   bool hasGameStarted = false;
   onGameStart(context) {
     assert(match != null);
-    GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
     GameData.of(context)!.curStageNotifier.value = GameplayStage();
     if (!GameData.of(context)!.hasGameStarted) {
       hasGameStarted = true;
-      StoneLogic.of(context)?.fetchNewStoneFromDB(context);
+      // StoneLogic.of(context)?.fetchNewStoneFromDB(context);
     }
   }
 
@@ -86,7 +85,7 @@ class GameData extends InheritedWidget {
 
       lastMoveDateTime[turn] = (TimeAndDuration(lastMoveDateTime[turn]?.datetime, durationAfterTimeElapsedCorrection));
 
-      GameData.of(context)!.updateController.add(List<TimeAndDuration>.from(lastMoveDateTime));
+      updateController.add(List<TimeAndDuration>.from(lastMoveDateTime));
     });
   }
 
@@ -153,6 +152,7 @@ class GameData extends InheritedWidget {
     return MultiplayerData.of(context)?.database.child('game').child(match.id);
   }
 
+  // FIXME: what does it mean by `current client not found` maybe int? can just be int
   int? getRemotePlayer(BuildContext context) {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
@@ -165,6 +165,7 @@ class GameData extends InheritedWidget {
     }
   }
 
+  // FIXME: what does it mean by `current client not found` maybe int? can just be int
   int? getClientPlayer(BuildContext context) {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;

@@ -53,6 +53,12 @@ class GameDatabaseReferences {
   DatabaseReference get time => thisGame.child("time");
   DatabaseReference get turn => thisGame.child("turn");
   DatabaseReference get removedClusters => thisGame.child("removedClusters");
-  DatabaseReference? myRemovedCluster(context) => removedClusters.child(GameData.of(context)!.getClientPlayer(context).toString());
-  DatabaseReference remoteRemovedCluster(context) => removedClusters.child(GameData.of(context)!.getRemotePlayer(context).toString());
+
+  DatabaseReference get gameEndData => thisGame.child("gameEndData");
+  DatabaseReference get finalRemovedClusters => gameEndData.child("finalRemovedClusters");
+  DatabaseReference get finalClusterConfirmation => gameEndData.child("finalClusterConfirmation");
+  DatabaseReference finalOpponentConfirmation(context) =>
+      gameEndData.child("finalClusterConfirmation").child(GameData.of(context)!.getRemotePlayer(context).toString());
+  DatabaseReference finalOurConfirmation(context) =>
+      gameEndData.child("finalClusterConfirmation").child(GameData.of(context)!.getClientPlayer(context).toString());
 }

@@ -4,30 +4,48 @@ import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
+import 'package:go/gameplay/stages/game_end_stage.dart';
+import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
+import 'package:go/models/game_match.dart';
 import 'package:go/playfield/stone.dart';
+import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/utils/position.dart';
 
+// class ScoreCalculationStage extends Stage<ScoreCalculationStage> {
 class ScoreCalculationStage extends Stage {
-  int blackScore = 0;
-  int whiteScore = 0;
-  BuildContext? _context;
   var removedClusterSubscription;
-  get context => _context;
+  var opponentConfirmationStream;
+  //get context => _context;
+
+  @override
+  // TODO: implement stage
+  ScoreCalculationStage? get stage => this;
+  @override
+  void initializeWhenAllMiddlewareAvailable(context) {
+    GameData.of(context)?.match.finalRemovedCluster.forEach((element) {
+      ScoreCalculation.of(context)!.virtualRemovedCluster.add(StoneLogic.of(context)!.playground_Map[element]!.value!.cluster);
+    });
+    ScoreCalculation.of(context)!.calculateScore(context);
+  }
 
   ScoreCalculationStage(context) {
-    _context = context;
     GameData.of(context)?.timerController[0].pause();
     GameData.of(context)?.timerController[1].pause();
     ScoreCalculation.of(context)!.calculateScore(context);
-
-    removedClusterSubscription = removedClusterSubscription ?? ScoreCalculation.of(context)!.listenForRemovedCluster(context);
+    removedClusterSubscription = listenForRemovedCluster(context);
+    opponentConfirmationStream = listenForOpponentConfirmation(context);
   }
 
   @override
-  Widget drawCell(Position position, Stone? stone) {
+  List<Widget> buttons() {
+    return [Accept(), CopyId()];
+  }
+
+  @override
+  Widget drawCell(Position position, Stone? stone, BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: ScoreCalculation.of(_context!)!.areaMap[position]!,
+        valueListenable: ScoreCalculation.of(context)!.areaMap[position]!,
         builder: (context, Area? dyn, wid) {
           return dyn?.owner != null
               ? Center(
@@ -49,12 +67,8 @@ class ScoreCalculationStage extends Stage {
               : () {
                   return stone != null
                       ? (Stone stone) {
-                          if (_context != null) {
-                            if (ScoreCalculation.of(_context!)!.virtualRemovedCluster.contains(stone.cluster)) {
-                              return Stone(stone.color!.withOpacity(0.6), position);
-                            } else {
-                              return stone;
-                            }
+                          if (ScoreCalculation.of(context)!.virtualRemovedCluster.contains(stone.cluster)) {
+                            return Stone(stone.color!.withOpacity(0.6), position);
                           } else {
                             return stone;
                           }
@@ -68,7 +82,6 @@ class ScoreCalculationStage extends Stage {
 
   @override
   onClickCell(Position? position, BuildContext context) {
-    _context = context;
     if (StoneLogic.of(context)!.playground_Map[position]?.value != null) {
       if (ScoreCalculation.of(context)!.virtualRemovedCluster.contains(StoneLogic.of(context)!.playground_Map[position]!.value!.cluster)) {
         var cluster = StoneLogic.of(context)!.playground_Map[position]!.value!.cluster;
@@ -84,10 +97,64 @@ class ScoreCalculationStage extends Stage {
     }
   }
 
+  List listenForRemovedCluster(context) {
+    return [
+      MultiplayerData.of(context)!.curGameReferences?.removedClusters.onChildAdded.listen((event) {
+        ScoreCalculation.of(context)
+            ?.virtualRemovedCluster
+            .add(StoneLogic.of(context)!.playground_Map[Position.fromString(event.snapshot.key as String)]?.value?.cluster as Cluster);
+
+        ScoreCalculation.of(context)?.calculateScore(context);
+      }),
+      MultiplayerData.of(context)!.curGameReferences?.removedClusters.onChildRemoved.listen((event) {
+        if (StoneLogic.of(context)!.playground_Map[Position.fromString(event.snapshot.key as String)]?.value?.cluster != null) {
+          ScoreCalculation.of(context)
+              ?.virtualRemovedCluster
+              .remove(StoneLogic.of(context)!.playground_Map[Position.fromString(event.snapshot.key as String)]?.value?.cluster as Cluster);
+
+          ScoreCalculation.of(context)?.calculateScore(context);
+        }
+      })
+    ];
+  }
+
+  listenForOpponentConfirmation(context) {
+    return MultiplayerData.of(context)!.curGameReferences?.finalOpponentConfirmation(context).onValue.listen((event) {
+      if (event.snapshot.value == true) {
+        listenForGameEndRequest(context);
+      } else if (event.snapshot.value == false) {
+        GameData.of(context)!.cur_stage = GameplayStage();
+      }
+    });
+  }
+
+  listenForGameEndRequest(context) {
+    // return MultiplayerData.of(context)!.curGameReferences?.runStatus.onValue.listen((event) {
+    MultiplayerData.of(context)!.curGameReferences?.finalRemovedClusters.get().then((cluster) {
+      Set<Cluster> opponentsCluster = GameData.of(context)!.match.removedClusterFromJson(cluster.value, context);
+
+      ScoreCalculation.of(context)!.virtualRemovedCluster = opponentsCluster;
+      ScoreCalculation.of(context)!.calculateScore(context);
+      ScoreCalculation.of(context)!.stoneRemovalAccepted.add(GameData.of(context)!.getRemotePlayer(context) as int);
+
+      ScoreCalculation.of(context)!.onGameEnd(context, opponentsCluster);
+      // bool declareResult = true;
+      // opponentsCluster.forEach((element) {
+      //   if (!ScoreCalculation.of(context)!.virtualRemovedCluster.contains(element)) {
+      //     declareResult = false;
+      //   }
+      // });
+      // if (opponentsCluster.length != ScoreCalculation.of(context)?.virtualRemovedCluster.length) {
+      //   declareResult = false;
+      // }
+    });
+  }
+
   @override
   disposeStage() {
     removedClusterSubscription.forEach((element) {
       element.cancel();
     });
+    opponentConfirmationStream.cancel();
   }
 }

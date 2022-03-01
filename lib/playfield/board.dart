@@ -46,41 +46,34 @@ class _BoardState extends State<Board> {
     return Center(
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          return StoneLogic(
-            playgroundMap: widget.playgroundMap,
-            rows: widget.rows,
-            cols: widget.cols,
-            mChild: ScoreCalculation(
-              widget.rows,
-              widget.cols,
-              mChild: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  print("${constraints.maxHeight}, ${constraints.maxWidth}");
-                  return Stack(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
-                        child: AspectRatio(
-                          aspectRatio: 1.0,
-                          child: Container(
-                            height: constraints.maxHeight,
-                            width: constraints.maxWidth,
-                            //color: Colors.black,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(image: AssetImage(Constants.assets['board']!), fit: BoxFit.fill),
-                            ),
-                          ),
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              print("${constraints.maxHeight}, ${constraints.maxWidth}");
+              return Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
+                    child: AspectRatio(
+                      aspectRatio: 1.0,
+                      child: Container(
+                        height: constraints.maxHeight,
+                        width: constraints.maxWidth,
+                        //color: Colors.black,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(image: AssetImage(Constants.assets['board']!), fit: BoxFit.fill),
                         ),
                       ),
-                      BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset)),
-                      StoneLayoutGrid(
-                        GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+                    ),
+                  ),
+                  BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset)),
+                  StoneLayoutGrid(
+                    GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset),
+                  ),
+                ],
+              );
+            },
+            //   ),
+            // ),
           );
         },
       ),
@@ -136,7 +129,6 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
 
   @override
   Widget build(BuildContext context) {
-    StoneLogic.of(context)!.fetchNewStoneFromDB(context);
     return ValueListenableBuilder<Stage>(
         valueListenable: GameData.of(context)!.curStageNotifier,
         builder: (context, stage, idk) => GridView.builder(

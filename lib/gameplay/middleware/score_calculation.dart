@@ -1,9 +1,12 @@
 import 'package:firebase_database/ui/utils/stream_subscriber_mixin.dart';
 import 'package:flutter/widgets.dart';
+import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
+import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/position.dart';
+import 'package:go/constants/constants.dart' as Constants;
 
 import '../../utils/position.dart';
 import 'stone_logic.dart';
@@ -11,10 +14,21 @@ import 'stone_logic.dart';
 class ScoreCalculation extends InheritedWidget {
   final Map<Position, ValueNotifier<Area?>> areaMap = {};
   final List<Cluster> clusterEncountered = [];
+  List<int> _scores = [];
+
+  // Map<int,bool>
+  List<int> stoneRemovalAccepted = [];
 
   BuildContext? _context;
   Map<Position, Stone?> virtualPlaygroundMap = {};
   Set<Cluster> virtualRemovedCluster = {};
+
+  // GETTERS
+  List<int> scores(context) {
+    if (_scores.isNotEmpty) return _scores;
+    calculateScore(context);
+    return _scores;
+  }
 
   ScoreCalculation(rows, cols, {required Widget mChild}) : super(child: mChild) {
     for (int i = 0; i < rows; i++) {
@@ -24,7 +38,15 @@ class ScoreCalculation extends InheritedWidget {
     }
   }
 
+  onGameEnd(context, removedCluster) {
+    if (stoneRemovalAccepted.length == 2) {
+      GameData.of(context)!.cur_stage = GameEndStage(context);
+      MultiplayerData.of(context)!.curGameReferences!.runStatus.set(false);
+    }
+  }
+
   calculateScore(BuildContext context) {
+    _context = context;
     clusterEncountered.clear();
 
     for (int i = 0; i < StoneLogic.of(context)!.rows; i++) {
@@ -41,7 +63,6 @@ class ScoreCalculation extends InheritedWidget {
       }
     }
 
-    _context = context;
     // const Position startPos = Position(0, 0);
     // List<Area> result = [];
 
@@ -81,8 +102,13 @@ class ScoreCalculation extends InheritedWidget {
         }
       }
     }
-
+    _scores = [0, 0];
     // print(startArea);
+    areaMap.forEach((key, value) {
+      if (value.value?.owner != null) {
+        _scores[Constants.playerColors.indexWhere((element) => element == value.value?.owner)] += 1;
+      }
+    });
 
     return areaMap;
 
@@ -149,25 +175,4 @@ class ScoreCalculation extends InheritedWidget {
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
 
   static ScoreCalculation? of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<ScoreCalculation>();
-
-  List listenForRemovedCluster(context) {
-    return [
-      MultiplayerData.of(context)!.curGameReferences?.removedClusters.onChildAdded.listen((event) {
-        ScoreCalculation.of(context)
-            ?.virtualRemovedCluster
-            .add(StoneLogic.of(context)!.playground_Map[Position.fromString(event.snapshot.key as String)]?.value?.cluster as Cluster);
-
-        ScoreCalculation.of(context)?.calculateScore(context);
-      }),
-      MultiplayerData.of(context)!.curGameReferences?.removedClusters.onChildRemoved.listen((event) {
-        if (StoneLogic.of(context)!.playground_Map[Position.fromString(event.snapshot.key as String)]?.value?.cluster != null) {
-          ScoreCalculation.of(context)
-              ?.virtualRemovedCluster
-              .remove(StoneLogic.of(context)!.playground_Map[Position.fromString(event.snapshot.key as String)]?.value?.cluster as Cluster);
-
-          ScoreCalculation.of(context)?.calculateScore(context);
-        }
-      })
-    ];
-  }
 }

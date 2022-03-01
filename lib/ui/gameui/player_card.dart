@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
+import 'package:go/gameplay/middleware/score_calculation.dart';
+import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
@@ -27,6 +29,12 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                   GameData.of(context)?.timerController[widget.player],
                   pplayer: widget.player,
                 ),
+          GameData.of(context)!.cur_stage.stage is GameEndStage
+              ? Text(
+                  "${ScoreCalculation.of(context)!.scores(context)[widget.player]}",
+                  style: TextStyle(color: Constants.playerColors[widget.player == 0 ? 1 : 0], fontSize: 25),
+                )
+              : SizedBox.shrink(),
         ],
       ),
     );

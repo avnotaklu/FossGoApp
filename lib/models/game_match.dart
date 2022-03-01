@@ -2,6 +2,8 @@ import 'dart:developer';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:go/gameplay/middleware/score_calculation.dart';
+import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/core_utils.dart';
 import 'package:go/utils/database_strings.dart';
@@ -17,34 +19,35 @@ class GameMatch {
   DateTime? startTime;
 
   /// this is true when game is being played GameplayStage and ScoreCalculationStage both have runStatus of true. BeforeGameStart has runStatus of false.
-  bool runStatus = false;
-
+  bool runStatus = true;
 
   Map<int?, String?> uid = {};
   int rows;
   int cols;
+
   /// moves is the list of moves played. In database position are stored in {x y} format and iff move is pass then it is stored as "null"
   List<Position?> moves = [];
+
   /// playground map stores the entire map of stones. In database this is stored in {player cluster freedoms} format to avoid rebuilding entire table of freedoms for each cluster on each load
   Map<Position, Stone?> playgroundMap = {}; // int gives player id
   String id;
   int time;
   int _turn = 0;
+  Set<Position> finalRemovedCluster = {};
 
   GameMatch({required this.rows, required this.cols, required this.time, required this.id, required this.uid});
 
   GameMatch.fromJson(Map<dynamic, dynamic> json)
-      : //startTime = DateTime.parse(json['startTime']),
-        rows = int.parse(json['rows']),
+      : rows = int.parse(json['rows']),
         cols = int.parse(json['cols']),
         time = int.parse(json['time']),
         id = json['id'],
-        // uid = {0: json['uid'][0].toString(), 1: json['uid'][1].toString()},
-//         uid = Map.fromIterable(json['uid'], key: (v) => v[0], value: (v) => v[1]);
-        // uid = {json['uid'].keys : json['uid'].values},
         uid = uidFromJson(json['uid']),
         runStatus = json['runStatus'] == "true" ? true : false,
         _turn = int.parse(json['turn']) {
+    json['gameEndData']?['finalRemovedClusters']?.forEach((v) {
+      finalRemovedCluster.add(Position.fromString(v));
+    });
     json['moves']?.forEach((v) {
       if (v != null) {
         if (v == "null") {
@@ -59,6 +62,7 @@ class GameMatch {
       lastTimeAndDate.add(TimeAndDuration.fromString(v));
     });
 
+    playgroundMap.clear();
     Map<int?, Position?> clusterRefer = {};
     json['playgroundMap']?.forEach((k, v) {
       var currentClusterID = int.parse(v.split(' ')[1]);
@@ -124,6 +128,37 @@ class GameMatch {
     })); // TODO make sure element works in this line changed from json['uid'][id]
     result.removeWhere((key, value) => value == "null");
     return result;
+  }
+
+  static List<String> removedClusterToJson(Set<Cluster> clusters) {
+    List<String> result = [];
+    clusters.forEach((element) {
+      result.add(element.smallestPosition().toString());
+    });
+    return result;
+  }
+
+  Set<Cluster> removedClusterFromJson(clusters, context, [GameMatch? match]) {
+    Set<Cluster> result = {};
+    clusters?.forEach((i) {
+      // TODO: inside gamematch accessing data that's in match with inherited widgets shouldn't be a thing access playgroundMap of this match directly
+      var j;
+      try {
+        j = StoneLogic.of(context)!.playground_Map[Position.fromString(i)]!.value!.cluster;
+      } catch (Exception) {
+        j = match!.playgroundMap[i]!.cluster;
+      }
+      if (j != null) {
+        result.add(j);
+      }
+    });
+
+    return result;
+  }
+
+  static bool isRunning(runStatus) {
+    if (runStatus == "true") return true;
+    return false;
   }
 }
 

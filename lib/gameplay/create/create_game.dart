@@ -5,6 +5,7 @@ import 'package:go/gameplay/create/request_recieve.dart';
 import 'package:go/gameplay/create/request_send.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
@@ -41,7 +42,12 @@ class CreateGame extends StatelessWidget {
       // BOTH players have entered game in database
       assert(match != null);
       if (match?.uid.containsValue(MultiplayerData.of(context)?.curUser!.uid.toString()) ?? false) {
-        return Game(match as GameMatch, false, GameplayStage());
+        if (match!.runStatus == true) {
+          return Game(match as GameMatch, false, GameplayStage());
+        } else {
+          return Game(match as GameMatch, false, GameEndStage.fromScratch(context));
+          //return Game(match as GameMatch, false, GameplayStage());
+        }
       }
       return Container(
         child: const Text("Game has already been created and two players have already entered"),
