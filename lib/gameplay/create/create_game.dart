@@ -43,7 +43,7 @@ class CreateGame extends StatelessWidget {
       assert(match != null);
       if (match?.uid.containsValue(MultiplayerData.of(context)?.curUser!.uid.toString()) ?? false) {
         if (match!.runStatus == true) {
-          return Game(match as GameMatch, false, GameplayStage());
+          return Game(match as GameMatch, false, GameplayStage.fromScratch());
         } else {
           return Game(match as GameMatch, false, GameEndStage.fromScratch(context));
           //return Game(match as GameMatch, false, GameplayStage());

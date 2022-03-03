@@ -16,6 +16,7 @@ class GameEndStage extends Stage{
   GameEndStage.fromScratch(context) {}
 
   GameEndStage(context) {
+    // TODO: the constructor shouldn't contain any initializations or state related behaviour
     GameData.of(context)?.timerController[0].pause();
     GameData.of(context)?.timerController[1].pause();
     ScoreCalculation.of(context)!.calculateScore(context);

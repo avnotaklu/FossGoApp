@@ -9,28 +9,43 @@ import 'package:go/playfield/stone.dart';
 import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/utils/database_strings.dart';
 import 'package:go/utils/position.dart';
+import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
 
 // class GameplayStage extends Stage<GameplayStage> {
-class GameplayStage extends Stage{
+class GameplayStage extends Stage {
   var listenNewStone;
 
-  GameplayStage() {}
+  GameplayStage.fromScratch() {}
+
+  GameplayStage(context) {}
 
   @override
   GameplayStage get stage => this;
   @override
   void initializeWhenAllMiddlewareAvailable(context) {
+    GameData.of(context)?.match.finalRemovedCluster = {};
+    MultiplayerData.of(context)?.curGameReferences?.gameEndData.remove();
+    NTP.now().then((value) {
+      GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getClientPlayer(context) as int] =
+          TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getClientPlayer(context) as int]!.duration);
+      MultiplayerData.of(context)!
+          .curGameReferences!
+          .ourTimeAndDuration(context)
+          .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getClientPlayer(context) as int].toString());
+    });
+    GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
     listenNewStone = fetchNewStoneFromDB(context);
     ScoreCalculation.of(context)!.calculateScore(context);
   }
 
   fetchNewStoneFromDB(context) {
     print('hello');
-    return MultiplayerData.of(context)?.curGameReferences?.moves.onValue.listen((event) {
+    return MultiplayerData.of(context)?.curGameReferences?.moves.onChildAdded.listen((event) {
+      // FIXME: this todo is fixme
       // TODO: unnecessary listen move even when move is played by clientPlayer even though (StoneLogic.of(context)!.stoneAt(pos)  == null) stops it from doing anything stupid
-      print(GameData.of(context)!.listenNewMove);
-      final data = event.snapshot.value as List?;
+      // final data = event.snapshot.value as List?;
+      final data = <String>[event.snapshot.value as String];
       if (data?.last != null) {
         if (data?.last != "null") {
           final pos = Position(int.parse(data!.last!.split(' ')[0]), int.parse(data.last!.split(' ')[1]));
@@ -42,16 +57,21 @@ class GameplayStage extends Stage{
             }
           }
         } else {
-          if (data!.length > GameData.of(context)!.turn) {
+          if (int.parse(event.snapshot.key as String) + 1 > GameData.of(context)!.turn) {
             GameData.of(context)?.match.moves.add(null);
             GameData.of(context)?.toggleTurn(context);
+
+            MultiplayerData.of(context)?.curGameReferences?.moves.get().then((event) {
+              if ((event.value as List).reversed.elementAt(0) == "null" && (event.value as List).reversed.elementAt(1) == "null") {
+                GameData.of(context)!.cur_stage = ScoreCalculationStage(context);
+              }
+            });
           }
         }
-        if (data.reversed.elementAt(0) == "null" && data.reversed.elementAt(1) == "null") {
-          GameData.of(context)!.cur_stage = ScoreCalculationStage(context);
-        }
+        // // TODO: reimplement_with_cloud_functions or maybe that'll be overkill idk
+        // if (data?.last == "null") {
+        // }
       }
-      GameData.of(context)!.listenNewMove = false;
     });
   }
 
@@ -95,7 +115,17 @@ class GameplayStage extends Stage{
             mapRef!.update(playgroundMapToString(
                 Map<Position?, Stone?>.from(StoneLogic.of(context)!.playground_Map.map((key, value) => MapEntry(key, value.value)))));
           }
+
+          if (position == null) {
+            MultiplayerData.of(context)?.curGameReferences?.moves.get().then((event) {
+              if ((event.value as List).reversed.elementAt(0) == "null" && (event.value as List).reversed.elementAt(1) == "null") {
+                GameData.of(context)!.cur_stage = ScoreCalculationStage(context);
+              }
+            });
+          }
         });
+        // TODO: detect consequent nulls in better way now if you do null null then continue game and 1 more null would just take straight to scorecalculation instead 2 nulls are required again + this is crap way of doing it
+
       }
     }
   }
@@ -103,5 +133,6 @@ class GameplayStage extends Stage{
   @override
   disposeStage() {
     // TODO: implement disposeStage
+    listenNewStone.cancel();
   }
 }

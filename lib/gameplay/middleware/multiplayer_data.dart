@@ -46,6 +46,8 @@ class GameDatabaseReferences {
   DatabaseReference get moves => thisGame.child("moves");
   DatabaseReference get uid => thisGame.child("uid");
   DatabaseReference get lastTimeAndDuration => thisGame.child("lastTimeAndDuration");
+  DatabaseReference ourTimeAndDuration(context) => lastTimeAndDuration.child(GameData.of(context)!.getClientPlayer(context).toString());
+  DatabaseReference opponentTimeAndDuration(context) => lastTimeAndDuration.child(GameData.of(context)!.getRemotePlayer(context).toString());
   DatabaseReference get playgroundMap => thisGame.child("playgroundMap");
   DatabaseReference get rows => thisGame.child("rows");
   DatabaseReference get runStatus => thisGame.child("runStatus");

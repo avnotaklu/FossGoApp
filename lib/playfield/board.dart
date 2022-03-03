@@ -120,18 +120,10 @@ class StoneLayoutGrid extends StatefulWidget {
 }
 
 class _StoneLayoutGridState extends State<StoneLayoutGrid> {
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-    context.dependOnInheritedWidgetOfExactType<ScoreCalculation>();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Stage>(
-        valueListenable: GameData.of(context)!.curStageNotifier,
-        builder: (context, stage, idk) => GridView.builder(
+    return GridView.builder(
               shrinkWrap: true,
               padding: EdgeInsets.all(widget.info.stoneInset),
               itemCount: (widget.info.rows) * (widget.info.cols),
@@ -162,6 +154,6 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
                   ],
                 ),
               ),
-            ));
+            );
   }
 }

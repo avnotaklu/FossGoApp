@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
@@ -23,7 +24,8 @@ class GameData extends InheritedWidget {
   bool hasGameStarted = false;
   onGameStart(context) {
     assert(match != null);
-    GameData.of(context)!.curStageNotifier.value = GameplayStage();
+    // Stage changes from before start to gameplay
+    GameData.of(context)!.curStageNotifier.value = GameplayStage.fromScratch();
     if (!GameData.of(context)!.hasGameStarted) {
       hasGameStarted = true;
       // StoneLogic.of(context)?.fetchNewStoneFromDB(context);
@@ -51,7 +53,6 @@ class GameData extends InheritedWidget {
   }
 
   final GameMatch match;
-  bool listenNewMove = false;
 
   // GETTERS
   int get turn => match.turn;
@@ -59,7 +60,6 @@ class GameData extends InheritedWidget {
   Stage get cur_stage => curStageNotifier.value;
   set cur_stage(Stage stage) {
     cur_stage.disposeStage();
-
     curStageNotifier.value = stage;
   }
 
@@ -145,7 +145,6 @@ class GameData extends InheritedWidget {
     turn += 1;
     // turn = turn %2 == 0 ? 1 : 0;
     GameData.of(context)?.timerController[turn % 2].start();
-    listenNewMove = true;
   }
 
   DatabaseReference? getMatch(BuildContext context) {

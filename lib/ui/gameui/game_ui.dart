@@ -5,6 +5,7 @@ import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
+import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/playfield/game.dart';
@@ -54,42 +55,40 @@ class _GameUiState extends State<GameUi> {
     // return LayoutBuilder(
     // builder: (BuildContext context, BoxConstraints constraints){
     int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;
-    return ValueListenableBuilder<Stage>(
-        valueListenable: GameData.of(context)!.curStageNotifier,
-        builder: (context, stage, idk) => Column(
-              children: [
-                Expanded(
-                  flex: 9,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Spacer(),
-                      Expanded(flex: 5, child: PlayerDataUi(pplayer: 0)),
-                      Spacer(),
-                      Expanded(flex: 5, child: PlayerDataUi(pplayer: 1)),
-                      Spacer(),
-                    ],
-                  ),
-                ),
-                Spacer(),
-                Expanded(
-                  flex: 3,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Spacer(),
-                      // GameData.of(context)!.cur_stage.buttons()[0],
-                      GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? const Accept() : const Pass(),
-                      Spacer(),
-                      GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? const ContinueGame() : const CopyId(),
-                      // GameData.of(context)!.cur_stage.buttons()[1],
-                      Spacer(),
-                    ],
-                  ),
-                ),
-                Spacer(),
-              ],
-            ));
+    return Column(
+      children: [
+        Expanded(
+          flex: 9,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Spacer(),
+              Expanded(flex: 5, child: PlayerDataUi(pplayer: 0)),
+              Spacer(),
+              Expanded(flex: 5, child: PlayerDataUi(pplayer: 1)),
+              Spacer(),
+            ],
+          ),
+        ),
+        Spacer(),
+        Expanded(
+          flex: 3,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Spacer(),
+              // GameData.of(context)!.cur_stage.buttons()[0],
+              GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? const Accept() : const Pass(),
+              Spacer(),
+              GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? const ContinueGame() : const CopyId(),
+              // GameData.of(context)!.cur_stage.buttons()[1],
+              Spacer(),
+            ],
+          ),
+        ),
+        Spacer(),
+      ],
+    );
   }
 }
 
@@ -182,6 +181,7 @@ class ContinueGame extends StatelessWidget {
         MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(false);
         // GameData.of(context).acceptFinal();
         MultiplayerData.of(context)!.curGameReferences!.finalRemovedClusters.remove();
+        GameData.of(context)!.cur_stage = GameplayStage(context);
       },
       child: const Text("Continue Game"),
     );

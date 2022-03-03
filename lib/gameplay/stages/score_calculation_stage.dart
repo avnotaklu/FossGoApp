@@ -19,22 +19,22 @@ class ScoreCalculationStage extends Stage {
   //get context => _context;
 
   @override
-  // TODO: implement stage
   ScoreCalculationStage? get stage => this;
   @override
   void initializeWhenAllMiddlewareAvailable(context) {
     GameData.of(context)?.match.finalRemovedCluster.forEach((element) {
       ScoreCalculation.of(context)!.virtualRemovedCluster.add(StoneLogic.of(context)!.playground_Map[element]!.value!.cluster);
     });
-    ScoreCalculation.of(context)!.calculateScore(context);
-  }
 
-  ScoreCalculationStage(context) {
     GameData.of(context)?.timerController[0].pause();
     GameData.of(context)?.timerController[1].pause();
     ScoreCalculation.of(context)!.calculateScore(context);
     removedClusterSubscription = listenForRemovedCluster(context);
     opponentConfirmationStream = listenForOpponentConfirmation(context);
+    // ScoreCalculation.of(context)!.calculateScore(context);
+  }
+
+  ScoreCalculationStage(context) {
   }
 
   @override
@@ -123,7 +123,8 @@ class ScoreCalculationStage extends Stage {
       if (event.snapshot.value == true) {
         listenForGameEndRequest(context);
       } else if (event.snapshot.value == false) {
-        GameData.of(context)!.cur_stage = GameplayStage();
+
+        GameData.of(context)!.cur_stage = GameplayStage(context);
       }
     });
   }
@@ -152,6 +153,7 @@ class ScoreCalculationStage extends Stage {
 
   @override
   disposeStage() {
+    
     removedClusterSubscription.forEach((element) {
       element.cancel();
     });

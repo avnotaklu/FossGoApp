@@ -34,7 +34,7 @@ class StoneLogic extends InheritedWidget {
   }
 
   // Getters
-  Map<Position?, ValueNotifier<Stone?>> get playground_Map => _playgroundMap; // TODO maybe Position? can be just Position
+  Map<Position?, ValueNotifier<Stone?>> get playground_Map => _playgroundMap; // TODO:NP2 nullable_position_1 maybe Position? can be just Position see NP1
   get teststone => _teststone;
 
   // Database update
@@ -169,7 +169,7 @@ class StoneLogic extends InheritedWidget {
 
   // --- Deletion
   // Traversed key gives the empty freedom point position and value is the list of cluster that has recieved freedom from that point
-  Map<Position?, List<Cluster?>?> traversed = {null: null}; // TODO Find a way to do this without making this data member
+  Map<Position?, List<Cluster?>?> traversed = {null: null}; // TODO: Find a way to do this without making this data member
   deleteStonesInDeletableCluster(Position curpos, Position neighbor) {
     if (_playgroundMap[neighbor]?.value?.color != _playgroundMap[curpos]?.value?.color && _playgroundMap[neighbor]?.value?.cluster.freedoms == 1) {
       for (var i in getClusterFromPosition(neighbor).data) {
@@ -236,6 +236,9 @@ class StoneLogic extends InheritedWidget {
       // var tmp2 = tmp1.cast<int,dynamic>;
 
       GameData.of(context)?.match.moves.add(position);
+      //TODO:NP2 nullable_position_1 key! is another proof that maybe Position? can just be Position see NP1
+      GameData.of(context)?.match.playgroundMap = playground_Map.map((key, value) => MapEntry(key!, value.value));
+
       return true;
     }
 

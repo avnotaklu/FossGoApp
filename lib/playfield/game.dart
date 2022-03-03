@@ -101,11 +101,9 @@ class Game extends StatelessWidget {
                       GameData.of(context)!.onGameStart(context);
                       setState(() => match = match);
                     });
-                  }
+                  } else {
+                    // if game enterable start timer of black
 
-                  // if game enterable start timer of black
-
-                  if (GameData.of(context)!.match.startTime == null) {
                     MultiplayerData.of(context)?.curGameReferences?.startTime.onValue.listen((snaphot) {
                       match.startTime = DateTime.parse(snaphot.snapshot.value as String);
                       match.lastTimeAndDate.clear();
@@ -123,7 +121,7 @@ class Game extends StatelessWidget {
                   controller.close();
                 }
               });
-            } else {
+            } else if (match.runStatus == false) {
               GameData.of(context)?.timerController[0].pause();
               GameData.of(context)?.timerController[1].pause();
             }
@@ -136,7 +134,11 @@ class Game extends StatelessWidget {
               mChild: ScoreCalculation(
                 match.rows,
                 match.cols,
-                mChild: WrapperGame(match, finalPlaygroundMap),
+                mChild: ValueListenableBuilder<Stage>(
+        valueListenable: GameData.of(context)!.curStageNotifier,
+        builder: (context, stage, idk) => 
+                WrapperGame(match, finalPlaygroundMap),
+                ),
               ),
             );
           },
@@ -157,6 +159,12 @@ class WrapperGame extends StatefulWidget {
 }
 
 class _WrapperGameState extends State<WrapperGame> {
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     GameData.of(context)!.cur_stage.initializeWhenAllMiddlewareAvailable(context);
