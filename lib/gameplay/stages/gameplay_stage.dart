@@ -26,14 +26,6 @@ class GameplayStage extends Stage {
   void initializeWhenAllMiddlewareAvailable(context) {
     GameData.of(context)?.match.finalRemovedCluster = {};
     MultiplayerData.of(context)?.curGameReferences?.gameEndData.remove();
-    NTP.now().then((value) {
-      GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getClientPlayer(context) as int] =
-          TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getClientPlayer(context) as int]!.duration);
-      MultiplayerData.of(context)!
-          .curGameReferences!
-          .ourTimeAndDuration(context)
-          .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getClientPlayer(context) as int].toString());
-    });
     GameData.of(context)!.timerController[GameData.of(context)!.getPlayerWithTurn.turn].start();
     listenNewStone = fetchNewStoneFromDB(context);
     ScoreCalculation.of(context)!.calculateScore(context);
@@ -62,7 +54,20 @@ class GameplayStage extends Stage {
             GameData.of(context)?.toggleTurn(context);
 
             MultiplayerData.of(context)?.curGameReferences?.moves.get().then((event) {
-              if ((event.value as List).reversed.elementAt(0) == "null" && (event.value as List).reversed.elementAt(1) == "null") {
+              var prev;
+              bool change_stage = false;
+              for (var i in (event.value as List).reversed) {
+                if (prev == null) {
+                  prev = i;
+                  continue;
+                }
+                if (i == "null" && prev == "null") {
+                  change_stage = !change_stage;
+                } else {
+                  break;
+                }
+              }
+              if (change_stage) {
                 GameData.of(context)!.cur_stage = ScoreCalculationStage(context);
               }
             });
@@ -118,7 +123,20 @@ class GameplayStage extends Stage {
 
           if (position == null) {
             MultiplayerData.of(context)?.curGameReferences?.moves.get().then((event) {
-              if ((event.value as List).reversed.elementAt(0) == "null" && (event.value as List).reversed.elementAt(1) == "null") {
+              var prev;
+              bool change_stage = false;
+              for (var i in (event.value as List).reversed) {
+                if (prev == null) {
+                  prev = i;
+                  continue;
+                }
+                if (i == "null" && prev == "null") {
+                  change_stage = !change_stage;
+                } else {
+                  break;
+                }
+              }
+              if (change_stage) {
                 GameData.of(context)!.cur_stage = ScoreCalculationStage(context);
               }
             });

@@ -63,18 +63,18 @@ class _GameTimerState extends State<GameTimer> {
           .then((dataEvent) {
         if (changeEvent.snapshot.value != null) {
           if (dataEvent.value != null) {
-              if (GameData.of(context)!.turn % 2 != widget.player) {
-                List<TimeAndDuration> lastMoveDateTime = [];
-                for (var element in (dataEvent.value as List)) {
-                  lastMoveDateTime.add(TimeAndDuration.fromString(element));
-                }
-
-                GameData.of(context)!
-                    .correctTurnPlayerTimeAndAddToUpdateController(GameData.of(context)!.getPlayerWithTurn.turn, context, lastMoveDateTime);
-
-                GameData.of(context)?.match.lastTimeAndDate = [...lastMoveDateTime];
-                // GameData.of(context)!.updateController.add(lastMoveDateTime);
+            if (GameData.of(context)!.turn % 2 != widget.player) {
+              List<TimeAndDuration> lastMoveDateTime = [];
+              for (var element in (dataEvent.value as List)) {
+                lastMoveDateTime.add(TimeAndDuration.fromString(element));
               }
+
+              GameData.of(context)!
+                  .correctTurnPlayerTimeAndAddToUpdateController(GameData.of(context)!.getPlayerWithTurn.turn, context, lastMoveDateTime);
+
+              GameData.of(context)?.match.lastTimeAndDate = [...lastMoveDateTime];
+              // GameData.of(context)!.updateController.add(lastMoveDateTime);
+            }
           }
         }
       });
@@ -94,6 +94,12 @@ class _GameTimerState extends State<GameTimer> {
       // }
       // });
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
 
   @override

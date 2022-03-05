@@ -46,6 +46,9 @@ class GameData extends InheritedWidget {
   })  : _players = pplayer,
         curStageNotifier = ValueNotifier(curStage),
         super(child: mChild) {
+    // if (match.lastTimeAndDate.isNotEmpty) {
+    //   updateController.add(match.lastTimeAndDate as List<TimeAndDuration>);
+    // }
     timers = [
       PlayerCountdownTimer(controller: _controller[0], time: Duration(seconds: match.time), player: 0),
       PlayerCountdownTimer(controller: _controller[1], time: Duration(seconds: match.time), player: 1)

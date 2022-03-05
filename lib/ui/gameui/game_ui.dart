@@ -14,6 +14,7 @@ import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/utils/player.dart';
 import 'package:go/utils/position.dart';
+import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 import 'package:timer_count_down/timer_controller.dart';
@@ -181,7 +182,30 @@ class ContinueGame extends StatelessWidget {
         MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(false);
         // GameData.of(context).acceptFinal();
         MultiplayerData.of(context)!.curGameReferences!.finalRemovedClusters.remove();
-        GameData.of(context)!.cur_stage = GameplayStage(context);
+
+        NTP.now().then((value) {
+
+
+          GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn] =
+              TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn]!.duration);
+          MultiplayerData.of(context)!
+              .curGameReferences!
+              .lastTimeAndDuration
+              .child(GameData.of(context)!.getPlayerWithoutTurn.turn.toString())
+              .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn].toString());
+
+
+
+          GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn] =
+              TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn]!.duration);
+          MultiplayerData.of(context)!
+              .curGameReferences!
+              .lastTimeAndDuration
+              .child(GameData.of(context)!.getPlayerWithTurn.turn.toString())
+              .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn].toString());
+
+          GameData.of(context)!.cur_stage = GameplayStage(context);
+        });
       },
       child: const Text("Continue Game"),
     );
