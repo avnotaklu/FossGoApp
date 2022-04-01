@@ -1,6 +1,7 @@
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/gameplay/create/request_recieve.dart';
 import 'package:go/gameplay/create/request_send.dart';
 import 'package:go/gameplay/create/utils.dart';
@@ -12,6 +13,7 @@ import 'package:go/playfield/stone.dart';
 import 'package:go/services/auth_bloc.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/utils/position.dart';
+import 'package:go/utils/widgets/buttons.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 
@@ -56,18 +58,10 @@ class CreateGame extends StatelessWidget {
 
     if ((match?.bothPlayers.any((element) => element != null) ?? false) && match?.bothPlayers.contains(null)) {
       // One Player, Sender has entered game in database
-      return ElevatedButton(
-          onPressed: () => Navigator.pushReplacement(
-                context,
-                MaterialPageRoute<void>(
-                    builder: (BuildContext context) => RequestRecieve(
-                          match: match as GameMatch,
-                          newPlace: newPlace,
-                        )),
-              ),
-          child: Container(
-            child: const Text("Enter Game"),
-          ));
+      return RequestRecieve(
+        match: match as GameMatch,
+        newPlace: newPlace,
+      );
     }
 
     var curBoardSize = Constants.boardsizes[0];
@@ -106,11 +100,17 @@ class CreateGame extends StatelessWidget {
                         flex: 1,
                         child: DropdownButton(
                           value: curBoardSize,
-                          hint: const Text("Board Size"),
+                          hint: Text(
+                            "Board Size",
+                            style: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+                          ),
                           items: Constants.boardsizes.map((String items) {
                             return DropdownMenuItem(
                               value: items,
-                              child: Text(items),
+                              child: Text(
+                                items,
+                                style: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+                              ),
                             );
                           }).toList(),
                           onChanged: (String? newValue) {
@@ -125,8 +125,11 @@ class CreateGame extends StatelessWidget {
                         child: Row(children: [
                           Expanded(
                             flex: 2,
-                            child: ElevatedButton(
-                              child: Container(child: const Text("Time")),
+                            child: BadukButton(
+                              child: Text(
+                                "Time",
+                                style: TextStyle(color: defaultTheme.mainTextColor, fontSize: 15),
+                              ),
                               onPressed: () => showDialog(
                                 context: context,
                                 builder: (context) => Center(
@@ -150,13 +153,13 @@ class CreateGame extends StatelessWidget {
                 ),
               )),
       // EnterGameButton(match, newPlace),
-      ElevatedButton(
+      BadukButton(
         onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (BuildContext context) {
           match = GameMatch(id: newPlace.key.toString(), rows: mRows, cols: mCols, time: mTime, uid: mUid);
           newPlace.set(match?.toJson());
           return RequestSend(match!);
         })),
-        child: const Text("Create"),
+        child: Text("Create"),
       ),
     ]));
   }

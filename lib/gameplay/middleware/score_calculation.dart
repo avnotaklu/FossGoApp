@@ -1,10 +1,13 @@
 import 'package:firebase_database/ui/utils/stream_subscriber_mixin.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/playfield/stone.dart';
+import 'package:go/utils/player.dart';
 import 'package:go/utils/position.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
@@ -14,7 +17,7 @@ import 'stone_logic.dart';
 class ScoreCalculation extends InheritedWidget {
   final Map<Position, ValueNotifier<Area?>> areaMap = {};
   final List<Cluster> clusterEncountered = [];
-  List<int> _scores = [];
+  List<int> _territoryScores = [];
 
   // Map<int,bool>
   List<int> stoneRemovalAccepted = [];
@@ -23,11 +26,24 @@ class ScoreCalculation extends InheritedWidget {
   Map<Position, Stone?> virtualPlaygroundMap = {};
   Set<Cluster> virtualRemovedCluster = {};
 
+  Player getWinner(context) {
+    GameData.of(context)!.getPlayerWithTurn.score = _territoryScores[GameData.of(context)!.getPlayerWithTurn.turn] +
+        StoneLogic.of(context)!.prisoners[GameData.of(context)!.getPlayerWithTurn.turn].value +
+        (playerColors[GameData.of(context)!.getPlayerWithTurn.turn] == Colors.white ? 6.5 : 0);
+    GameData.of(context)!.getPlayerWithoutTurn.score = _territoryScores[GameData.of(context)!.getPlayerWithoutTurn.turn] +
+        StoneLogic.of(context)!.prisoners[GameData.of(context)!.getPlayerWithoutTurn.turn].value +
+        (playerColors[GameData.of(context)!.getPlayerWithoutTurn.turn] == Colors.white ? 6.5 : 0);
+    Player winner = (GameData.of(context)!.getPlayerWithTurn.score > GameData.of(context)!.getPlayerWithoutTurn.score)
+        ? GameData.of(context)!.getPlayerWithTurn
+        : GameData.of(context)!.getPlayerWithoutTurn;
+    return winner;
+  }
+
   // GETTERS
   List<int> scores(context) {
-    if (_scores.isNotEmpty) return _scores;
+    if (_territoryScores.isNotEmpty) return _territoryScores;
     calculateScore(context);
-    return _scores;
+    return _territoryScores;
   }
 
   ScoreCalculation(rows, cols, {required Widget mChild}) : super(child: mChild) {
@@ -102,11 +118,11 @@ class ScoreCalculation extends InheritedWidget {
         }
       }
     }
-    _scores = [0, 0];
+    _territoryScores = [0, 0];
     // print(startArea);
     areaMap.forEach((key, value) {
       if (value.value?.owner != null) {
-        _scores[Constants.playerColors.indexWhere((element) => element == value.value?.owner)] += 1;
+        _territoryScores[Constants.playerColors.indexWhere((element) => element == value.value?.owner)] += 1;
       }
     });
 

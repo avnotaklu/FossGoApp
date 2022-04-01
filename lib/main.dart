@@ -38,9 +38,26 @@ class MyApp extends StatelessWidget {
               return MultiplayerData(
                 curUser: snapshot.data,
                 database: FirebaseDatabase.instance.reference(),
-                mChild: MaterialApp(home: snapshot.data != null ? HomePage() : SignIn(), routes: <String, WidgetBuilder>{
-                  '/HomePage': (BuildContext context) => HomePage(),
-                }),
+                mChild: MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    home: DefaultTextStyle(
+                      style: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+                      child: snapshot.data != null ? HomePage() : SignIn(),
+                    ),
+                    theme: ThemeData(
+                      // Define the default brightness and colors.
+                      brightness: Brightness.dark,
+                      primaryColor: Colors.red[800],
+                      textTheme: TextTheme(
+                        button: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+                      ),
+                      buttonTheme: ButtonThemeData(
+                        buttonColor: Constants.defaultTheme.mainHighlightColor,
+                      ),
+                    ),
+                    routes: <String, WidgetBuilder>{
+                      '/HomePage': (BuildContext context) => HomePage(),
+                    }),
               );
             }));
   }

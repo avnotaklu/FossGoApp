@@ -38,9 +38,9 @@ class GameplayStage extends Stage {
       // TODO: unnecessary listen move even when move is played by clientPlayer even though (StoneLogic.of(context)!.stoneAt(pos)  == null) stops it from doing anything stupid
       // final data = event.snapshot.value as List?;
       final data = <String>[event.snapshot.value as String];
-      if (data?.last != null) {
-        if (data?.last != "null") {
-          final pos = Position(int.parse(data!.last!.split(' ')[0]), int.parse(data.last!.split(' ')[1]));
+      if (data.last != null) {
+        if (data.last != "null") {
+          final pos = Position(int.parse(data.last.split(' ')[0]), int.parse(data.last.split(' ')[1]));
           if (StoneLogic.of(context)!.stoneAt(pos) == null) {
             if (StoneLogic.of(context)!.handleStoneUpdate(pos, context)) {
               print("illegel");
@@ -82,7 +82,7 @@ class GameplayStage extends Stage {
 
   @override
   List<Widget> buttons() {
-    return [Pass(), CopyId()];
+    return [Pass(), Resign()];
   }
 
   @override
@@ -124,19 +124,19 @@ class GameplayStage extends Stage {
           if (position == null) {
             MultiplayerData.of(context)?.curGameReferences?.moves.get().then((event) {
               var prev;
-              bool change_stage = false;
+              bool hasPassedTwice = false;
               for (var i in (event.value as List).reversed) {
                 if (prev == null) {
                   prev = i;
                   continue;
                 }
                 if (i == "null" && prev == "null") {
-                  change_stage = !change_stage;
+                  hasPassedTwice = !hasPassedTwice;
                 } else {
                   break;
                 }
               }
-              if (change_stage) {
+              if (hasPassedTwice) {
                 GameData.of(context)!.cur_stage = ScoreCalculationStage(context);
               }
             });

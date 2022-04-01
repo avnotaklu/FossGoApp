@@ -20,7 +20,7 @@ class BackgroundScreenWithDialog extends StatelessWidget {
       child: FractionallySizedBox(
         widthFactor: 0.9,
         heightFactor: 0.6,
-        child: Dialog(backgroundColor: Colors.blue, child: child),
+        child: Dialog(backgroundColor: Constants.defaultTheme.mainHighlightColor, child: child),
       ),
       decoration: BoxDecoration(color: Constants.defaultTheme.backgroundColor),
     ));

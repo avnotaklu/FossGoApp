@@ -4,6 +4,7 @@ import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/models/game_match.dart';
+import 'package:go/utils/widgets/buttons.dart';
 import 'package:share/share.dart';
 
 class RequestSend extends StatelessWidget {
@@ -33,11 +34,12 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Expanded(flex: 10, child: Container()),
+        Expanded(flex: 8, child: Container()),
+        Expanded(flex: 8, child: TextField()),
         Expanded(
             flex: 2,
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-              ElevatedButton(
+              BadukButton(
                 onPressed: () {
                   MultiplayerData.of(context)!.createGameDatabaseRefs(widget.match.id);
 
@@ -51,9 +53,7 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
                         builder: (BuildContext context) => Game(widget.match, true, BeforeStartStage()),
                       ));
                 },
-                child: Container(
-                  child: const Text("Share"),
-                ),
+                child: const Text("Share"),
               ),
               widget.circularIndicator ?? Container(),
             ])),

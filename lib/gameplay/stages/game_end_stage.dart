@@ -26,7 +26,7 @@ class GameEndStage extends Stage{
   GameEndStage get stage => this;
   @override
   List<Widget> buttons() {
-    return [Pass(), CopyId()];
+    return [Pass(), Resign()];
   }
 
   @override

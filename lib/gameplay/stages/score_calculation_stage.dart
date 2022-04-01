@@ -39,7 +39,7 @@ class ScoreCalculationStage extends Stage {
 
   @override
   List<Widget> buttons() {
-    return [Accept(), CopyId()];
+    return [Accept(), Resign()];
   }
 
   @override

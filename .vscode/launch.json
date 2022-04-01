@@ -9,6 +9,7 @@
             "request": "launch",
             "preLaunchTask": "Flutter-Launch-All",
             "type": "dart",
+            "args": ["-v"]
         },
         {
             "name": "go",

@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
@@ -22,6 +23,9 @@ class StoneLogic extends InheritedWidget {
   Position? koDelete;
   Position? koInsert;
 
+  // FIXME: This stone_login and score_calculation relation sucks now we are placing scoring functionality in stone_logic because of this because context is required to access each other and these are circular dependency so the inherited widget can have other one as null
+  List<ValueNotifier<int>> prisoners = [ValueNotifier(0), ValueNotifier(0)];
+
   ValueNotifier<Stone?> stoneNotifierAt(Position) {
     return playground_Map[Position]!;
   }
@@ -34,7 +38,8 @@ class StoneLogic extends InheritedWidget {
   }
 
   // Getters
-  Map<Position?, ValueNotifier<Stone?>> get playground_Map => _playgroundMap; // TODO:NP2 nullable_position_1 maybe Position? can be just Position see NP1
+  Map<Position?, ValueNotifier<Stone?>> get playground_Map =>
+      _playgroundMap; // TODO:NP2 nullable_position_1 maybe Position? can be just Position see NP1
   get teststone => _teststone;
 
   // Database update
@@ -188,6 +193,7 @@ class StoneLogic extends InheritedWidget {
           koDelete = neighbor;
         }
 
+        prisoners[Constants.playerColors.indexWhere((element) => element != _playgroundMap[i]?.value?.color)].value += 1;
         _playgroundMap[i]?.value = null;
         recalculateFreedomsForNeighborsOfDeleted(i);
       }

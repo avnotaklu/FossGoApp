@@ -32,7 +32,7 @@ class GameMatch {
   Map<Position, Stone?> playgroundMap = {}; // int gives player id
   String id;
   int time;
-  int _turn = 0;
+  ValueNotifier<int> _turn = ValueNotifier(0);
   Set<Position> finalRemovedCluster = {};
 
   GameMatch({required this.rows, required this.cols, required this.time, required this.id, required this.uid});
@@ -43,8 +43,9 @@ class GameMatch {
         time = int.parse(json['time']),
         id = json['id'],
         uid = uidFromJson(json['uid']),
-        runStatus = json['runStatus'] == "true" ? true : false,
-        _turn = int.parse(json['turn']) {
+        runStatus = json['runStatus'] == "true" ? true : false {
+    _turn.value = int.parse(json['turn']);
+
     json['gameEndData']?['finalRemovedClusters']?.forEach((v) {
       finalRemovedCluster.add(Position.fromString(v));
     });
@@ -87,7 +88,7 @@ class GameMatch {
         'uid': Map<String, String>.from(uid.map((key, value) => MapEntry(key.toString(), value.toString()))),
         'runStatus': runStatus.toString(),
         'moves': moves,
-        'turn': _turn.toString(),
+        'turn': turn.toString(),
         'playgroundMap': (playgroundMapToString(playgroundMap)),
         'startTime': startTime.toString(),
         'playersTimeLeft': (() {
@@ -106,12 +107,16 @@ class GameMatch {
         }).call()
       };
 
-  get turn {
+  int get turn {
+    return _turn.value;
+  }
+
+  ValueNotifier<int> get turnNotifier {
     return _turn;
   }
 
-  set turn(dynamic val) {
-    _turn = val;
+  set turn(int val) {
+    _turn.value = val;
   }
 
   bool isComplete() {

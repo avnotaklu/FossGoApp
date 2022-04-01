@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:core';
 
 import 'package:flutter/material.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
@@ -59,64 +61,114 @@ class _GameUiState extends State<GameUi> {
     return Column(
       children: [
         Expanded(
-          flex: 9,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          flex: 6,
+          child: Column(
             children: [
-              Spacer(),
-              Expanded(flex: 5, child: PlayerDataUi(pplayer: 0)),
-              Spacer(),
-              Expanded(flex: 5, child: PlayerDataUi(pplayer: 1)),
-              Spacer(),
+              Spacer(
+                flex: 4,
+              ),
+
+              // FIXME: hack to emulate getRemotePlayer which is not usable before game has started because it used id that is assigned after player joins and game starts
+              Expanded(flex: 3, child: PlayerDataUi(pplayer: GameData.of(context)!.getClientPlayer(context) == 0 ? 1 : 0)),
             ],
           ),
         ),
-        Spacer(),
+        Spacer(
+          flex: 18,
+        ),
         Expanded(
-          flex: 3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          flex: 6,
+          child: Column(
             children: [
-              Spacer(),
-              // GameData.of(context)!.cur_stage.buttons()[0],
-              GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? const Accept() : const Pass(),
-              Spacer(),
-              GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? const ContinueGame() : const CopyId(),
-              // GameData.of(context)!.cur_stage.buttons()[1],
-              Spacer(),
+              Expanded(flex: 3, child: PlayerDataUi(pplayer: GameData.of(context)!.getClientPlayer(context))),
+              GameData.of(context)!.cur_stage.stage is GameEndStage
+                  ? Text(
+                      "${() {
+                        return ScoreCalculation.of(context)!.getWinner(context).mColor == Colors.black ? 'Black' : 'White';
+                      }.call()} won by ${(GameData.of(context)!.getPlayerWithTurn.score - GameData.of(context)!.getPlayerWithoutTurn.score).abs()}",
+                      style: TextStyle(color: defaultTheme.mainTextColor),
+                    )
+                  : Spacer(
+                      flex: 2,
+                    ),
+              Expanded(
+                flex: 2,
+                child: Container(
+                  color: Colors.blue,
+                  child: IntrinsicHeight(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // GameData.of(context)!.cur_stage.buttons()[0],
+                        Expanded(
+                          flex: 3,
+                          child: GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? Accept() : Pass(),
+                        ),
+                        VerticalDivider(
+                          width: 2,
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? ContinueGame() : Resign(),
+                        )
+                        // GameData.of(context)!.cur_stage.buttons()[1],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-        Spacer(),
+        // Spacer(),
+        // Expanded(flex: 3, child: PlayerDataUi(pplayer: 1)),
       ],
     );
   }
 }
 
-class OnlineCountdownTimer extends StatefulWidget {
-  @override
-  State<OnlineCountdownTimer> createState() => _OnlineCountdownTimerState();
-  Duration duration;
-  Duration? time;
-  OnlineCountdownTimer({required this.duration}) {
-    time = duration;
-  }
-}
+class BottomButton extends StatelessWidget {
+  BottomButton(this.action, this.text);
+  VoidCallback action;
+  String text;
 
-class _OnlineCountdownTimerState extends State<OnlineCountdownTimer> {
   @override
   Widget build(BuildContext context) {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      NTP.now().asStream().asBroadcastStream().listen((value) {
-        widget.time = Duration(seconds: GameData.of(context)!.match.time) - (value).difference(GameData.of(context)?.match.startTime ?? value);
-        setState(() {});
-      });
-    });
-    return Column(
-      children: [
-        Text((widget.time.toString())),
-      ],
+    return Material(
+      child: InkWell(
+        splashFactory: InkRipple.splashFactory,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.blue.shade700,
+        // Colors.transparent,
+        //splashColor: Colors.blue,
+        onTap: action,
+        child: Container(
+          //height: double.infinity,
+          // height: 100,
+          width: 100,
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ),
+        ),
+      ),
     );
+    // return InkWell(
+    //   onTap: action,
+    //   child: Container(
+    //     color: Colors.blue.shade700,
+    //     child: Expanded(
+    //       child: Text(
+    //         text,
+    //         style: TextStyle(color: Colors.white),
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 }
 
@@ -125,22 +177,18 @@ class Pass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      flex: 1,
-      child: ElevatedButton(
-        style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-        ),
-        onPressed: () => {
-          NTP.now().then((value) {
-            GameData.of(context)!.cur_stage.onClickCell(null, context);
-            // GameData.of(context)?.newMovePlayed(context, value, null);
-            // GameData.of(context)?.toggleTurn(context);
-          })
-        },
-        child: const Text("Pass"),
-      ),
-    );
+    // return ElevatedButton(
+    //   style: ButtonStyle(
+    //     foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+    //   ),
+    return BottomButton(() {
+      print("pass");
+      NTP.now().then((value) {
+        GameData.of(context)!.cur_stage.onClickCell(null, context);
+        // GameData.of(context)?.newMovePlayed(context, value, null);
+        // GameData.of(context)?.toggleTurn(context);
+      });
+    }, "Pass");
   }
 }
 
@@ -149,23 +197,17 @@ class Accept extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-      ),
-      onPressed: () {
-        MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(true);
-        // GameData.of(context).acceptFinal();
-        MultiplayerData.of(context)!
-            .curGameReferences!
-            .finalRemovedClusters
-            .set(GameMatch.removedClusterToJson(ScoreCalculation.of(context)!.virtualRemovedCluster));
+    return BottomButton(() {
+      MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(true);
+      // GameData.of(context).acceptFinal();
+      MultiplayerData.of(context)!
+          .curGameReferences!
+          .finalRemovedClusters
+          .set(GameMatch.removedClusterToJson(ScoreCalculation.of(context)!.virtualRemovedCluster));
 
-        ScoreCalculation.of(context)!.stoneRemovalAccepted.add(GameData.of(context)!.getClientPlayer(context) as int);
-        ScoreCalculation.of(context)!.onGameEnd(context, ScoreCalculation.of(context)!.virtualRemovedCluster);
-      },
-      child: const Text("Accept"),
-    );
+      ScoreCalculation.of(context)!.stoneRemovalAccepted.add(GameData.of(context)!.getClientPlayer(context) as int);
+      ScoreCalculation.of(context)!.onGameEnd(context, ScoreCalculation.of(context)!.virtualRemovedCluster);
+    }, "Accept");
   }
 }
 
@@ -174,52 +216,42 @@ class ContinueGame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-      ),
-      onPressed: () {
-        MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(false);
-        // GameData.of(context).acceptFinal();
-        MultiplayerData.of(context)!.curGameReferences!.finalRemovedClusters.remove();
+    return BottomButton(() {
+      MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(false);
+      // GameData.of(context).acceptFinal();
+      MultiplayerData.of(context)!.curGameReferences!.finalRemovedClusters.remove();
 
-        NTP.now().then((value) {
+      NTP.now().then((value) {
+        GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn] =
+            TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn]!.duration);
+        MultiplayerData.of(context)!
+            .curGameReferences!
+            .lastTimeAndDuration
+            .child(GameData.of(context)!.getPlayerWithoutTurn.turn.toString())
+            .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn].toString());
 
+        GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn] =
+            TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn]!.duration);
+        MultiplayerData.of(context)!
+            .curGameReferences!
+            .lastTimeAndDuration
+            .child(GameData.of(context)!.getPlayerWithTurn.turn.toString())
+            .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn].toString());
 
-          GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn] =
-              TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn]!.duration);
-          MultiplayerData.of(context)!
-              .curGameReferences!
-              .lastTimeAndDuration
-              .child(GameData.of(context)!.getPlayerWithoutTurn.turn.toString())
-              .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn].toString());
-
-
-
-          GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn] =
-              TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn]!.duration);
-          MultiplayerData.of(context)!
-              .curGameReferences!
-              .lastTimeAndDuration
-              .child(GameData.of(context)!.getPlayerWithTurn.turn.toString())
-              .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn].toString());
-
-          GameData.of(context)!.cur_stage = GameplayStage(context);
-        });
-      },
-      child: const Text("Continue Game"),
-    );
+        GameData.of(context)!.cur_stage = GameplayStage(context);
+      });
+    }, "Continue");
   }
 }
 
-class CopyId extends StatelessWidget {
-  const CopyId({Key? key}) : super(key: key);
+class Resign extends StatelessWidget {
+  const Resign({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      flex: 1,
-      child: ElevatedButton(onPressed: () => Clipboard.setData(ClipboardData(text: GameData.of(context)?.match.id)), child: const Text("game id")),
-    );
+    return BottomButton(() {
+      print("resign");
+      Clipboard.setData(ClipboardData(text: GameData.of(context)?.match.id));
+    }, "Resign");
   }
 }

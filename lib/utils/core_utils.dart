@@ -13,3 +13,6 @@ Duration parseDurationFromString(String s) {
   return Duration(hours: hours, minutes: minutes, microseconds: micros);
 }
 
+extension turn on num {
+  num get player_turn => this % 2;
+}

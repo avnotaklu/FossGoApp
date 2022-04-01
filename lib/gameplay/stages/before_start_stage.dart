@@ -16,7 +16,7 @@ class BeforeStartStage extends Stage {
 
   @override
   List<Widget> buttons() {
-    return [Pass(), CopyId()];
+    return [Pass(), Resign()];
   }
 
   @override
@@ -29,7 +29,6 @@ class BeforeStartStage extends Stage {
   @override
   onClickCell(Position? position, BuildContext context) {
     // Before game do nothing on click on cell
-    throw UnimplementedError();
   }
 
   @override

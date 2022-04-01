@@ -58,6 +58,7 @@ class GameData extends InheritedWidget {
   final GameMatch match;
 
   // GETTERS
+  ValueNotifier<int> get turnNotifier => match.turnNotifier;
   int get turn => match.turn;
   set turn(dynamic val) => match.turn = val;
   Stage get cur_stage => curStageNotifier.value;

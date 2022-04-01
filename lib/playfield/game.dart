@@ -135,9 +135,8 @@ class Game extends StatelessWidget {
                 match.rows,
                 match.cols,
                 mChild: ValueListenableBuilder<Stage>(
-        valueListenable: GameData.of(context)!.curStageNotifier,
-        builder: (context, stage, idk) => 
-                WrapperGame(match, finalPlaygroundMap),
+                  valueListenable: GameData.of(context)!.curStageNotifier,
+                  builder: (context, stage, idk) => WrapperGame(match, finalPlaygroundMap),
                 ),
               ),
             );
@@ -177,11 +176,20 @@ class _WrapperGameState extends State<WrapperGame> {
             //image: DecorationImage(image: AssetImage(Constants.assets['table']!), fit: BoxFit.fitHeight, repeat: ImageRepeat.repeatY),
           ),
         ),
-        Column(children: [
-          Expanded(flex: 18, child: Board(widget.match.rows, widget.match.cols, widget.finalPlaygroundMap)),
-          Spacer(),
-          Expanded(flex: 12, child: GameUi()),
-        ]),
+        Stack(
+          children: [
+            Column(children: [
+              Spacer(
+                flex: 6,
+              ),
+              Expanded(flex: 18, child: Board(widget.match.rows, widget.match.cols, widget.finalPlaygroundMap)),
+              Spacer(
+                flex: 6,
+              ),
+            ]),
+            GameUi(),
+          ],
+        ),
       ],
     );
   }

@@ -8,6 +8,7 @@ import 'package:go/playfield/game.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/utils/position.dart';
+import 'package:go/utils/widgets/buttons.dart';
 import 'create_game.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
@@ -31,13 +32,22 @@ class RequestRecieve extends StatelessWidget {
 
     return BackgroundScreenWithDialog(
         child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+      Spacer(),
       Expanded(
         flex: 3,
-        child: Row(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            const Text("You are playing"),
             Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: FittedBox(child: Text("You are playing")),
+              ),
+            ),
+            Spacer(),
+            Expanded(
+              flex: 2,
               child: Stone(Constants.playerColors[recieversTurn], Position(0, 0)),
             ),
           ],
@@ -45,6 +55,7 @@ class RequestRecieve extends StatelessWidget {
       ),
       Expanded(flex: 4, child: Container()),
       Expanded(flex: 3, child: EnterGameButton(match, newPlace)),
+      Spacer(flex: 3),
     ]));
   }
 }
@@ -63,8 +74,7 @@ class EnterGameButton extends StatelessWidget {
 
     return Expanded(
       flex: 2,
-      child: ElevatedButton(
-        style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.white)),
+      child: BadukButton(
         onPressed: () {
           newPlace.set(match.toJson());
           if (match.isComplete()) {
@@ -88,7 +98,7 @@ class EnterGameButton extends StatelessWidget {
             );
           }
         },
-        child: Container(),
+        child: Text("Enter"),
       ),
     );
   }

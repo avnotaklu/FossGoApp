@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/playfield/game.dart';
+import 'package:go/utils/core_utils.dart';
 import 'package:go/utils/position.dart';
 import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
@@ -226,43 +228,49 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
       // after seconds have been modified then do the stuff
       GameData.of(context)?.timerController[widget.player].reset(); // This restarts with new seconds value
     });
-    return Countdown(
-      controller: widget.controller,
-      // seconds: GameData.of(context)!.match.time,
-      duration: widget.time > const Duration(seconds: 0) ? widget.time : const Duration(seconds: 0),
-      build: (BuildContext context, double time) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              (time.toInt() ~/ 60).toString(),
-              style: TextStyle(
-                fontSize: 25,
-                color: Constants.playerColors[widget.player == 0 ? 1 : 0],
-              ),
-            ),
-            Text(
-              ':',
-              style: TextStyle(
-                fontSize: 25,
-                color: Constants.playerColors[widget.player == 0 ? 1 : 0],
-              ),
-            ),
-            Text((time.toInt() % 60).toString(),
-                style: TextStyle(
-                  fontSize: 25,
-                  color: Constants.playerColors[widget.player == 0 ? 1 : 0],
-                )),
-          ],
-        );
-      },
 
-      interval: const Duration(milliseconds: 100),
+    return Container(
+        color: GameData.of(context)!.turn.player_turn == widget.player ? Constants.defaultTheme.mainHighlightColor : Colors.transparent,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Countdown(
+            controller: widget.controller,
+            // seconds: GameData.of(context)!.match.time,
+            duration: widget.time > const Duration(seconds: 0) ? widget.time : const Duration(seconds: 0),
+            build: (BuildContext context, double time) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    (time.toInt() ~/ 60).toString(),
+                    style: TextStyle(
+                      fontSize: 25,
+                      color: Constants.playerColors[widget.player],
+                    ),
+                  ),
+                  Text(
+                    ':',
+                    style: TextStyle(
+                      fontSize: 25,
+                      color: Constants.playerColors[widget.player],
+                    ),
+                  ),
+                  Text((time.toInt() % 60).toString(),
+                      style: TextStyle(
+                        fontSize: 25,
+                        color: Constants.playerColors[widget.player],
+                      )),
+                ],
+              );
+            },
 
-      onFinished: () {
-        print('Timer is done!');
-      },
-    );
+            interval: const Duration(milliseconds: 100),
+
+            onFinished: () {
+              print('Timer is done!');
+            },
+          ),
+        ));
   }
 }
