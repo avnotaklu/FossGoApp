@@ -9,7 +9,7 @@ const List<String> boardsizes = ["9x9", "13x13", "19x19"];
 const List<Color> playerColors = [(Colors.black), (Colors.white)];
 
 const Map<String, String> assets = {
-  "board": "assets/images/board.jpg", //
+  "board": "assets/images/board_light_free.jpg", //
   "table": "assets/images/table.jpg" //
 };
 

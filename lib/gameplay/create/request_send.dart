@@ -34,8 +34,9 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Expanded(flex: 8, child: Container()),
-        Expanded(flex: 8, child: TextField()),
+        Expanded(flex: 4, child: Container()),
+        Expanded(flex: 4, child: TextField()),
+        Expanded(flex: 4, child: Container()),
         Expanded(
             flex: 2,
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
@@ -43,9 +44,9 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
                 onPressed: () {
                   MultiplayerData.of(context)!.createGameDatabaseRefs(widget.match.id);
 
-                  if (widget.match.isComplete()) {
-                    Share.share(widget.match.id);
-                  }
+                  // if (widget.match.isComplete()) {
+                  //   Share.share(widget.match.id);
+                  // }
 
                   Navigator.pushReplacement(
                       context,
@@ -57,6 +58,8 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
               ),
               widget.circularIndicator ?? Container(),
             ])),
+
+        Expanded(flex: 4, child: Container()),
         Expanded(flex: 1, child: Container()),
       ],
     );
