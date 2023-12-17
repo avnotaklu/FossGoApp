@@ -43,39 +43,41 @@ class _BoardState extends State<Board> {
     double stoneSpacing = 2; // Don't make spacing so large that to get that spacing Stones start to move out of position
 
     //double boardInset = stoneInsetstoneSpacing;
-    return Center(
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              print("${constraints.maxHeight}, ${constraints.maxWidth}");
-              return Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
-                    child: AspectRatio(
-                      aspectRatio: 1.0,
-                      child: Container(
-                        height: constraints.maxHeight,
-                        width: constraints.maxWidth,
-                        //color: Colors.black,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(image: AssetImage(Constants.assets['board']!), fit: BoxFit.fill),
+    return InteractiveViewer(
+      child: Center(
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                print("${constraints.maxHeight}, ${constraints.maxWidth}");
+                return Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
+                      child: AspectRatio(
+                        aspectRatio: 1.0,
+                        child: Container(
+                          height: constraints.maxHeight,
+                          width: constraints.maxWidth,
+                          //color: Colors.black,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(image: AssetImage(Constants.assets['board']!), fit: BoxFit.fill),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset)),
-                  StoneLayoutGrid(
-                    GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset),
-                  ),
-                ],
-              );
-            },
-            //   ),
-            // ),
-          );
-        },
+                    BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset)),
+                    StoneLayoutGrid(
+                      GridInfo(constraints, stoneSpacing, widget.rows, widget.cols, stoneInset),
+                    ),
+                  ],
+                );
+              },
+              //   ),
+              // ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -5,6 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "One-Device-Launch",
+            "request": "launch",
+            "type": "dart",
+            "args": ["-v"]
+        },
+        {
             "name": "Flutter-All",
             "request": "launch",
             "preLaunchTask": "Flutter-Launch-All",
