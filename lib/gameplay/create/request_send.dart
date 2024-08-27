@@ -5,7 +5,6 @@ import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/utils/widgets/buttons.dart';
-import 'package:share/share.dart';
 
 class RequestSend extends StatelessWidget {
   final GameMatch match;

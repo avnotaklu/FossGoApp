@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/playfield/game.dart';
 import 'package:go/models/game_match.dart';
-import 'package:share/share.dart';
 
 class BackgroundScreenWithDialog extends StatelessWidget {
   @override

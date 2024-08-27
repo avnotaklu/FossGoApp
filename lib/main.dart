@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go/firebase_options.dart';
 import 'package:go/gameplay/create/create_game.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
-import 'package:share/share.dart';
 // import 'package:/share/share.dart';
 import 'constants/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
@@ -23,7 +23,9 @@ import 'models/game_match.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 
@@ -48,9 +50,15 @@ class MyApp extends StatelessWidget {
                       // Define the default brightness and colors.
                       brightness: Brightness.dark,
                       primaryColor: Colors.red[800],
-                      textTheme: TextTheme(
-                        button: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+                      // textTheme: TextTheme(
+                      //   button: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+                      // ),
+                      textButtonTheme: TextButtonThemeData(
+                        style: ButtonStyle(
+                          foregroundColor: WidgetStateProperty.all<Color>(Constants.defaultTheme.mainTextColor),
+                        ),
                       ),
+                      
                       buttonTheme: ButtonThemeData(
                         buttonColor: Constants.defaultTheme.mainHighlightColor,
                       ),

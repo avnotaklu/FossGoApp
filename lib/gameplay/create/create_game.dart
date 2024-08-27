@@ -15,7 +15,6 @@ import 'package:go/models/game_match.dart';
 import 'package:go/utils/position.dart';
 import 'package:go/utils/widgets/buttons.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
 
 class CreateGame extends StatelessWidget {
   static const title = 'Grid List';
