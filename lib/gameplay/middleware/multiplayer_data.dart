@@ -3,13 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
+import 'package:go/services/app_user.dart';
 
 class MultiplayerData extends InheritedWidget {
   final Widget mChild;
   final DatabaseReference database;
   final gamesRef;
   final firestoreInstance;
-  User? curUser;
+  AppUser? curUser;
   DatabaseReference? curGame;
 
   GameDatabaseReferences? curGameReferences;
@@ -25,7 +26,7 @@ class MultiplayerData extends InheritedWidget {
     return true;
   }
 
-  set setUser(User user) {
+  set setUser(AppUser user) {
     curUser = user;
   }
 

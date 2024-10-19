@@ -103,7 +103,7 @@ class GameplayStage extends Stage {
     //     ?.move_ref
     //     .set({'pos': widget.position.toString()});
     if (((StoneLogic.of(context)?.stoneAt(position)) == null) &&
-        (GameData.of(context)?.match.uid[GameData.of(context)!.turn % 2]) == MultiplayerData.of(context)?.curUser!.uid) {
+        (GameData.of(context)?.match.uid[GameData.of(context)!.turn % 2]) == MultiplayerData.of(context)?.curUser!.email) {
       // If position is null and this is users turn, place stone
       if (StoneLogic.of(context)?.handleStoneUpdate(position, context) ?? true) // TODO revisit this and make sure it does the right thing
       {

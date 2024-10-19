@@ -22,8 +22,9 @@ class _SignInState extends State<SignIn> {
       if (user != null) {
         print("got user");
         MultiplayerData?.of(context)?.setUser = user;
-        Navigator.of(context).pushReplacementNamed(
+        Navigator.of(context).pushNamedAndRemoveUntil(
           '/HomePage',
+          (route) => false,
         );
       }
     });
@@ -39,6 +40,23 @@ class _SignInState extends State<SignIn> {
             Buttons.Google,
             onPressed: () => authBloc.loginGoogle(),
           ),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                  '/SignUp',
+                );
+              },
+              child: Text("Sign Up")),
+          SizedBox(
+            height: 20,
+          ),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                  '/LogIn',
+                );
+              },
+              child: Text("Log In"))
         ]),
       ),
     );

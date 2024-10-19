@@ -42,7 +42,7 @@ class CreateGame extends StatelessWidget {
     if ((match?.bothPlayers.contains(null) ?? true) == false) {
       // BOTH players have entered game in database
       assert(match != null);
-      if (match?.uid.containsValue(MultiplayerData.of(context)?.curUser!.uid.toString()) ?? false) {
+      if (match?.uid.containsValue(MultiplayerData.of(context)?.curUser!.email.toString()) ?? false) {
         if (match!.runStatus == true) {
           return Game(match as GameMatch, false, GameplayStage.fromScratch());
         } else {
@@ -83,11 +83,11 @@ class CreateGame extends StatelessWidget {
             IconButton(
                 onPressed: () => {
                       mUid.clear(),
-                      mUid[0] = MultiplayerData.of(context)?.curUser!.uid.toString(),
+                      mUid[0] = MultiplayerData.of(context)?.curUser!.email.toString(),
                     },
                 icon: Expanded(child: Stone(Colors.black, Position(0, 0)))),
             IconButton(
-                onPressed: () => {mUid.clear(), mUid[1] = MultiplayerData.of(context)?.curUser!.uid.toString()},
+                onPressed: () => {mUid.clear(), mUid[1] = MultiplayerData.of(context)?.curUser!.email.toString()},
                 icon: Expanded(child: Stone(Colors.white, Position(0, 0)))),
           ])),
       StatefulBuilder(

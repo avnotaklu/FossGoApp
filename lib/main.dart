@@ -2,6 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go/firebase_options.dart';
 import 'package:go/gameplay/create/create_game.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/providers/sign_up_provider.dart';
+import 'package:go/services/app_user.dart';
+import 'package:go/views/log_in_screen.dart';
+import 'package:go/views/sign_up_screen.dart';
 // import 'package:/share/share.dart';
 import 'constants/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
@@ -10,7 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:go/services/auth_bloc.dart';
 import 'package:go/playfield/board.dart';
 import 'package:go/ui/homepage/homepage.dart';
-import 'package:go/services/signin.dart';
+import 'package:go/services/sign_in_screen.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/utils/position.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +38,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider(
         create: (context) => AuthBloc(),
-        builder: (context, child) => StreamBuilder<User?>(
+        builder: (context, child) => StreamBuilder<AppUser?>(
             stream: Provider.of<AuthBloc>(context).currentUser,
             builder: (context, snapshot) {
               return MultiplayerData(
@@ -65,6 +69,10 @@ class MyApp extends StatelessWidget {
                     ),
                     routes: <String, WidgetBuilder>{
                       '/HomePage': (BuildContext context) => HomePage(),
+
+                      '/SignUp': (BuildContext context) => SignUpScreen(),
+
+                      '/LogIn': (BuildContext context) => LogInScreen(),
                     }),
               );
             }));

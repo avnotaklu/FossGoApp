@@ -160,7 +160,7 @@ class GameData extends InheritedWidget {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
     try {
-      return match.uid.keys.firstWhere((k) => match.uid[k] != MultiplayerData.of(context)?.curUser!.uid, orElse: () {
+      return match.uid.keys.firstWhere((k) => match.uid[k] != MultiplayerData.of(context)?.curUser!.email, orElse: () {
         throw TypeError;
       });
     } on TypeError {
@@ -173,7 +173,7 @@ class GameData extends InheritedWidget {
     //   match.uid.(MultiplayerData.of(context)?.curUser);
     // return (GameData.of(context)?.match.uid[GameData.of(context)?.turn % 2]) == MultiplayerData.of(context)?.curUser.uid;
     try {
-      return match.uid.keys.firstWhere((k) => match.uid[k] == MultiplayerData.of(context)?.curUser!.uid, orElse: () {
+      return match.uid.keys.firstWhere((k) => match.uid[k] == MultiplayerData.of(context)?.curUser!.email, orElse: () {
         throw TypeError;
       });
     } on TypeError {

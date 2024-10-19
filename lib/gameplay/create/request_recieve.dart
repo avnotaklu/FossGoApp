@@ -28,7 +28,7 @@ class RequestRecieve extends StatelessWidget {
 
     // assert(match.uid[recieversTurn] == null);
 
-    match.uid[recieversTurn] = MultiplayerData.of(context)?.curUser!.uid.toString();
+    match.uid[recieversTurn] = MultiplayerData.of(context)?.curUser!.email.toString();
 
     return BackgroundScreenWithDialog(
         child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
