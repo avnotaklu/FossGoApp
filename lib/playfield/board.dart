@@ -6,7 +6,7 @@ import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/stage.dart';
-import 'package:go/playfield/game.dart';
+import 'package:go/playfield/game_widget.dart';
 import 'stone.dart';
 import '../utils/position.dart';
 import '../utils/player.dart';

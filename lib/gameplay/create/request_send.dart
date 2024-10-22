@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';
-import 'package:go/playfield/game.dart';
+import 'package:go/playfield/game_widget.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/utils/widgets/buttons.dart';
 
@@ -50,7 +50,7 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute<void>(
-                        builder: (BuildContext context) => Game(widget.match, true, BeforeStartStage()),
+                        builder: (BuildContext context) => GameWidget(widget.match, true, BeforeStartStage()),
                       ));
                 },
                 child: const Text("Share"),

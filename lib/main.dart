@@ -3,6 +3,7 @@ import 'package:go/firebase_options.dart';
 import 'package:go/gameplay/create/create_game.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/providers/sign_up_provider.dart';
+import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/app_user.dart';
 import 'package:go/views/log_in_screen.dart';
 import 'package:go/views/sign_up_screen.dart';
@@ -22,7 +23,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:ntp/ntp.dart';
 
-import 'playfield/game.dart';
+import 'playfield/game_widget.dart';
 import 'models/game_match.dart';
 
 void main() async {
@@ -36,8 +37,11 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Provider(
-        create: (context) => AuthBloc(),
+    return MultiProvider(
+        providers: [
+          Provider(create: (context) => AuthBloc()),
+          ChangeNotifierProvider(create: (context) => SignalRBloc()),
+        ],
         builder: (context, child) => StreamBuilder<AppUser?>(
             stream: Provider.of<AuthBloc>(context).currentUser,
             builder: (context, snapshot) {
@@ -47,7 +51,9 @@ class MyApp extends StatelessWidget {
                 mChild: MaterialApp(
                     debugShowCheckedModeBanner: false,
                     home: DefaultTextStyle(
-                      style: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+                      style: TextStyle(
+                          color: Constants.defaultTheme.mainTextColor,
+                          fontSize: 15),
                       child: snapshot.data != null ? HomePage() : SignIn(),
                     ),
                     theme: ThemeData(
@@ -59,19 +65,18 @@ class MyApp extends StatelessWidget {
                       // ),
                       textButtonTheme: TextButtonThemeData(
                         style: ButtonStyle(
-                          foregroundColor: WidgetStateProperty.all<Color>(Constants.defaultTheme.mainTextColor),
+                          foregroundColor: WidgetStateProperty.all<Color>(
+                              Constants.defaultTheme.mainTextColor),
                         ),
                       ),
-                      
+
                       buttonTheme: ButtonThemeData(
                         buttonColor: Constants.defaultTheme.mainHighlightColor,
                       ),
                     ),
                     routes: <String, WidgetBuilder>{
                       '/HomePage': (BuildContext context) => HomePage(),
-
                       '/SignUp': (BuildContext context) => SignUpScreen(),
-
                       '/LogIn': (BuildContext context) => LogInScreen(),
                     }),
               );

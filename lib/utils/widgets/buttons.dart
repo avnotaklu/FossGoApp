@@ -10,19 +10,22 @@ class BadukButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: onPressed,
-      child: Container(
-        color: Constants.defaultTheme.mainHighlightColor,
+        onPressed: onPressed,
         child: Text(
           child.data!,
           // TODO: make BadukText widget to avoid this crap
-          style: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
-        ),
-      ),
-      style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(
-        Constants.defaultTheme.mainHighlightColor,
-      )),
-    );
+        //   style: TextStyle(
+        //       color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+        )
+
+        // Container(
+        //   color: Constants.defaultTheme.mainHighlightColor,
+        //   child: ,
+        // ),
+        // style: ButtonStyle(
+        //     backgroundColor: MaterialStateProperty.all(
+        //   Constants.defaultTheme.mainHighlightColor,
+        // )),
+        );
   }
 }

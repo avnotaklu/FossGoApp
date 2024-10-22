@@ -4,7 +4,7 @@ import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
-import 'package:go/playfield/game.dart';
+import 'package:go/playfield/game_widget.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/utils/position.dart';
@@ -85,7 +85,7 @@ class EnterGameButton extends StatelessWidget {
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute<void>(
-                      builder: (BuildContext context) => Game(match, false, BeforeStartStage()),
+                      builder: (BuildContext context) => GameWidget(match, false, BeforeStartStage()),
                     ));
               }
             });

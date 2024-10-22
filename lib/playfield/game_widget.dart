@@ -28,7 +28,7 @@ import '../utils/player.dart';
 import 'board.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
-class Game extends StatelessWidget {
+class GameWidget extends StatelessWidget {
   var players = List<Player>.filled(2, Player(0, Colors.black), growable: false); // TODO this is early idk why i did this
 
   Stage curStage;
@@ -36,7 +36,7 @@ class Game extends StatelessWidget {
   GameMatch match;
   bool enteredAsGameCreator;
 
-  Game(this.match, this.enteredAsGameCreator, this.curStage) // Board
+  GameWidget(this.match, this.enteredAsGameCreator, this.curStage) // Board
       : board = Board(match.rows, match.cols, match.playgroundMap) {
     for (var element in match.moves) {
       print(element.toString());

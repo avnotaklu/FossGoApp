@@ -2,8 +2,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/auth_bloc.dart';
-import 'package:go/playfield/game.dart';
+import 'package:go/playfield/game_widget.dart';
 import 'package:go/ui/homepage/homepage.dart';
 import 'package:go/main.dart';
 import 'package:go/services/auth.dart';
@@ -38,7 +39,32 @@ class _SignInState extends State<SignIn> {
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           SignInButton(
             Buttons.Google,
-            onPressed: () => authBloc.loginGoogle(),
+            onPressed: () async {
+              var result = await authBloc.loginGoogle();
+              result.fold((e) {
+                debugPrint(e.toString());
+              }, (v) async {
+                var signalRConnection =
+                    await context.read<SignalRBloc>().connectionId;
+                signalRConnection.fold((e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.message),
+                    ),
+                  );
+                }, (connectionId) {
+                  context
+                      .read<AuthBloc>()
+                      .setUser(v.user, v.token, connectionId);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Successfully logged in"),
+                    ),
+                  );
+                });
+              });
+            },
           ),
           ElevatedButton(
               onPressed: () {

@@ -8,7 +8,7 @@ import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
-import 'package:go/playfield/game.dart';
+import 'package:go/playfield/game_widget.dart';
 import 'package:go/playfield/stone.dart';
 import 'package:go/services/auth_bloc.dart';
 import 'package:go/models/game_match.dart';
@@ -44,9 +44,9 @@ class CreateGame extends StatelessWidget {
       assert(match != null);
       if (match?.uid.containsValue(MultiplayerData.of(context)?.curUser!.email.toString()) ?? false) {
         if (match!.runStatus == true) {
-          return Game(match as GameMatch, false, GameplayStage.fromScratch());
+          return GameWidget(match as GameMatch, false, GameplayStage.fromScratch());
         } else {
-          return Game(match as GameMatch, false, GameEndStage.fromScratch(context));
+          return GameWidget(match as GameMatch, false, GameEndStage.fromScratch(context));
           //return Game(match as GameMatch, false, GameplayStage());
         }
       }
