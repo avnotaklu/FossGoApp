@@ -4,22 +4,23 @@ import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/models/game_match.dart';
+import 'package:go/models/game.dart';
 import 'package:go/utils/widgets/buttons.dart';
 
-class RequestSend extends StatelessWidget {
-  final GameMatch match;
-  const RequestSend(this.match);
+class RequestSendScreen extends StatelessWidget {
+  final Game game;
+  const RequestSendScreen(this.game, {super.key});
   @override
   Widget build(BuildContext context) {
     return BackgroundScreenWithDialog(
-      child: ShareGameIDButton(match),
+      child: ShareGameIDButton(game),
     );
   }
 }
 
 class ShareGameIDButton extends StatefulWidget {
-  final GameMatch match;
-  ShareGameIDButton(this.match);
+  final Game game;
+  ShareGameIDButton(this.game, {super.key});
   Widget? circularIndicator;
 
   @override
@@ -34,23 +35,17 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(flex: 4, child: Container()),
-        Expanded(flex: 4, child: TextField()),
+        const Expanded(flex: 4, child: TextField()),
         Expanded(flex: 4, child: Container()),
         Expanded(
             flex: 2,
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
               BadukButton(
                 onPressed: () {
-                  MultiplayerData.of(context)!.createGameDatabaseRefs(widget.match.id);
-
-                  // if (widget.match.isComplete()) {
-                  //   Share.share(widget.match.id);
-                  // }
-
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute<void>(
-                        builder: (BuildContext context) => GameWidget(widget.match, true, BeforeStartStage()),
+                        builder: (BuildContext context) => GameWidget(widget.game, true),
                       ));
                 },
                 child: const Text("Share"),

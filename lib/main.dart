@@ -16,8 +16,8 @@ import 'package:go/services/auth_bloc.dart';
 import 'package:go/playfield/board.dart';
 import 'package:go/ui/homepage/homepage.dart';
 import 'package:go/services/sign_in_screen.dart';
-import 'package:go/playfield/stone.dart';
-import 'package:go/utils/position.dart';
+import 'package:go/playfield/stone_widget.dart';
+import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -45,41 +45,45 @@ class MyApp extends StatelessWidget {
         builder: (context, child) => StreamBuilder<AppUser?>(
             stream: Provider.of<AuthBloc>(context).currentUser,
             builder: (context, snapshot) {
-              return MultiplayerData(
-                curUser: snapshot.data,
-                database: FirebaseDatabase.instance.reference(),
-                mChild: MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    home: DefaultTextStyle(
-                      style: TextStyle(
-                          color: Constants.defaultTheme.mainTextColor,
-                          fontSize: 15),
-                      child: snapshot.data != null ? HomePage() : SignIn(),
-                    ),
-                    theme: ThemeData(
-                      // Define the default brightness and colors.
-                      brightness: Brightness.dark,
-                      primaryColor: Colors.red[800],
-                      // textTheme: TextTheme(
-                      //   button: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
-                      // ),
-                      textButtonTheme: TextButtonThemeData(
-                        style: ButtonStyle(
-                          foregroundColor: WidgetStateProperty.all<Color>(
-                              Constants.defaultTheme.mainTextColor),
+              return
+                  // MultiplayerData(
+                  //   curUser: snapshot.data,
+                  //   database: FirebaseDatabase.instance.reference(),
+                  //   mChild:
+                  MaterialApp(
+                      debugShowCheckedModeBanner: false,
+                      home: DefaultTextStyle(
+                        style: TextStyle(
+                            color: Constants.defaultTheme.mainTextColor,
+                            fontSize: 15),
+                        child: snapshot.data != null ? HomePage() : SignIn(),
+                      ),
+                      theme: ThemeData(
+                        // Define the default brightness and colors.
+                        brightness: Brightness.dark,
+                        primaryColor: Colors.red[800],
+                        // textTheme: TextTheme(
+                        //   button: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+                        // ),
+                        textButtonTheme: TextButtonThemeData(
+                          style: ButtonStyle(
+                            foregroundColor: WidgetStateProperty.all<Color>(
+                                Constants.defaultTheme.mainTextColor),
+                          ),
+                        ),
+
+                        buttonTheme: ButtonThemeData(
+                          buttonColor:
+                              Constants.defaultTheme.mainHighlightColor,
                         ),
                       ),
-
-                      buttonTheme: ButtonThemeData(
-                        buttonColor: Constants.defaultTheme.mainHighlightColor,
-                      ),
-                    ),
-                    routes: <String, WidgetBuilder>{
-                      '/HomePage': (BuildContext context) => HomePage(),
-                      '/SignUp': (BuildContext context) => SignUpScreen(),
-                      '/LogIn': (BuildContext context) => LogInScreen(),
-                    }),
-              );
+                      routes: <String, WidgetBuilder>{
+                    '/HomePage': (BuildContext context) => HomePage(),
+                    '/SignUp': (BuildContext context) => SignUpScreen(),
+                    '/LogIn': (BuildContext context) => LogInScreen(),
+                  }
+                      // ),
+                      );
             }));
   }
 }

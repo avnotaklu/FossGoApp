@@ -3,16 +3,20 @@ import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/gameplay/create/create_game.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/score_calculation_stage.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/game_match.dart';
+import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/ui/gameui/player_card.dart';
 import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
+import 'package:provider/provider.dart';
 
 class GameUi extends StatefulWidget {
   bool blackTimerStarted = false;
@@ -61,7 +65,15 @@ class _GameUiState extends State<GameUi> {
               ),
 
               // FIXME: hack to emulate getRemotePlayer which is not usable before game has started because it used id that is assigned after player joins and game starts
-              Expanded(flex: 3, child: PlayerDataUi(pplayer: GameData.of(context)!.getClientPlayer(context) == 0 ? 1 : 0)),
+              Expanded(
+                  flex: 3,
+                  child: PlayerDataUi(
+                      pplayer: context
+                                  .read<GameStateBloc>()
+                                  .getClientPlayerIndex() ==
+                              0
+                          ? 1
+                          : 0)),
             ],
           ),
         ),
@@ -72,12 +84,22 @@ class _GameUiState extends State<GameUi> {
           flex: 6,
           child: Column(
             children: [
-              Expanded(flex: 3, child: PlayerDataUi(pplayer: GameData.of(context)!.getClientPlayer(context))),
-              GameData.of(context)!.cur_stage.stage is GameEndStage
+              Expanded(
+                  flex: 3,
+                  child: PlayerDataUi(
+                      pplayer: context
+                          .read<GameStateBloc>()
+                          .getClientPlayerIndex())),
+              context.read<GameStateBloc>().curStage.stage is GameEndStage
                   ? Text(
                       "${() {
-                        return ScoreCalculation.of(context)!.getWinner(context).mColor == Colors.black ? 'Black' : 'White';
-                      }.call()} won by ${(GameData.of(context)!.getPlayerWithTurn.score - GameData.of(context)!.getPlayerWithoutTurn.score).abs()}",
+                        return ScoreCalculation.of(context)!
+                                    .getWinner(context)
+                                    .turn ==
+                                0
+                            ? 'Black'
+                            : 'White';
+                      }.call()} won by ${(context.read<GameStateBloc>().getPlayerWithTurn.score - context.read<GameStateBloc>().getPlayerWithoutTurn.score).abs()}",
                       style: TextStyle(color: defaultTheme.mainTextColor),
                     )
                   : Spacer(
@@ -92,17 +114,23 @@ class _GameUiState extends State<GameUi> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // GameData.of(context)!.cur_stage.buttons()[0],
+                        // context.read<GameStateBloc>().cur_stage.buttons()[0],
                         Expanded(
                           flex: 3,
-                          child: GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? Accept() : Pass(),
+                          child: context.read<GameStateBloc>().curStage.stage
+                                  is ScoreCalculationStage
+                              ? Accept()
+                              : Pass(),
                         ),
                         VerticalDivider(
                           width: 2,
                         ),
                         Expanded(
                           flex: 3,
-                          child: GameData.of(context)!.cur_stage.stage is ScoreCalculationStage ? ContinueGame() : Resign(),
+                          child: context.read<GameStateBloc>().curStage.stage
+                                  is ScoreCalculationStage
+                              ? ContinueGame()
+                              : Resign(),
                         )
                         // GameData.of(context)!.cur_stage.buttons()[1],
                       ],
@@ -175,8 +203,9 @@ class Pass extends StatelessWidget {
     //   ),
     return BottomButton(() {
       print("pass");
+      var bloc = context.read<GameStateBloc>();
       NTP.now().then((value) {
-        GameData.of(context)!.cur_stage.onClickCell(null, context);
+        bloc.curStage.onClickCell(null, context);
         // GameData.of(context)?.newMovePlayed(context, value, null);
         // GameData.of(context)?.toggleTurn(context);
       });
@@ -190,15 +219,22 @@ class Accept extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomButton(() {
-      MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(true);
-      // GameData.of(context).acceptFinal();
-      MultiplayerData.of(context)!
-          .curGameReferences!
-          .finalRemovedClusters
-          .set(GameMatch.removedClusterToJson(ScoreCalculation.of(context)!.virtualRemovedCluster));
+      // MultiplayerData.of(context)!
+      //     .curGameReferences!
+      //     .finalOurConfirmation(context)
+      //     .set(true);
+      // // GameData.of(context).acceptFinal();
+      // MultiplayerData.of(context)!.curGameReferences!.finalRemovedClusters.set(
+      //     GameMatch.removedClusterToJson(
+      //         ScoreCalculation.of(context)!.virtualRemovedCluster));
+      final gameStateBloc = context.read<GameStateBloc>();
 
-      ScoreCalculation.of(context)!.stoneRemovalAccepted.add(GameData.of(context)!.getClientPlayer(context) as int);
-      ScoreCalculation.of(context)!.onGameEnd(context, ScoreCalculation.of(context)!.virtualRemovedCluster);
+      gameStateBloc.confirmGameEnd();
+
+      ScoreCalculation.of(context)!
+          .stoneRemovalAccepted
+          .add(gameStateBloc.getClientPlayerIndex());
+      ScoreCalculation.of(context)!.onGameEnd(gameStateBloc, ScoreCalculation.of(context)!.virtualRemovedCluster);
     }, "Accept");
   }
 }
@@ -209,29 +245,57 @@ class ContinueGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomButton(() {
-      MultiplayerData.of(context)!.curGameReferences!.finalOurConfirmation(context).set(false);
-      // GameData.of(context).acceptFinal();
-      MultiplayerData.of(context)!.curGameReferences!.finalRemovedClusters.remove();
+      // MultiplayerData.of(context)!
+      //     .curGameReferences!
+      //     .finalOurConfirmation(context)
+      //     .set(false);
+      // // GameData.of(context).acceptFinal();
+      // MultiplayerData.of(context)!
+      //     .curGameReferences!
+      //     .finalRemovedClusters
+      //     .remove();
 
-      NTP.now().then((value) {
-        GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn] =
-            TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn]!.duration);
-        MultiplayerData.of(context)!
-            .curGameReferences!
-            .lastTimeAndDuration
-            .child(GameData.of(context)!.getPlayerWithoutTurn.turn.toString())
-            .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithoutTurn.turn].toString());
+      // NTP.now().then((value) {
+      //   GameData.of(context)!.match.lastTimeAndDate[
+      //           GameData.of(context)!.getPlayerWithoutTurn.turn] =
+      //       TimeAndDuration(
+      //           value,
+      //           GameData.of(context)!
+      //               .match
+      //               .lastTimeAndDate[
+      //                   GameData.of(context)!.getPlayerWithoutTurn.turn]!
+      //               .duration);
+      //   MultiplayerData.of(context)!
+      //       .curGameReferences!
+      //       .lastTimeAndDuration
+      //       .child(GameData.of(context)!.getPlayerWithoutTurn.turn.toString())
+      //       .set(GameData.of(context)!
+      //           .match
+      //           .lastTimeAndDate[
+      //               GameData.of(context)!.getPlayerWithoutTurn.turn]
+      //           .toString());
 
-        GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn] =
-            TimeAndDuration(value, GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn]!.duration);
-        MultiplayerData.of(context)!
-            .curGameReferences!
-            .lastTimeAndDuration
-            .child(GameData.of(context)!.getPlayerWithTurn.turn.toString())
-            .set(GameData.of(context)!.match.lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn].toString());
+      //   GameData.of(context)!.match.lastTimeAndDate[
+      //       GameData.of(context)!
+      //           .getPlayerWithTurn
+      //           .turn] = TimeAndDuration(
+      //       value,
+      //       GameData.of(context)!
+      //           .match
+      //           .lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn]!
+      //           .duration);
+      //   MultiplayerData.of(context)!
+      //       .curGameReferences!
+      //       .lastTimeAndDuration
+      //       .child(GameData.of(context)!.getPlayerWithTurn.turn.toString())
+      //       .set(GameData.of(context)!
+      //           .match
+      //           .lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn]
+      //           .toString());
 
-        GameData.of(context)!.cur_stage = GameplayStage(context);
-      });
+      context.read<GameStateBloc>()!.continueGame();
+      context.read<GameStateBloc>()!.cur_stage_type = StageType.Gameplay;
+      // });
     }, "Continue");
   }
 }
@@ -243,7 +307,7 @@ class Resign extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomButton(() {
       print("resign");
-      Clipboard.setData(ClipboardData(text: GameData.of(context)!.match.id));
+      // Clipboard.setData(ClipboardData(text: GameData.of(context)!.match.id));
     }, "Resign");
   }
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go/utils/player.dart';
-import 'package:go/utils/position.dart';
+import 'package:go/models/position.dart';
 
-import '';
 
 const String title = "Go";
 const List<String> boardsizes = ["9x9", "13x13", "19x19"];

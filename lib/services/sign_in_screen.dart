@@ -19,10 +19,19 @@ class _SignInState extends State<SignIn> {
   @override
   void initState() {
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
-    authBloc.currentUser.listen((user) {
+    final signalR = context.read<SignalRBloc>();
+    authBloc.currentUser.listen((user) async {
       if (user != null) {
+        if (authBloc.locallyInitialedAuth) {
+          final conId = await signalR.connectionId;
+          conId.fold((e) {
+            debugPrint("Can't get connection id");
+          }, (d) {
+            authBloc.setUser(user, authBloc.token!, d);
+          });
+        }
         print("got user");
-        MultiplayerData?.of(context)?.setUser = user;
+        // MultiplayerData?.of(context)?.setUser = user;
         Navigator.of(context).pushNamedAndRemoveUntil(
           '/HomePage',
           (route) => false,

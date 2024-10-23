@@ -14,11 +14,16 @@ import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
-import 'package:go/playfield/stone.dart';
+import 'package:go/models/stone_representation.dart';
+import 'package:go/playfield/stone_widget.dart';
+import 'package:go/providers/game_state_bloc.dart';
+import 'package:go/providers/gameboard_bloc.dart';
+import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/auth_bloc.dart';
 import 'package:go/models/game_match.dart';
+import 'package:go/models/game.dart';
 import 'package:go/ui/gameui/game_ui.dart';
-import 'package:go/utils/position.dart';
+import 'package:go/models/position.dart';
 import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
@@ -29,42 +34,38 @@ import 'board.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
 class GameWidget extends StatelessWidget {
-  var players = List<Player>.filled(2, Player(0, Colors.black), growable: false); // TODO this is early idk why i did this
-
-  Stage curStage;
-  Board board;
-  GameMatch match;
+  // Board board;
+  Game game;
   bool enteredAsGameCreator;
 
-  GameWidget(this.match, this.enteredAsGameCreator, this.curStage) // Board
-      : board = Board(match.rows, match.cols, match.playgroundMap) {
-    for (var element in match.moves) {
+  GameWidget(this.game, this.enteredAsGameCreator) // Board
+  // : board = Board(game.rows, game.columns, game.playgroundMap)
+  {
+    for (var element in game.moves) {
       print(element.toString());
     }
-    players[0] = Player(0, Colors.black);
-    players[1] = Player(1, Colors.white);
   }
   @override
   Widget build(BuildContext context) {
     // return StatefulBuilder(
-    StreamController<bool> controller =
-        StreamController<bool>.broadcast(); // TODO: improve this so that stream controller and stream itself are one part not seperate like this
+    StreamController<bool> controller = StreamController<
+        bool>.broadcast(); // TODO: improve this so that stream controller and stream itself are one part not seperate like this
     var authBloc = Provider.of<AuthBloc>(context, listen: false);
 
-    Map<Position?, Stone?> finalPlaygroundMap = {};
+    // Map<Position?, StoneWidget?> finalPlaygroundMap = {};
 
     // TODO: this part was done in board but now because ui needs some info this is done here see `TODO: inherited_widget_restructure`
-    for (var i = 0; i < match.rows; i++) {
-      for (var j = 0; j < match.cols; j++) {
-        // playgroundMap[Position(i, j)] = Player(Colors.black);
-        var tmpPos = Position(i, j);
-        if (match.playgroundMap.keys.contains(tmpPos)) {
-          finalPlaygroundMap[Position(i, j)] = match.playgroundMap[tmpPos];
-        } else {
-          finalPlaygroundMap[Position(i, j)] = null;
-        }
-      }
-    }
+    // for (var i = 0; i < game.rows; i++) {
+    //   for (var j = 0; j < game.columns; j++) {
+    //     // playgroundMap[Position(i, j)] = Player(Colors.black);
+    //     var tmpPos = Position(i, j);
+    //     if (game.playgroundMap.keys.contains(tmpPos)) {
+    //       finalPlaygroundMap[Position(i, j)] = game.playgroundMap[tmpPos];
+    //     } else {
+    //       finalPlaygroundMap[Position(i, j)] = null;
+    //     }
+    //   }
+    // }
 
     return Scaffold(
       // appBar: AppBar(
@@ -74,84 +75,117 @@ class GameWidget extends StatelessWidget {
       //   ],
       // ),
       backgroundColor: Colors.green,
-      body: GameData(
-        curStage: curStage,
-        match: match,
-        pplayer: players,
-        mChild: StatefulBuilder(
-          builder: (context, setState) {
-            // TODO: make this so that below check isn't done and all of this functionality is in stages in this case gameplay_stage and game_end stage
-            if (match.runStatus == true) {
-              var checkGameStateStream = checkGameEnterable(context, match, controller).listen((event) {
-                if (event == true) {
-                  if (enteredAsGameCreator) {
-                    // this sets time so only should be called by one player
-                    var lastTimeAndDate;
-                    NTP.now().then((value) {
-                      match.startTime = value;
-                      match.lastTimeAndDate.clear();
-                      match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
-                      match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
-                      match.runStatus = true;
+      body:
+          // GameData(
+          //   curStage: curStage,
+          //   match: game,
+          //   pplayer: players,
+          //   mChild:
+          // StatefulBuilder(
+          //   builder: (context, setState) {
+          // TODO: make this so that below check isn't done and all of this functionality is in stages in this case gameplay_stage and game_end stage
+          // if (game.runStatus == true) {
+          //   var checkGameStateStream =
+          //       checkGameEnterable(context, game, controller)
+          //           .listen((event) {
+          //     if (event == true) {
+          //       if (enteredAsGameCreator) {
+          //         // this sets time so only should be called by one player
+          //         var lastTimeAndDate;
+          //         NTP.now().then((value) {
+          //           game.startTime = value;
+          //           game.lastTimeAndDate.clear();
+          //           game.lastTimeAndDate.add(TimeAndDuration(
+          //               game.startTime as DateTime,
+          //               Duration(seconds: game.time)));
+          //           game.lastTimeAndDate.add(TimeAndDuration(
+          //               game.startTime as DateTime,
+          //               Duration(seconds: game.time)));
+          //           game.runStatus = true;
 
-                      MultiplayerData.of(context)!
-                          .curGameReferences!
-                          .game
-                          .set(match.toJson()); // TODO Instead of writing entire match again write only changed values
-                      GameData.of(context)!.onGameStart(context);
-                      setState(() => match = match);
-                    });
-                  } else {
-                    // if game enterable start timer of black
+          //           MultiplayerData.of(context)!.curGameReferences!.game.set(game
+          //               .toJson()); // TODO Instead of writing entire match again write only changed values
+          //           GameData.of(context)!.onGameStart(context);
+          //           setState(() => game = game);
+          //         });
+          //       } else {
+          //         // if game enterable start timer of black
 
-                    MultiplayerData.of(context)?.curGameReferences?.startTime.onValue.listen((snaphot) {
-                      match.startTime = DateTime.parse(snaphot.snapshot.value as String);
-                      match.lastTimeAndDate.clear();
-                      match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
-                      match.lastTimeAndDate.add(TimeAndDuration(match.startTime as DateTime, Duration(seconds: match.time)));
-                      match.runStatus = true;
+          //         MultiplayerData.of(context)
+          //             ?.curGameReferences
+          //             ?.startTime
+          //             .onValue
+          //             .listen((snaphot) {
+          //           game.startTime =
+          //               DateTime.parse(snaphot.snapshot.value as String);
+          //           game.lastTimeAndDate.clear();
+          //           game.lastTimeAndDate.add(TimeAndDuration(
+          //               game.startTime as DateTime,
+          //               Duration(seconds: game.time)));
+          //           game.lastTimeAndDate.add(TimeAndDuration(
+          //               game.startTime as DateTime,
+          //               Duration(seconds: game.time)));
+          //           game.runStatus = true;
 
-                      GameData.of(context)!.onGameStart(context);
+          //           GameData.of(context)!.onGameStart(context);
 
-                      setState(() => match = match);
-                    });
-                  }
+          //           setState(() => game = game);
+          //         });
+          //       }
 
-                  // close controller once game is enterable
-                  controller.close();
-                }
-              });
-            } else if (match.runStatus == false) {
-              GameData.of(context)?.timerController[0].pause();
-              GameData.of(context)?.timerController[1].pause();
-            }
+          //       // close controller once game is enterable
+          //       controller.close();
+          //     }
+          //   });
+          // } else if (game.runStatus == false) {
 
-            // TODO: inherited_widget_restructure :: both stonelogic and score calculation should not be this up in widget tree find a way to construct them in board and still access in game ui maybe with streams or something
-            return StoneLogic(
-              playgroundMap: finalPlaygroundMap,
-              rows: match.rows,
-              cols: match.cols,
-              mChild: ScoreCalculation(
-                match.rows,
-                match.cols,
-                mChild: ValueListenableBuilder<Stage>(
-                  valueListenable: GameData.of(context)!.curStageNotifier,
-                  builder: (context, stage, idk) => WrapperGame(match, finalPlaygroundMap),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+          // }
+
+          // GameData.of(context)?.timerController[0].pause();
+          // GameData.of(context)?.timerController[1].pause();
+
+          // TODO: inherited_widget_restructure :: both stonelogic and score calculation should not be this up in widget tree find a way to construct them in board and still access in game ui maybe with streams or something
+
+          MultiProvider(
+              providers: [
+            // ChangeNotifierProvider(
+            //     create: (context) => GameStateBloc(
+            //           context.read<SignalRBloc>(),
+            //           context.read<AuthBloc>(),
+            //           game,
+            //         )),
+            ChangeNotifierProvider(create: (context) => GameboardBloc(game))
+          ],
+              builder: (context, child) {
+                return StoneLogic(
+                  gameboardBloc: context.read<GameboardBloc>(),
+                  rows: game.rows,
+                  cols: game.columns,
+                  mChild: ScoreCalculation(
+                    game.rows,
+                    game.columns,
+                    mChild: ValueListenableBuilder<StageType>(
+                      valueListenable:
+                          context.read<GameStateBloc>()!.curStageTypeNotifier,
+                      builder: (context, stage, idk) {
+                        context.read<GameStateBloc>().curStage =
+                            stage.stageConstructor(context);
+                        return WrapperGame(game);
+                      },
+                    ),
+                    gameStateBloc: context.read<GameStateBloc>(),
+                  ),
+                  gameStateBloc: context.read<GameStateBloc>(),
+                );
+              }),
     );
   }
 }
 
 class WrapperGame extends StatefulWidget {
-  final match;
-  final finalPlaygroundMap;
+  final Game game;
 
-  WrapperGame(this.match, this.finalPlaygroundMap);
+  WrapperGame(this.game);
 
   @override
   State<WrapperGame> createState() => _WrapperGameState();
@@ -166,7 +200,10 @@ class _WrapperGameState extends State<WrapperGame> {
 
   @override
   Widget build(BuildContext context) {
-    GameData.of(context)!.cur_stage.initializeWhenAllMiddlewareAvailable(context);
+    context
+        .read<GameStateBloc>()
+        .curStage
+        .initializeWhenAllMiddlewareAvailable(context);
     return Stack(
       children: [
         Container(
@@ -182,7 +219,14 @@ class _WrapperGameState extends State<WrapperGame> {
               Spacer(
                 flex: 6,
               ),
-              Expanded(flex: 18, child: Board(widget.match.rows, widget.match.cols, widget.finalPlaygroundMap)),
+              Expanded(
+                flex: 18,
+                child: Board(
+                  widget.game.rows,
+                  widget.game.columns,
+                  widget.game.playgroundMap,
+                ),
+              ),
               Spacer(
                 flex: 6,
               ),

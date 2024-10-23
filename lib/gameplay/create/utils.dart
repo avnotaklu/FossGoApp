@@ -14,32 +14,37 @@ class BackgroundScreenWithDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-        child: Container(
+    return
+        // Positioned.fill(
+        //     child:
+        Container(
+      decoration: BoxDecoration(color: Constants.defaultTheme.backgroundColor),
       child: FractionallySizedBox(
         widthFactor: 0.9,
         heightFactor: 0.6,
-        child: Dialog(backgroundColor: Constants.defaultTheme.mainHighlightColor, child: child),
+        child: Dialog(
+            backgroundColor: Constants.defaultTheme.mainHighlightColor,
+            child: child),
       ),
-      decoration: BoxDecoration(color: Constants.defaultTheme.backgroundColor),
-    ));
+      // )
+    );
   }
 }
 
 /// This reads match from database and assigns it to match if all conditions of entering game are met returns true;
-Stream<bool> checkGameEnterable(BuildContext context, GameMatch match, StreamController<bool> controller) {
-  if (match.isComplete()) {
-    bool gameEnterable = false;
-    var changeStream = MultiplayerData.of(context)?.game_ref.child(match.id).child('uid').onValue.listen((event) {
-      match.uid = GameMatch.uidFromJson(event.snapshot.value as List<Object?>);
-      if (match.bothPlayers.contains(null) == false) {
-        // gameEnterable = true;
-        controller.add(true);
-      } else {
-        // gameEnterable = false;
-        controller.add(false);
-      }
-    });
-  }
-  return controller.stream;
-}
+// Stream<bool> checkGameEnterable(BuildContext context, GameMatch match, StreamController<bool> controller) {
+//   if (match.isComplete()) {
+//     bool gameEnterable = false;
+//     var changeStream = MultiplayerData.of(context)?.game_ref.child(match.id).child('uid').onValue.listen((event) {
+//       match.uid = GameMatch.uidFromJson(event.snapshot.value as List<Object?>);
+//       if (match.bothPlayers.contains(null) == false) {
+//         // gameEnterable = true;
+//         controller.add(true);
+//       } else {
+//         // gameEnterable = false;
+//         controller.add(false);
+//       }
+//     });
+//   }
+//   return controller.stream;
+// }

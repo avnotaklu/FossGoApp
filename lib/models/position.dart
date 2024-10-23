@@ -6,7 +6,6 @@ class Position {
       : x = int.parse(val.split(' ')[0]),
         y = int.parse(val.split(' ')[1]);
 
-  @override
   bool operator <(Position other) {
     return other.x < x || other.y < y;
   }
@@ -21,11 +20,11 @@ class Position {
 
   @override
   String toString() {
-    return x.toString() + " " + y.toString();
+    return "$x $y";
   }
 
   @override
   int get hashCode => x.hashCode ^ y.hashCode;
-  final x;
-  final y;
+  final int x;
+  final int y;
 }

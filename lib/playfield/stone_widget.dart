@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
-import 'package:go/utils/position.dart';
+import 'package:go/models/cluster.dart';
+import 'package:go/models/position.dart';
 import 'package:flutter/foundation.dart';
 
-class Stone extends StatelessWidget {
+class StoneWidget extends StatelessWidget {
   Color? color;
-  Cluster cluster;
+  // Cluster cluster;
+  Position pos;
 
-  Stone(this.color, Position pos) : cluster = Cluster({pos});
+  StoneWidget(this.color, this.pos, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -44,30 +46,6 @@ class Stone extends StatelessWidget {
   }
 }
 
-class Cluster {
-  Set<Position> data;
-  Cluster(this.data);
-  int freedoms = 0;
-
-  @override
-  bool operator ==(other) {
-    if (other is! Cluster) {
-      return false;
-    }
-    return other.data == data && other.freedoms == freedoms;
-  }
-
-  @override
-  int get hashCode => data.hashCode ^ freedoms.hashCode;
-
-  Position smallestPosition() {
-    Position smallest = data.first;
-    for (Position pos in data) {
-      smallest = smallest < pos ? pos : smallest;
-    }
-    return smallest;
-  }
-}
 
 
 // class Cluster extends StatefulWidget {

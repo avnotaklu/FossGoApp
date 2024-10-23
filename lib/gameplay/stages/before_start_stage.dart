@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:go/gameplay/stages/stage.dart';
-import 'package:go/playfield/stone.dart';
+import 'package:go/playfield/stone_widget.dart';
 import 'package:go/ui/gameui/game_ui.dart';
-import 'package:go/utils/position.dart';
+import 'package:go/models/position.dart';
 
 // class BeforeStartStage extends Stage<BeforeStartStage> {
 class BeforeStartStage extends Stage {
@@ -20,7 +20,7 @@ class BeforeStartStage extends Stage {
   }
 
   @override
-  Widget drawCell(Position position, Stone? stone, BuildContext context) {
+  Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
     return Container(
       color: Colors.transparent,
     );
@@ -36,4 +36,7 @@ class BeforeStartStage extends Stage {
 
   @override
   void initializeWhenAllMiddlewareAvailable(context) {}
+
+  @override
+  StageType get getType => StageType.BeforeStart;
 }
