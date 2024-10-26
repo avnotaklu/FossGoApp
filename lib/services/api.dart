@@ -135,10 +135,28 @@ class Api {
     }
   }
 
+  Future<Either<ApiError, AvailableGames>>  getAvailableGames(String token) async {
+    var res = await http.get(
+      Uri.parse("$baseUrl/Player/AvailableGames"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      },
+    );
+    if (res.statusCode == 200) {
+      return Either.right(AvailableGames.fromJson(res.body));
+    } else {
+      return Either.left(getErrorFromResponse(res));
+      // return Either.left(
+      //     ApiError(message: res.body, statusCode: res.statusCode));
+    }
+  }
+
   static ApiError getErrorFromResponse(http.Response res) {
     return ApiError(
         message: res.body,
         statusCode: res.statusCode,
         reasonPhrase: res.reasonPhrase);
   }
+
 }

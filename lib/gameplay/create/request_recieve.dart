@@ -55,8 +55,8 @@ class RequestRecieve extends StatelessWidget {
             Expanded(
               flex: 2,
               child: StoneWidget(
-                  Constants.playerColors[game
-                      .players[context.read<AuthProvider>().currentUserRaw!.id]!],
+                  Constants.playerColors[game.players[
+                      context.read<AuthProvider>().currentUserRaw!.id]!],
                   const Position(0, 0)),
             ),
           ],
@@ -103,11 +103,15 @@ class EnterGameButton extends StatelessWidget {
           Navigator.pushReplacement(context,
               MaterialPageRoute<void>(builder: (BuildContext context) {
             var stage = BeforeStartStage();
-            return ChangeNotifierProvider(
-                create: (context) =>
-                    GameStateBloc(signalRBloc, authBloc, game, stage),
+            return ChangeNotifierProvider.value(
+                value: signalRBloc,
                 builder: (context, child) {
-                  return GameWidget(game, false);
+                  return ChangeNotifierProvider(
+                      create: (context) =>
+                          GameStateBloc(signalRBloc, authBloc, game, stage),
+                      builder: (context, child) {
+                        return GameWidget(game, false);
+                      });
                 });
           }));
 

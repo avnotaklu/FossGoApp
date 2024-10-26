@@ -70,15 +70,18 @@ class MyApp extends StatelessWidget {
           ),
         ),
         routes: <String, WidgetBuilder>{
-          '/HomePage': (BuildContext context) => MultiProvider(
-                providers: [
-                  Provider(create: (context) => HomepageBloc()),
-                  ChangeNotifierProvider(
-                      create: (context) =>
-                          SignalRProvider(context.read<AuthProvider>())),
-                ],
-                builder: (context, child) => HomePage(),
-              ),
+          '/HomePage': (BuildContext context) {
+            final signalR = SignalRProvider(context.read<AuthProvider>());
+            return MultiProvider(
+              providers: [
+                ChangeNotifierProvider(
+                    create: (context) =>
+                        HomepageBloc(signalRProvider: signalR)),
+                ChangeNotifierProvider(create: (context) => signalR),
+              ],
+              builder: (context, child) => HomePage(),
+            );
+          },
           '/SignUp': (BuildContext context) => SignUpScreen(),
           '/LogIn': (BuildContext context) => LogInScreen(),
           // '/CreateGame': (BuildContext context) => MultiProvider(

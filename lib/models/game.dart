@@ -63,12 +63,37 @@ class Game {
           ),
         ),
         players: Map<String, int>.from((map['players'])),
-        playerScores:
-            Map<String, int>.from((map['playerScores'])));
+        playerScores: Map<String, int>.from((map['playerScores'])));
   }
 
   String toJson() => json.encode(toMap());
 
   factory Game.fromJson(String source) =>
       Game.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
+class AvailableGames {
+  final List<Game> games;
+
+  AvailableGames({required this.games});
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'games': games.map((x) => x.toMap()).toList(),
+    };
+  }
+
+  factory AvailableGames.fromMap(Map<String, dynamic> map) {
+    return AvailableGames(
+      games: List<Game>.from(
+        (map['games'] as List).map<Game>(
+          (x) => Game.fromMap(x as Map<String, dynamic>),
+        ),
+      ),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+  factory AvailableGames.fromJson(String source) =>
+      AvailableGames.fromMap(json.decode(source) as Map<String, dynamic>);
 }

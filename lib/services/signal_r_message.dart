@@ -41,7 +41,8 @@ typedef SignalRMessageList = List<SignalRMessage>;
 
 extension SignalRMessageListExtension on SignalRMessageListRaw {
   SignalRMessageList get signalRMessageList {
-    return map((e) => SignalRMessage.fromMap(e as Map<String, dynamic>)).toList();
+    return map((e) => SignalRMessage.fromMap(e as Map<String, dynamic>))
+        .toList();
   }
 }
 
@@ -50,6 +51,8 @@ SignalRMessageType getSignalRMessageTypeFromMap(
   switch (type) {
     case 'GameJoin':
       return GameJoinMessage.fromMap(map);
+    case 'NewGame':
+      return NewGameCreatedMessage.fromMap(map);
     default:
       throw Exception('Unknown signalR message type: $type');
   }
@@ -67,6 +70,31 @@ SignalRMessageType getSignalRMessageType(String json, String type) {
 abstract class SignalRMessageType {
   Map<String, dynamic> toMap();
   String toJson();
+}
+
+class NewGameCreatedMessage extends SignalRMessageType {
+  final Game game;
+  NewGameCreatedMessage(this.game);
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'game': game.toMap(),
+    };
+  }
+
+  factory NewGameCreatedMessage.fromMap(Map<String, dynamic> map) {
+    return NewGameCreatedMessage(
+      Game.fromMap(map['game']),
+    );
+  }
+
+  @override
+  String toJson() => json.encode(toMap());
+
+  factory NewGameCreatedMessage.fromJson(String source) =>
+      NewGameCreatedMessage.fromMap(
+          json.decode(source) as Map<String, dynamic>);
 }
 
 class GameJoinMessage extends SignalRMessageType {
