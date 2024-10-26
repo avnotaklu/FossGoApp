@@ -58,13 +58,13 @@ class Game {
           ),
         ),
         moves: List<GameMove>.from(
-          (map['moves'] as List<GameMove>).map<GameMove>(
+          (map['moves'] as List).map<GameMove>(
             (x) => GameMove.fromMap(x as Map<String, dynamic>),
           ),
         ),
         players: Map<String, int>.from((map['players'])),
         playerScores:
-            Map<String, int>.from((map['playersScores'] as Map<String, int>)));
+            Map<String, int>.from((map['playerScores'])));
   }
 
   String toJson() => json.encode(toMap());

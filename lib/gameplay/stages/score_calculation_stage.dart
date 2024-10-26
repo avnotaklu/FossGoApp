@@ -3,7 +3,7 @@ import 'package:go/constants/constants.dart' as constants;
 
 import 'package:firebase_database/ui/utils/stream_subscriber_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/create/create_game.dart';
+import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';

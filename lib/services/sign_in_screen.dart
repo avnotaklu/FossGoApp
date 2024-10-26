@@ -1,9 +1,9 @@
-import 'package:firebase_database/firebase_database.dart';
+// import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/providers/signalr_bloc.dart';
-import 'package:go/services/auth_bloc.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/ui/homepage/homepage.dart';
 import 'package:go/main.dart';
@@ -18,18 +18,9 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   @override
   void initState() {
-    var authBloc = Provider.of<AuthBloc>(context, listen: false);
-    final signalR = context.read<SignalRBloc>();
+    var authBloc = Provider.of<AuthProvider>(context, listen: false);
     authBloc.currentUser.listen((user) async {
       if (user != null) {
-        if (authBloc.locallyInitialedAuth) {
-          final conId = await signalR.connectionId;
-          conId.fold((e) {
-            debugPrint("Can't get connection id");
-          }, (d) {
-            authBloc.setUser(user, authBloc.token!, d);
-          });
-        }
         print("got user");
         // MultiplayerData?.of(context)?.setUser = user;
         Navigator.of(context).pushNamedAndRemoveUntil(
@@ -42,7 +33,7 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    final authBloc = Provider.of<AuthBloc>(context);
+    final authBloc = Provider.of<AuthProvider>(context);
     return Scaffold(
       body: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -50,29 +41,13 @@ class _SignInState extends State<SignIn> {
             Buttons.Google,
             onPressed: () async {
               var result = await authBloc.loginGoogle();
-              result.fold((e) {
-                debugPrint(e.toString());
-              }, (v) async {
-                var signalRConnection =
-                    await context.read<SignalRBloc>().connectionId;
-                signalRConnection.fold((e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(e.message),
-                    ),
-                  );
-                }, (connectionId) {
-                  context
-                      .read<AuthBloc>()
-                      .setUser(v.user, v.token, connectionId);
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Successfully logged in"),
-                    ),
-                  );
-                });
-              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(result.fold(
+                      (l) => l.toString(), (r) => "Successfully logged in")),
+                ),
+              );
             },
           ),
           ElevatedButton(

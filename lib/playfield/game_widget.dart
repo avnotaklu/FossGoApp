@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/create/utils.dart';
@@ -19,7 +19,7 @@ import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/gameboard_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
-import 'package:go/services/auth_bloc.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/models/game.dart';
 import 'package:go/ui/gameui/game_ui.dart';
@@ -50,7 +50,7 @@ class GameWidget extends StatelessWidget {
     // return StatefulBuilder(
     StreamController<bool> controller = StreamController<
         bool>.broadcast(); // TODO: improve this so that stream controller and stream itself are one part not seperate like this
-    var authBloc = Provider.of<AuthBloc>(context, listen: false);
+    var authBloc = Provider.of<AuthProvider>(context, listen: false);
 
     // Map<Position?, StoneWidget?> finalPlaygroundMap = {};
 

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/create/create_game.dart';
+import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
@@ -11,7 +11,7 @@ import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
-import 'package:go/services/auth_bloc.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/services/game_move_dto.dart';
 import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/utils/database_strings.dart';
@@ -130,7 +130,7 @@ class GameplayStage extends Stage {
           true) // TODO revisit this and make sure it does the right thing
       {
         context.read<GameStateBloc>().getClientPlayerIndex();
-        final playerId = context.read<AuthBloc>().currentUserRaw!.id;
+        final playerId = context.read<AuthProvider>().currentUserRaw!.id;
 
         final move = GameMoveDto(
           playerId: playerId,

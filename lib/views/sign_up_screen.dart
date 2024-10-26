@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go/main.dart';
 import 'package:go/providers/sign_up_provider.dart';
 import 'package:go/providers/signalr_bloc.dart';
-import 'package:go/services/auth_bloc.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/views/my_app_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -22,13 +22,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Provider<SignUpProvider>(
-      create: (context) => SignUpProvider(),
-      child: Scaffold(
+      create: (context) => SignUpProvider(authBloc: context.read()),
+      builder:(context, child) => Scaffold(
         appBar: MyAppBar("Sign Up"),
-        body: Provider<SignUpProvider>(
-          create: (context) => SignUpProvider(),
-          builder: (context, child) => Container(
-            child: Center(
+        body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
@@ -62,33 +59,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     emailController.text,
                                     passwordController.text,
                                   );
-                          userResponse.fold((e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(e.message),
-                              ),
-                            );
-                          }, (v) async {
-                            var signalRConnection =
-                               await  context.read<SignalRBloc>().connectionId;
-                            signalRConnection.fold((e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(e.message),
-                                ),
-                              );
-                            }, (connectionId) {
-                              context
-                                  .read<AuthBloc>()
-                                  .setUser(v.user, v.token, connectionId);
+         
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(userResponse.fold(
+                              (e) => e.message,
+                              (v) => "Successfully logged in",
+                            )),
+                          ),
+                        );
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Successfully Signed up"),
-                                ),
-                              );
-                            });
-                          });
+                     
                         },
                         child: const Text("Sign Up"))
                   ],
@@ -152,8 +133,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           //     ),
           //   ),
           // ),
-        ),
-      ),
     );
   }
 }

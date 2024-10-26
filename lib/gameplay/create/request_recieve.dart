@@ -11,10 +11,10 @@ import 'package:go/models/game_match.dart';
 import 'package:go/models/position.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
-import 'package:go/services/auth_bloc.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/utils/widgets/buttons.dart';
 import 'package:provider/provider.dart';
-import 'create_game.dart';
+import 'create_game_screen.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
 class RequestRecieve extends StatelessWidget {
@@ -56,7 +56,7 @@ class RequestRecieve extends StatelessWidget {
               flex: 2,
               child: StoneWidget(
                   Constants.playerColors[game
-                      .players[context.read<AuthBloc>().currentUserRaw!.id]!],
+                      .players[context.read<AuthProvider>().currentUserRaw!.id]!],
                   const Position(0, 0)),
             ),
           ],
@@ -97,8 +97,8 @@ class EnterGameButton extends StatelessWidget {
           //     GameMatch.uidFromJson(event.snapshot.value as List<Object?>);
           // if (match.bothPlayers.contains(null) == false) {
 
-          final signalRBloc = context.read<SignalRBloc>();
-          final authBloc = context.read<AuthBloc>();
+          final signalRBloc = context.read<SignalRProvider>();
+          final authBloc = context.read<AuthProvider>();
 
           Navigator.pushReplacement(context,
               MaterialPageRoute<void>(builder: (BuildContext context) {

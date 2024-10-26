@@ -1,22 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/create/create_game.dart';
+import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/providers/game_state_bloc.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/utils/core_utils.dart';
+import 'package:go/utils/player.dart';
 import 'package:provider/provider.dart';
 
 class PlayerDataUi extends StatefulWidget {
-  int player;
+  PublicUserInfo? playerInfo;
+  Player player;
   @override
   State<PlayerDataUi> createState() => _PlayerDataUiState();
-  PlayerDataUi({required pplayer}) : player = pplayer;
+  PlayerDataUi(this.playerInfo, this.player, {super.key});
 }
 
 class _PlayerDataUiState extends State<PlayerDataUi> {
@@ -40,19 +43,29 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                       children: [
                         Expanded(
                           flex: 2,
-                          child: Container(
-                            width: 15,
-                            height: 15,
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.lightGreenAccent),
-                          ),
+                          child: widget.playerInfo?.email == null
+                              ? const Center(
+                                  child: SizedBox(
+                                      width: 25,
+                                      height: 25,
+                                      child: CircularProgressIndicator()),
+                                )
+                              : Container(
+                                  width: 15,
+                                  height: 15,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: widget.playerInfo?.email == null
+                                          ? Colors.grey
+                                          : Colors.lightGreenAccent),
+                                ),
                         ),
                         Expanded(
                           flex: 10,
                           child: Container(
                             child: Text(
-                              "${widget.player == 0 ? 'Sukhmander' : 'avnotaklu'}",
+                              // "${widget.player == 0 ? 'Sukhmander' : 'avnotaklu'}",
+                              widget.playerInfo?.email ?? "Unknown",
                               style: TextStyle(
                                   color: Constants.defaultTheme.mainTextColor,
                                   fontSize: 18),
@@ -66,20 +79,21 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                     flex: 3,
                     child: Row(
                       children: [
-                        Spacer(
+                        const Spacer(
                           flex: 1,
                         ),
-                        context.read<GameStateBloc>()!.curStage.stage is GameEndStage
+                        context.read<GameStateBloc>()!.curStage.stage
+                                is GameEndStage
                             ? Expanded(
                                 flex: 2,
                                 child: Text(
-                                  "${ScoreCalculation.of(context)!.scores(context)[widget.player]} + ",
+                                  "${ScoreCalculation.of(context)!.scores(context)[widget.player.turn]} + ",
                                   style: TextStyle(
                                       color:
                                           Constants.defaultTheme.mainTextColor),
                                 ),
                               )
-                            : Spacer(
+                            : const Spacer(
                                 flex: 1,
                               ),
                         Expanded(
@@ -87,7 +101,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                           child: Container(
                             child: ValueListenableBuilder(
                                 valueListenable: StoneLogic.of(context)!
-                                    .prisoners[widget.player],
+                                    .prisoners[widget.player.turn],
                                 builder: (context, snapshot, child) {
                                   return Text(
                                     "Prisoners ${snapshot}",
@@ -109,10 +123,10 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                                           Constants.defaultTheme.mainTextColor),
                                 )),
                               )
-                            : Spacer(
+                            : const Spacer(
                                 flex: 2,
                               ),
-                        Spacer(
+                        const Spacer(
                           flex: 3,
                         ),
                       ],
@@ -127,7 +141,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                 //     ? const Center(child: CircularProgressIndicator())
                 //     :
                 GameTimer(
-              context.read<GameStateBloc>()?.timerController[widget.player],
+              context.read<GameStateBloc>().timerController[widget.player.turn],
               pplayer: widget.player,
             ),
           ),

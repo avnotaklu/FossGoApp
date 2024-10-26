@@ -3,15 +3,16 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/create/create_game.dart';
+import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
-import 'package:go/services/auth_bloc.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/utils/core_utils.dart';
 import 'package:go/models/position.dart';
+import 'package:go/utils/player.dart';
 import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
@@ -34,13 +35,13 @@ import 'package:go/constants/constants.dart' as Constants;
 class GameTimer extends StatefulWidget {
   // StreamController<List<TimeAndDuration>> changeController = StreamController.broadcast();
 
-  CountdownController mController;
+  final CountdownController mController;
+  final Player player;
   @override
   State<GameTimer> createState() => _GameTimerState();
-  GameTimer(controller, {required pplayer})
+  const GameTimer(controller, {super.key, required pplayer})
       : mController = controller,
         player = pplayer;
-  int player;
   // ValueNotifier<TimeAndDuration?> lastMoveNotifier = ValueNotifier<TimeAndDuration?>(null);
 }
 
@@ -154,7 +155,8 @@ class _GameTimerState extends State<GameTimer> {
       builder: (context, AsyncSnapshot<GameMove> move) {
         if (move.connectionState == ConnectionState.active) {
           assert(
-            move.data!.playerId == context.read<AuthBloc>().currentUserRaw!.id,
+            move.data!.playerId ==
+                context.read<AuthProvider>().currentUserRaw!.id,
             "Shouldn't be listening to other players moves",
           );
           // WidgetsBinding.instance?.addPostFrameCallback((__) {
@@ -207,10 +209,11 @@ class _GameTimerState extends State<GameTimer> {
           // return SizedBox.shrink();
           //GameData.of(context)!.timers[widget.player]!.time = Duration(seconds:  GameData.of(context)!.match.time - 5);
           return PlayerCountdownTimer(
-              controller: widget.mController,
-              time: Duration(
-                  seconds: context.read<GameStateBloc>().game.timeInSeconds),
-              player: widget.player);
+            controller: widget.mController,
+            time: Duration(
+                seconds: context.read<GameStateBloc>().game.timeInSeconds),
+            player: widget.player,
+          );
 
           /// return GameData.of(context)!.timers[widget.player]!;
           // return PlayerCountdownTimer(
@@ -224,15 +227,15 @@ class _GameTimerState extends State<GameTimer> {
 }
 
 class PlayerCountdownTimer extends StatefulWidget {
-  PlayerCountdownTimer({
-    Key? key,
+  const PlayerCountdownTimer({
+    super.key,
     required this.controller,
     required this.time,
     required this.player,
-  }) : super(key: key);
+  });
 
-  final int player;
-  Duration time;
+  final Player player;
+  final Duration time;
   final CountdownController controller;
 
   @override
@@ -246,12 +249,12 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
       // after seconds have been modified then do the stuff
       context
           .read<GameStateBloc>()
-          .timerController[widget.player]
+          .timerController[widget.player.turn]
           .reset(); // This restarts with new seconds value
     });
 
     return Container(
-        color: context.read<GameStateBloc>().turn.player_turn == widget.player
+        color: context.read<GameStateBloc>().turn.player_turn == widget.player.turn
             ? Constants.defaultTheme.mainHighlightColor
             : Colors.transparent,
         child: Align(
@@ -271,20 +274,20 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
                     (time.toInt() ~/ 60).toString(),
                     style: TextStyle(
                       fontSize: 25,
-                      color: Constants.playerColors[widget.player],
+                      color: Constants.playerColors[widget.player.turn],
                     ),
                   ),
                   Text(
                     ':',
                     style: TextStyle(
                       fontSize: 25,
-                      color: Constants.playerColors[widget.player],
+                      color: Constants.playerColors[widget.player.turn],
                     ),
                   ),
                   Text((time.toInt() % 60).toString(),
                       style: TextStyle(
                         fontSize: 25,
-                        color: Constants.playerColors[widget.player],
+                        color: Constants.playerColors[widget.player.turn],
                       )),
                 ],
               );

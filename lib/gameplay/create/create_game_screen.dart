@@ -13,30 +13,45 @@ import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/playfield/stone_widget.dart';
+import 'package:go/providers/create_game_provider.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/homepage_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
-import 'package:go/services/auth_bloc.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
 import 'package:go/utils/widgets/buttons.dart';
 import 'package:provider/provider.dart';
 
-class CreateGame extends StatefulWidget {
-  const CreateGame({super.key});
+class CreateGameScreen extends StatefulWidget {
+  // final SignalRProvider signalRProvider;
+  const CreateGameScreen({super.key});
 
   @override
-  State<CreateGame> createState() => _CreateGameState();
+  State<CreateGameScreen> createState() => _CreateGameScreenState();
 }
 
-class _CreateGameState extends State<CreateGame> {
+class _CreateGameScreenState extends State<CreateGameScreen> {
   // static const title = 'Grid List';
   var curBoardSize = Constants.boardsizes[0];
   int mRows = 9;
   int mCols = 9;
   Map<int, String?> mUid = {};
   int mTime = 300;
+
+  @override
+  void initState() {
+    mUid.clear();
+    mUid[0] = context.read<AuthProvider>().currentUserRaw!.id;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   // ignore: use_key_in_widget_constructors
   @override
@@ -85,61 +100,71 @@ class _CreateGameState extends State<CreateGame> {
     //   );
     // }
 
+    // return Consumer<SignalRProvider>(
+    //   // : (context) => widget.signalRProvider,
+    //   builder: (context, signalRBloc, child) {
     return BackgroundScreenWithDialog(
-        child:
-            Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-      const
-      // Expanded(
-      //   flex: 2,
-      //   child:
-      Text(
-        "Choose color of your stone",
-        style: TextStyle(color: Colors.black, fontSize: 20),
-        // ),
-      ),
-      // Expanded(
-      //     flex: 1,
-      //     child:
-      Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-        IconButton(
-            onPressed: () => {
-                  mUid.clear(),
-                  mUid[0] = context.read<AuthBloc>().currentUserRaw!.id,
-                  // ?.curUser!
-                  // .email
-                  // .toString(),
-                },
-            icon:
-                // Expanded(child:
-                StoneWidget(Colors.black, Position(0, 0))
-            // )
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          const
+          // Expanded(
+          //   flex: 2,
+          //   child:
+          Text(
+            "Choose color of your stone",
+            style: TextStyle(color: Colors.black, fontSize: 20),
+            // ),
+          ),
+          // Expanded(
+          //     flex: 1,
+          //     child:
+          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+            IconButton(
+              onPressed: () => {
+                mUid.clear(),
+                mUid[0] = context.read<AuthProvider>().currentUserRaw!.id,
+                // ?.curUser!
+                // .email
+                // .toString(),
+              },
+              icon:
+                  // Expanded(child:
+                  Container(
+                      height: 50,
+                      width: 50,
+                      child: StoneWidget(Colors.black, Position(0, 0))),
+              // )
             ),
-        IconButton(
-          onPressed: () => {
-            mUid.clear(),
-            mUid[1] = context.read<AuthBloc>().currentUserRaw!.id,
-            // mUid[1] =
-            //     MultiplayerData.of(context)?.curUser!.email.toString()
-          },
-          icon:
-              // Expanded(child:
-              StoneWidget(Colors.white, Position(0, 0)
-                  // )
-                  ),
-        ),
-      ]),
-      // ),
-      StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) =>
-              // Expanded(
-              //       flex: 5,
-              // child:
-              Row(
-                children: [
-                  Expanded(
-                      flex: 1,
-                      child:
-                  DropdownButton(
+            IconButton(
+              onPressed: () => {
+                mUid.clear(),
+                mUid[1] = context.read<AuthProvider>().currentUserRaw!.id,
+                // mUid[1] =
+                //     MultiplayerData.of(context)?.curUser!.email.toString()
+              },
+              icon:
+                  // Expanded(child:
+                  Container(
+                      height: 50,
+                      width: 50,
+                      child: StoneWidget(Colors.white, Position(0, 0))),
+
+              // )
+              // ),
+            ),
+          ]),
+          // ),
+          // StatefulBuilder(
+          //     builder: (BuildContext context, StateSetter setState) =>
+          // Expanded(
+          //       flex: 5,
+          // child:
+          Row(
+            children: [
+              Expanded(
+                  flex: 1,
+                  child: DropdownButton(
                     value: curBoardSize,
                     hint: Text(
                       "Board Size",
@@ -164,12 +189,10 @@ class _CreateGameState extends State<CreateGame> {
                       mCols = int.parse(newValue.split("x")[1]);
                       setState(() => curBoardSize = newValue);
                     },
-                    )
-                  ),
-                  Expanded(
-                      flex: 1,
-                      child:
-                  Row(children: [
+                  )),
+              Expanded(
+                  flex: 1,
+                  child: Row(children: [
                     Expanded(
                       flex: 2,
                       child: BadukButton(
@@ -196,40 +219,58 @@ class _CreateGameState extends State<CreateGame> {
                         ),
                       ),
                     ),
-                  ])
-                  ),
-                ],
-                // ),
-              )),
-      // EnterGameButton(match, newPlace),
-      BadukButton(
-        onPressed: () async {
-          final signalRBloc = context.read<SignalRBloc>();
-          final authBloc = context.read<AuthBloc>();
-          final token = context.read<AuthBloc>().token;
-          final res = await context.read<HomepageBloc>().createGame(token!);
+                  ])),
+            ],
+            // ),
+          ),
+          // ),
+          // EnterGameButton(match, newPlace),
+          BadukButton(
+            onPressed: () async {
+              final signalRProvider = context.read<SignalRProvider>();
+              final signalRBloc =
+                  ChangeNotifierProvider.value(value: signalRProvider);
+              final authBloc = context.read<AuthProvider>();
+              final token = context.read<AuthProvider>().token;
+              final res =
+                  await context.read<CreateGameProvider>().createGame(token!);
 
-          res.fold((e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(e.message),
-              ),
-            );
-          }, (game) {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute<void>(builder: (BuildContext context) {
-              var stage = BeforeStartStage();
-              return ChangeNotifierProvider(
-                  create: (context) =>
-                      GameStateBloc(signalRBloc, authBloc, game, stage),
-                  builder: (context, child) {
-                    return RequestSendScreen(game);
-                  });
-            }));
-          });
-        },
-        child: Text("Create"),
+              res.fold((e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.message),
+                  ),
+                );
+              }, (game) {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute<void>(builder: (BuildContext context) {
+                  return MultiProvider(
+                      providers: [
+                        signalRBloc,
+                        // ChangeNotifierProvider.value(
+                        //   value: GameStateBloc(
+                        //       signalRProvider, authBloc, game, stage),
+                        // )
+
+                        // ProxyProvider<SignalRProvider, GameStateBloc>(
+                        //   create: (context) =>
+                        //       GameStateBloc(signalRBloc, authBloc, game, stage),
+                        //   update: (context, value, previous) =>
+                        //       GameStateBloc(value, authBloc, game, stage),
+                        // )
+                      ],
+                      builder: (context, child) {
+                        return RequestSendScreen(game);
+                      });
+                }));
+              });
+            },
+            child: Text("Create"),
+          ),
+        ],
       ),
-    ]));
+      //   );
+      // },
+    );
   }
 }

@@ -3,7 +3,7 @@ import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go/constants/constants.dart';
-import 'package:go/gameplay/create/create_game.dart';
+import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
@@ -54,96 +54,103 @@ class _GameUiState extends State<GameUi> {
     // return LayoutBuilder(
     // builder: (BuildContext context, BoxConstraints constraints){
     int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;
-    return Column(
-      children: [
-        Expanded(
-          flex: 6,
-          child: Column(
-            children: [
-              Spacer(
-                flex: 4,
-              ),
+    return Consumer<GameStateBloc>(
+      builder: (context, value, child) {
+        return Column(
+          children: [
+            Expanded(
+              flex: 6,
+              child: Column(
+                children: [
+                  Spacer(
+                    flex: 4,
+                  ),
 
-              // FIXME: hack to emulate getRemotePlayer which is not usable before game has started because it used id that is assigned after player joins and game starts
-              Expanded(
-                  flex: 3,
-                  child: PlayerDataUi(
-                      pplayer: context
-                                  .read<GameStateBloc>()
-                                  .getClientPlayerIndex() ==
-                              0
-                          ? 1
-                          : 0)),
-            ],
-          ),
-        ),
-        Spacer(
-          flex: 18,
-        ),
-        Expanded(
-          flex: 6,
-          child: Column(
-            children: [
-              Expanded(
-                  flex: 3,
-                  child: PlayerDataUi(
-                      pplayer: context
-                          .read<GameStateBloc>()
-                          .getClientPlayerIndex())),
-              context.read<GameStateBloc>().curStage.stage is GameEndStage
-                  ? Text(
-                      "${() {
-                        return ScoreCalculation.of(context)!
-                                    .getWinner(context)
-                                    .turn ==
-                                0
-                            ? 'Black'
-                            : 'White';
-                      }.call()} won by ${(context.read<GameStateBloc>().getPlayerWithTurn.score - context.read<GameStateBloc>().getPlayerWithoutTurn.score).abs()}",
-                      style: TextStyle(color: defaultTheme.mainTextColor),
-                    )
-                  : Spacer(
-                      flex: 2,
-                    ),
-              Expanded(
-                flex: 2,
-                child: Container(
-                  color: Colors.blue,
-                  child: IntrinsicHeight(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // context.read<GameStateBloc>().cur_stage.buttons()[0],
-                        Expanded(
-                          flex: 3,
-                          child: context.read<GameStateBloc>().curStage.stage
-                                  is ScoreCalculationStage
-                              ? Accept()
-                              : Pass(),
-                        ),
-                        VerticalDivider(
-                          width: 2,
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: context.read<GameStateBloc>().curStage.stage
-                                  is ScoreCalculationStage
-                              ? ContinueGame()
-                              : Resign(),
+                  // FIXME: hack to emulate getRemotePlayer which is not usable before game has started because it used id that is assigned after player joins and game starts
+                  Expanded(
+                      flex: 3,
+                      child: PlayerDataUi(
+                          context.read<GameStateBloc>().otherPlayerInfo,
+                          context.read<GameStateBloc>().players[context
+                              .read<GameStateBloc>()
+                              .getRemotePlayerIndex()])),
+                ],
+              ),
+            ),
+            Spacer(
+              flex: 18,
+            ),
+            Expanded(
+              flex: 6,
+              child: Column(
+                children: [
+                  Expanded(
+                      flex: 3,
+                      child: PlayerDataUi(
+                          context.read<GameStateBloc>().myPlayerInfo,
+                          context.read<GameStateBloc>().players[context
+                              .read<GameStateBloc>()
+                              .getClientPlayerIndex()])),
+                  context.read<GameStateBloc>().curStage.stage is GameEndStage
+                      ? Text(
+                          "${() {
+                            return ScoreCalculation.of(context)!
+                                        .getWinner(context)
+                                        .turn ==
+                                    0
+                                ? 'Black'
+                                : 'White';
+                          }.call()} won by ${(context.read<GameStateBloc>().getPlayerWithTurn.score - context.read<GameStateBloc>().getPlayerWithoutTurn.score).abs()}",
+                          style: TextStyle(color: defaultTheme.mainTextColor),
                         )
-                        // GameData.of(context)!.cur_stage.buttons()[1],
-                      ],
+                      : Spacer(
+                          flex: 2,
+                        ),
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      color: Colors.blue,
+                      child: IntrinsicHeight(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // context.read<GameStateBloc>().cur_stage.buttons()[0],
+                            Expanded(
+                              flex: 3,
+                              child: context
+                                      .read<GameStateBloc>()
+                                      .curStage
+                                      .stage is ScoreCalculationStage
+                                  ? Accept()
+                                  : Pass(),
+                            ),
+                            VerticalDivider(
+                              width: 2,
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: context
+                                      .read<GameStateBloc>()
+                                      .curStage
+                                      .stage is ScoreCalculationStage
+                                  ? ContinueGame()
+                                  : Resign(),
+                            )
+                            // GameData.of(context)!.cur_stage.buttons()[1],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
-        // Spacer(),
-        // Expanded(flex: 3, child: PlayerDataUi(pplayer: 1)),
-      ],
+            ),
+            // Spacer(),
+            // Expanded(flex: 3, child: PlayerDataUi(pplayer: 1)),
+          ],
+        );
+      },
     );
   }
 }
@@ -234,7 +241,8 @@ class Accept extends StatelessWidget {
       ScoreCalculation.of(context)!
           .stoneRemovalAccepted
           .add(gameStateBloc.getClientPlayerIndex());
-      ScoreCalculation.of(context)!.onGameEnd(gameStateBloc, ScoreCalculation.of(context)!.virtualRemovedCluster);
+      ScoreCalculation.of(context)!.onGameEnd(
+          gameStateBloc, ScoreCalculation.of(context)!.virtualRemovedCluster);
     }, "Accept");
   }
 }

@@ -9,9 +9,10 @@ import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/auth_bloc.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/services/game_move_dto.dart';
 import 'package:go/services/join_message.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:go/utils/player.dart';
 import 'package:ntp/ntp.dart';
 import 'package:signalr_netcore/signalr_client.dart';
@@ -19,17 +20,22 @@ import 'package:timer_count_down/timer_controller.dart';
 
 class GameStateBloc extends ChangeNotifier {
   final List<Player> _players = [];
-  DateTime? _startTime;
+  List<Player> get players => List.unmodifiable(_players);
   Api api = Api();
-  final Game game;
   int get turn => game.moves.length;
-  final AuthBloc authBloc;
-  final SignalRBloc signalRbloc;
+  final AuthProvider authBloc;
+  final SignalRProvider signalRbloc;
 
   int get gametime => game.timeInSeconds;
 
   Player get getPlayerWithTurn => _players[turn % 2];
   Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
+
+  // Join Data
+  DateTime? _startTime;
+  Game game;
+  PublicUserInfo myPlayerInfo;
+  PublicUserInfo? otherPlayerInfo;
 
   Set<Position> finalRemovedCluster = {};
 
@@ -50,7 +56,9 @@ class GameStateBloc extends ChangeNotifier {
   Stage curStage;
 
   GameStateBloc(this.signalRbloc, this.authBloc, this.game, this.curStage)
-      : curStageTypeNotifier = ValueNotifier(curStage.getType) {
+      : curStageTypeNotifier = ValueNotifier(curStage.getType),
+        myPlayerInfo = PublicUserInfo(
+            authBloc.currentUserRaw!.email, authBloc.currentUserRaw!.id) {
     _players.add(Player(0));
     _players.add(Player(1));
 
@@ -82,13 +90,36 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   void listenFromGameJoin() {
-    signalRbloc.hubConnection.on('gameJoin', (data) {
-      assert(data != null, "Game Join data can't be null");
-      _startTime =
-          DateTime.parse((JoinMessage.fromJson(data!.first as String)).time);
-      debugPrint("Joined game BAHAHA");
-      notifyListeners();
+    signalRbloc.hubConnection.on('gameUpdate',
+        (SignalRMessageListRaw? messagesRaw) {
+      assert(messagesRaw != null, "Game Join data can't be null");
+      var messageList = messagesRaw!.signalRMessageList;
+      if (messageList.length != 1) {
+        throw "messages count ${messageList.length}, WHAT TO DO?";
+      }
+      var message = messageList.first;
+      if (message.type == "GameJoin") {
+        debugPrint("Joining game BAHAHA");
+        final joinMessage = (message.data as GameJoinMessage);
+        joinGame(joinMessage);
+        debugPrint("Joined game BAHAHA");
+        notifyListeners();
+      }
     });
+  }
+
+  void joinGame(GameJoinMessage joinMessage) {
+    _startTime = DateTime.parse((joinMessage.time));
+    game = joinMessage.game;
+
+    var myPlayerInfoIndex = joinMessage.players
+        .indexWhere((element) => element.id == authBloc.currentUserRaw!.id);
+
+    myPlayerInfo = joinMessage.players[myPlayerInfoIndex];
+    otherPlayerInfo = joinMessage.players[myPlayerInfoIndex == 0 ? 1 : 0];
+
+    startPausedTimerOfActivePlayer();
+    cur_stage_type = StageType.Gameplay;
   }
 
   StreamSubscription moveListener() {
@@ -171,7 +202,6 @@ class GameStateBloc extends ChangeNotifier {
   void confirmGameEnd() {
     // TODO: call api to end game
   }
-
 
   void startPausedTimerOfActivePlayer() {
     timerController[getPlayerWithTurn.turn].start();

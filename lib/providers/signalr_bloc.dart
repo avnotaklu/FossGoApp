@@ -3,35 +3,65 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/signal_r_error.dart';
+import 'package:go/services/api.dart';
+import 'package:go/services/auth.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:signalr_netcore/hub_connection_builder.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
-class SignalRBloc extends ChangeNotifier {
+class SignalRProvider extends ChangeNotifier {
   // The location of the SignalR Server.
-  final serverUrl = "http://192.168.188.71:8080/gameHub";
-  Future<Either<SignalRError, String>> get connectionId =>
-      connectionCompleter.future;
-  final Completer<Either<SignalRError, String>> connectionCompleter =
-      Completer();
+  final serverUrl = "${Api.baseUrl}/gameHub";
+  Either<SignalRError, String> connectionId;
+  // connectionCompleter.future;
+  // final Either<SignalRError, String> connectionCompleter =
+  // Completer();
+  late final AuthProvider authBloc;
   late final HubConnection hubConnection;
   late final Timer _timeoutTimer;
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    debugPrint("Disposing SignalR Provider");
+  }
 // Creates the connection by using the HubConnectionBuilder.
-  SignalRBloc() {
+  SignalRProvider(this.authBloc)
+      : connectionId = Either.left(SignalRError(
+          message: "Connection not started",
+          connectionState: RegisterationConnectionState.Disconnected,
+        )) {
     hubConnection = HubConnectionBuilder().withUrl(serverUrl).build();
     hubConnection.start();
     hubConnection.onclose(({error}) => debugPrint("Connection Closed"));
 
-    hubConnection.stateStream.listen((data) {
+    hubConnection.stateStream.listen((data) async {
       debugPrint("Connection State is now: ${data.name}");
       if (data == HubConnectionState.Connected) {
-        connectionCompleter.complete(Either.right(hubConnection.connectionId!));
-        _timeoutTimer.cancel();
+        var conId = hubConnection.connectionId!;
+        final registerRes = await authBloc.registerUser(
+            authBloc.currentUserRaw!, authBloc.token!, conId);
+        registerRes.fold(
+          (e) {
+            hubConnection.stop();
+            debugPrint(e.toString());
+          },
+          (v) {
+            connectionId = (Either.right(conId));
+            _timeoutTimer.cancel();
+            notifyListeners();
+          },
+        );
+      }
+      if(data == HubConnectionState.Disconnected) {
+        hubConnection.start();
+        debugPrint("Connection Disconnected");
       }
     });
     _timeoutTimer = Timer(const Duration(seconds: 5), () {
       if (hubConnection.state != HubConnectionState.Connected) {
-        connectionCompleter.complete(
-            Either.left(SignalRError(message: "Connection Timed Out")));
+        connectionId = (Either.left(SignalRError(
+            message: "Connection Timed Out",
+            connectionState: RegisterationConnectionState.Disconnected)));
       }
     });
   }
@@ -49,7 +79,6 @@ class SignalRBloc extends ChangeNotifier {
     hubConnection.off('gameMessage');
     ;
   }
-
 }
 
 class GameMessage {

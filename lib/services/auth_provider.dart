@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
@@ -9,13 +8,14 @@ import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
 import 'package:go/services/auth.dart';
 import 'package:go/services/register_player_dto.dart';
+import 'package:go/services/register_user_result.dart';
 import 'package:go/services/user_authentication_model.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AuthBloc {
+class AuthProvider {
   final sharedPrefs = SharedPreferencesAsync();
-  final authService = Auth();
+  // final authService = Auth();
   final api = Api();
   final googleSignIn = GoogleSignIn(
       scopes: [
@@ -31,17 +31,21 @@ class AuthBloc {
   AppUser? currentUserRaw;
   String? token;
 
-  List<AppUser> otherActivePlayers = [];
 
   bool locallyInitialedAuth = false;
-  AuthBloc() {
+  AuthProvider() {
     getToken().then((value) {
       if (value != null) {
         token = value;
-        getUser().then((user) {
-          locallyInitialedAuth = true;
-          _currentUserStreamController.add(user);
-          currentUserRaw = user;
+        getUser(value).then((authRes) {
+          authRes.fold((e) {
+            debugPrint(e.toString());
+          }, (userAuthModel) {
+            locallyInitialedAuth = true;
+            token = userAuthModel.token;
+            _currentUserStreamController.add(userAuthModel.user);
+            currentUserRaw = userAuthModel.user;
+          });
         });
       }
     });
@@ -60,9 +64,10 @@ class AuthBloc {
       // final result = await authService.signInWithCredentials(credential);
       final result = await api.googleSignIn(googleAuth);
 
-      return result.mapLeft(
-        (e) => AppError(message: e.message),
-      );
+      return result.mapLeft(AppError.fromApiError).map((r) {
+        setUser(r.token, r.user);
+        return r;
+      });
     } catch (error) {
       debugPrint(error.toString());
 
@@ -72,26 +77,33 @@ class AuthBloc {
     }
   }
 
-  void setUser(AppUser user, String token, String signalRConnectionId) async {
+  void setUser(String token, AppUser user) {
+    _currentUserStreamController.add(user);
+    currentUserRaw = user;
+    this.token = token;
+
+    storeToken(token);
+    storeUser(user);
+
+    debugPrint("email");
+  }
+
+  Future<Either<ApiError, RegisterUserResult>> registerUser(
+      AppUser user, String token, String signalRConnectionId) async {
     this.token = token;
     var registerRes = await api.registerPlayer(
       RegisterPlayerDto(connectionId: signalRConnectionId),
       token,
     );
-    registerRes.fold((e) {
-      debugPrint(e.toString());
-    }, (v) {
-      otherActivePlayers = v.otherActivePlayers;
-      if (!locallyInitialedAuth) {
-        _currentUserStreamController.add(user);
-        currentUserRaw = user;
+    return registerRes;
+    // registerRes.fold((e) {
+    //   debugPrint(e.toString());
+    // }, (v) {
+    //   otherActivePlayers = v.otherActivePlayers;
 
-        storeToken(token);
-        storeUser(user);
-
-        debugPrint("email");
-      }
-    });
+    //   if (!locallyInitialedAuth) {
+    //   }
+    // });
   }
 
   void storeToken(String token) {
@@ -106,13 +118,13 @@ class AuthBloc {
     return sharedPrefs.getString('token');
   }
 
-  Future<AppUser> getUser() async {
-    // NOTE: ONLY CALL WHEN TOKEN AVAILABLE
-    final userJson = await sharedPrefs.getString('user');
-    return AppUser.fromJson(userJson!);
+  Future<Either<AppError, UserAuthenticationModel>> getUser(
+      String token) async {
+    var res = await api.getUser(token);
+    return res.mapLeft((AppError.fromApiError));
   }
 
   logout() {
-    authService.logout();
+    // authService.logout();
   }
 }
