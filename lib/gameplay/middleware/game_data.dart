@@ -15,7 +15,7 @@ import 'package:go/models/game_match.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/services/auth_provider.dart';
-import 'package:go/services/game_move_dto.dart';
+import 'package:go/services/move_position.dart';
 import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/utils/player.dart';
 import 'package:go/models/position.dart';

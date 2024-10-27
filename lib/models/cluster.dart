@@ -2,9 +2,10 @@ import 'package:go/models/position.dart';
 
 class Cluster {
   Set<Position> data;
+  Set<Position> freedomPositions;
   int freedoms;
   int player;
-  Cluster(this.data, this.freedoms, this.player);
+  Cluster(this.data, this.freedomPositions, this.freedoms, this.player);
 
   @override
   bool operator ==(other) {

@@ -6,6 +6,7 @@ import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/stage.dart';
+import 'package:go/models/game.dart';
 import 'package:go/models/stone_representation.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'stone_widget.dart';
@@ -17,15 +18,15 @@ class Board extends StatefulWidget {
   late int rows, cols;
   Map<Position?, StoneWidget?> playgroundMap = {};
 
-  Board(this.rows, this.cols, Map<Position, StoneRepresentation?> stonePos) {
+  Board(this.rows, this.cols, Map<Position, StoneType> stonePos) {
     for (var i = 0; i < rows; i++) {
       for (var j = 0; j < cols; j++) {
         // playgroundMap[Position(i, j)] = Player(Colors.black);
         var tmpPos = Position(i, j);
         if (stonePos.keys.contains(tmpPos)) {
-          final repr = stonePos[tmpPos]!;
+          final stoneType = stonePos[tmpPos]!;
           playgroundMap[Position(i, j)] = StoneWidget(
-            repr.player == 0 ? Colors.black : Colors.white,
+            stoneType == StoneType.black ? Colors.black : Colors.white,
             tmpPos,
           );
         } else {

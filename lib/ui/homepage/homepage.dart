@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/create/request_recieve.dart';
+import 'package:go/gameplay/create/request_send_screen.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/main.dart';
@@ -171,15 +172,40 @@ class _HomePageState extends State<HomePage> {
                         final game =
                             context.read<HomepageBloc>().availableGames[index];
                         return ListTile(
-                          onTap: () {
-                            Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ChangeNotifierProvider.value(
-                                            value: signalRBloc,
-                                            builder: (context, child) {
-                                              return RequestRecieve(game: game);
-                                            })));
+                          onTap: () async {
+                            // Navigator.of(context).pushReplacement(
+                            //     MaterialPageRoute(
+                            //         builder: (context) =>
+                            //             ChangeNotifierProvider.value(
+                            //                 value: signalRBloc,
+                            //                 builder: (context, child) {
+                            var res = await homepageBloc.joinGame(game.gameId,
+                                context.read<AuthProvider>().token!);
+                            res.fold((e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.message),
+                                ),
+                              );
+                            }, (gameMessage) {
+                              Navigator.pushReplacement(context,
+                                  MaterialPageRoute<void>(
+                                      builder: (BuildContext context) {
+                                return MultiProvider(
+                                    providers: [
+                                      ChangeNotifierProvider.value(
+                                        value: signalRBloc,
+                                      )
+                                    ],
+                                    builder: (context, child) {
+                                      return RequestRecieve(
+                                        game: gameMessage.game,
+                                        joinMessage: gameMessage,
+                                      );
+                                    });
+                              }));
+                            });
+                            // })));
                           },
                           title: Text(game.gameId),
                           // onTap: () {

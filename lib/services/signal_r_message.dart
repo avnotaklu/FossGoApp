@@ -5,7 +5,7 @@ import 'package:go/models/game.dart';
 
 class SignalRMessage {
   final String type;
-  final SignalRMessageType data;
+  final SignalRMessageType? data;
 
   SignalRMessage({
     required this.type,
@@ -15,7 +15,7 @@ class SignalRMessage {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'type': type,
-      'data': data.toMap(),
+      'data': data?.toMap(),
     };
   }
 
@@ -23,10 +23,12 @@ class SignalRMessage {
     var type = map['type'] as String;
     return SignalRMessage(
       type: type,
-      data: getSignalRMessageTypeFromMap(
-        map['data'] as Map<String, dynamic>,
-        type,
-      ),
+      data: map['data'] == null
+          ? null
+          : getSignalRMessageTypeFromMap(
+              map['data'] as Map<String, dynamic>,
+              type,
+            ),
     );
   }
 
@@ -46,25 +48,37 @@ extension SignalRMessageListExtension on SignalRMessageListRaw {
   }
 }
 
-SignalRMessageType getSignalRMessageTypeFromMap(
+SignalRMessageType? getSignalRMessageTypeFromMap(
     Map<String, dynamic> map, String type) {
   switch (type) {
-    case 'GameJoin':
+    case SignalRMessageTypes.gameJoin:
       return GameJoinMessage.fromMap(map);
-    case 'NewGame':
+    case SignalRMessageTypes.newGame:
       return NewGameCreatedMessage.fromMap(map);
+    case SignalRMessageTypes.scoreCaculationStarted:
+      return null;
     default:
       throw Exception('Unknown signalR message type: $type');
   }
 }
 
-SignalRMessageType getSignalRMessageType(String json, String type) {
+SignalRMessageType? getSignalRMessageType(String json, String type) {
   switch (type) {
-    case 'GameJoin':
+    case SignalRMessageTypes.gameJoin:
       return GameJoinMessage.fromJson(json);
+    case SignalRMessageTypes.newGame:
+      return NewGameCreatedMessage.fromJson(json);
+    case SignalRMessageTypes.scoreCaculationStarted:
+      return null;
     default:
       throw Exception('Unknown signalR message type: $type');
   }
+}
+
+class SignalRMessageTypes {
+  static const String newGame = "NewGame";
+  static const String gameJoin = "GameJoin";
+  static const String scoreCaculationStarted = "ScoreCaculationStarted";
 }
 
 abstract class SignalRMessageType {
@@ -95,6 +109,32 @@ class NewGameCreatedMessage extends SignalRMessageType {
   factory NewGameCreatedMessage.fromJson(String source) =>
       NewGameCreatedMessage.fromMap(
           json.decode(source) as Map<String, dynamic>);
+}
+
+class GameMoveMessage extends SignalRMessageType {
+  final Game game;
+  GameMoveMessage({
+    required this.game,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'game': game.toMap(),
+    };
+  }
+
+  factory GameMoveMessage.fromMap(Map<String, dynamic> map) {
+    return GameMoveMessage(
+      game: Game.fromMap(map['game'] as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  String toJson() => json.encode(toMap());
+
+  factory GameMoveMessage.fromJson(String source) =>
+      GameMoveMessage.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class GameJoinMessage extends SignalRMessageType {

@@ -12,7 +12,7 @@ import 'package:go/models/game_move.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/services/auth_provider.dart';
-import 'package:go/services/game_move_dto.dart';
+import 'package:go/services/move_position.dart';
 import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/utils/database_strings.dart';
 import 'package:go/models/position.dart';
@@ -36,7 +36,7 @@ class GameplayStage extends Stage {
     final gameStateBloc = context.read<GameStateBloc>();
     gameStateBloc.unsetFinalRemovedCluster();
     gameStateBloc.startPausedTimerOfActivePlayer();
-    listenNewStone = gameStateBloc.moveListener();
+    listenNewStone = gameStateBloc.listenForMove();
     ScoreCalculation.of(context)!.calculateScore(StoneLogic.of(context)!);
   }
 
@@ -130,10 +130,8 @@ class GameplayStage extends Stage {
           true) // TODO revisit this and make sure it does the right thing
       {
         context.read<GameStateBloc>().getClientPlayerIndex();
-        final playerId = context.read<AuthProvider>().currentUserRaw!.id;
 
-        final move = GameMoveDto(
-          playerId: playerId,
+        final move = MovePosition(
           // playedAt: value,
           x: position!.x,
           y: position!.y,

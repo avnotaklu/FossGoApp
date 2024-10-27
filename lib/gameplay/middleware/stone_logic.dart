@@ -21,9 +21,9 @@ class StoneLogic extends InheritedWidget {
   final int cols;
   // Map<Position?, ValueNotifier<StoneWidget?>> _playgroundMap = {};
   // Map<Position, Stone> _playgroundMap = {};
-  StoneWidget? _teststone;
+  // StoneWidget? _teststone;
   Position? _position;
-  var newStoneStream;
+  // var newStoneStream;
 
   Position? koDelete;
   Position? koInsert;
@@ -49,7 +49,7 @@ class StoneLogic extends InheritedWidget {
   final Map<Position, Stone> _playgroundMap;
   Map<Position, Stone> get playgroundMap => _playgroundMap;
 
-  get teststone => _teststone;
+  // get teststone => _teststone;
 
   // Database update
   // this function wouldn't work in any other inherited widget because it requires StoneLogic which is built later than other inherited widgets.
@@ -278,7 +278,7 @@ class StoneLogic extends InheritedWidget {
     Position? thisCurrentCell = position;
 
     final player = gameStateBloc.getPlayerWithTurn.turn;
-    final current_cluster = Cluster({position}, 0, player);
+    final current_cluster = Cluster({position}, {}, 0, player);
 
     playgroundMap[thisCurrentCell] = Stone(
       position: position,

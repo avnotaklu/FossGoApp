@@ -2,10 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/models/game.dart';
+import 'package:go/models/game_move.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
+import 'package:go/services/move_position.dart';
+import 'package:go/services/join_message.dart';
 import 'package:go/services/register_player_dto.dart';
 import 'package:go/services/register_user_result.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/user_authentication_model.dart';
 import 'package:go/services/user_details_dto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -116,10 +120,30 @@ class Api {
     }
   }
 
-  Future<Either<ApiError, Game>> joinGame(
+  Future<Either<ApiError, GameJoinMessage>> joinGame(
       GameJoinDto data, String token) async {
     var res = await http.post(
       Uri.parse("$baseUrl/Player/JoinGame"),
+      body: data.toJson(),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      },
+    );
+    if (res.statusCode == 200) {
+      return Either.right(GameJoinMessage.fromJson(res.body));
+    } else {
+      return Either.left(getErrorFromResponse(res));
+      // return Either.left(
+      //     ApiError(message: res.body, statusCode: res.statusCode));
+    }
+  }
+
+
+  Future<Either<ApiError, Game>> makeMove(
+      MovePosition data, String token, String gameId) async {
+    var res = await http.post(
+      Uri.parse("$baseUrl/Game/$gameId/MakeMove"),
       body: data.toJson(),
       headers: {
         "Content-Type": "application/json",

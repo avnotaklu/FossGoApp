@@ -14,12 +14,15 @@ import 'package:go/utils/core_utils.dart';
 import 'package:go/utils/player.dart';
 import 'package:provider/provider.dart';
 
+enum PlayerCardType { my, other }
+
 class PlayerDataUi extends StatefulWidget {
-  PublicUserInfo? playerInfo;
-  Player player;
+  final PublicUserInfo? playerInfo;
+  final Player player;
+  final PlayerCardType type;
   @override
   State<PlayerDataUi> createState() => _PlayerDataUiState();
-  PlayerDataUi(this.playerInfo, this.player, {super.key});
+  const PlayerDataUi(this.playerInfo, this.player, this.type, {super.key});
 }
 
 class _PlayerDataUiState extends State<PlayerDataUi> {
@@ -140,9 +143,23 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                 //  GameData.of(context)?.match.uid[widget.player] == null
                 //     ? const Center(child: CircularProgressIndicator())
                 //     :
-                GameTimer(
-              context.read<GameStateBloc>().timerController[widget.player.turn],
-              pplayer: widget.player,
+                ValueListenableBuilder(
+              valueListenable: widget.type == PlayerCardType.my
+                  ? context
+                      .read<GameStateBloc>()
+                      .times[context.read<GameStateBloc>().myStone.index]
+                  : context
+                      .read<GameStateBloc>()
+                      .times[context.read<GameStateBloc>().otherStone.index],
+              builder: (context, value, child) {
+                return GameTimer(
+                  value,
+                  context
+                      .read<GameStateBloc>()
+                      .timerController[widget.player.turn],
+                  pplayer: widget.player,
+                );
+              },
             ),
           ),
         ],

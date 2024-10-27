@@ -6,6 +6,7 @@ import 'package:go/core/error_handling/signal_r_error.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth.dart';
 import 'package:go/services/auth_provider.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:signalr_netcore/hub_connection_builder.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
@@ -24,6 +25,7 @@ class SignalRProvider extends ChangeNotifier {
     // TODO: implement dispose
     debugPrint("Disposing SignalR Provider");
   }
+
 // Creates the connection by using the HubConnectionBuilder.
   SignalRProvider(this.authBloc)
       : connectionId = Either.left(SignalRError(
@@ -52,7 +54,7 @@ class SignalRProvider extends ChangeNotifier {
           },
         );
       }
-      if(data == HubConnectionState.Disconnected) {
+      if (data == HubConnectionState.Disconnected) {
         hubConnection.start();
         debugPrint("Connection Disconnected");
       }
@@ -66,22 +68,27 @@ class SignalRProvider extends ChangeNotifier {
     });
   }
 
-  StreamController<GameMessage> gameMessageController =
-      StreamController<GameMessage>.broadcast();
+  StreamController<SignalRMessage> gameMessageController =
+      StreamController<SignalRMessage>.broadcast();
 
   void listenMessages() {
-    hubConnection.on('gameMessage', (data) {
-      gameMessageController.add(GameMessage(data));
+    hubConnection.on('gameUpdate', (SignalRMessageListRaw? messagesRaw) {
+      assert(messagesRaw != null, "Message can't be null");
+
+      if (messagesRaw!.length != 1) {
+        throw "messages count ${messagesRaw.length}, WHAT TO DO?";
+      }
+
+      var messageList = messagesRaw.signalRMessageList;
+      var message = messageList.first;
+
+      gameMessageController.add(message);
     });
   }
 
   void silenceMessages() {
-    hubConnection.off('gameMessage');
+    hubConnection.off('gameUpdate');
     ;
   }
 }
 
-class GameMessage {
-  dynamic placeholder;
-  GameMessage(this.placeholder);
-}

@@ -12,14 +12,16 @@ import 'package:go/models/position.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/auth_provider.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:go/utils/widgets/buttons.dart';
 import 'package:provider/provider.dart';
 import 'create_game_screen.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
 class RequestRecieve extends StatelessWidget {
-  Game game;
-  RequestRecieve({required this.game});
+  final GameJoinMessage joinMessage;
+  final Game game;
+  const RequestRecieve({super.key, required this.game, required this.joinMessage});
   @override
   Widget build(BuildContext context) {
     // int recieversTurn = (() {
@@ -56,22 +58,24 @@ class RequestRecieve extends StatelessWidget {
               flex: 2,
               child: StoneWidget(
                   Constants.playerColors[game.players[
-                      context.read<AuthProvider>().currentUserRaw!.id]!],
+                      context.read<AuthProvider>().currentUserRaw!.id]!.index],
                   const Position(0, 0)),
             ),
           ],
         ),
       ),
       Expanded(flex: 4, child: Container()),
-      Expanded(flex: 3, child: EnterGameButton(game)),
+      Expanded(flex: 3, child: EnterGameButton(game,joinMessage)),
       const Spacer(flex: 3),
     ]));
   }
 }
 
 class EnterGameButton extends StatelessWidget {
+  final GameJoinMessage joinMessage;
+
   final Game game;
-  const EnterGameButton(this.game);
+  const EnterGameButton(this.game, this.joinMessage);
   @override
   Widget build(BuildContext context) {
     // try {
@@ -108,7 +112,7 @@ class EnterGameButton extends StatelessWidget {
                 builder: (context, child) {
                   return ChangeNotifierProvider(
                       create: (context) =>
-                          GameStateBloc(signalRBloc, authBloc, game, stage),
+                          GameStateBloc(signalRBloc, authBloc, game, stage, joinMessage),
                       builder: (context, child) {
                         return GameWidget(game, false);
                       });

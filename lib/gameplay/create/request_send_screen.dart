@@ -74,6 +74,7 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
                                       authBloc,
                                       widget.game,
                                       stage,
+                                      null,
                                     ),
                                   ),
                                   ChangeNotifierProvider.value(

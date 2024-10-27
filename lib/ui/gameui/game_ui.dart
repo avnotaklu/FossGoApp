@@ -70,10 +70,12 @@ class _GameUiState extends State<GameUi> {
                   Expanded(
                       flex: 3,
                       child: PlayerDataUi(
-                          context.read<GameStateBloc>().otherPlayerInfo,
-                          context.read<GameStateBloc>().players[context
-                              .read<GameStateBloc>()
-                              .getRemotePlayerIndex()])),
+                        context.read<GameStateBloc>().otherPlayerInfo,
+                        context.read<GameStateBloc>().players[context
+                            .read<GameStateBloc>()
+                            .getRemotePlayerIndex()],
+                        PlayerCardType.other,
+                      )),
                 ],
               ),
             ),
@@ -87,10 +89,12 @@ class _GameUiState extends State<GameUi> {
                   Expanded(
                       flex: 3,
                       child: PlayerDataUi(
-                          context.read<GameStateBloc>().myPlayerInfo,
-                          context.read<GameStateBloc>().players[context
-                              .read<GameStateBloc>()
-                              .getClientPlayerIndex()])),
+                        context.read<GameStateBloc>().myPlayerInfo,
+                        context.read<GameStateBloc>().players[context
+                            .read<GameStateBloc>()
+                            .getClientPlayerIndex()],
+                        PlayerCardType.my,
+                      )),
                   context.read<GameStateBloc>().curStage.stage is GameEndStage
                       ? Text(
                           "${() {

@@ -24,6 +24,11 @@ class Position {
   }
 
   @override
+  String toHighLevelRepr() {
+    return "$x $y";
+  }
+
+  @override
   int get hashCode => x.hashCode ^ y.hashCode;
   final int x;
   final int y;
