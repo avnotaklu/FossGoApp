@@ -138,32 +138,6 @@ class NewGameCreatedMessage extends SignalRMessageType {
           json.decode(source) as Map<String, dynamic>);
 }
 
-class GameMoveMessage extends SignalRMessageType {
-  final Game game;
-  GameMoveMessage({
-    required this.game,
-  });
-
-  @override
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'game': game.toMap(),
-    };
-  }
-
-  factory GameMoveMessage.fromMap(Map<String, dynamic> map) {
-    return GameMoveMessage(
-      game: Game.fromMap(map['game'] as Map<String, dynamic>),
-    );
-  }
-
-  @override
-  String toJson() => json.encode(toMap());
-
-  factory GameMoveMessage.fromJson(String source) =>
-      GameMoveMessage.fromMap(json.decode(source) as Map<String, dynamic>);
-}
-
 class GameJoinMessage extends SignalRMessageType {
   final DateTime time;
   final List<PublicUserInfo> players;

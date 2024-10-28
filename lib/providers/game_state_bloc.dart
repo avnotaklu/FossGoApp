@@ -107,7 +107,7 @@ class GameStateBloc extends ChangeNotifier {
   late final Stream<GameJoinMessage> listenForGameJoin;
   late final Stream<bool> listenFromOpponentConfirmation;
   late final Stream<(bool, Position)> listenFromRemovedCluster;
-  late final Stream<GameMoveMessage> listenFromMove;
+  late final Stream<NewMoveMessage> listenFromMove;
 
   void setupStreams() {
     var gameMessageStream = signalRbloc.gameMessageStream;
@@ -129,8 +129,8 @@ class GameStateBloc extends ChangeNotifier {
       }
     });
     listenFromMove = gameMessageStream.asyncExpand((message) async* {
-      if (message.data is GameMoveMessage) {
-        yield message.data as GameMoveMessage;
+      if (message.data is NewMoveMessage) {
+        yield message.data as NewMoveMessage;
       }
     });
   }
@@ -165,6 +165,7 @@ class GameStateBloc extends ChangeNotifier {
   StreamSubscription listenForMove() {
     return listenFromMove.listen((message) {
       final game = message.game;
+      debugPrint("Got move ${authBloc.token}");
       // assert(data != null, "Game move data can't be null");
       applyMoveResult(game);
     });
@@ -181,11 +182,9 @@ class GameStateBloc extends ChangeNotifier {
     );
 
     updatedGame.fold((l) {
-//  Either.left(AppError(message: l.message)
+      debugPrint("Move failure ${l.message}");
     }, (r) {
-      final move = r.moves.last;
       applyMoveResult(r);
-      return right(move);
     });
 
     // var tmpMove = GameMove(time: DateTime.now(), x: moveDto.x, y: moveDto.y);
@@ -217,21 +216,35 @@ class GameStateBloc extends ChangeNotifier {
     nonTurnPlayerTimer.pause();
 
     var firstPlayerDuration = times
+        .mapWithIndex((e, i) => (e, i))
         .filterWithIndex((e, i) => i % 2 == 1)
-        .mapWithIndex((e, i) => (e, i + 1))
         .fold(const Duration(), (d, r) => d + r.$1.difference(times[r.$2 - 1]));
 
     this.times[0].value =
         Duration(seconds: game.timeInSeconds) - firstPlayerDuration;
 
+    var secondPlayerTimes = times
+        .mapWithIndex((e, i) => (e, i))
+        .skip(1)
+        .filterWithIndex((e, i) => i % 2 == 1);
+
     var secondPlayerDuration = times
+        .mapWithIndex((e, i) => (e, i))
         .skip(1)
         .filterWithIndex((e, i) => i % 2 == 1)
-        .mapWithIndex((e, i) => (e, i + 1))
         .fold(const Duration(), (d, r) => d + r.$1.difference(times[r.$2 - 1]));
 
+    debugPrint("times: ${times.fold("", (s, d) => "$s$d ,")}");
+    debugPrint(
+        "secondPlayerTimes: ${secondPlayerTimes.fold("", (s, d) => "$s$d ,")}");
+
+    debugPrint("Second Player time: ${secondPlayerDuration.inSeconds}");
     this.times[1].value =
         Duration(seconds: game.timeInSeconds) - secondPlayerDuration;
+
+    // Also calculate the lag time and incorporate that for player with turn
+    this.times[getPlayerWithTurn.turn].value -=
+        systemUtilities.currentTime.difference(game.moves.last.time);
   }
 
   String getPlayerIdFromTurn(int turn) {
