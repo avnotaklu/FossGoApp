@@ -25,7 +25,7 @@ class Game {
   final Map<Position, StoneType> playgroundMap;
   final List<GameMove> moves;
   final Map<String, StoneType> players;
-  final DateTime startTime;
+  final DateTime? startTime;
   final Position? koPositionInLastMove;
   final GameState gameState;
 
@@ -53,7 +53,7 @@ class Game {
       'moves': moves.map((x) => x.toMap()).toList(),
       'players': players,
       'playerScores': playerScores,
-      'startTime': startTime.toIso8601String(),
+      'startTime': startTime?.toIso8601String(),
       'koPositionInLastMove': koPositionInLastMove?.toString(),
       'gameState': gameState.toString(),
     };
@@ -66,7 +66,7 @@ class Game {
       columns: map['columns'] as int,
       timeInSeconds: map['timeInSeconds'] as int,
       playgroundMap:
-          (map['playgroundMap'] as Map<String, int>).map<Position, StoneType>(
+          Map<String, int>.from(map['playgroundMap']).map<Position, StoneType>(
         (key, value) => MapEntry(
           Position.fromString(key),
           StoneType.values[value],
@@ -78,19 +78,19 @@ class Game {
         ),
       ),
       players: Map<String, StoneType>.from(
-        (map['players'] as Map<String, int> ?? {}).map((key, value) => MapEntry(
+        Map<String, int>.from(map['players']).map((key, value) => MapEntry(
               key,
               StoneType.values[value],
             )),
       ),
       playerScores: Map<String, int>.from((map['playerScores'])),
-      startTime: DateTime.parse(map['startTime'] as String),
+      startTime: map['startTime'] == null
+          ? null
+          : DateTime.parse(map['startTime'] as String),
       koPositionInLastMove: map['koPositionInLastMove'] != null
           ? Position.fromString(map['koPositionInLastMove'] as String)
           : null,
-      gameState: GameState.values.firstWhere(
-        (e) => e.toString() == map['gameState'] as String,
-      ),
+      gameState: GameState.values[map['gameState'] as int],
     );
   }
 
@@ -98,6 +98,34 @@ class Game {
 
   factory Game.fromJson(String source) =>
       Game.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  Game copyWith({
+    String? gameId,
+    int? rows,
+    int? columns,
+    int? timeInSeconds,
+    Map<String, int>? playerScores,
+    Map<Position, StoneType>? playgroundMap,
+    List<GameMove>? moves,
+    Map<String, StoneType>? players,
+    DateTime? startTime,
+    Position? koPositionInLastMove,
+    GameState? gameState,
+  }) {
+    return Game(
+      gameId: gameId ?? this.gameId,
+      rows: rows ?? this.rows,
+      columns: columns ?? this.columns,
+      timeInSeconds: timeInSeconds ?? this.timeInSeconds,
+      playerScores: playerScores ?? this.playerScores,
+      playgroundMap: playgroundMap ?? this.playgroundMap,
+      moves: moves ?? this.moves,
+      players: players ?? this.players,
+      startTime: startTime ?? this.startTime,
+      koPositionInLastMove: koPositionInLastMove ?? this.koPositionInLastMove,
+      gameState: gameState ?? this.gameState,
+    );
+  }
 }
 
 class AvailableGames {

@@ -55,6 +55,8 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
       return GameJoinMessage.fromMap(map);
     case SignalRMessageTypes.newGame:
       return NewGameCreatedMessage.fromMap(map);
+    case SignalRMessageTypes.newMove:
+      return NewMoveMessage.fromMap(map);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     default:
@@ -68,6 +70,8 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
       return GameJoinMessage.fromJson(json);
     case SignalRMessageTypes.newGame:
       return NewGameCreatedMessage.fromJson(json);
+    case SignalRMessageTypes.newMove:
+      return NewMoveMessage.fromJson(json);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     default:
@@ -78,12 +82,35 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
 class SignalRMessageTypes {
   static const String newGame = "NewGame";
   static const String gameJoin = "GameJoin";
+  static const String newMove = "NewMove";
   static const String scoreCaculationStarted = "ScoreCaculationStarted";
 }
 
 abstract class SignalRMessageType {
   Map<String, dynamic> toMap();
   String toJson();
+}
+
+class NewMoveMessage extends SignalRMessageType {
+  final Game game;
+  NewMoveMessage(this.game);
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'game': game.toMap(),
+    };
+  }
+
+  factory NewMoveMessage.fromMap(Map<String, dynamic> map) {
+    return NewMoveMessage(
+      Game.fromMap(map['game'] as Map<String, dynamic>),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory NewMoveMessage.fromJson(String source) =>
+      NewMoveMessage.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class NewGameCreatedMessage extends SignalRMessageType {
@@ -138,7 +165,7 @@ class GameMoveMessage extends SignalRMessageType {
 }
 
 class GameJoinMessage extends SignalRMessageType {
-  final String time;
+  final DateTime time;
   final List<PublicUserInfo> players;
   final Game game;
   GameJoinMessage({
@@ -149,7 +176,7 @@ class GameJoinMessage extends SignalRMessageType {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'time': time,
+      'time': time.toString(),
       'players': players.map((x) => x.toMap()).toList(),
       'game': game.toMap(),
     };
@@ -157,7 +184,7 @@ class GameJoinMessage extends SignalRMessageType {
 
   factory GameJoinMessage.fromMap(Map<String, dynamic> map) {
     return GameJoinMessage(
-      time: map['time'] as String,
+      time: DateTime.parse(map['time'] as String),
       players: List<PublicUserInfo>.from(
         (map['players']).map<PublicUserInfo>(
           (x) => PublicUserInfo.fromMap(x as Map<String, dynamic>),

@@ -32,6 +32,11 @@ class SignalRProvider extends ChangeNotifier {
           message: "Connection not started",
           connectionState: RegisterationConnectionState.Disconnected,
         )) {
+    setupHubConnection();
+    listenMessages();
+  }
+
+  void setupHubConnection() {
     hubConnection = HubConnectionBuilder().withUrl(serverUrl).build();
     hubConnection.start();
     hubConnection.onclose(({error}) => debugPrint("Connection Closed"));
@@ -68,7 +73,10 @@ class SignalRProvider extends ChangeNotifier {
     });
   }
 
-  StreamController<SignalRMessage> gameMessageController =
+  Stream<SignalRMessage> get gameMessageStream =>
+      _gameMessageController.stream;
+
+  final StreamController<SignalRMessage> _gameMessageController =
       StreamController<SignalRMessage>.broadcast();
 
   void listenMessages() {
@@ -82,13 +90,11 @@ class SignalRProvider extends ChangeNotifier {
       var messageList = messagesRaw.signalRMessageList;
       var message = messageList.first;
 
-      gameMessageController.add(message);
+      _gameMessageController.add(message);
     });
   }
 
   void silenceMessages() {
     hubConnection.off('gameUpdate');
-    ;
   }
 }
-

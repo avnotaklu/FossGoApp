@@ -70,7 +70,7 @@ class _GameUiState extends State<GameUi> {
                   Expanded(
                       flex: 3,
                       child: PlayerDataUi(
-                        context.read<GameStateBloc>().otherPlayerInfo,
+                        context.read<GameStateBloc>().otherPlayerUserInfo,
                         context.read<GameStateBloc>().players[context
                             .read<GameStateBloc>()
                             .getRemotePlayerIndex()],
@@ -89,13 +89,13 @@ class _GameUiState extends State<GameUi> {
                   Expanded(
                       flex: 3,
                       child: PlayerDataUi(
-                        context.read<GameStateBloc>().myPlayerInfo,
+                        context.read<GameStateBloc>().myPlayerUserInfo,
                         context.read<GameStateBloc>().players[context
                             .read<GameStateBloc>()
                             .getClientPlayerIndex()],
                         PlayerCardType.my,
                       )),
-                  context.read<GameStateBloc>().curStage.stage is GameEndStage
+                  context.read<Stage>() is GameEndStage
                       ? Text(
                           "${() {
                             return ScoreCalculation.of(context)!
@@ -122,24 +122,20 @@ class _GameUiState extends State<GameUi> {
                             // context.read<GameStateBloc>().cur_stage.buttons()[0],
                             Expanded(
                               flex: 3,
-                              child: context
-                                      .read<GameStateBloc>()
-                                      .curStage
-                                      .stage is ScoreCalculationStage
-                                  ? Accept()
-                                  : Pass(),
+                              child:
+                                  context.read<Stage>() is ScoreCalculationStage
+                                      ? Accept()
+                                      : Pass(),
                             ),
                             VerticalDivider(
                               width: 2,
                             ),
                             Expanded(
                               flex: 3,
-                              child: context
-                                      .read<GameStateBloc>()
-                                      .curStage
-                                      .stage is ScoreCalculationStage
-                                  ? ContinueGame()
-                                  : Resign(),
+                              child:
+                                  context.read<Stage>() is ScoreCalculationStage
+                                      ? ContinueGame()
+                                      : Resign(),
                             )
                             // GameData.of(context)!.cur_stage.buttons()[1],
                           ],
@@ -216,7 +212,7 @@ class Pass extends StatelessWidget {
       print("pass");
       var bloc = context.read<GameStateBloc>();
       NTP.now().then((value) {
-        bloc.curStage.onClickCell(null, context);
+        context.read<Stage>().onClickCell(null, context);
         // GameData.of(context)?.newMovePlayed(context, value, null);
         // GameData.of(context)?.toggleTurn(context);
       });
@@ -306,7 +302,7 @@ class ContinueGame extends StatelessWidget {
       //           .toString());
 
       context.read<GameStateBloc>()!.continueGame();
-      context.read<GameStateBloc>()!.cur_stage_type = StageType.Gameplay;
+      context.read<GameStateBloc>()!.curStageType = StageType.Gameplay;
       // });
     }, "Continue");
   }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go/core/system_utilities.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/game.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/playfield/stone_widget.dart';
@@ -11,6 +13,7 @@ import 'package:go/models/game_match.dart';
 import 'package:go/models/position.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
+import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/utils/widgets/buttons.dart';
@@ -21,7 +24,8 @@ import 'package:go/constants/constants.dart' as Constants;
 class RequestRecieve extends StatelessWidget {
   final GameJoinMessage joinMessage;
   final Game game;
-  const RequestRecieve({super.key, required this.game, required this.joinMessage});
+  const RequestRecieve(
+      {super.key, required this.game, required this.joinMessage});
   @override
   Widget build(BuildContext context) {
     // int recieversTurn = (() {
@@ -57,15 +61,16 @@ class RequestRecieve extends StatelessWidget {
             Expanded(
               flex: 2,
               child: StoneWidget(
-                  Constants.playerColors[game.players[
-                      context.read<AuthProvider>().currentUserRaw!.id]!.index],
+                  Constants.playerColors[game
+                      .players[context.read<AuthProvider>().currentUserRaw!.id]!
+                      .index],
                   const Position(0, 0)),
             ),
           ],
         ),
       ),
       Expanded(flex: 4, child: Container()),
-      Expanded(flex: 3, child: EnterGameButton(game,joinMessage)),
+      Expanded(flex: 3, child: EnterGameButton(game, joinMessage)),
       const Spacer(flex: 3),
     ]));
   }
@@ -106,13 +111,20 @@ class EnterGameButton extends StatelessWidget {
 
           Navigator.pushReplacement(context,
               MaterialPageRoute<void>(builder: (BuildContext context) {
-            var stage = BeforeStartStage();
+            var stage = StageType.BeforeStart;
             return ChangeNotifierProvider.value(
                 value: signalRBloc,
                 builder: (context, child) {
                   return ChangeNotifierProvider(
-                      create: (context) =>
-                          GameStateBloc(signalRBloc, authBloc, game, stage, joinMessage),
+                      create: (context) => GameStateBloc(
+                            Api(),
+                            signalRBloc,
+                            authBloc,
+                            game,
+                            systemUtils,
+                            stage,
+                            joinMessage,
+                          ),
                       builder: (context, child) {
                         return GameWidget(game, false);
                       });

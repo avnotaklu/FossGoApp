@@ -8,15 +8,18 @@ import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/game_match.dart';
+import 'package:go/models/stone.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
-import 'package:go/providers/gameboard_bloc.dart';
+import 'package:go/providers/game_board_bloc.dart';
 import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
 
 // class GameEndStage extends Stage<GameEndStage> {
 class GameEndStage extends Stage {
+  late final Map<Position, Stone> stonesCopy;
+
   GameEndStage.fromScratch(context) {}
 
   GameEndStage(context) {
@@ -24,7 +27,7 @@ class GameEndStage extends Stage {
 
     context.read<GameStateBloc>().timerController[0].pause();
     context.read<GameStateBloc>().timerController[1].pause();
-    ScoreCalculation.of(context)!.calculateScore(context);
+    ScoreCalculation.of(context)!.calculateScore();
   }
 
   @override
@@ -63,10 +66,7 @@ class GameEndStage extends Stage {
                       ? (StoneWidget stone) {
                           if (ScoreCalculation.of(context)!
                               .virtualRemovedCluster
-                              .contains(context
-                                  .read<GameboardBloc>()
-                                  .stones[stone.pos]!
-                                  .cluster)) {
+                              .contains(stonesCopy[stone.pos]!.cluster)) {
                             return StoneWidget(
                                 stone.color!.withOpacity(0.6), position);
                           } else {
@@ -90,13 +90,16 @@ class GameEndStage extends Stage {
 
   @override
   void initializeWhenAllMiddlewareAvailable(context) {
-    final stoneLogic = StoneLogic.of(context)!;
+    final gameBoarcBloc = context.read<GameBoardBloc>();
+    stonesCopy = gameBoarcBloc.stonesCopy;
+
     context.read<GameStateBloc>().finalRemovedCluster.forEach((element) {
       ScoreCalculation.of(context)!
           .virtualRemovedCluster
-          .add(stoneLogic.playgroundMap[element]!.cluster);
+          .add(stonesCopy[element]!.cluster);
     });
-    ScoreCalculation.of(context)!.calculateScore(stoneLogic);
+
+    ScoreCalculation.of(context)!.calculateScore();
   }
 
   @override

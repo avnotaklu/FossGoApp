@@ -11,7 +11,7 @@ import 'package:go/models/stone.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
-import 'package:go/providers/gameboard_bloc.dart';
+import 'package:go/providers/game_board_bloc.dart';
 import 'package:go/utils/player.dart';
 import 'package:go/models/position.dart';
 
@@ -36,18 +36,23 @@ class StoneLogic extends InheritedWidget {
   // }
 
   Stone? stoneAt(Position? pos) {
-    if (pos == null) {
-      return null;
-    }
-    return playgroundMap[pos];
+    return gameBoardBloc.stoneAt(pos);
+  }
+
+  void setStoneAt(Position pos, Stone stone) {
+    gameBoardBloc.setStoneAt(pos, stone);
+  }
+
+  void removeStoneAt(Position pos) {
+    gameBoardBloc.removeStoneAt(pos);
   }
 
   // Getters
   // Map<Position?, ValueNotifier<StoneWidget?>> get playground_Map =>
   //     _playgroundMap; // TODO:NP2 nullable_position_1 maybe Position? can be just Position see NP1
 
-  final Map<Position, Stone> _playgroundMap;
-  Map<Position, Stone> get playgroundMap => _playgroundMap;
+  // final Map<Position, Stone> _playgroundMap;
+  // Map<Position, Stone> get playgroundMap => _playgroundMap;
 
   // get teststone => _teststone;
 
@@ -66,16 +71,17 @@ class StoneLogic extends InheritedWidget {
   //       playgroundMap.map((key, value) => MapEntry(key, ValueNotifier(value))));
   // }
 
-  final GameboardBloc gameboardBloc;
+  final GameBoardBloc gameBoardBloc;
 
   StoneLogic(
       {super.key,
       required this.gameStateBloc,
-      required this.gameboardBloc,
+      required this.gameBoardBloc,
       required this.mChild,
       required this.rows,
       required this.cols})
-      : _playgroundMap = gameboardBloc.stones,
+      :
+        // _playgroundMap = gameboardBloc.stones,
         super(child: mChild);
 
   // Inheritance Widget related functions
@@ -89,20 +95,20 @@ class StoneLogic extends InheritedWidget {
       context.dependOnInheritedWidgetOfExactType<StoneLogic>();
 
   // Helper functions
-  printEntireGrid() {
-    playgroundMap.forEach((i, j) {
-      debugPrint(
-          " ${i.x} ${i.y} => color : ${j.player.toString()} ${j.cluster.freedoms.toString()}");
-    });
-  }
+  // printEntireGrid() {
+  //   playgroundMap.forEach((i, j) {
+  //     debugPrint(
+  //         " ${i.x} ${i.y} => color : ${j.player.toString()} ${j.cluster.freedoms.toString()}");
+  //   });
+  // }
 
   Cluster? getClusterFromPosition(Position pos) {
-    return _playgroundMap[pos]?.cluster;
+    return stoneAt(pos)?.cluster;
   }
 
   /// returns true if not out of bounds
   bool checkIfInsideBounds(Position pos) {
-    return pos.x > -1 && pos.x < rows && pos.y < cols && pos.y > -1;
+    return gameBoardBloc.checkIfInsideBounds(pos);
   }
 
   /* Main Stone Logic functionality */
@@ -114,12 +120,11 @@ class StoneLogic extends InheritedWidget {
       if ((traversed[curpos]?.contains(getClusterFromPosition(neighbor)) ??
               false) ==
           false) {
-        // if( _playgroundMap[neighbor] == null && checkOutofBounds(neighbor))
+        // if( stoneAt(neighbor) == null && checkOutofBounds(neighbor))
         // {
-        //   _playgroundMap[curpos]?.cluster.freedoms += 1;
+        //   stoneAt(curpos)?.cluster.freedoms += 1;
         // }
-        if (_playgroundMap[neighbor]?.player !=
-            _playgroundMap[curpos]?.player) {
+        if (stoneAt(neighbor)?.player != stoneAt(curpos)?.player) {
           getClusterFromPosition(neighbor)?.freedoms -= 1;
           if (traversed[curpos] == null) {
             traversed[curpos] = [getClusterFromPosition(neighbor)];
@@ -144,8 +149,7 @@ class StoneLogic extends InheritedWidget {
                 {
                   if (!insertable)
                     {
-                      if (_playgroundMap[neighbor]?.player ==
-                          _playgroundMap[curpos]?.player)
+                      if (stoneAt(neighbor)?.player == stoneAt(curpos)?.player)
                         insertable =
                             !(getClusterFromPosition(neighbor)?.freedoms == 1)
                       else
@@ -167,7 +171,7 @@ class StoneLogic extends InheritedWidget {
   /* From here */
   void calculateFreedomForPosition(Position position) {
     doActionOnNeighbors(position, (Position curpos, Position neighbor) {
-      // if( _playgroundMap[neighbor] == null && checkOutofBounds(neighbor) && alreadyAdded.contains(neighbor) == false)//  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
+      // if( stoneAt(neighbor) == null && checkOutofBounds(neighbor) && alreadyAdded.contains(neighbor) == false)//  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
       if (stoneAt(neighbor) == null &&
           checkIfInsideBounds(neighbor) &&
           ((traversed[neighbor]?.contains(getClusterFromPosition(curpos)) ??
@@ -194,18 +198,18 @@ class StoneLogic extends InheritedWidget {
       Position curpos, Position? neighbor) // done on all neighbors
   {
     if (neighbor != null &&
-        _playgroundMap[neighbor]?.player == _playgroundMap[curpos]?.player) {
+        stoneAt(neighbor)?.player == stoneAt(curpos)?.player) {
       // If neighbor isn't null and both neighbor and curpos both have same color
       for (var i in getClusterFromPosition(neighbor)!.data) {
         // add all of neighbors Position to cluster of curpos
-        _playgroundMap[curpos]?.cluster.data.add(i);
+        stoneAt(curpos)?.cluster.data.add(i);
       }
     }
   }
 
   void updateAllInTheClusterWithCorrectCluster(Cluster correctCluster) {
     for (var i in correctCluster.data) {
-      _playgroundMap[i] = _playgroundMap[i]!.copyWith(cluster: correctCluster);
+      setStoneAt(i, stoneAt(i)!.copyWith(cluster: correctCluster));
     }
   }
   // Step 1 ---
@@ -216,8 +220,8 @@ class StoneLogic extends InheritedWidget {
     null: null
   }; // TODO: Find a way to do this without making this data member
   deleteStonesInDeletableCluster(Position curpos, Position neighbor) {
-    if (_playgroundMap[neighbor]?.player != _playgroundMap[curpos]?.player &&
-        _playgroundMap[neighbor]?.cluster.freedoms == 1) {
+    if (stoneAt(neighbor)?.player != stoneAt(curpos)?.player &&
+        stoneAt(neighbor)?.cluster.freedoms == 1) {
       for (var i in getClusterFromPosition(neighbor)!.data) {
         // This supposedly works because a
         // position where delete occurs in such a way that ko is possible
@@ -235,11 +239,11 @@ class StoneLogic extends InheritedWidget {
         }
 
         // prisoners[Constants.playerColors.indexWhere(
-        //         (element) => element != _playgroundMap[i]?.value?.color)]
+        //         (element) => element != stoneAt(i)?.value?.color)]
         //     .value += 1;
 
-        prisoners[1 - _playgroundMap[i]!.player].value += 1;
-        _playgroundMap.remove(i);
+        prisoners[1 - stoneAt(i)!.player].value += 1;
+        removeStoneAt(i);
 
         recalculateFreedomsForNeighborsOfDeleted(i);
       }
@@ -280,10 +284,13 @@ class StoneLogic extends InheritedWidget {
     final player = gameStateBloc.getPlayerWithTurn.turn;
     final current_cluster = Cluster({position}, {}, 0, player);
 
-    playgroundMap[thisCurrentCell] = Stone(
-      position: position,
-      player: player,
-      cluster: current_cluster,
+    setStoneAt(
+      thisCurrentCell,
+      Stone(
+        position: position,
+        player: player,
+        cluster: current_cluster,
+      ),
     );
 
     // StoneWidget(gameStateBloc?.getPlayerWithTurn.mColor, position);
@@ -309,7 +316,7 @@ class StoneLogic extends InheritedWidget {
       return true;
     }
 
-    playgroundMap.remove(thisCurrentCell);
+    removeStoneAt(thisCurrentCell);
     return false;
   }
 

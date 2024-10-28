@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
 class MovePosition {
@@ -26,4 +27,15 @@ class MovePosition {
 
   factory MovePosition.fromJson(String source) =>
       MovePosition.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  // @override
+  // bool operator ==(covariant MovePosition other) {
+  //   if (identical(this, other)) return true;
+  //   return 
+  //     other.x == x &&
+  //     other.y == y;
+  // }
+
+  // @override
+  // int get hashCode => x.hashCode ^ y.hashCode;
 }

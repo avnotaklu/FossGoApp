@@ -7,6 +7,7 @@ import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:provider/provider.dart';
 import 'stone_widget.dart';
@@ -34,13 +35,11 @@ class _CellState extends State<Cell> {
     //   valueListenable: StoneLogic.of(context)!.stoneNotifierAt(widget.position),
     //   builder: (BuildContext context, dyn, wid) {
     final stone = StoneLogic.of(context)!.stoneAt(widget.position);
+    final stage = context.read<Stage>();
     return GestureDetector(
       onTap: () {
         setState(() {
-          context
-              .read<GameStateBloc>()
-              .curStage
-              .onClickCell(widget.position, context);
+          stage.onClickCell(widget.position, context);
         });
       },
       child:
@@ -54,7 +53,7 @@ class _CellState extends State<Cell> {
           // //         width: 20,
           // //         color: Colors.red,
           // //       )
-          context.read<GameStateBloc>().curStage.drawCell(
+          stage.drawCell(
               widget.position,
               StoneWidget(
                 stone == null ? null : constants.playerColors[stone!.player],

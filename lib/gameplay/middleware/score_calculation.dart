@@ -12,6 +12,7 @@ import 'package:go/models/cluster.dart';
 import 'package:go/models/stone.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
+import 'package:go/providers/game_board_bloc.dart';
 import 'package:go/utils/player.dart';
 import 'package:go/models/position.dart';
 import 'package:go/constants/constants.dart' as Constants;
@@ -32,6 +33,7 @@ class ScoreCalculation extends InheritedWidget {
   Map<Position, Stone> virtualPlaygroundMap = {};
   Set<Cluster> virtualRemovedCluster = {};
   final GameStateBloc gameStateBloc;
+  final GameBoardBloc gameBoardBloc;
 
   Player getWinner(BuildContext context) {
     gameStateBloc.getPlayerWithTurn.score =
@@ -61,14 +63,16 @@ class ScoreCalculation extends InheritedWidget {
   // GETTERS
   List<int> scores(context) {
     if (_territoryScores.isNotEmpty) return _territoryScores;
-    calculateScore(context);
+    calculateScore();
     return _territoryScores;
   }
 
   ScoreCalculation(
     rows,
     cols, {
+    super.key,
     required this.gameStateBloc,
+    required this.gameBoardBloc,
     required Widget mChild,
   }) : super(child: mChild) {
     for (int i = 0; i < rows; i++) {
@@ -80,13 +84,14 @@ class ScoreCalculation extends InheritedWidget {
 
   onGameEnd(GameStateBloc gameState, removedCluster) {
     if (stoneRemovalAccepted.length == 2) {
-      gameState.cur_stage_type = StageType.GameEnd;
+      gameState.curStageType = StageType.GameEnd;
       gameState.endGame();
     }
   }
 
-  calculateScore(StoneLogic stoneLogic) {
+  calculateScore() {
     clusterEncountered.clear();
+    var stoneLogic = gameBoardBloc;
 
     for (int i = 0; i < stoneLogic.rows; i++) {
       for (int j = 0; j < stoneLogic.cols; j++) {
@@ -95,8 +100,8 @@ class ScoreCalculation extends InheritedWidget {
       }
     }
 
-    virtualPlaygroundMap = Map.from(
-        stoneLogic.playgroundMap.map((key, value) => MapEntry(key, value)));
+    virtualPlaygroundMap = stoneLogic.stonesCopy;
+
     for (Cluster cluster in virtualRemovedCluster) {
       for (var pos in cluster.data) {
         virtualPlaygroundMap.remove(pos);
@@ -139,7 +144,7 @@ class ScoreCalculation extends InheritedWidget {
       for (int j = 0; j < stoneLogic.rows; j++) {
         if (areaMap[Position(i, j)]!.value == null &&
             virtualPlaygroundMap[Position(i, j)] == null) {
-          forEachEmptyArea(Position(i, j), Area(), stoneLogic);
+          forEachEmptyArea(Position(i, j), Area());
         }
       }
     }
@@ -147,8 +152,10 @@ class ScoreCalculation extends InheritedWidget {
     // print(startArea);
     areaMap.forEach((key, value) {
       if (value.value?.owner != null) {
-        _territoryScores[Constants.playerColors
-            .indexWhere((element) => element == value.value?.owner)] += 1;
+        // _territoryScores[Constants.playerColors
+        //     .indexWhere((element) => element == value.value?.owner)] += 1;
+
+        _territoryScores[value.value!.owner!] += 1;
       }
     });
 
@@ -168,8 +175,8 @@ class ScoreCalculation extends InheritedWidget {
     // if not then add this
   }
 
-  forEachEmptyArea(Position startPos, Area curArea, StoneLogic stoneLogic) {
-    if (stoneLogic.checkIfInsideBounds(startPos)) {
+  forEachEmptyArea(Position startPos, Area curArea) {
+    if (gameBoardBloc.checkIfInsideBounds(startPos)) {
       if (virtualPlaygroundMap[startPos] != null) {
         if (!clusterEncountered
             .contains(virtualPlaygroundMap[startPos]!.cluster)) {
@@ -180,8 +187,8 @@ class ScoreCalculation extends InheritedWidget {
         }
       }
       StoneLogic.doActionOnNeighbors(startPos, (curPos, neighbor) {
-        if (stoneLogic.checkIfInsideBounds(neighbor) &&
-            stoneLogic.checkIfInsideBounds(curPos)) {
+        if (gameBoardBloc.checkIfInsideBounds(neighbor) &&
+            gameBoardBloc.checkIfInsideBounds(curPos)) {
           // TODO: maybe check if inside bounds is not necessary for curpos
           if (!curArea.spaces.contains(curPos) &&
               virtualPlaygroundMap[curPos] == null) {
@@ -194,7 +201,7 @@ class ScoreCalculation extends InheritedWidget {
                 // if () {
                 curArea.spaces.add(neighbor);
                 areaMap[neighbor]!.value = curArea;
-                forEachEmptyArea(neighbor, curArea, stoneLogic);
+                forEachEmptyArea(neighbor, curArea);
                 //}
               }
             }

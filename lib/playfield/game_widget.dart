@@ -17,7 +17,7 @@ import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/stone_representation.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
-import 'package:go/providers/gameboard_bloc.dart';
+import 'package:go/providers/game_board_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/models/game_match.dart';
@@ -48,9 +48,9 @@ class GameWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // return StatefulBuilder(
-    StreamController<bool> controller = StreamController<
-        bool>.broadcast(); // TODO: improve this so that stream controller and stream itself are one part not seperate like this
-    var authBloc = Provider.of<AuthProvider>(context, listen: false);
+    // StreamController<bool> controller = StreamController<
+    //     bool>.broadcast(); // TODO: improve this so that stream controller and stream itself are one part not seperate like this
+    // var authBloc = Provider.of<AuthProvider>(context, listen: false);
 
     // Map<Position?, StoneWidget?> finalPlaygroundMap = {};
 
@@ -154,11 +154,10 @@ class GameWidget extends StatelessWidget {
             //           context.read<AuthBloc>(),
             //           game,
             //         )),
-            ChangeNotifierProvider(create: (context) => GameboardBloc(game))
+            ChangeNotifierProvider(create: (context) => GameBoardBloc(game))
           ],
               builder: (context, child) {
                 return StoneLogic(
-                  gameboardBloc: context.read<GameboardBloc>(),
                   rows: game.rows,
                   cols: game.columns,
                   mChild: ScoreCalculation(
@@ -167,15 +166,21 @@ class GameWidget extends StatelessWidget {
                     mChild: ValueListenableBuilder<StageType>(
                       valueListenable:
                           context.read<GameStateBloc>()!.curStageTypeNotifier,
-                      builder: (context, stage, idk) {
-                        context.read<GameStateBloc>().curStage =
-                            stage.stageConstructor(context);
-                        return WrapperGame(game);
+                      builder: (context, stageType, idk) {
+                        var stage = stageType.stageConstructor(context);
+                        return Provider<Stage>(
+                          create: (c) => stage,
+                          builder: (context, child) {
+                            return WrapperGame(game);
+                          },
+                        );
                       },
                     ),
                     gameStateBloc: context.read<GameStateBloc>(),
+                    gameBoardBloc: context.read<GameBoardBloc>(),
                   ),
                   gameStateBloc: context.read<GameStateBloc>(),
+                  gameBoardBloc: context.read<GameBoardBloc>(),
                 );
               }),
     );
@@ -201,8 +206,7 @@ class _WrapperGameState extends State<WrapperGame> {
   @override
   Widget build(BuildContext context) {
     context
-        .read<GameStateBloc>()
-        .curStage
+        .read<Stage>()
         .initializeWhenAllMiddlewareAvailable(context);
     return Stack(
       children: [

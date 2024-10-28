@@ -7,8 +7,8 @@ class GameMove {
   final int? y;
   GameMove({
     required this.time,
-    this.x,
-    this.y,
+    required this.x,
+    required this.y,
   });
 
   bool isPass() {

@@ -6,6 +6,7 @@ import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/ui/gameui/time_watch.dart';
@@ -85,8 +86,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                         const Spacer(
                           flex: 1,
                         ),
-                        context.read<GameStateBloc>()!.curStage.stage
-                                is GameEndStage
+                        context.read<Stage>() is GameEndStage
                             ? Expanded(
                                 flex: 2,
                                 child: Text(
@@ -144,13 +144,13 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                 //     ? const Center(child: CircularProgressIndicator())
                 //     :
                 ValueListenableBuilder(
-              valueListenable: widget.type == PlayerCardType.my
-                  ? context
-                      .read<GameStateBloc>()
-                      .times[context.read<GameStateBloc>().myStone.index]
-                  : context
-                      .read<GameStateBloc>()
-                      .times[context.read<GameStateBloc>().otherStone.index],
+              valueListenable:
+                  // widget.type == PlayerCardType.my
+                  // ?
+                  context.read<GameStateBloc>().times[widget.player.turn],
+              // : context
+              //     .read<GameStateBloc>()
+              //     .times[context.read<GameStateBloc>().otherStone.index],
               builder: (context, value, child) {
                 return GameTimer(
                   value,

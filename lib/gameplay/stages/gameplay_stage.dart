@@ -22,7 +22,7 @@ import 'package:provider/provider.dart';
 
 // class GameplayStage extends Stage<GameplayStage> {
 class GameplayStage extends Stage {
-  StreamSubscription? listenNewStone;
+  // StreamSubscription? listenNewStone;
 
   GameplayStage.fromScratch();
 
@@ -36,8 +36,8 @@ class GameplayStage extends Stage {
     final gameStateBloc = context.read<GameStateBloc>();
     gameStateBloc.unsetFinalRemovedCluster();
     gameStateBloc.startPausedTimerOfActivePlayer();
-    listenNewStone = gameStateBloc.listenForMove();
-    ScoreCalculation.of(context)!.calculateScore(StoneLogic.of(context)!);
+    // listenNewStone = gameStateBloc.listenForMove();
+    ScoreCalculation.of(context)!.calculateScore();
   }
 
   // fetchNewStoneFromDB(context) {
@@ -129,7 +129,6 @@ class GameplayStage extends Stage {
       if (StoneLogic.of(context)?.handleStoneUpdate(position, context) ??
           true) // TODO revisit this and make sure it does the right thing
       {
-        context.read<GameStateBloc>().getClientPlayerIndex();
 
         final move = MovePosition(
           // playedAt: value,
@@ -185,7 +184,7 @@ class GameplayStage extends Stage {
   @override
   disposeStage() {
     // TODO: implement disposeStage
-    listenNewStone?.cancel();
+    // listenNewStone?.cancel();
   }
 
   @override

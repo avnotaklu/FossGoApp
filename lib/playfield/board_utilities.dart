@@ -26,6 +26,7 @@ class BoardStateUtilities {
   final int rows;
   final int cols;
   BoardStateUtilities(this.rows, this.cols);
+
   BoardState BoardStateFromGame(Game game) {
     var map = game.playgroundMap;
 
@@ -33,6 +34,15 @@ class BoardStateUtilities {
     var clusters = GetClusters(simpleB);
     var stones = GetStones(clusters);
     var board = ConstructBoard(rows, cols, stones, game.koPositionInLastMove);
+
+    return board;
+  }
+
+  BoardState BoardStateFromSimpleRepr(
+      List<List<int>> simpleB, Position? koPosition) {
+    var clusters = GetClusters(simpleB);
+    var stones = GetStones(clusters);
+    var board = ConstructBoard(rows, cols, stones, koPosition);
 
     return board;
   }
@@ -141,8 +151,8 @@ class BoardStateUtilities {
 
   HighLevelBoardRepresentation MakeHighLevelBoardRepresentationFromBoardState(
       BoardState boardState) {
-    return boardState.playgroundMap.map(
-        (e, v) => MapEntry(e, StoneType.values[v.player]));
+    return boardState.playgroundMap
+        .map((e, v) => MapEntry(e, StoneType.values[v.player]));
   }
 
   bool checkIfInsideBounds(Position pos) {

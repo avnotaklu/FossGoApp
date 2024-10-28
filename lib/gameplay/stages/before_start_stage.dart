@@ -12,11 +12,9 @@ class BeforeStartStage extends Stage {
   @override
   BeforeStartStage get stage => this;
 
-  
-
   @override
   List<Widget> buttons() {
-    return [Pass(), Resign()];
+    return [const Pass(), const Resign()];
   }
 
   @override

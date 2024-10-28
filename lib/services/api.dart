@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/models/game.dart';
@@ -15,8 +16,13 @@ import 'package:go/services/user_details_dto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
+// abstract interface class IApi {
+//   Future<Either<ApiError, Game>> makeMove(
+//       MovePosition data, String token, String gameId);
+// }
+
 class Api {
-  static const String baseUrl = "http://192.168.28.71:8080";
+  static const String baseUrl = "http://192.168.200.71:8080";
 
   Future<Either<ApiError, UserAuthenticationModel>> googleSignIn(
       GoogleSignInAuthentication userCreds) async {
@@ -139,9 +145,11 @@ class Api {
     }
   }
 
-
   Future<Either<ApiError, Game>> makeMove(
-      MovePosition data, String token, String gameId) async {
+      MovePosition data,
+      String token,
+      String gameId) async {
+    // var data = MovePosition(x: 0, y: 0);
     var res = await http.post(
       Uri.parse("$baseUrl/Game/$gameId/MakeMove"),
       body: data.toJson(),
@@ -159,7 +167,8 @@ class Api {
     }
   }
 
-  Future<Either<ApiError, AvailableGames>>  getAvailableGames(String token) async {
+  Future<Either<ApiError, AvailableGames>> getAvailableGames(
+      String token) async {
     var res = await http.get(
       Uri.parse("$baseUrl/Player/AvailableGames"),
       headers: {
@@ -182,5 +191,4 @@ class Api {
         statusCode: res.statusCode,
         reasonPhrase: res.reasonPhrase);
   }
-
 }

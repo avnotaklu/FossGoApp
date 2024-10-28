@@ -13,9 +13,10 @@ import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/cluster.dart';
 import 'package:go/models/game_match.dart';
+import 'package:go/models/stone.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
-import 'package:go/providers/gameboard_bloc.dart';
+import 'package:go/providers/game_board_bloc.dart';
 import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
@@ -25,20 +26,23 @@ class ScoreCalculationStage extends Stage {
   StreamSubscription? removedClusterSubscription;
   StreamSubscription? opponentConfirmationStream;
   //get context => _context;
+  late final Map<Position, Stone> stonesCopy;
 
   @override
   ScoreCalculationStage? get stage => this;
   @override
   void initializeWhenAllMiddlewareAvailable(context) {
+    final gameBoarcBloc = context.read<GameBoardBloc>();
+    stonesCopy = gameBoarcBloc.stonesCopy;
     context.read<GameStateBloc>().finalRemovedCluster.forEach((element) {
       ScoreCalculation.of(context)!
           .virtualRemovedCluster
-          .add(StoneLogic.of(context)!.playgroundMap[element]!.cluster);
+          .add(stonesCopy[element]!.cluster);
     });
 
     context.read<GameStateBloc>().timerController[0].pause();
     context.read<GameStateBloc>().timerController[1].pause();
-    ScoreCalculation.of(context)!.calculateScore(StoneLogic.of(context)!);
+    ScoreCalculation.of(context)!.calculateScore();
     removedClusterSubscription = listenForRemovedCluster(context);
     opponentConfirmationStream = listenForOpponentConfirmation(context);
     // ScoreCalculation.of(context)!.calculateScore(context);
@@ -80,10 +84,7 @@ class ScoreCalculationStage extends Stage {
                       ? (StoneWidget stone) {
                           if (ScoreCalculation.of(context)!
                               .virtualRemovedCluster
-                              .contains(context
-                                  .read<GameboardBloc>()
-                                  .stones[stone.pos]!
-                                  .cluster)) {
+                              .contains(stonesCopy[stone.pos]!.cluster)) {
                             return StoneWidget(
                                 stone.color!.withOpacity(0.6), position);
                           } else {
@@ -99,11 +100,11 @@ class ScoreCalculationStage extends Stage {
 
   @override
   onClickCell(Position? position, BuildContext context) {
-    if (StoneLogic.of(context)!.playgroundMap[position] != null) {
+    if (stonesCopy[position] != null) {
       if (ScoreCalculation.of(context)!
           .virtualRemovedCluster
-          .contains(StoneLogic.of(context)!.playgroundMap[position]!.cluster)) {
-        var cluster = StoneLogic.of(context)!.playgroundMap[position]!.cluster;
+          .contains(stonesCopy[position]!.cluster)) {
+        var cluster = stonesCopy[position]!.cluster;
         ScoreCalculation.of(context)!.virtualRemovedCluster.remove(cluster);
         context.read<GameStateBloc>().removeClusterFromRemovedClusters(cluster);
 
@@ -113,7 +114,7 @@ class ScoreCalculationStage extends Stage {
         //     .child(cluster.smallestPosition().toString())
         //     .remove();
       } else {
-        var cluster = StoneLogic.of(context)!.playgroundMap[position]!.cluster;
+        var cluster = stonesCopy[position]!.cluster;
         ScoreCalculation.of(context)!.virtualRemovedCluster.add(cluster);
 
         context.read<GameStateBloc>().addClusterToRemovedClusters(cluster);
@@ -122,7 +123,7 @@ class ScoreCalculationStage extends Stage {
         //     .removedClusters
         //     .update({cluster.smallestPosition().toString(): false});
       }
-      ScoreCalculation.of(context)!.calculateScore(StoneLogic.of(context)!);
+      ScoreCalculation.of(context)!.calculateScore();
     }
   }
 
@@ -133,8 +134,8 @@ class ScoreCalculationStage extends Stage {
         .read<GameStateBloc>()
         .listenFromRemovedCluster
         .listen((event) {
-      if (stoneLogic!.playgroundMap[event.$2]?.cluster != null) {
-        final cluster = stoneLogic.playgroundMap[event.$2]!.cluster;
+      if (stonesCopy[event.$2]?.cluster != null) {
+        final cluster = stonesCopy[event.$2]!.cluster;
         if (event.$1) {
           scoreCalculation!.virtualRemovedCluster.add(cluster);
         } else {
@@ -192,7 +193,7 @@ class ScoreCalculationStage extends Stage {
       if (data) {
         listenForGameEndRequest(scoreCalculator, gameState, stoneLogic);
       } else {
-        gameState.cur_stage_type = StageType.Gameplay;
+        gameState.curStageType = StageType.Gameplay;
       }
     });
   }
@@ -202,7 +203,7 @@ class ScoreCalculationStage extends Stage {
     // return MultiplayerData.of(context)!.curGameReferences?.removedClusters.get().then((data) {
     Set<Cluster> opponentsCluster = gameState.getRemovedClusters();
     scoreCalculator.virtualRemovedCluster = opponentsCluster;
-    scoreCalculator.calculateScore(stoneLogic);
+    scoreCalculator.calculateScore();
     scoreCalculator.stoneRemovalAccepted.add(gameState.getRemotePlayerIndex());
 
     scoreCalculator.onGameEnd(gameState, opponentsCluster);

@@ -28,23 +28,24 @@ class AuthProvider {
   final StreamController<AppUser?> _currentUserStreamController =
       StreamController.broadcast();
   Stream<AppUser?> get currentUser => _currentUserStreamController.stream;
-  AppUser? currentUserRaw;
-  String? token;
-
+  AppUser? _currentUserRaw;
+  AppUser get currentUserRaw => _currentUserRaw!;
+  String? _token;
+  String? get token => _token;
 
   bool locallyInitialedAuth = false;
   AuthProvider() {
     getToken().then((value) {
       if (value != null) {
-        token = value;
+        _token = value;
         getUser(value).then((authRes) {
           authRes.fold((e) {
             debugPrint(e.toString());
           }, (userAuthModel) {
             locallyInitialedAuth = true;
-            token = userAuthModel.token;
+            _token = userAuthModel.token;
             _currentUserStreamController.add(userAuthModel.user);
-            currentUserRaw = userAuthModel.user;
+            _currentUserRaw = userAuthModel.user;
           });
         });
       }
@@ -79,8 +80,8 @@ class AuthProvider {
 
   void setUser(String token, AppUser user) {
     _currentUserStreamController.add(user);
-    currentUserRaw = user;
-    this.token = token;
+    _currentUserRaw = user;
+    _token = token;
 
     storeToken(token);
     storeUser(user);
@@ -90,7 +91,7 @@ class AuthProvider {
 
   Future<Either<ApiError, RegisterUserResult>> registerUser(
       AppUser user, String token, String signalRConnectionId) async {
-    this.token = token;
+    _token = token;
     var registerRes = await api.registerPlayer(
       RegisterPlayerDto(connectionId: signalRConnectionId),
       token,

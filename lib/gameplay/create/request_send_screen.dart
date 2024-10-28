@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:go/core/system_utilities.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/models/game.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
+import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/utils/widgets/buttons.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +64,7 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
                               context.read<SignalRProvider>();
 
                           final authBloc = context.read<AuthProvider>();
-                          var stage = BeforeStartStage();
+                          var stage = StageType.BeforeStart;
                           // final gameStatebloc = context.read<GameStateBloc>();
                           Navigator.pushReplacement(
                             context,
@@ -70,9 +73,11 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
                                 providers: [
                                   ChangeNotifierProvider(
                                     create: (context) => GameStateBloc(
+                                      Api(),
                                       signalRProvider,
                                       authBloc,
                                       widget.game,
+                                      systemUtils,
                                       stage,
                                       null,
                                     ),
