@@ -86,8 +86,7 @@ class _ShareGameIDButtonState extends State<ShareGameIDButton> {
                                     value: signalRProvider,
                                   )
                                 ],
-                                builder: (context, child) =>
-                                    GameWidget(widget.game, true),
+                                builder: (context, child) => GameWidget(true),
                               ),
                             ),
                           );

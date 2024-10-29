@@ -10,7 +10,11 @@ import 'package:go/playfield/board_utilities.dart';
 class GameBoardBloc extends ChangeNotifier {
   final Map<Position, Stone> _stones = {};
   Map<Position, Stone> get stonesCopy => Map.fromEntries(_stones.entries);
+
   final Game game;
+
+  final Position? koDelete;
+
   int get rows => game.rows;
   int get cols => game.columns;
 
@@ -37,7 +41,7 @@ class GameBoardBloc extends ChangeNotifier {
   }
 
   // final Map<int, Cluster> clusters = {};
-  GameBoardBloc(this.game) {
+  GameBoardBloc(this.game) : koDelete = game.koPositionInLastMove {
     // for (var stone_rep_map_entry in game.playgroundMap.entries) {
     //   var currentClusterID = stone_rep_map_entry.value.clusterId;
     //   if (clusters[currentClusterID] == null) {

@@ -25,8 +25,12 @@ class StoneLogic extends InheritedWidget {
   Position? _position;
   // var newStoneStream;
 
-  Position? koDelete;
-  Position? koInsert;
+  Position? get koDelete => gameBoardBloc.koDelete;
+
+  set koDelete(Position? pos) {
+    // Do nothing from now, it's set using api response
+  }
+  // Position? koInsert;
 
   // FIXME: This stone_login and score_calculation relation sucks now we are placing scoring functionality in stone_logic because of this because context is required to access each other and these are circular dependency so the inherited widget can have other one as null
   List<ValueNotifier<int>> prisoners = [ValueNotifier(0), ValueNotifier(0)];

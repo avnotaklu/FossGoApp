@@ -163,7 +163,7 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(height: 50),
                   Text("Active Players", style: TextStyle(fontSize: 30)),
                   Container(
-                    // height: 200,
+                    height: 300,
                     child: ListView.builder(
                       shrinkWrap: true,
                       itemCount:

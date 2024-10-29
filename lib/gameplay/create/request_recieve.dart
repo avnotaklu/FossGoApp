@@ -126,7 +126,7 @@ class EnterGameButton extends StatelessWidget {
                             joinMessage,
                           ),
                       builder: (context, child) {
-                        return GameWidget(game, false);
+                        return GameWidget(false);
                       });
                 });
           }));

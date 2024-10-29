@@ -15,6 +15,7 @@ import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/services/move_position.dart';
+import 'package:go/services/new_move_result.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -40,8 +41,6 @@ class MockSystemUtilities extends Mock implements SystemUtilities {}
 
 void main() {
   late MockApi api;
-  late MockSystemUtilities utils;
-  late DateTime currentTime;
   late List<GameMove> moves;
   final a1 = MovePosition(x: 0, y: 0);
   final a2 = MovePosition(x: 1, y: 0);
@@ -57,15 +56,20 @@ void main() {
   late MockSignalR signalR;
   late GameStateBloc bloc;
   late StreamController<SignalRMessage> signalRController1;
+  late DateTime currentTime;
+  late MockSystemUtilities utils;
 
   // User 2 things
   late MockAuth auth2;
   late MockSignalR signalR2;
   late GameStateBloc bloc2;
   late StreamController<SignalRMessage> signalRController2;
+  late DateTime currentTime2;
+  late MockSystemUtilities utils2;
 
   // Don't setup, these are required to be consistent for all tests
   currentTime = _1980Jan1_1_30PM;
+  currentTime2 = _1980Jan1_1_30PM;
   moves = [];
 
   // setUp(() {
@@ -73,15 +77,16 @@ void main() {
   auth = MockAuth();
   signalR = MockSignalR();
   signalRController1 = StreamController<SignalRMessage>.broadcast();
+  utils = MockSystemUtilities();
 
   // User 2
   auth2 = MockAuth();
   signalR2 = MockSignalR();
   signalRController2 = StreamController<SignalRMessage>.broadcast();
+  utils2 = MockSystemUtilities();
 
   // Global
   api = MockApi();
-  utils = MockSystemUtilities();
 
   // User 1
   when(() => auth.currentUserRaw).thenReturn(
@@ -95,6 +100,7 @@ void main() {
   when(() => signalR.gameMessageStream).thenAnswer(
     (_) => signalRController1.stream,
   );
+  when(() => utils.currentTime).thenAnswer((inv) => currentTime);
 
   // User 2
   when(() => auth2.currentUserRaw).thenReturn(
@@ -108,12 +114,13 @@ void main() {
   when(() => signalR2.gameMessageStream).thenAnswer(
     (_) => signalRController2.stream,
   );
-
-  when(() => utils.currentTime).thenAnswer((inv) => currentTime);
+  when(() => utils2.currentTime).thenAnswer((inv) => currentTime2);
 
   when(() => api.makeMove(any(), any(), any())).thenAnswer((inv) async {
+    var token = inv.positionalArguments[1] as String;
+
     var newMove = GameMove(
-      time: currentTime,
+      time: (token == 'token1') ? currentTime : currentTime2,
       x: (inv.positionalArguments[0] as MovePosition).x,
       y: (inv.positionalArguments[0] as MovePosition).y,
       // y: 0,
@@ -123,12 +130,10 @@ void main() {
     var gameResult = gameConstructor(
         getBoardForMoveCount()[moves.length](), _1980Jan1_1_30PM, moves);
 
-    var token = inv.positionalArguments[1] as String;
-
     // Api takees 1 second to send the signalR message
-    currentTime = currentTime.add(const Duration(seconds: 1));
-
     if (token == 'token1') {
+      currentTime2 = currentTime.add(const Duration(seconds: 1));
+      // currentTime2 = currentTime2
       signalRController2.add(SignalRMessage(
         type: SignalRMessageTypes.newMove,
         data: NewMoveMessage(gameResult),
@@ -136,18 +141,23 @@ void main() {
     }
 
     if (token == 'token2') {
+      currentTime = currentTime2.add(const Duration(seconds: 1));
       signalRController1.add(SignalRMessage(
         type: SignalRMessageTypes.newMove,
         data: NewMoveMessage(gameResult),
       ));
     }
 
-    return right<ApiError, Game>(gameResult);
+    return right<ApiError, NewMoveResult>(
+        NewMoveResult(game: gameResult, result: true));
   });
   // });
 
   final sGame = gameConstructor(simpleBoard(), _1980Jan1_1_30PM);
   const curStage = StageType.Gameplay;
+
+  // joins game on client1 when constructing gameStateBloc
+  bloc = GameStateBloc(api, signalR, auth, sGame, utils, curStage, null);
 
   // Join Message recieved from server
 
@@ -161,27 +171,14 @@ void main() {
   // 1 second lag between server and client
   currentTime = currentTime.add(const Duration(seconds: 1));
 
-  // joins game on client when constructing gameStateBloc
-  bloc = GameStateBloc(
-    api,
-    signalR,
-    auth,
-    sGame,
-    utils,
-    curStage,
-    joinMessage,
-  );
+  signalRController1.add(SignalRMessage(
+    type: SignalRMessageTypes.newMove,
+    data: joinMessage,
+  ));
 
-  // joins game on client when constructing gameStateBloc
-  bloc2 = GameStateBloc(
-    api,
-    signalR2,
-    auth2,
-    sGame,
-    utils,
-    curStage,
-    joinMessage,
-  );
+  // joins game on client2 when constructing gameStateBloc
+  bloc2 =
+      GameStateBloc(api, signalR2, auth2, sGame, utils2, curStage, joinMessage);
 
   group("GameStateBloc", () {
     // test("30 minutes passed in mock", () {
@@ -190,8 +187,16 @@ void main() {
     //       _1980Jan1_1_30PM.add(const Duration(minutes: 30)), utils.currentTime);
     // });
 
-    test("Join delay should be 1 second", () async {
+    test("Join delay should be player 1: 1 second, player 2: 0 seconds",
+        () async {
+      await pumpEventQueue();
+
+      expect(bloc2.times[0].value.inSeconds, 300);
+      expect(bloc2.times[1].value.inSeconds, 300);
+
+      // After bloc 1 has recieved the join message, we need to incorporate server lag
       expect(bloc.times[0].value.inSeconds, 299);
+      expect(bloc.times[1].value.inSeconds, 300);
     });
 
     test(
@@ -203,10 +208,10 @@ void main() {
       await bloc.playMove(a1);
 
       expect(bloc.times[0].value.inSeconds, 296);
+      expect(bloc.times[1].value.inSeconds, 300);
     });
 
-    test(
-        "Player 2 should have accurate time considering 1 second server lag of recieving message",
+    test("Player 2 should have accurate time considering 1 second A1",
         () async {
       // 3 seconds spent playing first move
       // currentTime = currentTime.add(const Duration(seconds: 3));
@@ -215,6 +220,7 @@ void main() {
 
       // expect(bloc.times[1].value.inSeconds, 299);
       await pumpEventQueue();
+      expect(bloc2.times[0].value.inSeconds, 296);
       expect(bloc2.times[1].value.inSeconds, 299);
     });
 
@@ -223,11 +229,25 @@ void main() {
       // currentTime = currentTime.add(const Duration(seconds: 3));
 
       // player 2 uses 5 seconds to play his move
-      currentTime = currentTime.add(const Duration(seconds: 5));
+      currentTime2 = currentTime2.add(const Duration(seconds: 5));
 
       await bloc2.playMove(a2);
 
+      expect(bloc2.times[0].value.inSeconds, 296);
       expect(bloc2.times[1].value.inSeconds, 294);
+    });
+
+    test("Player 1 should have accurate time considering 1 second lag of A2",
+        () async {
+      // 3 seconds spent playing first move
+      // currentTime = currentTime.add(const Duration(seconds: 3));
+
+      // await bloc.playMove(a1);
+
+      // expect(bloc.times[1].value.inSeconds, 299);
+      await pumpEventQueue();
+      expect(bloc.times[0].value.inSeconds, 295);
+      expect(bloc.times[1].value.inSeconds, 294);
     });
   });
 }

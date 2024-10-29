@@ -48,7 +48,8 @@ class BoardStateUtilities {
   }
 
   List<List<int>> SimpleBoardRepresentation(HighLevelBoardRepresentation map) {
-    List<List<int>> board = [];
+    List<List<int>> board = List.generate(cols, (i) => List.generate(rows, (i) => 0));
+    // List<List<int>> board = List.filled(cols, List.filled(rows, 0));
 
     for (var item in map.entries) {
       var position = item.key;

@@ -19,11 +19,13 @@ extension Constructor on StageType {
       };
 }
 
-abstract class Stage {
+abstract class Stage extends ChangeNotifier {
   //<Derived extends Stage<Derived>> {
   // Derived child;
   Stage? get stage;
-  Stage();
+  Stage() {
+    notifyListeners();
+  }
 
   onClickCell(Position? position, BuildContext context);
 

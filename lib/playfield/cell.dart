@@ -38,8 +38,8 @@ class _CellState extends State<Cell> {
     final stage = context.read<Stage>();
     return GestureDetector(
       onTap: () {
-        setState(() {
-          stage.onClickCell(widget.position, context);
+        setState(() async {
+          await stage.onClickCell(widget.position, context);
         });
       },
       child:

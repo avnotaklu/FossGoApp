@@ -172,7 +172,7 @@ class GameStateBloc extends ChangeNotifier {
     // signalRbloc.hubConnection.on('gameMove', (data) {});
   }
 
-  Future<void> playMove(MovePosition moveDto) async {
+  Future<Either<AppError, GameMove>> playMove(MovePosition moveDto) async {
     var token = authBloc.token!;
 
     var updatedGame = await api.makeMove(
@@ -181,10 +181,16 @@ class GameStateBloc extends ChangeNotifier {
       game.gameId,
     );
 
-    updatedGame.fold((l) {
+    return updatedGame.fold((l) {
       debugPrint("Move failure ${l.message}");
+      return left(AppError(message: l.message));
     }, (r) {
-      applyMoveResult(r);
+      if (r.result) {
+        applyMoveResult(r.game);
+        return right(game.moves.last);
+      } else {
+        return left(AppError(message: "Invalid move"));
+      }
     });
 
     // var tmpMove = GameMove(time: DateTime.now(), x: moveDto.x, y: moveDto.y);

@@ -8,6 +8,7 @@ import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/join_message.dart';
+import 'package:go/services/new_move_result.dart';
 import 'package:go/services/register_player_dto.dart';
 import 'package:go/services/register_user_result.dart';
 import 'package:go/services/signal_r_message.dart';
@@ -145,7 +146,7 @@ class Api {
     }
   }
 
-  Future<Either<ApiError, Game>> makeMove(
+  Future<Either<ApiError, NewMoveResult>> makeMove(
       MovePosition data,
       String token,
       String gameId) async {
@@ -159,7 +160,7 @@ class Api {
       },
     );
     if (res.statusCode == 200) {
-      return Either.right(Game.fromJson(res.body));
+      return Either.right(NewMoveResult.fromJson(res.body));
     } else {
       return Either.left(getErrorFromResponse(res));
       // return Either.left(
