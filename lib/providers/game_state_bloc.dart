@@ -4,15 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/system_utilities.dart';
+import 'package:go/gameplay/middleware/score_calculation.dart';
+import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/cluster.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
+import 'package:go/models/stone.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
+import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/join_message.dart';
 import 'package:go/services/signal_r_message.dart';
@@ -50,7 +54,11 @@ class GameStateBloc extends ChangeNotifier {
         ) {
     setupGame(game, joiningData);
     setupStreams();
-    subscriptions = [listenFromGameJoin(), listenForMove()];
+    subscriptions = [
+      listenFromGameJoin(),
+      listenForMove(),
+      listenForContinueGame()
+    ];
   }
 
   late final List<Player> _players;
@@ -72,8 +80,6 @@ class GameStateBloc extends ChangeNotifier {
   PublicUserInfo? otherPlayerUserInfo;
 
   List<ValueNotifier<Duration>> times;
-
-  Set<Position> finalRemovedCluster = {};
 
   final List<CountdownController> _controller = [
     CountdownController(autoStart: false),
@@ -97,6 +103,7 @@ class GameStateBloc extends ChangeNotifier {
     }
   }
 
+
   // Stream<bool> listenForGameEndRequest() {
   //   return signalRbloc.gameMessageController.stream
   //       .where((message) => message.placeholder is bool)
@@ -106,13 +113,14 @@ class GameStateBloc extends ChangeNotifier {
   late final List<StreamSubscription> subscriptions;
   late final Stream<GameJoinMessage> listenForGameJoin;
   late final Stream<bool> listenFromOpponentConfirmation;
-  late final Stream<(bool, Position)> listenFromRemovedCluster;
+  late final Stream<EditDeadStoneMessage> listenForEditDeadStone;
   late final Stream<NewMoveMessage> listenFromMove;
+  late final Stream<ContinueGameMessage> listenFromContinueGame;
 
   void setupStreams() {
     var gameMessageStream = signalRbloc.gameMessageStream;
     listenForGameJoin = gameMessageStream.asyncExpand((message) async* {
-      if (message.data is GameJoinMessage) {
+      if (message.type == SignalRMessageTypes.gameJoin) {
         yield message.data as GameJoinMessage;
       }
     });
@@ -123,14 +131,20 @@ class GameStateBloc extends ChangeNotifier {
       }
     });
 
-    listenFromRemovedCluster = gameMessageStream.asyncExpand((message) async* {
-      if (message.data is (bool, Position)) {
-        yield message.data as (bool, Position);
+    listenForEditDeadStone = gameMessageStream.asyncExpand((message) async* {
+      if (message.type == SignalRMessageTypes.editDeadStone) {
+        yield message.data as EditDeadStoneMessage;
       }
     });
     listenFromMove = gameMessageStream.asyncExpand((message) async* {
-      if (message.data is NewMoveMessage) {
+      if (message.type == SignalRMessageTypes.newMove) {
         yield message.data as NewMoveMessage;
+      }
+    });
+
+    listenFromContinueGame = gameMessageStream.asyncExpand((message) async* {
+      if (message.type == SignalRMessageTypes.continueGame) {
+        yield message.data as ContinueGameMessage;
       }
     });
   }
@@ -162,6 +176,15 @@ class GameStateBloc extends ChangeNotifier {
     curStageType = StageType.Gameplay;
   }
 
+  StreamSubscription listenForContinueGame() {
+    return listenFromContinueGame.listen((message) {
+      final game = message;
+      debugPrint("Got move ${authBloc.token}");
+      applyContinue();
+    });
+    // signalRbloc.hubConnection.on('gameMove', (data) {});
+  }
+
   StreamSubscription listenForMove() {
     return listenFromMove.listen((message) {
       final game = message.game;
@@ -172,11 +195,35 @@ class GameStateBloc extends ChangeNotifier {
     // signalRbloc.hubConnection.on('gameMove', (data) {});
   }
 
-  Future<Either<AppError, GameMove>> playMove(MovePosition moveDto) async {
+  Future<Either<AppError, GameMove>> playMove(
+      Position? position, StoneLogic stoneLogic) async {
+    bool canPlayMove = isMyTurn();
+    if (position == null && canPlayMove) {
+      canPlayMove = true;
+    } else if (position != null && canPlayMove) {
+      canPlayMove = (stoneLogic.stoneAt(position) == null) &&
+          stoneLogic.checkInsertable(position, myStone);
+    }
+
+    if (!canPlayMove) {
+      return left(AppError(message: "You can't play here"));
+    }
+
+    // If there is no stone at this position and this is users turn, place stone
+    final move = MovePosition(
+      // playedAt: value,
+      x: position?.x,
+      y: position?.y,
+    );
+
     var token = authBloc.token!;
 
+    if (!move.isPass()) {
+      stoneLogic.handleStoneUpdate(position);
+    }
+
     var updatedGame = await api.makeMove(
-      moveDto,
+      move,
       token,
       game.gameId,
     );
@@ -288,15 +335,17 @@ class GameStateBloc extends ChangeNotifier {
     return hasPassedTwice;
   }
 
-  void unsetFinalRemovedCluster() {
-    finalRemovedCluster = {};
-
-    // TODO: call api to reset final removed cluster??
-    // MultiplayerData.of(context)?.curGameReferences?.gameEndData.remove();
+  Future<Either<AppError, Game>> continueGame() async {
+    return (await api.continueGame(authBloc.token!, game.gameId))
+        .fold((l) => left(AppError.fromApiError(l)), (r) {
+      applyContinue();
+      return right(r);
+    });
   }
 
-  void continueGame() {
-    // TODO: call api to continue game
+  void applyContinue() {
+    curStageType = StageType.Gameplay;
+    startPausedTimerOfActivePlayer();
   }
 
   void confirmGameEnd() {
@@ -305,14 +354,6 @@ class GameStateBloc extends ChangeNotifier {
 
   void startPausedTimerOfActivePlayer() {
     timerController[getPlayerWithTurn.turn].start();
-  }
-
-  void removeClusterFromRemovedClusters(Cluster cluster) {
-    // TODO: call api
-  }
-
-  void addClusterToRemovedClusters(Cluster cluster) {
-    // TODO: call api
   }
 
   Set<Cluster> getRemovedClusters() {

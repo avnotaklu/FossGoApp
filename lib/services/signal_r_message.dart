@@ -2,6 +2,8 @@
 import 'dart:convert';
 
 import 'package:go/models/game.dart';
+import 'package:go/models/position.dart';
+import 'package:go/services/edit_dead_stone_dto.dart';
 
 class SignalRMessage {
   final String type;
@@ -57,6 +59,10 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
       return NewGameCreatedMessage.fromMap(map);
     case SignalRMessageTypes.newMove:
       return NewMoveMessage.fromMap(map);
+    case SignalRMessageTypes.continueGame:
+      return ContinueGameMessage.fromMap(map);
+    case SignalRMessageTypes.editDeadStone:
+      return EditDeadStoneMessage.fromMap(map);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     default:
@@ -72,6 +78,10 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
       return NewGameCreatedMessage.fromJson(json);
     case SignalRMessageTypes.newMove:
       return NewMoveMessage.fromJson(json);
+    case SignalRMessageTypes.continueGame:
+      return ContinueGameMessage.fromJson(json);
+    case SignalRMessageTypes.editDeadStone:
+      return EditDeadStoneMessage.fromJson(json);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     default:
@@ -83,6 +93,8 @@ class SignalRMessageTypes {
   static const String newGame = "NewGame";
   static const String gameJoin = "GameJoin";
   static const String newMove = "NewMove";
+  static const String continueGame = "ContinueGame";
+  static const String editDeadStone = "EditDeadStone";
   static const String scoreCaculationStarted = "ScoreCaculationStarted";
 }
 
@@ -91,10 +103,71 @@ abstract class SignalRMessageType {
   String toJson();
 }
 
+
+class EditDeadStoneMessage extends SignalRMessageType {
+  final Position position;
+  final DeadStoneState state;
+  final Game game;
+  EditDeadStoneMessage({
+    required this.position,
+    required this.state,
+    required this.game,
+  });
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'position': position.toMap(),
+      'state': state.index,
+      'game': game.toMap(),
+    };
+  }
+
+  factory EditDeadStoneMessage.fromMap(Map<String, dynamic> map) {
+    return EditDeadStoneMessage(
+      position: Position.fromMap(map['position'] as Map<String, dynamic>),
+      state: DeadStoneState.values[map['state'] as int],
+      game: Game.fromMap(map['game'] as Map<String, dynamic>),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory EditDeadStoneMessage.fromJson(String source) =>
+      EditDeadStoneMessage.fromMap(json.decode(source) as Map<String, dynamic>);
+
+}
+
+class ContinueGameMessage extends SignalRMessageType {
+  final Game game;
+  ContinueGameMessage({
+    required this.game,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'game': game.toMap(),
+    };
+  }
+
+  factory ContinueGameMessage.fromMap(Map<String, dynamic> map) {
+    return ContinueGameMessage(
+      game: Game.fromMap(map['game'] as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  String toJson() => json.encode(toMap());
+
+  factory ContinueGameMessage.fromJson(String source) =>
+      ContinueGameMessage.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
 class NewMoveMessage extends SignalRMessageType {
   final Game game;
   NewMoveMessage(this.game);
 
+  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'game': game.toMap(),
@@ -107,6 +180,7 @@ class NewMoveMessage extends SignalRMessageType {
     );
   }
 
+  @override
   String toJson() => json.encode(toMap());
 
   factory NewMoveMessage.fromJson(String source) =>
@@ -148,6 +222,7 @@ class GameJoinMessage extends SignalRMessageType {
     required this.game,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'time': time.toString(),
@@ -168,6 +243,7 @@ class GameJoinMessage extends SignalRMessageType {
     );
   }
 
+  @override
   String toJson() => json.encode(toMap());
 
   factory GameJoinMessage.fromJson(String source) =>

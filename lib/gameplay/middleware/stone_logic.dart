@@ -7,6 +7,7 @@ import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/models/cluster.dart';
+import 'package:go/models/game.dart';
 import 'package:go/models/stone.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/playfield/stone_widget.dart';
@@ -15,8 +16,7 @@ import 'package:go/providers/game_board_bloc.dart';
 import 'package:go/utils/player.dart';
 import 'package:go/models/position.dart';
 
-class StoneLogic extends InheritedWidget {
-  final Widget mChild;
+class StoneLogic {
   final int rows;
   final int cols;
   // Map<Position?, ValueNotifier<StoneWidget?>> _playgroundMap = {};
@@ -78,25 +78,21 @@ class StoneLogic extends InheritedWidget {
   final GameBoardBloc gameBoardBloc;
 
   StoneLogic(
-      {super.key,
-      required this.gameStateBloc,
+      {required this.gameStateBloc,
       required this.gameBoardBloc,
-      required this.mChild,
       required this.rows,
-      required this.cols})
-      :
-        // _playgroundMap = gameboardBloc.stones,
-        super(child: mChild);
+      required this.cols});
 
   // Inheritance Widget related functions
-  @override
-  bool updateShouldNotify(StoneLogic oldWidget) {
-    return oldWidget._position == _position;
-    // return oldWidget.playgroundMap == playgroundMap;
-  }
 
-  static StoneLogic? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<StoneLogic>();
+  // @override
+  // bool updateShouldNotify(StoneLogic oldWidget) {
+  //   return oldWidget._position == _position;
+  //   // return oldWidget.playgroundMap == playgroundMap;
+  // }
+
+  // static StoneLogic? of(BuildContext context) =>
+  //     context.dependOnInheritedWidgetOfExactType<StoneLogic>();
 
   // Helper functions
   // printEntireGrid() {
@@ -140,8 +136,7 @@ class StoneLogic extends InheritedWidget {
     });
   }
 
-  // Hack
-  bool checkInsertable(Position position) {
+  bool checkInsertable(Position position, StoneType playerStone) {
     if (koDelete == position) {
       return false;
     }
@@ -153,7 +148,7 @@ class StoneLogic extends InheritedWidget {
                 {
                   if (!insertable)
                     {
-                      if (stoneAt(neighbor)?.player == stoneAt(curpos)?.player)
+                      if (stoneAt(neighbor)?.player == playerStone.index)
                         insertable =
                             !(getClusterFromPosition(neighbor)?.freedoms == 1)
                       else
@@ -169,6 +164,36 @@ class StoneLogic extends InheritedWidget {
 
     return insertable;
   }
+
+  // Hack
+  // bool _checkInsertable(Position position) {
+  //   if (koDelete == position) {
+  //     return false;
+  //   }
+  //   bool insertable = false;
+  //   doActionOnNeighbors(
+  //       position,
+  //       (curpos, neighbor) => {
+  //             if (stoneAt(neighbor) != null)
+  //               {
+  //                 if (!insertable)
+  //                   {
+  //                     if (stoneAt(neighbor)?.player == stoneAt(curpos)?.player)
+  //                       insertable =
+  //                           !(getClusterFromPosition(neighbor)?.freedoms == 1)
+  //                     else
+  //                       insertable =
+  //                           getClusterFromPosition(neighbor)?.freedoms == 1,
+  //                   }
+  //               }
+  //             else if (checkIfInsideBounds(neighbor))
+  //               {
+  //                 insertable = true,
+  //               }
+  //           });
+
+  //   return insertable;
+  // }
 
   // Update Freedom by going through all stone in cluster and counting freedom for every stone
 
@@ -278,7 +303,7 @@ class StoneLogic extends InheritedWidget {
 
   final GameStateBloc gameStateBloc;
 
-  bool handleStoneUpdate(Position? position, BuildContext context) {
+  bool handleStoneUpdate(Position? position) {
     if (position == null) {
       return true;
     }
@@ -286,26 +311,27 @@ class StoneLogic extends InheritedWidget {
     Position? thisCurrentCell = position;
 
     final player = gameStateBloc.getPlayerWithTurn.turn;
-    final current_cluster = Cluster({position}, {}, 0, player);
-
-    setStoneAt(
-      thisCurrentCell,
-      Stone(
-        position: position,
-        player: player,
-        cluster: current_cluster,
-      ),
-    );
-
+    final myStone = gameStateBloc.myStone;
     // StoneWidget(gameStateBloc?.getPlayerWithTurn.mColor, position);
 
-    if (checkInsertable(position)) {
+    if (checkInsertable(position, myStone)) {
+      final currentCluster = Cluster({position}, {}, 0, player);
+
+      setStoneAt(
+        thisCurrentCell,
+        Stone(
+          position: position,
+          player: player,
+          cluster: currentCluster,
+        ),
+      );
+
       // if stone can be inserted at this position
       koDelete = null;
       doActionOnNeighbors(position, addAllOfNeighborToCurpos);
-      updateAllInTheClusterWithCorrectCluster(current_cluster);
+      updateAllInTheClusterWithCorrectCluster(currentCluster);
       doActionOnNeighbors(position, deleteStonesInDeletableCluster);
-      calculateFreedomForCluster(current_cluster);
+      calculateFreedomForCluster(currentCluster);
       updateFreedomsFromNewlyInsertedStone(position);
       traversed.clear();
 
@@ -320,7 +346,6 @@ class StoneLogic extends InheritedWidget {
       return true;
     }
 
-    removeStoneAt(thisCurrentCell);
     return false;
   }
 

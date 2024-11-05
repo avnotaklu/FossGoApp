@@ -17,6 +17,7 @@ import 'package:go/models/stone.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/game_board_bloc.dart';
+import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
@@ -26,25 +27,19 @@ class ScoreCalculationStage extends Stage {
   StreamSubscription? removedClusterSubscription;
   StreamSubscription? opponentConfirmationStream;
   //get context => _context;
-  late final Map<Position, Stone> stonesCopy;
+  late Map<Position, Stone> stonesCopy;
 
   @override
   ScoreCalculationStage? get stage => this;
   @override
   void initializeWhenAllMiddlewareAvailable(context) {
     final gameBoarcBloc = context.read<GameBoardBloc>();
-    stonesCopy = gameBoarcBloc.stonesCopy;
-    context.read<GameStateBloc>().finalRemovedCluster.forEach((element) {
-      ScoreCalculation.of(context)!
-          .virtualRemovedCluster
-          .add(stonesCopy[element]!.cluster);
-    });
-
+    final gameStateBloc = context.read<GameStateBloc>();
     context.read<GameStateBloc>().timerController[0].pause();
     context.read<GameStateBloc>().timerController[1].pause();
-    ScoreCalculation.of(context)!.calculateScore();
-    removedClusterSubscription = listenForRemovedCluster(context);
     opponentConfirmationStream = listenForOpponentConfirmation(context);
+    context.read<ScoreCalculationBloc>().setupScore();
+    stonesCopy = gameBoarcBloc.stones;
     // ScoreCalculation.of(context)!.calculateScore(context);
   }
 
@@ -58,14 +53,18 @@ class ScoreCalculationStage extends Stage {
   @override
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: ScoreCalculation.of(context)!.areaMap[position]!,
+        valueListenable:
+            context.read<ScoreCalculationBloc>().areaMap[position]!,
         builder: (context, Area? dyn, wid) {
           return dyn?.owner != null
               ? Center(
                   child: Stack(
                     children: [
                       stone != null
-                          ? StoneWidget(stone.color!.withOpacity(0.6), position)
+                          ? StoneWidget(
+                              constants.playerColors[dyn!.owner!]
+                                  .withOpacity(0.6),
+                              position)
                           : const SizedBox.shrink(),
                       Center(
                         child: FractionallySizedBox(
@@ -82,9 +81,11 @@ class ScoreCalculationStage extends Stage {
               : () {
                   return stone != null
                       ? (StoneWidget stone) {
-                          if (ScoreCalculation.of(context)!
-                              .virtualRemovedCluster
-                              .contains(stonesCopy[stone.pos]!.cluster)) {
+                          if (stonesCopy.containsKey(stone.pos) &&
+                              context
+                                  .read<ScoreCalculationBloc>()
+                                  .virtualRemovedCluster
+                                  .contains(stonesCopy[stone.pos]!.cluster)) {
                             return StoneWidget(
                                 stone.color!.withOpacity(0.6), position);
                           } else {
@@ -101,93 +102,81 @@ class ScoreCalculationStage extends Stage {
   @override
   onClickCell(Position? position, BuildContext context) {
     if (stonesCopy[position] != null) {
-      if (ScoreCalculation.of(context)!
-          .virtualRemovedCluster
-          .contains(stonesCopy[position]!.cluster)) {
-        var cluster = stonesCopy[position]!.cluster;
-        ScoreCalculation.of(context)!.virtualRemovedCluster.remove(cluster);
-        context.read<GameStateBloc>().removeClusterFromRemovedClusters(cluster);
-
-        // MultiplayerData.of(context)!
-        //     .curGameReferences!
-        //     .removedClusters
-        //     .child(cluster.smallestPosition().toString())
-        //     .remove();
-      } else {
-        var cluster = stonesCopy[position]!.cluster;
-        ScoreCalculation.of(context)!.virtualRemovedCluster.add(cluster);
-
-        context.read<GameStateBloc>().addClusterToRemovedClusters(cluster);
-        // MultiplayerData.of(context)!
-        //     .curGameReferences!
-        //     .removedClusters
-        //     .update({cluster.smallestPosition().toString(): false});
-      }
-      ScoreCalculation.of(context)!.calculateScore();
+      context.read<ScoreCalculationBloc>().onClickStone(position!);
     }
   }
 
-  StreamSubscription listenForRemovedCluster(BuildContext context) {
-    final stoneLogic = StoneLogic.of(context);
-    final scoreCalculation = ScoreCalculation.of(context);
-    return context
-        .read<GameStateBloc>()
-        .listenFromRemovedCluster
-        .listen((event) {
-      if (stonesCopy[event.$2]?.cluster != null) {
-        final cluster = stonesCopy[event.$2]!.cluster;
-        if (event.$1) {
-          scoreCalculation!.virtualRemovedCluster.add(cluster);
-        } else {
-          scoreCalculation!.virtualRemovedCluster.remove(cluster);
-        }
-      }
-      // MultiplayerData.of(context)!
-      //     .curGameReferences!
-      //     .removedClusters
-    });
-    // return [
-    //     MultiplayerData.of(context)!
-    //         .curGameReferences
-    //         ?.removedClusters
-    //         .onChildAdded
-    //         .listen((event) {
-    //       ScoreCalculation.of(context)?.virtualRemovedCluster.add(StoneLogic.of(
-    //               context)!
-    //           .playgroundMap[Position.fromString(event.snapshot.key as String)]
-    //           ?.value
-    //           ?.cluster as Cluster);
+  // StreamSubscription listenForEditDeadStone(
+  //     GameStateBloc bloc, ScoreCalculation scoreCalc) {
+  //   return bloc.listenForEditDeadStone.listen((data) {
+  //     if (data.state == DeadStoneState.Dead) {
+  //       scoreCalc.virtualRemovedCluster.add(stonesCopy[data.position]!.cluster);
+  //     } else {
+  //       scoreCalc.virtualRemovedCluster
+  //           .remove(stonesCopy[data.position]!.cluster);
+  //     }
+  //     scoreCalc.calculateScore();
+  //   });
+  //   // final stoneLogic = StoneLogic.of(context);
+  //   // final scoreCalculation = ScoreCalculation.of(context);
+  //   // return context
+  //   //     .read<GameStateBloc>()
+  //   //     .listenForEditDeadStone
+  //   //     .listen((event) {
+  //   //   if (stonesCopy[event.$2]?.cluster != null) {
+  //   //     final cluster = stonesCopy[event.$2]!.cluster;
+  //   //     if (event.$1) {
+  //   //       scoreCalculation!.virtualRemovedCluster.add(cluster);
+  //   //     } else {
+  //   //       scoreCalculation!.virtualRemovedCluster.remove(cluster);
+  //   //     }
+  //   //   }
+  //   //   // MultiplayerData.of(context)!
+  //   //   //     .curGameReferences!
+  //   //   //     .removedClusters
+  //   // });
+  //   // return [
+  //   //     MultiplayerData.of(context)!
+  //   //         .curGameReferences
+  //   //         ?.removedClusters
+  //   //         .onChildAdded
+  //   //         .listen((event) {
+  //   //       ScoreCalculation.of(context)?.virtualRemovedCluster.add(StoneLogic.of(
+  //   //               context)!
+  //   //           .playgroundMap[Position.fromString(event.snapshot.key as String)]
+  //   //           ?.value
+  //   //           ?.cluster as Cluster);
 
-    //       ScoreCalculation.of(context)?.calculateScore(context);
-    //     }),
-    //     MultiplayerData.of(context)!
-    //         .curGameReferences
-    //         ?.removedClusters
-    //         .onChildRemoved
-    //         .listen((event) {
-    //       if (StoneLogic.of(context)!
-    //               .playgroundMap[
-    //                   Position.fromString(event.snapshot.key as String)]
-    //               ?.value
-    //               ?.cluster !=
-    //           null) {
-    //         ScoreCalculation.of(context)?.virtualRemovedCluster.remove(StoneLogic
-    //                 .of(context)!
-    //             .playgroundMap[Position.fromString(event.snapshot.key as String)]
-    //             ?.value
-    //             ?.cluster as Cluster);
+  //   //       ScoreCalculation.of(context)?.calculateScore(context);
+  //   //     }),
+  //   //     MultiplayerData.of(context)!
+  //   //         .curGameReferences
+  //   //         ?.removedClusters
+  //   //         .onChildRemoved
+  //   //         .listen((event) {
+  //   //       if (StoneLogic.of(context)!
+  //   //               .playgroundMap[
+  //   //                   Position.fromString(event.snapshot.key as String)]
+  //   //               ?.value
+  //   //               ?.cluster !=
+  //   //           null) {
+  //   //         ScoreCalculation.of(context)?.virtualRemovedCluster.remove(StoneLogic
+  //   //                 .of(context)!
+  //   //             .playgroundMap[Position.fromString(event.snapshot.key as String)]
+  //   //             ?.value
+  //   //             ?.cluster as Cluster);
 
-    //         ScoreCalculation.of(context)?.calculateScore(context);
-    //       }
-    //     })
-    //   ];
-    // }
-  }
+  //   //         ScoreCalculation.of(context)?.calculateScore(context);
+  //   //       }
+  //   //     })
+  //   //   ];
+  //   // }
+  // }
 
   StreamSubscription listenForOpponentConfirmation(BuildContext context) {
     final gameState = context.read<GameStateBloc>();
-    final scoreCalculator = ScoreCalculation.of(context)!;
-    final stoneLogic = StoneLogic.of(context)!;
+    final scoreCalculator = context.read<ScoreCalculationBloc>();
+    StoneLogic stoneLogic = context.read();
 
     return gameState.listenFromOpponentConfirmation.listen((data) {
       if (data) {
@@ -198,15 +187,19 @@ class ScoreCalculationStage extends Stage {
     });
   }
 
-  listenForGameEndRequest(ScoreCalculation scoreCalculator,
+  listenForGameEndRequest(ScoreCalculationBloc scoreCalculator,
       GameStateBloc gameState, StoneLogic stoneLogic) {
     // return MultiplayerData.of(context)!.curGameReferences?.removedClusters.get().then((data) {
+
+/*
     Set<Cluster> opponentsCluster = gameState.getRemovedClusters();
     scoreCalculator.virtualRemovedCluster = opponentsCluster;
     scoreCalculator.calculateScore();
     scoreCalculator.stoneRemovalAccepted.add(gameState.getRemotePlayerIndex());
 
     scoreCalculator.onGameEnd(gameState, opponentsCluster);
+*/
+
     // bool declareResult = true;
     // opponentsCluster.forEach((element) {
     //   if (!ScoreCalculation.of(context)!.virtualRemovedCluster.contains(element)) {

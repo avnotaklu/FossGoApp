@@ -157,33 +157,48 @@ class GameWidget extends StatelessWidget {
               //           context.read<AuthBloc>(),
               //           game,
               //         )),
-              ChangeNotifierProvider.value(value: GameBoardBloc(game))
+              ChangeNotifierProvider(
+                  create: (context) => GameBoardBloc(context.read()))
             ],
             builder: (context, child) {
-              return StoneLogic(
-                rows: game.rows,
-                cols: game.columns,
-                mChild: ScoreCalculation(
-                  game.rows,
-                  game.columns,
-                  mChild: ValueListenableBuilder<StageType>(
+              context.read<GameBoardBloc>().setupGame(game);
+              return Provider(
+                create: (context) => StoneLogic(
+                  rows: game.rows,
+                  cols: game.columns,
+                  gameStateBloc: context.read<GameStateBloc>(),
+                  gameBoardBloc: context.read<GameBoardBloc>(),
+                ),
+                builder: (context, child) => ChangeNotifierProvider(
+                  create: (context) {
+                    return ScoreCalculationBloc(
+                      game.rows,
+                      game.columns,
+                      api: context.read<AuthProvider>().api,
+                      authBloc: context.read<AuthProvider>(),
+                      gameStateBloc: context.read<GameStateBloc>(),
+                      gameBoardBloc: context.read<GameBoardBloc>(),
+                    );
+                  },
+                  builder: (context, child) =>
+                      ValueListenableBuilder<StageType>(
                     valueListenable:
                         context.read<GameStateBloc>()!.curStageTypeNotifier,
                     builder: (context, stageType, idk) {
-                      var stage = stageType.stageConstructor(context);
+                      var stage = stageType.stageConstructor(
+                        context,
+                        context.read(),
+                      );
                       return ChangeNotifierProvider<Stage>.value(
                         value: stage,
                         builder: (context, child) {
-                          return WrapperGame(game);
+                          return Consumer<ScoreCalculationBloc>(builder: (context,dyn, child) =>WrapperGame(game));
+                          
                         },
                       );
                     },
                   ),
-                  gameStateBloc: context.read<GameStateBloc>(),
-                  gameBoardBloc: context.read<GameBoardBloc>(),
                 ),
-                gameStateBloc: context.read<GameStateBloc>(),
-                gameBoardBloc: context.read<GameBoardBloc>(),
               );
             },
           );

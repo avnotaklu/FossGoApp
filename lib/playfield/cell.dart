@@ -34,7 +34,9 @@ class _CellState extends State<Cell> {
     // return ValueListenableBuilder<StoneWidget?>(
     //   valueListenable: StoneLogic.of(context)!.stoneNotifierAt(widget.position),
     //   builder: (BuildContext context, dyn, wid) {
-    final stone = StoneLogic.of(context)!.stoneAt(widget.position);
+
+    StoneLogic stoneLogic = context.read();
+    final stone = stoneLogic.stoneAt(widget.position);
     final stage = context.read<Stage>();
     return GestureDetector(
       onTap: () {

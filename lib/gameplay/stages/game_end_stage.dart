@@ -22,12 +22,9 @@ class GameEndStage extends Stage {
 
   GameEndStage.fromScratch(context) {}
 
-  GameEndStage(context) {
-    // TODO: the constructor shouldn't contain any initializations or state related behaviour
-
-    context.read<GameStateBloc>().timerController[0].pause();
-    context.read<GameStateBloc>().timerController[1].pause();
-    ScoreCalculation.of(context)!.calculateScore();
+  GameEndStage(GameStateBloc gameStateBloc) {
+    gameStateBloc.timerController[0].pause();
+    gameStateBloc.timerController[1].pause();
   }
 
   @override
@@ -40,7 +37,8 @@ class GameEndStage extends Stage {
   @override
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: ScoreCalculation.of(context)!.areaMap[position]!,
+        valueListenable:
+            context.read<ScoreCalculationBloc>().areaMap[position]!,
         builder: (context, Area? dyn, wid) {
           return dyn?.owner != null
               ? Center(
@@ -64,7 +62,8 @@ class GameEndStage extends Stage {
               : () {
                   return stone != null
                       ? (StoneWidget stone) {
-                          if (ScoreCalculation.of(context)!
+                          if (context
+                              .read<ScoreCalculationBloc>()
                               .virtualRemovedCluster
                               .contains(stonesCopy[stone.pos]!.cluster)) {
                             return StoneWidget(
@@ -89,18 +88,7 @@ class GameEndStage extends Stage {
   disposeStage() {}
 
   @override
-  void initializeWhenAllMiddlewareAvailable(context) {
-    final gameBoarcBloc = context.read<GameBoardBloc>();
-    stonesCopy = gameBoarcBloc.stonesCopy;
-
-    context.read<GameStateBloc>().finalRemovedCluster.forEach((element) {
-      ScoreCalculation.of(context)!
-          .virtualRemovedCluster
-          .add(stonesCopy[element]!.cluster);
-    });
-
-    ScoreCalculation.of(context)!.calculateScore();
-  }
+  void initializeWhenAllMiddlewareAvailable(context) {}
 
   @override
   StageType get getType => StageType.GameEnd;

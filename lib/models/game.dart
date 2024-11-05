@@ -1,10 +1,12 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:fpdart/fpdart.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/stone.dart';
 import 'package:go/models/stone_representation.dart';
+import 'package:go/providers/create_game_provider.dart';
 
 enum StoneType { black, white }
 
@@ -21,13 +23,14 @@ class Game {
   final int rows;
   final int columns;
   final int timeInSeconds;
-  final Map<String, int> playerScores;
+  final Map<String, int> prisoners;
   final Map<Position, StoneType> playgroundMap;
   final List<GameMove> moves;
   final Map<String, StoneType> players;
   final DateTime? startTime;
   final Position? koPositionInLastMove;
   final GameState gameState;
+  final List<Position> deadStones;
 
   Game({
     required this.gameId,
@@ -37,10 +40,11 @@ class Game {
     required this.playgroundMap,
     required this.moves,
     required this.players,
-    required this.playerScores,
+    required this.prisoners,
     required this.startTime,
     required this.koPositionInLastMove,
     required this.gameState,
+    required this.deadStones,
   });
 
   Map<String, dynamic> toMap() {
@@ -52,10 +56,11 @@ class Game {
       'playgroundMap': playgroundMap,
       'moves': moves.map((x) => x.toMap()).toList(),
       'players': players,
-      'playerScores': playerScores,
+      'prisoners': prisoners,
       'startTime': startTime?.toIso8601String(),
       'koPositionInLastMove': koPositionInLastMove?.toString(),
       'gameState': gameState.toString(),
+      'deadStones': deadStones.map((e) => e.toString()).toList(),
     };
   }
 
@@ -78,12 +83,14 @@ class Game {
         ),
       ),
       players: Map<String, StoneType>.from(
-        Map<String, int>.from(map['players']).map((key, value) => MapEntry(
-              key,
-              StoneType.values[value],
-            )),
+        Map<String, int>.from(map['players']).map(
+          (key, value) => MapEntry(
+            key,
+            StoneType.values[value],
+          ),
+        ),
       ),
-      playerScores: Map<String, int>.from((map['playerScores'])),
+      prisoners: Map<String, int>.from((map['prisoners'])),
       startTime: map['startTime'] == null
           ? null
           : DateTime.parse(map['startTime'] as String),
@@ -91,6 +98,11 @@ class Game {
           ? Position.fromString(map['koPositionInLastMove'] as String)
           : null,
       gameState: GameState.values[map['gameState'] as int],
+      deadStones: List<Position>.from(
+        (map['deadStones'] as List).map<Position>(
+          (e) => Position.fromString(e as String),
+        ),
+      ),
     );
   }
 
@@ -98,6 +110,15 @@ class Game {
 
   factory Game.fromJson(String source) =>
       Game.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  List<String> get playerIdsSorted => players
+      .toSortedList(
+        Order.from(
+          (a, b) => players[a]!.index.compareTo(players[b]!.index),
+        ),
+      )
+      .map((e) => e.key)
+      .toList();
 
   Game copyWith({
     String? gameId,
@@ -111,19 +132,22 @@ class Game {
     DateTime? startTime,
     Position? koPositionInLastMove,
     GameState? gameState,
+    List<Position>? deadStones,
+
   }) {
     return Game(
       gameId: gameId ?? this.gameId,
       rows: rows ?? this.rows,
       columns: columns ?? this.columns,
       timeInSeconds: timeInSeconds ?? this.timeInSeconds,
-      playerScores: playerScores ?? this.playerScores,
+      prisoners: playerScores ?? this.prisoners,
       playgroundMap: playgroundMap ?? this.playgroundMap,
       moves: moves ?? this.moves,
       players: players ?? this.players,
       startTime: startTime ?? this.startTime,
       koPositionInLastMove: koPositionInLastMove ?? this.koPositionInLastMove,
       gameState: gameState ?? this.gameState,
+      deadStones: deadStones ?? this.deadStones,
     );
   }
 }

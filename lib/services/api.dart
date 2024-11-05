@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
+import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
 import 'package:go/services/move_position.dart';
@@ -23,7 +24,7 @@ import 'package:http/http.dart' as http;
 // }
 
 class Api {
-  static const String baseUrl = "http://192.168.200.71:8080";
+  static const String baseUrl = "http://192.168.80.71:8080";
 
   Future<Either<ApiError, UserAuthenticationModel>> googleSignIn(
       GoogleSignInAuthentication userCreds) async {
@@ -147,9 +148,7 @@ class Api {
   }
 
   Future<Either<ApiError, NewMoveResult>> makeMove(
-      MovePosition data,
-      String token,
-      String gameId) async {
+      MovePosition data, String token, String gameId) async {
     // var data = MovePosition(x: 0, y: 0);
     var res = await http.post(
       Uri.parse("$baseUrl/Game/$gameId/MakeMove"),
@@ -161,6 +160,45 @@ class Api {
     );
     if (res.statusCode == 200) {
       return Either.right(NewMoveResult.fromJson(res.body));
+    } else {
+      return Either.left(getErrorFromResponse(res));
+      // return Either.left(
+      //     ApiError(message: res.body, statusCode: res.statusCode));
+    }
+  }
+
+  Future<Either<ApiError, Game>> continueGame(
+      String token, String gameId) async {
+    // var data = MovePosition(x: 0, y: 0);
+    var res = await http.post(
+      Uri.parse("$baseUrl/Game/$gameId/ContinueGame"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      },
+    );
+    if (res.statusCode == 200) {
+      return Either.right(Game.fromJson(res.body));
+    } else {
+      return Either.left(getErrorFromResponse(res));
+      // return Either.left(
+      //     ApiError(message: res.body, statusCode: res.statusCode));
+    }
+  }
+
+  Future<Either<ApiError, Game>> editDeadStoneCluster(
+      EditDeadStoneClusterDto dto, String token, String gameId) async {
+    // var data = MovePosition(x: 0, y: 0);
+    var res = await http.post(
+      Uri.parse("$baseUrl/Game/$gameId/EditDeadStoneCluster"),
+      body: dto.toJson(),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      },
+    );
+    if (res.statusCode == 200) {
+      return Either.right(Game.fromJson(res.body));
     } else {
       return Either.left(getErrorFromResponse(res));
       // return Either.left(

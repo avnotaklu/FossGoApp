@@ -34,10 +34,9 @@ class GameplayStage extends Stage {
   @override
   void initializeWhenAllMiddlewareAvailable(BuildContext context) {
     final gameStateBloc = context.read<GameStateBloc>();
-    gameStateBloc.unsetFinalRemovedCluster();
     gameStateBloc.startPausedTimerOfActivePlayer();
     // listenNewStone = gameStateBloc.listenForMove();
-    ScoreCalculation.of(context)!.calculateScore();
+    context.read<ScoreCalculationBloc>().calculateScore();
   }
 
   // fetchNewStoneFromDB(context) {
@@ -120,65 +119,8 @@ class GameplayStage extends Stage {
 
   @override
   onClickCell(Position? position, BuildContext context) {
-    // MultiplayerData.of(context)
-    //     ?.move_ref
-    //     .set({'pos': widget.position.toString()});
-    if (((StoneLogic.of(context)?.stoneAt(position)) == null) &&
-        context.read<GameStateBloc>().isMyTurn()) {
-      // If position is null and this is users turn, place stone
-      if (StoneLogic.of(context)?.handleStoneUpdate(position, context) ??
-          true) // TODO revisit this and make sure it does the right thing
-      {
-
-        final move = MovePosition(
-          // playedAt: value,
-          x: position!.x,
-          y: position!.y,
-        );
-
-        context.read<GameStateBloc>().playMove(move);
-
-        // TODO: remove Unnecessary database write on pass move
-        // var mapRef = MultiplayerData.of(context)
-        //     ?.database
-        //     .child('game')
-        //     .child(GameData.of(context)!.match.id)
-        //     .child('playgroundMap');
-
-        // TODO: null check on stone logic shouldn't be necessary as stone logic should be constructed as soon as game has started
-        // if (StoneLogic.of(context) != null) {
-        //   mapRef!.update(playgroundMapToString(
-        //       Map<Position?, StoneWidget?>.from(StoneLogic.of(context)!
-        //           .playgroundMap
-        //           .map((key, value) => MapEntry(key, value.value)))));
-        // }
-
-        // if (position == null) {
-        //   MultiplayerData.of(context)
-        //       ?.curGameReferences
-        //       ?.moves
-        //       .get()
-        //       .then((event) {
-        //     // NOTE: Start work again here
-        //     var prev;
-        //     bool hasPassedTwice = false;
-        //     for (var i in (event.value as List).reversed) {
-        //       if (prev == null) {
-        //         prev = i;
-        //         continue;
-        //       }
-        //       if (i == "null" && prev == "null") {
-        //         hasPassedTwice = !hasPassedTwice;
-        //       } else {
-        //         break;
-        //       }
-        //     }
-        // });
-        // }
-        // });
-        // TODO: detect consequent nulls in better way now if you do null null then continue game and 1 more null would just take straight to scorecalculation instead 2 nulls are required again + this is crap way of doing it
-      }
-    }
+    StoneLogic stoneLogic = context.read();
+    context.read<GameStateBloc>().playMove(position, stoneLogic);
   }
 
   @override

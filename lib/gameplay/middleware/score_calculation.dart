@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_database/ui/utils/stream_subscriber_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,6 +15,9 @@ import 'package:go/models/stone.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/game_board_bloc.dart';
+import 'package:go/services/api.dart';
+import 'package:go/services/auth_provider.dart';
+import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/utils/player.dart';
 import 'package:go/models/position.dart';
 import 'package:go/constants/constants.dart' as Constants;
@@ -21,7 +26,7 @@ import 'package:provider/provider.dart';
 import '../../models/position.dart';
 import 'stone_logic.dart';
 
-class ScoreCalculation extends InheritedWidget {
+class ScoreCalculationBloc extends ChangeNotifier {
   final Map<Position, ValueNotifier<Area?>> areaMap = {};
   final List<Cluster> clusterEncountered = [];
   List<int> _territoryScores = [];
@@ -32,27 +37,27 @@ class ScoreCalculation extends InheritedWidget {
   // BuildContext? _context;
   Map<Position, Stone> virtualPlaygroundMap = {};
   Set<Cluster> virtualRemovedCluster = {};
+
+  final Api api;
+  final AuthProvider authBloc;
+
   final GameStateBloc gameStateBloc;
   final GameBoardBloc gameBoardBloc;
 
   Player getWinner(BuildContext context) {
+    StoneLogic stoneLogic = context.read();
     gameStateBloc.getPlayerWithTurn.score =
         _territoryScores[gameStateBloc.getPlayerWithTurn.turn] +
-            StoneLogic.of(context)!
-                .prisoners[gameStateBloc.getPlayerWithTurn.turn]
-                .value +
+            stoneLogic.prisoners[gameStateBloc.getPlayerWithTurn.turn].value +
             (playerColors[gameStateBloc.getPlayerWithTurn.turn] == Colors.white
                 ? 6.5
                 : 0);
-    gameStateBloc.getPlayerWithoutTurn.score =
-        _territoryScores[gameStateBloc.getPlayerWithoutTurn.turn] +
-            StoneLogic.of(context)!
-                .prisoners[gameStateBloc.getPlayerWithoutTurn.turn]
-                .value +
-            (playerColors[gameStateBloc.getPlayerWithoutTurn.turn] ==
-                    Colors.white
-                ? 6.5
-                : 0);
+    gameStateBloc.getPlayerWithoutTurn.score = _territoryScores[
+            gameStateBloc.getPlayerWithoutTurn.turn] +
+        stoneLogic.prisoners[gameStateBloc.getPlayerWithoutTurn.turn].value +
+        (playerColors[gameStateBloc.getPlayerWithoutTurn.turn] == Colors.white
+            ? 6.5
+            : 0);
     Player winner = (gameStateBloc.getPlayerWithTurn.score >
             gameStateBloc.getPlayerWithoutTurn.score)
         ? gameStateBloc.getPlayerWithTurn
@@ -67,18 +72,90 @@ class ScoreCalculation extends InheritedWidget {
     return _territoryScores;
   }
 
-  ScoreCalculation(
+  late final StreamSubscription editStoneSubscription;
+
+  ScoreCalculationBloc(
     rows,
     cols, {
-    super.key,
+    required this.api,
+    required this.authBloc,
     required this.gameStateBloc,
     required this.gameBoardBloc,
-    required Widget mChild,
-  }) : super(child: mChild) {
+  }) {
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
         areaMap[Position(i, j)] = ValueNotifier(null);
       }
+    }
+
+    editStoneSubscription = listenFromEditDeadStone();
+    setupScore();
+  }
+
+  void setupScore() {
+    for (final pos in gameStateBloc.game.deadStones) {
+      virtualRemovedCluster.add(gameBoardBloc.stoneAt(pos)!.cluster);
+    }
+
+    calculateScore();
+  }
+
+  @override
+  void dispose() {
+    editStoneSubscription.cancel();
+  }
+
+  void addDeadStones(Position pos) async {
+    final token = authBloc.token!;
+    final res = await api.editDeadStoneCluster(
+      EditDeadStoneClusterDto(position: pos, state: DeadStoneState.Dead),
+      token,
+      gameStateBloc.game.gameId,
+    );
+
+    res.fold((e) {}, (r) {
+      applyDeadStones(pos, DeadStoneState.Dead);
+    });
+  }
+
+  void removeDeadStones(Position pos) async {
+    final token = authBloc.token!;
+    final res = await api.editDeadStoneCluster(
+      EditDeadStoneClusterDto(position: pos, state: DeadStoneState.Alive),
+      token,
+      gameStateBloc.game.gameId,
+    );
+    res.fold((e) {}, (r) {
+      applyDeadStones(pos, DeadStoneState.Alive);
+    });
+  }
+
+  void applyDeadStones(Position pos, DeadStoneState state) {
+    final cluster = gameBoardBloc.stoneAt(pos)!.cluster;
+    if (state == DeadStoneState.Dead) {
+      virtualRemovedCluster.add(cluster);
+    } else {
+      virtualRemovedCluster.remove(cluster);
+    }
+    calculateScore();
+    notifyListeners();
+  }
+
+  StreamSubscription listenFromEditDeadStone() {
+    return gameStateBloc.listenForEditDeadStone.listen((message) {
+      applyDeadStones(message.position, message.state);
+      debugPrint(
+        "Dead stone edited at position ${message.position} to ${message.state}",
+      );
+    });
+  }
+
+  void onClickStone(Position pos) {
+    final cluster = gameBoardBloc.stoneAt(pos)!.cluster;
+    if (virtualRemovedCluster.contains(cluster)) {
+      removeDeadStones(pos);
+    } else {
+      addDeadStones(pos);
     }
   }
 
@@ -89,24 +166,28 @@ class ScoreCalculation extends InheritedWidget {
     }
   }
 
-  calculateScore() {
-    clusterEncountered.clear();
-    var stoneLogic = gameBoardBloc;
-
-    for (int i = 0; i < stoneLogic.rows; i++) {
-      for (int j = 0; j < stoneLogic.cols; j++) {
-        areaMap[Position(i, j)]!.value = null;
-        // TODO: for now entire areaMap is updated so each value notifier listens even if it doesn't need to change use a tmp areaMap and update only the values that are required
-      }
-    }
-
-    virtualPlaygroundMap = stoneLogic.stonesCopy;
+  createVirtualPlayground() {
+    virtualPlaygroundMap.clear();
+    virtualPlaygroundMap.addAll(gameBoardBloc.stones);
 
     for (Cluster cluster in virtualRemovedCluster) {
       for (var pos in cluster.data) {
         virtualPlaygroundMap.remove(pos);
       }
     }
+  }
+
+  calculateScore() {
+    clusterEncountered.clear();
+
+    for (int i = 0; i < gameBoardBloc.rows; i++) {
+      for (int j = 0; j < gameBoardBloc.cols; j++) {
+        areaMap[Position(i, j)]!.value = null;
+        // TODO: for now entire areaMap is updated so each value notifier listens even if it doesn't need to change use a tmp areaMap and update only the values that are required
+      }
+    }
+
+    createVirtualPlayground();
 
     // const Position startPos = Position(0, 0);
     // List<Area> result = [];
@@ -140,8 +221,8 @@ class ScoreCalculation extends InheritedWidget {
 
     // iterate map starting from 0 0 to last
 
-    for (int i = 0; i < stoneLogic.rows; i++) {
-      for (int j = 0; j < stoneLogic.rows; j++) {
+    for (int i = 0; i < gameBoardBloc.rows; i++) {
+      for (int j = 0; j < gameBoardBloc.rows; j++) {
         if (areaMap[Position(i, j)]!.value == null &&
             virtualPlaygroundMap[Position(i, j)] == null) {
           forEachEmptyArea(Position(i, j), Area());
@@ -224,10 +305,4 @@ class ScoreCalculation extends InheritedWidget {
       });
     }
   }
-
-  @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
-
-  static ScoreCalculation? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<ScoreCalculation>();
 }

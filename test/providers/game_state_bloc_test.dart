@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/core/system_utilities.dart';
+import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
+import 'package:go/models/stone.dart';
 import 'package:go/playfield/board_utilities.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
@@ -28,6 +30,8 @@ class MockSignalR extends Mock implements SignalRProvider {}
 
 class MockSystemUtilities extends Mock implements SystemUtilities {}
 
+class MockStoneLogic extends Mock implements StoneLogic {}
+
 // class FakeMovePosition extends Mock implements MovePosition {
 //   @override
 //   final int? x;
@@ -41,13 +45,24 @@ class MockSystemUtilities extends Mock implements SystemUtilities {}
 
 void main() {
   late MockApi api;
+
+  // This does no logic and just says that the move is valid
+  late StoneLogic stoneLogic;
   late List<GameMove> moves;
-  final a1 = MovePosition(x: 0, y: 0);
-  final a2 = MovePosition(x: 1, y: 0);
+  const a1 = Position(0, 0);
+  const a2 = Position(1, 0);
+
+  final ma1 = MovePosition(x: 0, y: 0);
+  final ma2 = MovePosition(x: 1, y: 0);
 
   // setUpAll(() {
+  
   registerFallbackValue(a1);
   registerFallbackValue(a2);
+
+
+  registerFallbackValue(ma1);
+  registerFallbackValue(ma2);
   // registerFallbackValue(MovePosition(x: 1, y: 0));
   // });
 
@@ -87,34 +102,10 @@ void main() {
 
   // Global
   api = MockApi();
+  stoneLogic = MockStoneLogic();
 
-  // User 1
-  when(() => auth.currentUserRaw).thenReturn(
-    AppUser(id: "1", email: "1@1.com"),
-  );
-
-  when(() => auth.token).thenReturn(
-    "token1",
-  );
-
-  when(() => signalR.gameMessageStream).thenAnswer(
-    (_) => signalRController1.stream,
-  );
-  when(() => utils.currentTime).thenAnswer((inv) => currentTime);
-
-  // User 2
-  when(() => auth2.currentUserRaw).thenReturn(
-    AppUser(id: "2", email: "2@2.com"),
-  );
-
-  when(() => auth2.token).thenReturn(
-    "token2",
-  );
-
-  when(() => signalR2.gameMessageStream).thenAnswer(
-    (_) => signalRController2.stream,
-  );
-  when(() => utils2.currentTime).thenAnswer((inv) => currentTime2);
+  when(() => stoneLogic.stoneAt(any())).thenReturn(null);
+  when(() => stoneLogic.checkInsertable(any())).thenReturn(true);
 
   when(() => api.makeMove(any(), any(), any())).thenAnswer((inv) async {
     var token = inv.positionalArguments[1] as String;
@@ -151,6 +142,35 @@ void main() {
     return right<ApiError, NewMoveResult>(
         NewMoveResult(game: gameResult, result: true));
   });
+
+  // User 1
+  when(() => auth.currentUserRaw).thenReturn(
+    AppUser(id: "1", email: "1@1.com"),
+  );
+
+  when(() => auth.token).thenReturn(
+    "token1",
+  );
+
+  when(() => signalR.gameMessageStream).thenAnswer(
+    (_) => signalRController1.stream,
+  );
+  when(() => utils.currentTime).thenAnswer((inv) => currentTime);
+
+  // User 2
+  when(() => auth2.currentUserRaw).thenReturn(
+    AppUser(id: "2", email: "2@2.com"),
+  );
+
+  when(() => auth2.token).thenReturn(
+    "token2",
+  );
+
+  when(() => signalR2.gameMessageStream).thenAnswer(
+    (_) => signalRController2.stream,
+  );
+  when(() => utils2.currentTime).thenAnswer((inv) => currentTime2);
+
   // });
 
   final sGame = gameConstructor(simpleBoard(), _1980Jan1_1_30PM);
@@ -205,7 +225,7 @@ void main() {
       // 3 seconds spent playing first move
       currentTime = currentTime.add(const Duration(seconds: 3));
 
-      await bloc.playMove(a1);
+      await bloc.playMove(a1, stoneLogic);
 
       expect(bloc.times[0].value.inSeconds, 296);
       expect(bloc.times[1].value.inSeconds, 300);
@@ -231,7 +251,7 @@ void main() {
       // player 2 uses 5 seconds to play his move
       currentTime2 = currentTime2.add(const Duration(seconds: 5));
 
-      await bloc2.playMove(a2);
+      await bloc2.playMove(a2, stoneLogic);
 
       expect(bloc2.times[0].value.inSeconds, 296);
       expect(bloc2.times[1].value.inSeconds, 294);
@@ -328,10 +348,11 @@ Game gameConstructor(
     )),
     moves: moves,
     players: {"1": StoneType.black, "2": StoneType.white},
-    playerScores: {"1": scores[0], "2": scores[1]},
+    prisoners: {"1": scores[0], "2": scores[1]},
     startTime: startTime,
     koPositionInLastMove: koPosition,
     gameState: GameState.playing,
+    deadStones: [],
   );
 }
 

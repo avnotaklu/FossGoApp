@@ -90,7 +90,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                             ? Expanded(
                                 flex: 2,
                                 child: Text(
-                                  "${ScoreCalculation.of(context)!.scores(context)[widget.player.turn]} + ",
+                                  "${context.read<ScoreCalculationBloc>().scores(context)[widget.player.turn]} + ",
                                   style: TextStyle(
                                       color:
                                           Constants.defaultTheme.mainTextColor),
@@ -103,7 +103,8 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                           flex: 5,
                           child: Container(
                             child: ValueListenableBuilder(
-                                valueListenable: StoneLogic.of(context)!
+                                valueListenable: context
+                                    .read<StoneLogic>()
                                     .prisoners[widget.player.turn],
                                 builder: (context, snapshot, child) {
                                   return Text(

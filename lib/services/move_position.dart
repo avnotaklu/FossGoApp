@@ -28,14 +28,8 @@ class MovePosition {
   factory MovePosition.fromJson(String source) =>
       MovePosition.fromMap(json.decode(source) as Map<String, dynamic>);
 
-  // @override
-  // bool operator ==(covariant MovePosition other) {
-  //   if (identical(this, other)) return true;
-  //   return 
-  //     other.x == x &&
-  //     other.y == y;
-  // }
+  bool isPass() {
+    return x == null && y == null;
+  }
 
-  // @override
-  // int get hashCode => x.hashCode ^ y.hashCode;
 }

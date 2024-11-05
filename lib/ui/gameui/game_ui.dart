@@ -98,7 +98,8 @@ class _GameUiState extends State<GameUi> {
                   context.read<Stage>() is GameEndStage
                       ? Text(
                           "${() {
-                            return ScoreCalculation.of(context)!
+                            return context
+                                        .read<ScoreCalculationBloc>()
                                         .getWinner(context)
                                         .turn ==
                                     0
@@ -209,13 +210,7 @@ class Pass extends StatelessWidget {
     //     foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
     //   ),
     return BottomButton(() {
-      print("pass");
-      var bloc = context.read<GameStateBloc>();
-      NTP.now().then((value) {
-        context.read<Stage>().onClickCell(null, context);
-        // GameData.of(context)?.newMovePlayed(context, value, null);
-        // GameData.of(context)?.toggleTurn(context);
-      });
+      context.read<Stage>().onClickCell(null, context);
     }, "Pass");
   }
 }
@@ -238,21 +233,21 @@ class Accept extends StatelessWidget {
 
       gameStateBloc.confirmGameEnd();
 
-      ScoreCalculation.of(context)!
-          .stoneRemovalAccepted
-          .add(gameStateBloc.getClientPlayerIndex());
-      ScoreCalculation.of(context)!.onGameEnd(
-          gameStateBloc, ScoreCalculation.of(context)!.virtualRemovedCluster);
+      // ScoreCalculation.of(context)!
+      //     .stoneRemovalAccepted
+      //     .add(gameStateBloc.getClientPlayerIndex());
+      // ScoreCalculation.of(context)!.onGameEnd(
+      //     gameStateBloc, ScoreCalculation.of(context)!.virtualRemovedCluster);
     }, "Accept");
   }
 }
 
 class ContinueGame extends StatelessWidget {
-  const ContinueGame({Key? key}) : super(key: key);
+  const ContinueGame({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BottomButton(() {
+    return BottomButton(() async {
       // MultiplayerData.of(context)!
       //     .curGameReferences!
       //     .finalOurConfirmation(context)
@@ -301,8 +296,20 @@ class ContinueGame extends StatelessWidget {
       //           .lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn]
       //           .toString());
 
-      context.read<GameStateBloc>()!.continueGame();
-      context.read<GameStateBloc>()!.curStageType = StageType.Gameplay;
+      final res = await context.read<GameStateBloc>()!.continueGame();
+      res.fold((e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+          ),
+        );
+      }, (v) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Successfully continued game"),
+          ),
+        );
+      });
       // });
     }, "Continue");
   }
