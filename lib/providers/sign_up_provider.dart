@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/services/api.dart';
+import 'package:go/services/app_user.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/services/user_authentication_model.dart';
 import 'package:go/services/user_details_dto.dart';
@@ -15,7 +16,7 @@ class SignUpProvider {
   });
   final api = Api();
 
-  Future<Either<AppError, UserAuthenticationModel>> signUp(
+  Future<Either<AppError, AppUser>> signUp(
       String email, String password) async {
     // regex for email validation
     final RegExp emailRegex = RegExp(
@@ -30,12 +31,13 @@ class SignUpProvider {
           AppError(message: "Password must be at least 6 characters"));
     }
 
-    var signUpRes =
-        await api.passwordSignUp(UserDetailsDto(email, false, password));
+    var logInRes = TaskEither(
+            () => api.passwordSignUp(UserDetailsDto(email, false, password)))
+        .mapLeft(AppError.fromApiError);
 
-    return signUpRes.mapLeft(AppError.fromApiError).map((r) {
-      authBloc.setUser(r.token, r.user);
-      return r;
-    });
+    var res = logInRes.flatMap(
+        (r) => TaskEither(() => authBloc.registerUser(r.token, r.user)));
+
+    return await res.run();
   }
 }

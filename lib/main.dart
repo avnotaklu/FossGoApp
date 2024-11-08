@@ -39,62 +39,64 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider(create: (context) => AuthProvider()),
-        // ChangeNotifierProvider(create: (context) => SignalRBloc()),
-      ],
-      builder: (context, child) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: DefaultTextStyle(
-          style: TextStyle(
-              color: Constants.defaultTheme.mainTextColor, fontSize: 15),
-          child: SignIn(),
-        ),
-        theme: ThemeData(
-          // Define the default brightness and colors.
-          brightness: Brightness.dark,
-          primaryColor: Colors.red[800],
-          // textTheme: TextTheme(
-          //   button: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
-          // ),
-          textButtonTheme: TextButtonThemeData(
-            style: ButtonStyle(
-              foregroundColor: WidgetStateProperty.all<Color>(
-                  Constants.defaultTheme.mainTextColor),
+    return ChangeNotifierProvider(
+      create: (context) => SignalRProvider(),
+      builder: (context, child) => MultiProvider(
+        providers: [
+          Provider(create: (context) => AuthProvider(context.read<SignalRProvider>())),
+        ],
+        builder: (context, child) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: DefaultTextStyle(
+            style: TextStyle(
+                color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+            child: SignIn(),
+          ),
+          theme: ThemeData(
+            // Define the default brightness and colors.
+            brightness: Brightness.dark,
+            primaryColor: Colors.red[800],
+            // textTheme: TextTheme(
+            //   button: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
+            // ),
+            textButtonTheme: TextButtonThemeData(
+              style: ButtonStyle(
+                foregroundColor: WidgetStateProperty.all<Color>(
+                    Constants.defaultTheme.mainTextColor),
+              ),
+            ),
+
+            buttonTheme: ButtonThemeData(
+              buttonColor: Constants.defaultTheme.mainHighlightColor,
             ),
           ),
-
-          buttonTheme: ButtonThemeData(
-            buttonColor: Constants.defaultTheme.mainHighlightColor,
-          ),
-        ),
-        routes: <String, WidgetBuilder>{
-          '/HomePage': (BuildContext context) {
-            final signalR = SignalRProvider(context.read<AuthProvider>());
-            return MultiProvider(
-              providers: [
-                ChangeNotifierProvider(
+          routes: <String, WidgetBuilder>{
+            '/HomePage': (BuildContext context) {
+              return MultiProvider(
+                providers: [
+                  ChangeNotifierProvider(
                     create: (context) =>
-                        HomepageBloc(signalRProvider: signalR)),
-                ChangeNotifierProvider(create: (context) => signalR),
-              ],
-              builder: (context, child) => HomePage(),
-            );
+                        HomepageBloc(signalRProvider: context.read(), authBloc:  context.read()),
+                  ),
+                  // ChangeNotifierProvider(create: (context) => signalR),
+                ],
+                builder: (context, child) => HomePage(),
+              );
+            },
+            '/SignUp': (BuildContext context) => SignUpScreen(),
+            '/LogIn': (BuildContext context) => LogInScreen(),
+            // '/CreateGame': (BuildContext context) => MultiProvider(
+            //       providers: [
+            //         ChangeNotifierProvider(
+            //             create: (context) => context.read<SignalRProvider>()),
+            //         Provider(
+            //           create: (context) => CreateGameProvider(),
+            //         ),
+            //       ],
+            //       builder: (context, child) => CreateGameScreen(),
+            //     ),
           },
-          '/SignUp': (BuildContext context) => SignUpScreen(),
-          '/LogIn': (BuildContext context) => LogInScreen(),
-          // '/CreateGame': (BuildContext context) => MultiProvider(
-          //       providers: [
-          //         ChangeNotifierProvider(
-          //             create: (context) => context.read<SignalRProvider>()),
-          //         Provider(
-          //           create: (context) => CreateGameProvider(),
-          //         ),
-          //       ],
-          //       builder: (context, child) => CreateGameScreen(),
-          //     ),
-        },
+        ),
       ),
     );
   }

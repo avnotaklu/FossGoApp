@@ -8,6 +8,7 @@ import 'package:go/playfield/game_widget.dart';
 import 'package:go/ui/homepage/homepage.dart';
 import 'package:go/main.dart';
 import 'package:go/services/auth.dart';
+import 'package:go/views/error_screen.dart';
 import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
@@ -19,15 +20,22 @@ class _SignInState extends State<SignIn> {
   @override
   void initState() {
     var authBloc = Provider.of<AuthProvider>(context, listen: false);
-    authBloc.currentUser.listen((user) async {
-      if (user != null) {
-        print("got user");
-        // MultiplayerData?.of(context)?.setUser = user;
+    var signalRBloc = Provider.of<SignalRProvider>(context, listen: false);
+
+    authBloc.authResult.listen((res) async {
+      res.fold((l) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => ErrorPage(l),
+          ),
+          (route) => route.isFirst,
+        );
+      }, (r) {
         Navigator.of(context).pushNamedAndRemoveUntil(
           '/HomePage',
           (route) => false,
         );
-      }
+      });
     });
   }
 

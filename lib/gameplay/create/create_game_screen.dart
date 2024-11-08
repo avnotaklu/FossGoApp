@@ -3,7 +3,6 @@ import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
-import 'package:go/gameplay/create/request_recieve.dart';
 import 'package:go/gameplay/create/request_send_screen.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';

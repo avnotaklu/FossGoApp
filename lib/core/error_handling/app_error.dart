@@ -16,3 +16,13 @@ class AppError extends BaseError {
             ? error.reasonPhrase ?? "Internal Server Error"
             : error.message;
 }
+
+class RegisterError extends AppError {
+  RegisterError({
+    required super.message,
+  });
+
+  @override
+  String toString() => 'RegisterError(message: $message)';
+
+}

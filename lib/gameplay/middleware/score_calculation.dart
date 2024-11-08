@@ -28,11 +28,8 @@ import 'stone_logic.dart';
 
 class ScoreCalculationBloc extends ChangeNotifier {
   final Map<Position, ValueNotifier<Area?>> areaMap = {};
-  final List<Cluster> clusterEncountered = [];
+  // final List<Cluster> clusterEncountered = [];
   List<int> _territoryScores = [];
-
-  // Map<int,bool>
-  List<int> stoneRemovalAccepted = [];
 
   // BuildContext? _context;
   Map<Position, Stone> virtualPlaygroundMap = {};
@@ -44,26 +41,26 @@ class ScoreCalculationBloc extends ChangeNotifier {
   final GameStateBloc gameStateBloc;
   final GameBoardBloc gameBoardBloc;
 
-  Player getWinner(BuildContext context) {
-    StoneLogic stoneLogic = context.read();
-    gameStateBloc.getPlayerWithTurn.score =
-        _territoryScores[gameStateBloc.getPlayerWithTurn.turn] +
-            stoneLogic.prisoners[gameStateBloc.getPlayerWithTurn.turn].value +
-            (playerColors[gameStateBloc.getPlayerWithTurn.turn] == Colors.white
-                ? 6.5
-                : 0);
-    gameStateBloc.getPlayerWithoutTurn.score = _territoryScores[
-            gameStateBloc.getPlayerWithoutTurn.turn] +
-        stoneLogic.prisoners[gameStateBloc.getPlayerWithoutTurn.turn].value +
-        (playerColors[gameStateBloc.getPlayerWithoutTurn.turn] == Colors.white
-            ? 6.5
-            : 0);
-    Player winner = (gameStateBloc.getPlayerWithTurn.score >
-            gameStateBloc.getPlayerWithoutTurn.score)
-        ? gameStateBloc.getPlayerWithTurn
-        : gameStateBloc.getPlayerWithoutTurn;
-    return winner;
-  }
+  // Player getWinner(BuildContext context) {
+  //   StoneLogic stoneLogic = context.read();
+  //   gameStateBloc.getPlayerWithTurn.score =
+  //       _territoryScores[gameStateBloc.getPlayerWithTurn.turn] +
+  //           stoneLogic.prisoners[gameStateBloc.getPlayerWithTurn.turn].value +
+  //           (playerColors[gameStateBloc.getPlayerWithTurn.turn] == Colors.white
+  //               ? 6.5
+  //               : 0);
+  //   gameStateBloc.getPlayerWithoutTurn.score = _territoryScores[
+  //           gameStateBloc.getPlayerWithoutTurn.turn] +
+  //       stoneLogic.prisoners[gameStateBloc.getPlayerWithoutTurn.turn].value +
+  //       (playerColors[gameStateBloc.getPlayerWithoutTurn.turn] == Colors.white
+  //           ? 6.5
+  //           : 0);
+  //   Player winner = (gameStateBloc.getPlayerWithTurn.score >
+  //           gameStateBloc.getPlayerWithoutTurn.score)
+  //       ? gameStateBloc.getPlayerWithTurn
+  //       : gameStateBloc.getPlayerWithoutTurn;
+  //   return winner;
+  // }
 
   // GETTERS
   List<int> scores(context) {
@@ -74,25 +71,29 @@ class ScoreCalculationBloc extends ChangeNotifier {
 
   late final StreamSubscription editStoneSubscription;
 
-  ScoreCalculationBloc(
-    rows,
-    cols, {
+  ScoreCalculationBloc({
     required this.api,
     required this.authBloc,
     required this.gameStateBloc,
     required this.gameBoardBloc,
   }) {
+    editStoneSubscription = listenFromEditDeadStone();
+    setupScore();
+  }
+
+  void setupScore() {
+    final game = gameStateBloc.game;
+    final rows = game.rows;
+    final cols = game.columns;
+
+    _territoryScores = [0, 0];
+
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
         areaMap[Position(i, j)] = ValueNotifier(null);
       }
     }
 
-    editStoneSubscription = listenFromEditDeadStone();
-    setupScore();
-  }
-
-  void setupScore() {
     for (final pos in gameStateBloc.game.deadStones) {
       virtualRemovedCluster.add(gameBoardBloc.stoneAt(pos)!.cluster);
     }
@@ -160,10 +161,15 @@ class ScoreCalculationBloc extends ChangeNotifier {
   }
 
   onGameEnd(GameStateBloc gameState, removedCluster) {
-    if (stoneRemovalAccepted.length == 2) {
-      gameState.curStageType = StageType.GameEnd;
-      gameState.endGame();
-    }
+    // if (stoneRemovalAccepted.length == 2) {
+    //   gameState.curStageType = StageType.GameEnd;
+    //   gameState.endGame();
+    // }
+  }
+
+  void continueGame() {
+    virtualPlaygroundMap.clear();
+    virtualRemovedCluster.clear();
   }
 
   createVirtualPlayground() {
@@ -178,8 +184,6 @@ class ScoreCalculationBloc extends ChangeNotifier {
   }
 
   calculateScore() {
-    clusterEncountered.clear();
-
     for (int i = 0; i < gameBoardBloc.rows; i++) {
       for (int j = 0; j < gameBoardBloc.cols; j++) {
         areaMap[Position(i, j)]!.value = null;
@@ -189,43 +193,11 @@ class ScoreCalculationBloc extends ChangeNotifier {
 
     createVirtualPlayground();
 
-    // const Position startPos = Position(0, 0);
-    // List<Area> result = [];
-
-    // Area? startArea = Area();
-    // startArea.spaces.add(startPos);
-    // areaMap[startPos] = startArea;
-
-    // result.add(startArea);
-    // forEachEmptyArea(startPos, startArea);
-
-    // Iterate map with clusters
-    // Map<Cluster, bool> markDoneCluster = {};
-
-    // while (clusterEncountered.isNotEmpty) {
-    //   var cluster = clusterEncountered.first;
-
-    //   if (markDoneCluster[cluster] == false || markDoneCluster.containsKey(cluster) == false) {
-    //     for (Position pos in cluster.data) {
-    //       StoneLogic.doActionOnNeighbors(pos, (curPos, neighbor) {
-    //         if (areaMap[neighbor] == null) {
-    //           forEachEmptyArea(neighbor, Area());
-    //         }
-    //       });
-    //     }
-    //   }
-
-    //   markDoneCluster[cluster] = true;
-    //   clusterEncountered.removeAt(0);
-    // }
-
-    // iterate map starting from 0 0 to last
-
     for (int i = 0; i < gameBoardBloc.rows; i++) {
       for (int j = 0; j < gameBoardBloc.rows; j++) {
         if (areaMap[Position(i, j)]!.value == null &&
             virtualPlaygroundMap[Position(i, j)] == null) {
-          forEachEmptyArea(Position(i, j), Area());
+          forEachEmptyArea(Position(i, j), Area(), []);
         }
       }
     }
@@ -256,7 +228,8 @@ class ScoreCalculationBloc extends ChangeNotifier {
     // if not then add this
   }
 
-  forEachEmptyArea(Position startPos, Area curArea) {
+  forEachEmptyArea(
+      Position startPos, Area curArea, List<Cluster> clusterEncountered) {
     if (gameBoardBloc.checkIfInsideBounds(startPos)) {
       if (virtualPlaygroundMap[startPos] != null) {
         if (!clusterEncountered
@@ -282,7 +255,7 @@ class ScoreCalculationBloc extends ChangeNotifier {
                 // if () {
                 curArea.spaces.add(neighbor);
                 areaMap[neighbor]!.value = curArea;
-                forEachEmptyArea(neighbor, curArea);
+                forEachEmptyArea(neighbor, curArea, clusterEncountered);
                 //}
               }
             }

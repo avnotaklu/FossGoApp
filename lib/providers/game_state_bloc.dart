@@ -17,6 +17,7 @@ import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
+import 'package:go/services/game_over_message.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/join_message.dart';
 import 'package:go/services/signal_r_message.dart';
@@ -34,37 +35,10 @@ class GameStateBloc extends ChangeNotifier {
   Game game;
   // Stage curStage;
 
-  GameStateBloc(
-    this.api,
-    this.signalRbloc,
-    this.authBloc,
-    this.game,
-    this.systemUtilities,
-    // this.curStage,
-    StageType curStageType,
-    GameJoinMessage? joiningData,
-  )   : times = [
-          ValueNotifier(Duration(seconds: game.timeInSeconds)),
-          ValueNotifier(Duration(seconds: game.timeInSeconds))
-        ],
-        curStageTypeNotifier = ValueNotifier(curStageType),
-        myPlayerUserInfo = PublicUserInfo(
-          authBloc.currentUserRaw!.email,
-          authBloc.currentUserRaw!.id,
-        ) {
-    setupGame(game, joiningData);
-    setupStreams();
-    subscriptions = [
-      listenFromGameJoin(),
-      listenForMove(),
-      listenForContinueGame()
-    ];
-  }
-
   late final List<Player> _players;
   List<Player> get players => List.unmodifiable(_players);
 
-  StoneType get myStone => game.players[authBloc.currentUserRaw!.id]!;
+  StoneType get myStone => game.players[authBloc.currentUserRaw.id]!;
   StoneType get otherStone => StoneType.values[1 - myStone.index];
 
   int get turn => game.moves.length;
@@ -73,6 +47,27 @@ class GameStateBloc extends ChangeNotifier {
 
   Player get getPlayerWithTurn => _players[turn % 2];
   Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
+
+  StoneType? get getWinnerStone => game.players[game.winnerId];
+  StoneType? get getLoserStone => game.players[game.winnerId] == null
+      ? null
+      : StoneType.values[1 - game.players[game.winnerId]!.index];
+
+  List<double> get getSummedPlayerScores => [
+        game.finalTerritoryScores[0].toDouble() +
+            game.prisoners[getPlayerIdFromStoneType(StoneType.black)]!,
+        game.finalTerritoryScores[1].toDouble() +
+            game.prisoners[getPlayerIdFromStoneType(StoneType.white)]! +
+            game.komi,
+      ];
+
+  String getPlayerIdFromStoneType(StoneType stone) {
+    return game.players.entries
+        .firstWhere((element) => element.value == stone)
+        .key;
+  }
+
+  bool iAccepted = false;
 
   // Join Data
 
@@ -94,16 +89,6 @@ class GameStateBloc extends ChangeNotifier {
     // cur_stage.disposeStage();
     curStageTypeNotifier.value = stage;
   }
-
-  void setupGame(Game game, GameJoinMessage? joiningData) {
-    _players = [Player(0), Player(1)];
-
-    if (joiningData != null) {
-      joinGame(joiningData);
-    }
-  }
-
-
   // Stream<bool> listenForGameEndRequest() {
   //   return signalRbloc.gameMessageController.stream
   //       .where((message) => message.placeholder is bool)
@@ -115,7 +100,46 @@ class GameStateBloc extends ChangeNotifier {
   late final Stream<bool> listenFromOpponentConfirmation;
   late final Stream<EditDeadStoneMessage> listenForEditDeadStone;
   late final Stream<NewMoveMessage> listenFromMove;
+  late final Stream<GameOverMessage> listenFromGameOver;
+  late final Stream<Null> listenFromAcceptScores;
   late final Stream<ContinueGameMessage> listenFromContinueGame;
+
+  GameStateBloc(
+    this.api,
+    this.signalRbloc,
+    this.authBloc,
+    this.game,
+    this.systemUtilities,
+    // this.curStage,
+    StageType curStageType,
+    GameJoinMessage? joiningData,
+  )   : times = [
+          ValueNotifier(Duration(seconds: game.timeInSeconds)),
+          ValueNotifier(Duration(seconds: game.timeInSeconds))
+        ],
+        curStageTypeNotifier = ValueNotifier(curStageType),
+        myPlayerUserInfo = PublicUserInfo(
+          authBloc.currentUserRaw.email,
+          authBloc.currentUserRaw.id,
+        ) {
+    setupGame(game, joiningData);
+    setupStreams();
+    subscriptions = [
+      listenFromGameJoin(),
+      listenForMove(),
+      listenForContinueGame(),
+      listenForAcceptScore(),
+      listenForGameOver()
+    ];
+  }
+
+  void setupGame(Game game, GameJoinMessage? joiningData) {
+    _players = [Player(0), Player(1)];
+
+    if (joiningData != null) {
+      startGameplay(joiningData);
+    }
+  }
 
   void setupStreams() {
     var gameMessageStream = signalRbloc.gameMessageStream;
@@ -147,39 +171,62 @@ class GameStateBloc extends ChangeNotifier {
         yield message.data as ContinueGameMessage;
       }
     });
+
+    listenFromAcceptScores = gameMessageStream.asyncExpand((message) async* {
+      if (message.type == SignalRMessageTypes.acceptedScores) {
+        yield message.data as Null;
+      }
+    });
+
+    listenFromGameOver = gameMessageStream.asyncExpand((message) async* {
+      if (message.type == SignalRMessageTypes.gameOver) {
+        yield message.data as GameOverMessage;
+      }
+    });
   }
 
   StreamSubscription listenFromGameJoin() {
     return listenForGameJoin.listen((message) {
-      joinGame(message);
+      startGameplay(message);
       debugPrint("Joined game BAHAHA");
       notifyListeners();
     });
   }
 
-  void joinGame(GameJoinMessage joinMessage) {
+  void startGameplay(GameJoinMessage joinMessage) {
     // _startTime = DateTime.parse((joinMessage.time));
     game = joinMessage.game;
 
     var myPlayerInfoIndex = joinMessage.players
-        .indexWhere((element) => element.id == authBloc.currentUserRaw!.id);
+        .indexWhere((element) => element.id == authBloc.currentUserRaw.id);
 
     myPlayerUserInfo = joinMessage.players[myPlayerInfoIndex];
-    otherPlayerUserInfo = joinMessage.players[myPlayerInfoIndex == 0 ? 1 : 0];
+
+    otherPlayerUserInfo =
+        joinMessage.players.elementAtOrNull(myPlayerInfoIndex == 0 ? 1 : 0);
 
     var now = systemUtilities.currentTime;
-    times[getPlayerWithTurn.turn].value =
-        times[getPlayerWithTurn.turn].value - now.difference(joinMessage.time);
+    calculateTimesFromMoves();
 
-    startPausedTimerOfActivePlayer();
-
-    curStageType = StageType.Gameplay;
+    if (game.startTime != null && game.gameState == GameState.playing) {
+      times[getPlayerWithTurn.turn].value =
+          times[getPlayerWithTurn.turn].value -
+              now.difference(joinMessage.time);
+      startPausedTimerOfActivePlayer();
+      curStageType = StageType.Gameplay;
+    }
+    if (GameState.scoreCalculation == game.gameState) {
+      curStageType = StageType.ScoreCalculation;
+    }
+    if (game.gameState == GameState.ended) {
+      curStageType = StageType.GameEnd;
+    }
   }
 
   StreamSubscription listenForContinueGame() {
     return listenFromContinueGame.listen((message) {
-      final game = message;
-      debugPrint("Got move ${authBloc.token}");
+      debugPrint(
+          "Signal R said, ::${SignalRMessageTypes.continueGame}::\n\t\t${message.toMap()}");
       applyContinue();
     });
     // signalRbloc.hubConnection.on('gameMove', (data) {});
@@ -188,11 +235,27 @@ class GameStateBloc extends ChangeNotifier {
   StreamSubscription listenForMove() {
     return listenFromMove.listen((message) {
       final game = message.game;
-      debugPrint("Got move ${authBloc.token}");
+      debugPrint(
+          "Signal R said, ::${SignalRMessageTypes.newMove}::\n\t\t${message.toMap()}");
       // assert(data != null, "Game move data can't be null");
       applyMoveResult(game);
     });
     // signalRbloc.hubConnection.on('gameMove', (data) {});
+  }
+
+  StreamSubscription listenForAcceptScore() {
+    return listenFromAcceptScores.listen((message) {
+      debugPrint("Signal R said, ::${SignalRMessageTypes.acceptedScores}::");
+    });
+  }
+
+  StreamSubscription listenForGameOver() {
+    return listenFromGameOver.listen((message) {
+      debugPrint(
+          "Signal R said, ::${SignalRMessageTypes.gameOver}::\n\t\t${message.toMap()}");
+
+      applyEndGame();
+    });
   }
 
   Future<Either<AppError, GameMove>> playMove(
@@ -258,15 +321,8 @@ class GameStateBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setTurnTimerAfterMoveWasAdded() {
-    int turn = this.turn;
+  void calculateTimesFromMoves() {
     var times = [game.startTime!, ...game.moves.map((e) => e.time)];
-
-    var turnPlayerTimer = timerController[turn % 2];
-    turnPlayerTimer.start();
-
-    var nonTurnPlayerTimer = timerController[1 - turn % 2];
-    nonTurnPlayerTimer.pause();
 
     var firstPlayerDuration = times
         .mapWithIndex((e, i) => (e, i))
@@ -276,24 +332,26 @@ class GameStateBloc extends ChangeNotifier {
     this.times[0].value =
         Duration(seconds: game.timeInSeconds) - firstPlayerDuration;
 
-    var secondPlayerTimes = times
-        .mapWithIndex((e, i) => (e, i))
-        .skip(1)
-        .filterWithIndex((e, i) => i % 2 == 1);
-
     var secondPlayerDuration = times
         .mapWithIndex((e, i) => (e, i))
         .skip(1)
         .filterWithIndex((e, i) => i % 2 == 1)
         .fold(const Duration(), (d, r) => d + r.$1.difference(times[r.$2 - 1]));
 
-    debugPrint("times: ${times.fold("", (s, d) => "$s$d ,")}");
-    debugPrint(
-        "secondPlayerTimes: ${secondPlayerTimes.fold("", (s, d) => "$s$d ,")}");
-
-    debugPrint("Second Player time: ${secondPlayerDuration.inSeconds}");
     this.times[1].value =
         Duration(seconds: game.timeInSeconds) - secondPlayerDuration;
+  }
+
+  void setTurnTimerAfterMoveWasAdded() {
+    int turn = this.turn;
+
+    var turnPlayerTimer = timerController[turn % 2];
+    turnPlayerTimer.start();
+
+    calculateTimesFromMoves();
+
+    var nonTurnPlayerTimer = timerController[1 - turn % 2];
+    nonTurnPlayerTimer.pause();
 
     // Also calculate the lag time and incorporate that for player with turn
     this.times[getPlayerWithTurn.turn].value -=
@@ -309,12 +367,15 @@ class GameStateBloc extends ChangeNotifier {
     throw NotImplementedException();
   }
 
-  void endGame() {
-    // TODO: call api here
+  void applyEndGame() {
+    curStageType = StageType.GameEnd;
+    timerController[0].pause();
+    timerController[1].pause();
+    notifyListeners();
   }
 
   bool isMyTurn() {
-    return game.players[authBloc.currentUserRaw!.id]!.index == turn % 2;
+    return game.players[authBloc.currentUserRaw.id]!.index == turn % 2;
   }
 
   bool hasPassedTwice() {
@@ -348,8 +409,16 @@ class GameStateBloc extends ChangeNotifier {
     startPausedTimerOfActivePlayer();
   }
 
-  void confirmGameEnd() {
-    // TODO: call api to end game
+  Future<void> acceptScores() async {
+    final token = authBloc.token!;
+    final gameId = game.gameId;
+    final res = await api.acceptScores(token, gameId);
+
+    res.fold((l) {
+      debugPrint("Accept scores failed ${l.message}");
+    }, (r) {
+      iAccepted = true;
+    });
   }
 
   void startPausedTimerOfActivePlayer() {
@@ -362,7 +431,7 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   int getRemotePlayerIndex() {
-    final stone = game.players[(authBloc.currentUserRaw)!.id];
+    final stone = game.players[(authBloc.currentUserRaw).id];
     // game.players.indexWhere((k) => k != (authBloc.currentUserRaw)!.id);
     if (stone == null) {
       throw ("remote player not found");
@@ -371,7 +440,7 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   int getClientPlayerIndex() {
-    final stone = game.players[(authBloc.currentUserRaw)!.id];
+    final stone = game.players[(authBloc.currentUserRaw).id];
     // final index =
     //     game.players.indexWhere((k) => k == (authBloc.currentUserRaw)!.id);
     if (stone == null) {

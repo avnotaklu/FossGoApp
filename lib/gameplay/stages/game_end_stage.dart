@@ -20,11 +20,12 @@ import 'package:provider/provider.dart';
 class GameEndStage extends Stage {
   late final Map<Position, Stone> stonesCopy;
 
-  GameEndStage.fromScratch(context) {}
+  // GameEndStage.fromScratch(context) {}
 
-  GameEndStage(GameStateBloc gameStateBloc) {
-    gameStateBloc.timerController[0].pause();
-    gameStateBloc.timerController[1].pause();
+  final GameStateBloc gameStateBloc;
+  GameEndStage(this.gameStateBloc) {
+    // gameStateBloc.timerController[0].pause();
+    // gameStateBloc.timerController[1].pause();
   }
 
   @override
@@ -62,10 +63,11 @@ class GameEndStage extends Stage {
               : () {
                   return stone != null
                       ? (StoneWidget stone) {
-                          if (context
-                              .read<ScoreCalculationBloc>()
-                              .virtualRemovedCluster
-                              .contains(stonesCopy[stone.pos]!.cluster)) {
+                          if (stonesCopy[stone.pos] != null &&
+                              context
+                                  .read<ScoreCalculationBloc>()
+                                  .virtualRemovedCluster
+                                  .contains(stonesCopy[stone.pos]!.cluster)) {
                             return StoneWidget(
                                 stone.color!.withOpacity(0.6), position);
                           } else {
@@ -81,14 +83,16 @@ class GameEndStage extends Stage {
 
   @override
   onClickCell(Position? position, BuildContext context) {
-    // Before game do nothing on click on cell
+    // After game ended do nothing on cell click
   }
 
   @override
   disposeStage() {}
 
   @override
-  void initializeWhenAllMiddlewareAvailable(context) {}
+  void initializeWhenAllMiddlewareAvailable(context) {
+    stonesCopy = context.read<GameBoardBloc>().stones;
+  }
 
   @override
   StageType get getType => StageType.GameEnd;

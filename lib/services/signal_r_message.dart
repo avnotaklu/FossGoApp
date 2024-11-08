@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
+import 'package:go/services/game_over_message.dart';
 
 class SignalRMessage {
   final String type;
@@ -63,7 +64,11 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
       return ContinueGameMessage.fromMap(map);
     case SignalRMessageTypes.editDeadStone:
       return EditDeadStoneMessage.fromMap(map);
+    case SignalRMessageTypes.gameOver:
+      return GameOverMessage.fromMap(map);
     case SignalRMessageTypes.scoreCaculationStarted:
+      return null;
+    case SignalRMessageTypes.acceptedScores:
       return null;
     default:
       throw Exception('Unknown signalR message type: $type');
@@ -82,7 +87,11 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
       return ContinueGameMessage.fromJson(json);
     case SignalRMessageTypes.editDeadStone:
       return EditDeadStoneMessage.fromJson(json);
+    case SignalRMessageTypes.gameOver:
+      return GameOverMessage.fromJson(json);
     case SignalRMessageTypes.scoreCaculationStarted:
+      return null;
+    case SignalRMessageTypes.acceptedScores:
       return null;
     default:
       throw Exception('Unknown signalR message type: $type');
@@ -96,13 +105,14 @@ class SignalRMessageTypes {
   static const String continueGame = "ContinueGame";
   static const String editDeadStone = "EditDeadStone";
   static const String scoreCaculationStarted = "ScoreCaculationStarted";
+  static const String acceptedScores = "AcceptedScores";
+  static const String gameOver = "GameOver";
 }
 
 abstract class SignalRMessageType {
   Map<String, dynamic> toMap();
   String toJson();
 }
-
 
 class EditDeadStoneMessage extends SignalRMessageType {
   final Position position;
@@ -134,7 +144,6 @@ class EditDeadStoneMessage extends SignalRMessageType {
 
   factory EditDeadStoneMessage.fromJson(String source) =>
       EditDeadStoneMessage.fromMap(json.decode(source) as Map<String, dynamic>);
-
 }
 
 class ContinueGameMessage extends SignalRMessageType {

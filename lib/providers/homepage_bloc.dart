@@ -7,6 +7,7 @@ import 'package:go/models/game.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
 import 'package:go/services/signal_r_message.dart';
@@ -20,13 +21,26 @@ class HomepageBloc extends ChangeNotifier {
 
   HomepageBloc({
     required this.signalRProvider,
+    required this.authBloc,
   }) {
     listenForNewGame();
   }
 
-  Future<Either<AppError, GameJoinMessage>> joinGame(String gameId, String token) async {
+  final AuthProvider authBloc;
+
+  Future<Either<AppError, GameJoinMessage?>> joinGame(
+      String gameId, String token) async {
+    // final myId = authBloc.currentUserRaw!.id;
+    // if (availableGames
+    //     .firstWhere((a) => a.gameId == gameId)
+    //     .players
+    //     .keys
+    //     .contains(myId)) {
+    //   return right(null);
+    // } else {
     var game = await api.joinGame(GameJoinDto(gameId: gameId), token);
     return game.mapLeft(AppError.fromApiError);
+    // }
   }
 
   Future<void> getAvailableGames(String token) async {
@@ -35,6 +49,7 @@ class HomepageBloc extends ChangeNotifier {
       debugPrint("Couldn't get available games");
     }, (games) {
       availableGames.addAll(games.games);
+      notifyListeners();
     });
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/core/error_handling/app_error.dart';
+import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
 import 'package:go/services/auth.dart';
@@ -15,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider {
   final sharedPrefs = SharedPreferencesAsync();
+  final SignalRProvider signlRBloc;
   // final authService = Auth();
   final api = Api();
   final googleSignIn = GoogleSignIn(
@@ -25,16 +27,23 @@ class AuthProvider {
       ],
       clientId:
           "983500952462-p1upu5nu2bis5565bj6nbqu3iqsp5209.apps.googleusercontent.com");
-  final StreamController<AppUser?> _currentUserStreamController =
+
+  final StreamController<AppUser> _currentUserStreamController =
       StreamController.broadcast();
-  Stream<AppUser?> get currentUser => _currentUserStreamController.stream;
+  Stream<AppUser> get currentUser => _currentUserStreamController.stream;
+
+  final StreamController<Either<AppError, AppUser>>
+      _authResultStreamController = StreamController.broadcast();
+  Stream<Either<AppError, AppUser>> get authResult =>
+      _authResultStreamController.stream;
+
   AppUser? _currentUserRaw;
   AppUser get currentUserRaw => _currentUserRaw!;
   String? _token;
   String? get token => _token;
 
-  bool locallyInitialedAuth = false;
-  AuthProvider() {
+  // bool locallyInitialedAuth = false;
+  AuthProvider(this.signlRBloc) {
     getToken().then((value) {
       if (value != null) {
         _token = value;
@@ -42,17 +51,14 @@ class AuthProvider {
           authRes.fold((e) {
             debugPrint(e.toString());
           }, (userAuthModel) {
-            locallyInitialedAuth = true;
-            _token = userAuthModel.token;
-            _currentUserStreamController.add(userAuthModel.user);
-            _currentUserRaw = userAuthModel.user;
+            registerUser(userAuthModel.token, userAuthModel.user);
           });
         });
       }
     });
   }
 
-  Future<Either<AppError, UserAuthenticationModel>> loginGoogle() async {
+  Future<Either<AppError, AppUser>> loginGoogle() async {
     try {
       Future<GoogleSignInAccount?> googleUser() async =>
           await googleSignIn.signIn();
@@ -63,12 +69,14 @@ class AuthProvider {
       //     idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
 
       // final result = await authService.signInWithCredentials(credential);
-      final result = await api.googleSignIn(googleAuth);
+      final result = TaskEither(() => api.googleSignIn(googleAuth))
+          .mapLeft(AppError.fromApiError);
 
-      return result.mapLeft(AppError.fromApiError).map((r) {
-        setUser(r.token, r.user);
-        return r;
+      var res = result.flatMap((r) {
+        return TaskEither(() => registerUser(r.token, r.user));
       });
+
+      return await res.run();
     } catch (error) {
       debugPrint(error.toString());
 
@@ -78,7 +86,7 @@ class AuthProvider {
     }
   }
 
-  void setUser(String token, AppUser user) {
+  void _setUser(String token, AppUser user) {
     _currentUserStreamController.add(user);
     _currentUserRaw = user;
     _token = token;
@@ -89,14 +97,28 @@ class AuthProvider {
     debugPrint("email");
   }
 
-  Future<Either<ApiError, RegisterUserResult>> registerUser(
-      AppUser user, String token, String signalRConnectionId) async {
-    _token = token;
+  Future<Either<AppError, AppUser>> registerUser(
+      String token, AppUser user) async {
+    var signalRConnectionId = TaskEither(() => signlRBloc.connectSignalR());
+    var resTask = signalRConnectionId.flatMap((r) {
+      return TaskEither(() => _registerUser(token, r));
+    });
+
+    var res = (await resTask.run()).flatMap((r) {
+      _setUser(token, user);
+      return right(user);
+    });
+    _authResultStreamController.add(res);
+    return res;
+  }
+
+  Future<Either<AppError, RegisterUserResult>> _registerUser(
+      String token, String signalRConnectionId) async {
     var registerRes = await api.registerPlayer(
       RegisterPlayerDto(connectionId: signalRConnectionId),
       token,
     );
-    return registerRes;
+    return registerRes.mapLeft(AppError.fromApiError);
     // registerRes.fold((e) {
     //   debugPrint(e.toString());
     // }, (v) {
@@ -125,7 +147,10 @@ class AuthProvider {
     return res.mapLeft((AppError.fromApiError));
   }
 
-  logout() {
-    // authService.logout();
+  Future<void> logout() async {
+    await sharedPrefs.remove('user');
+    await sharedPrefs.remove('token');
+    _currentUserRaw = null;
+    _token = null;
   }
 }

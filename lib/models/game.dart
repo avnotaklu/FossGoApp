@@ -15,6 +15,7 @@ enum GameState {
   // Started,
   playing,
   scoreCalculation,
+  paused,
   ended
 }
 
@@ -31,6 +32,9 @@ class Game {
   final Position? koPositionInLastMove;
   final GameState gameState;
   final List<Position> deadStones;
+  final String? winnerId;
+  final double komi;
+  final List<int> finalTerritoryScores;
 
   Game({
     required this.gameId,
@@ -45,6 +49,9 @@ class Game {
     required this.koPositionInLastMove,
     required this.gameState,
     required this.deadStones,
+    required this.winnerId,
+    required this.komi,
+    required this.finalTerritoryScores,
   });
 
   Map<String, dynamic> toMap() {
@@ -61,6 +68,9 @@ class Game {
       'koPositionInLastMove': koPositionInLastMove?.toString(),
       'gameState': gameState.toString(),
       'deadStones': deadStones.map((e) => e.toString()).toList(),
+      'winnerId': winnerId,
+      'komi': komi,
+      'finalTerritoryScores': finalTerritoryScores,
     };
   }
 
@@ -103,6 +113,9 @@ class Game {
           (e) => Position.fromString(e as String),
         ),
       ),
+      winnerId: map['winnerId'] as String?,
+      komi: map['komi'] as double,
+      finalTerritoryScores: List<int>.from(map['finalTerritoryScores'] as List),
     );
   }
 
@@ -110,6 +123,42 @@ class Game {
 
   factory Game.fromJson(String source) =>
       Game.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  Game copyWith({
+    String? gameId,
+    int? rows,
+    int? columns,
+    int? timeInSeconds,
+    Map<String, int>? prisoners,
+    Map<Position, StoneType>? playgroundMap,
+    List<GameMove>? moves,
+    Map<String, StoneType>? players,
+    DateTime? startTime,
+    Position? koPositionInLastMove,
+    GameState? gameState,
+    List<Position>? deadStones,
+    double? komi,
+    List<int>? finalTerritoryScores,
+    String? winnerId ,
+    }) {
+    return Game(
+      gameId: gameId ?? this.gameId,
+      rows: rows ?? this.rows,
+      columns: columns ?? this.columns,
+      timeInSeconds: timeInSeconds ?? this.timeInSeconds,
+      prisoners: prisoners ?? this.prisoners,
+      playgroundMap: playgroundMap ?? this.playgroundMap,
+      moves: moves ?? this.moves,
+      players: players ?? this.players,
+      startTime: startTime ?? this.startTime,
+      koPositionInLastMove: koPositionInLastMove ?? this.koPositionInLastMove,
+      gameState: gameState ?? this.gameState,
+      deadStones: deadStones ?? this.deadStones,
+      winnerId: winnerId ?? this.winnerId,
+      komi: komi ?? this.komi,
+      finalTerritoryScores: finalTerritoryScores ?? this.finalTerritoryScores,
+    );
+  }
 
   List<String> get playerIdsSorted => players
       .toSortedList(
@@ -119,37 +168,6 @@ class Game {
       )
       .map((e) => e.key)
       .toList();
-
-  Game copyWith({
-    String? gameId,
-    int? rows,
-    int? columns,
-    int? timeInSeconds,
-    Map<String, int>? playerScores,
-    Map<Position, StoneType>? playgroundMap,
-    List<GameMove>? moves,
-    Map<String, StoneType>? players,
-    DateTime? startTime,
-    Position? koPositionInLastMove,
-    GameState? gameState,
-    List<Position>? deadStones,
-
-  }) {
-    return Game(
-      gameId: gameId ?? this.gameId,
-      rows: rows ?? this.rows,
-      columns: columns ?? this.columns,
-      timeInSeconds: timeInSeconds ?? this.timeInSeconds,
-      prisoners: playerScores ?? this.prisoners,
-      playgroundMap: playgroundMap ?? this.playgroundMap,
-      moves: moves ?? this.moves,
-      players: players ?? this.players,
-      startTime: startTime ?? this.startTime,
-      koPositionInLastMove: koPositionInLastMove ?? this.koPositionInLastMove,
-      gameState: gameState ?? this.gameState,
-      deadStones: deadStones ?? this.deadStones,
-    );
-  }
 }
 
 class AvailableGames {

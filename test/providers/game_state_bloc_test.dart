@@ -56,10 +56,9 @@ void main() {
   final ma2 = MovePosition(x: 1, y: 0);
 
   // setUpAll(() {
-  
+
   registerFallbackValue(a1);
   registerFallbackValue(a2);
-
 
   registerFallbackValue(ma1);
   registerFallbackValue(ma2);
@@ -105,7 +104,7 @@ void main() {
   stoneLogic = MockStoneLogic();
 
   when(() => stoneLogic.stoneAt(any())).thenReturn(null);
-  when(() => stoneLogic.checkInsertable(any())).thenReturn(true);
+  when(() => stoneLogic.checkInsertable(any(), any())).thenReturn(true);
 
   when(() => api.makeMove(any(), any(), any())).thenAnswer((inv) async {
     var token = inv.positionalArguments[1] as String;
@@ -353,6 +352,9 @@ Game gameConstructor(
     koPositionInLastMove: koPosition,
     gameState: GameState.playing,
     deadStones: [],
+    winnerId: null,
+    komi: 6.5,
+    finalTerritoryScores: [],
   );
 }
 

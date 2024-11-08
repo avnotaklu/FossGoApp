@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/error_handling/signal_r_error.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth.dart';
@@ -17,7 +18,7 @@ class SignalRProvider extends ChangeNotifier {
   // connectionCompleter.future;
   // final Either<SignalRError, String> connectionCompleter =
   // Completer();
-  late final AuthProvider authBloc;
+  // late final AuthProvider authBloc;
   late final HubConnection hubConnection;
   late final Timer _timeoutTimer;
   @override
@@ -27,54 +28,61 @@ class SignalRProvider extends ChangeNotifier {
   }
 
 // Creates the connection by using the HubConnectionBuilder.
-  SignalRProvider(this.authBloc)
+  SignalRProvider()
       : connectionId = Either.left(SignalRError(
           message: "Connection not started",
           connectionState: RegisterationConnectionState.Disconnected,
         )) {
-    setupHubConnection();
+    hubConnection = HubConnectionBuilder().withUrl(serverUrl).build();
     listenMessages();
   }
 
-  void setupHubConnection() {
-    hubConnection = HubConnectionBuilder().withUrl(serverUrl).build();
-    hubConnection.start();
-    hubConnection.onclose(({error}) => debugPrint("Connection Closed"));
-
-    hubConnection.stateStream.listen((data) async {
-      debugPrint("Connection State is now: ${data.name}");
-      if (data == HubConnectionState.Connected) {
-        var conId = hubConnection.connectionId!;
-        final registerRes = await authBloc.registerUser(
-            authBloc.currentUserRaw!, authBloc.token!, conId);
-        registerRes.fold(
-          (e) {
-            hubConnection.stop();
-            debugPrint(e.toString());
-          },
-          (v) {
-            connectionId = (Either.right(conId));
-            _timeoutTimer.cancel();
-            notifyListeners();
-          },
-        );
-      }
-      if (data == HubConnectionState.Disconnected) {
-        hubConnection.start();
-        debugPrint("Connection Disconnected");
-      }
-    });
-    _timeoutTimer = Timer(const Duration(seconds: 5), () {
-      if (hubConnection.state != HubConnectionState.Connected) {
-        connectionId = (Either.left(SignalRError(
-            message: "Connection Timed Out",
-            connectionState: RegisterationConnectionState.Disconnected)));
-      }
-    });
+  Future<Either<AppError, String>> connectSignalR() async {
+    try {
+      await hubConnection.start();
+      final conId = hubConnection.connectionId!;
+      connectionId = (Either.right(conId));
+      return right(conId);
+    } catch (e) {
+      return left(AppError(message: e.toString()));
+    }
   }
 
-  Stream<SignalRMessage> get gameMessageStream =>
-      _gameMessageController.stream;
+  void setupHubConnection() {
+    // hubConnection.onclose(({error}) => debugPrint("Connection Closed"));
+
+    // hubConnection.stateStream.listen((data) async {
+    //   debugPrint("Connection State is now: ${data.name}");
+    //   if (data == HubConnectionState.Connected) {
+    //     final registerRes = await authBloc.registerUser(
+    //         authBloc.currentUserRaw!, authBloc.token!, conId);
+    //     registerRes.fold(
+    //       (e) {
+    //         hubConnection.stop();
+    //         debugPrint(e.toString());
+    //       },
+    //       (v) {
+    //         connectionId = (Either.right(conId));
+    //         _timeoutTimer.cancel();
+    //         notifyListeners();
+    //       },
+    //     );
+    //   }
+    //   if (data == HubConnectionState.Disconnected) {
+    //     hubConnection.start();
+    //     debugPrint("Connection Disconnected");
+    //   }
+    // });
+    // _timeoutTimer = Timer(const Duration(seconds: 5), () {
+    //   if (hubConnection.state != HubConnectionState.Connected) {
+    //     connectionId = (Either.left(SignalRError(
+    //         message: "Connection Timed Out",
+    //         connectionState: RegisterationConnectionState.Disconnected)));
+    //   }
+    // });
+  }
+
+  Stream<SignalRMessage> get gameMessageStream => _gameMessageController.stream;
 
   final StreamController<SignalRMessage> _gameMessageController =
       StreamController<SignalRMessage>.broadcast();

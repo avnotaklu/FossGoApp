@@ -186,6 +186,26 @@ class Api {
     }
   }
 
+  Future<Either<ApiError, Game>> acceptScores(
+      String token, String gameId) async {
+    // var data = MovePosition(x: 0, y: 0);
+    var res = await http.post(
+      Uri.parse("$baseUrl/Game/$gameId/AcceptScores"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      },
+    );
+    if (res.statusCode == 200) {
+      return Either.right(Game.fromJson(res.body));
+    } else {
+      return Either.left(getErrorFromResponse(res));
+      // return Either.left(
+      //     ApiError(message: res.body, statusCode: res.statusCode));
+    }
+  }
+
+
   Future<Either<ApiError, Game>> editDeadStoneCluster(
       EditDeadStoneClusterDto dto, String token, String gameId) async {
     // var data = MovePosition(x: 0, y: 0);

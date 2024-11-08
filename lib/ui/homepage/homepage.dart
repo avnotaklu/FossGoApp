@@ -1,21 +1,26 @@
 import 'dart:async';
+import 'package:go/constants/constants.dart' as Constants;
 import 'dart:io';
 import 'package:async/async.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/system_utilities.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
-import 'package:go/gameplay/create/request_recieve.dart';
 import 'package:go/gameplay/create/request_send_screen.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/main.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/providers/create_game_provider.dart';
+import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/homepage_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
+import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/utils/widgets/buttons.dart';
+import 'package:go/views/my_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,13 +37,11 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     var homepageBloc = context.read<HomepageBloc>();
     homepageBloc.getAvailableGames(context.read<AuthProvider>().token!);
-    // TODO: implement initState
     super.initState();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -53,6 +56,11 @@ class _HomePageState extends State<HomePage> {
             }
 
             return Scaffold(
+              appBar: MyAppBar(
+                "Home Page",
+                trailing: IconButton(
+                    onPressed: () {}, icon: const Icon(Icons.logout)),
+              ),
               body: Column(
                 children: [
                   const SizedBox(
@@ -77,9 +85,7 @@ class _HomePageState extends State<HomePage> {
                                               )
                                             ],
                                             builder: (context, child) {
-                                              return CreateGameScreen(
-                                                  // signalRProvider: signalRBloc,
-                                                  );
+                                              return const CreateGameScreen();
                                             })));
                               },
                               child: const Text("create game")),
@@ -160,9 +166,9 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ])
                       : const SizedBox.shrink(),
-                  SizedBox(height: 50),
-                  Text("Active Players", style: TextStyle(fontSize: 30)),
-                  Container(
+                  const SizedBox(height: 50),
+                  const Text("Active Players", style: TextStyle(fontSize: 30)),
+                  SizedBox(
                     height: 300,
                     child: ListView.builder(
                       shrinkWrap: true,
@@ -187,10 +193,11 @@ class _HomePageState extends State<HomePage> {
                                   content: Text(e.message),
                                 ),
                               );
-                            }, (gameMessage) {
+                            }, (joinMessage) {
                               Navigator.pushReplacement(context,
                                   MaterialPageRoute<void>(
                                       builder: (BuildContext context) {
+                                var stage = StageType.BeforeStart;
                                 return MultiProvider(
                                     providers: [
                                       ChangeNotifierProvider.value(
@@ -198,10 +205,21 @@ class _HomePageState extends State<HomePage> {
                                       )
                                     ],
                                     builder: (context, child) {
-                                      return RequestRecieve(
-                                        game: gameMessage.game,
-                                        joinMessage: gameMessage,
-                                      );
+                                      final authBloc =
+                                          context.read<AuthProvider>();
+                                      return ChangeNotifierProvider(
+                                          create: (context) => GameStateBloc(
+                                                Api(),
+                                                signalRBloc,
+                                                authBloc,
+                                                game,
+                                                systemUtils,
+                                                stage,
+                                                joinMessage,
+                                              ),
+                                          builder: (context, child) {
+                                            return GameWidget(false);
+                                          });
                                     });
                               }));
                             });

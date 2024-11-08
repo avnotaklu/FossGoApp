@@ -95,17 +95,18 @@ class _GameUiState extends State<GameUi> {
                             .getClientPlayerIndex()],
                         PlayerCardType.my,
                       )),
-                  context.read<Stage>() is GameEndStage
+                  context.read<Stage>() is GameEndStage &&
+                          context.read<GameStateBloc>().game.winnerId != null
                       ? Text(
                           "${() {
                             return context
-                                        .read<ScoreCalculationBloc>()
-                                        .getWinner(context)
-                                        .turn ==
+                                        .read<GameStateBloc>()
+                                        .getWinnerStone!
+                                        .index ==
                                     0
                                 ? 'Black'
                                 : 'White';
-                          }.call()} won by ${(context.read<GameStateBloc>().getPlayerWithTurn.score - context.read<GameStateBloc>().getPlayerWithoutTurn.score).abs()}",
+                          }.call()} won by ${(context.read<GameStateBloc>().getSummedPlayerScores.fold(0.0, (tot, prev) => tot - prev)).abs()}",
                           style: TextStyle(color: defaultTheme.mainTextColor),
                         )
                       : Spacer(
@@ -157,9 +158,10 @@ class _GameUiState extends State<GameUi> {
 }
 
 class BottomButton extends StatelessWidget {
-  BottomButton(this.action, this.text);
-  VoidCallback action;
-  String text;
+  const BottomButton(this.action, this.text, {this.isDisabled = false});
+  final bool isDisabled;
+  final VoidCallback action;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -169,9 +171,10 @@ class BottomButton extends StatelessWidget {
         focusColor: Colors.transparent,
         hoverColor: Colors.transparent,
         highlightColor: Colors.blue.shade700,
+
         // Colors.transparent,
         //splashColor: Colors.blue,
-        onTap: action,
+        onTap: isDisabled ? null : action,
         child: Container(
           //height: double.infinity,
           // height: 100,
@@ -220,25 +223,14 @@ class Accept extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomButton(() {
-      // MultiplayerData.of(context)!
-      //     .curGameReferences!
-      //     .finalOurConfirmation(context)
-      //     .set(true);
-      // // GameData.of(context).acceptFinal();
-      // MultiplayerData.of(context)!.curGameReferences!.finalRemovedClusters.set(
-      //     GameMatch.removedClusterToJson(
-      //         ScoreCalculation.of(context)!.virtualRemovedCluster));
-      final gameStateBloc = context.read<GameStateBloc>();
-
-      gameStateBloc.confirmGameEnd();
-
-      // ScoreCalculation.of(context)!
-      //     .stoneRemovalAccepted
-      //     .add(gameStateBloc.getClientPlayerIndex());
-      // ScoreCalculation.of(context)!.onGameEnd(
-      //     gameStateBloc, ScoreCalculation.of(context)!.virtualRemovedCluster);
-    }, "Accept");
+    final gameStateBloc = context.read<GameStateBloc>();
+    return BottomButton(
+      () {
+        gameStateBloc.acceptScores();
+      },
+      "Accept",
+      isDisabled: gameStateBloc.iAccepted,
+    );
   }
 }
 

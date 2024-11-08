@@ -172,8 +172,6 @@ class GameWidget extends StatelessWidget {
                 builder: (context, child) => ChangeNotifierProvider(
                   create: (context) {
                     return ScoreCalculationBloc(
-                      game.rows,
-                      game.columns,
                       api: context.read<AuthProvider>().api,
                       authBloc: context.read<AuthProvider>(),
                       gameStateBloc: context.read<GameStateBloc>(),
@@ -192,8 +190,9 @@ class GameWidget extends StatelessWidget {
                       return ChangeNotifierProvider<Stage>.value(
                         value: stage,
                         builder: (context, child) {
-                          return Consumer<ScoreCalculationBloc>(builder: (context,dyn, child) =>WrapperGame(game));
-                          
+                          return Consumer<ScoreCalculationBloc>(
+                              builder: (context, dyn, child) =>
+                                  WrapperGame(game));
                         },
                       );
                     },
