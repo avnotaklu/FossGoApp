@@ -7,6 +7,7 @@ import 'package:go/models/position.dart';
 import 'package:go/models/stone.dart';
 import 'package:go/models/stone_representation.dart';
 import 'package:go/providers/create_game_provider.dart';
+import 'package:go/services/game_over_message.dart';
 
 enum StoneType { black, white }
 
@@ -34,7 +35,9 @@ class Game {
   final List<Position> deadStones;
   final String? winnerId;
   final double komi;
+  final GameOverMethod? gameOverMethod;
   final List<int> finalTerritoryScores;
+  final DateTime? endTime;
 
   Game({
     required this.gameId,
@@ -52,6 +55,8 @@ class Game {
     required this.winnerId,
     required this.komi,
     required this.finalTerritoryScores,
+    required this.gameOverMethod,
+    required this.endTime,
   });
 
   Map<String, dynamic> toMap() {
@@ -71,6 +76,8 @@ class Game {
       'winnerId': winnerId,
       'komi': komi,
       'finalTerritoryScores': finalTerritoryScores,
+      'gameOverMethod': gameOverMethod?.index,
+      'endTime': endTime?.toIso8601String(),
     };
   }
 
@@ -116,6 +123,12 @@ class Game {
       winnerId: map['winnerId'] as String?,
       komi: map['komi'] as double,
       finalTerritoryScores: List<int>.from(map['finalTerritoryScores'] as List),
+      gameOverMethod: map['gameOverMethod'] == null
+          ? null
+          : GameOverMethod.values[map['gameOverMethod'] as int],
+      endTime: map['endTime'] == null
+          ? null
+          : DateTime.parse(map['endTime'] as String),
     );
   }
 
@@ -139,8 +152,10 @@ class Game {
     List<Position>? deadStones,
     double? komi,
     List<int>? finalTerritoryScores,
-    String? winnerId ,
-    }) {
+    String? winnerId,
+    GameOverMethod? gameOverMethod,
+    DateTime? endTime,
+  }) {
     return Game(
       gameId: gameId ?? this.gameId,
       rows: rows ?? this.rows,
@@ -157,6 +172,8 @@ class Game {
       winnerId: winnerId ?? this.winnerId,
       komi: komi ?? this.komi,
       finalTerritoryScores: finalTerritoryScores ?? this.finalTerritoryScores,
+      gameOverMethod: gameOverMethod ?? this.gameOverMethod,
+      endTime: endTime ?? this.endTime,
     );
   }
 

@@ -53,6 +53,8 @@ class GameStateBloc extends ChangeNotifier {
       ? null
       : StoneType.values[1 - game.players[game.winnerId]!.index];
 
+  GameOverMethod? get getGameOverMethod => game.gameOverMethod;
+
   List<double> get getSummedPlayerScores => [
         game.finalTerritoryScores[0].toDouble() +
             game.prisoners[getPlayerIdFromStoneType(StoneType.black)]!,
@@ -206,7 +208,7 @@ class GameStateBloc extends ChangeNotifier {
         joinMessage.players.elementAtOrNull(myPlayerInfoIndex == 0 ? 1 : 0);
 
     var now = systemUtilities.currentTime;
-    calculateTimesFromMoves();
+    applyTimesOfDiscreteSections();
 
     if (game.startTime != null && game.gameState == GameState.playing) {
       times[getPlayerWithTurn.turn].value =
@@ -253,7 +255,7 @@ class GameStateBloc extends ChangeNotifier {
     return listenFromGameOver.listen((message) {
       debugPrint(
           "Signal R said, ::${SignalRMessageTypes.gameOver}::\n\t\t${message.toMap()}");
-
+      game = message.game;
       applyEndGame();
     });
   }
@@ -321,7 +323,7 @@ class GameStateBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  void calculateTimesFromMoves() {
+  void applyTimesOfDiscreteSections() {
     var times = [game.startTime!, ...game.moves.map((e) => e.time)];
 
     var firstPlayerDuration = times
@@ -340,6 +342,12 @@ class GameStateBloc extends ChangeNotifier {
 
     this.times[1].value =
         Duration(seconds: game.timeInSeconds) - secondPlayerDuration;
+
+    // If game has ended, apply game end time to player with turn
+    if (game.gameState == GameState.ended) {
+      this.times[getPlayerWithTurn.turn].value -=
+          game.endTime!.difference(times.last);
+    }
   }
 
   void setTurnTimerAfterMoveWasAdded() {
@@ -348,7 +356,7 @@ class GameStateBloc extends ChangeNotifier {
     var turnPlayerTimer = timerController[turn % 2];
     turnPlayerTimer.start();
 
-    calculateTimesFromMoves();
+    applyTimesOfDiscreteSections();
 
     var nonTurnPlayerTimer = timerController[1 - turn % 2];
     nonTurnPlayerTimer.pause();
@@ -368,6 +376,8 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   void applyEndGame() {
+    applyTimesOfDiscreteSections();
+
     curStageType = StageType.GameEnd;
     timerController[0].pause();
     timerController[1].pause();
@@ -399,6 +409,7 @@ class GameStateBloc extends ChangeNotifier {
   Future<Either<AppError, Game>> continueGame() async {
     return (await api.continueGame(authBloc.token!, game.gameId))
         .fold((l) => left(AppError.fromApiError(l)), (r) {
+      game = r;
       applyContinue();
       return right(r);
     });
@@ -410,6 +421,7 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   Future<void> acceptScores() async {
+    if (iAccepted) return;
     final token = authBloc.token!;
     final gameId = game.gameId;
     final res = await api.acceptScores(token, gameId);
@@ -417,7 +429,19 @@ class GameStateBloc extends ChangeNotifier {
     res.fold((l) {
       debugPrint("Accept scores failed ${l.message}");
     }, (r) {
-      iAccepted = true;
+      game = r;
+      if (game.gameOverMethod != null) {
+        applyEndGame();
+      }
+    });
+  }
+
+  Future<Either<AppError, Game>> resignGame() async {
+    return (await api.resignGame(authBloc.token!, game.gameId))
+        .fold((l) => left(AppError.fromApiError(l)), (r) {
+      game = r;
+      applyEndGame();
+      return right(r);
     });
   }
 

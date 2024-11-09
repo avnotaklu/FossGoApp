@@ -13,6 +13,7 @@ import 'package:go/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/providers/game_state_bloc.dart';
+import 'package:go/services/game_over_message.dart';
 import 'package:go/ui/gameui/player_card.dart';
 import 'package:go/utils/time_and_duration.dart';
 import 'package:ntp/ntp.dart';
@@ -106,7 +107,7 @@ class _GameUiState extends State<GameUi> {
                                     0
                                 ? 'Black'
                                 : 'White';
-                          }.call()} won by ${(context.read<GameStateBloc>().getSummedPlayerScores.fold(0.0, (tot, prev) => tot - prev)).abs()}",
+                          }.call()} won by ${getWinningMethod(context)}",
                           style: TextStyle(color: defaultTheme.mainTextColor),
                         )
                       : Spacer(
@@ -154,6 +155,14 @@ class _GameUiState extends State<GameUi> {
         );
       },
     );
+  }
+
+  String getWinningMethod(BuildContext context) {
+    final gameStateBloc = context.read<GameStateBloc>();
+    if (gameStateBloc.game.gameOverMethod == GameOverMethod.Score) {
+      return "${(gameStateBloc.getSummedPlayerScores.fold(0.0, (tot, prev) => tot - prev)).abs()} Point(s)";
+    }
+    return gameStateBloc.game.gameOverMethod!.actualName;
   }
 }
 
@@ -313,8 +322,7 @@ class Resign extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomButton(() {
-      print("resign");
-      // Clipboard.setData(ClipboardData(text: GameData.of(context)!.match.id));
+      context.read<GameStateBloc>().resignGame();
     }, "Resign");
   }
 }
