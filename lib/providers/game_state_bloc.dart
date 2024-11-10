@@ -326,19 +326,38 @@ class GameStateBloc extends ChangeNotifier {
   void applyTimesOfDiscreteSections() {
     var times = [game.startTime!, ...game.moves.map((e) => e.time)];
 
-    var firstPlayerDuration = times
-        .mapWithIndex((e, i) => (e, i))
-        .filterWithIndex((e, i) => i % 2 == 1)
-        .fold(const Duration(), (d, r) => d + r.$1.difference(times[r.$2 - 1]));
+    var firstPlayerDuration = Duration.zero;
+
+    var firstPlayerArrangedTimes = times.take(times.length - times.length % 2);
+    var firstPlayerTimesBeforeCorrespondingMoveMade = firstPlayerArrangedTimes
+        .filterWithIndex((time, index) => index % 2 == 0)
+        .toList();
+    var firstPlayerMoveMadeTimes = firstPlayerArrangedTimes
+        .filterWithIndex((time, index) => index % 2 == 1)
+        .toList();
+
+    for (int i = 0; i < (firstPlayerArrangedTimes.length / 2).floor(); i++) {
+      firstPlayerDuration += firstPlayerMoveMadeTimes[i]
+          .difference(firstPlayerTimesBeforeCorrespondingMoveMade[i]);
+    }
 
     this.times[0].value =
         Duration(seconds: game.timeInSeconds) - firstPlayerDuration;
 
-    var secondPlayerDuration = times
-        .mapWithIndex((e, i) => (e, i))
-        .skip(1)
-        .filterWithIndex((e, i) => i % 2 == 1)
-        .fold(const Duration(), (d, r) => d + r.$1.difference(times[r.$2 - 1]));
+    var secondPlayerDuration = Duration.zero;
+
+    var secondPlayerArrangedTimes = times.skip(1).take(times.length - times.length % 2);
+    var secondPlayerTimesBeforeCorrespondingMoveMade = secondPlayerArrangedTimes
+        .filterWithIndex((time, index) => index % 2 == 0)
+        .toList();
+    var secondPlayerMoveMadeTimes = secondPlayerArrangedTimes
+        .filterWithIndex((time, index) => index % 2 == 1)
+        .toList();
+
+    for (int i = 0; i < (secondPlayerArrangedTimes.length / 2).floor(); i++) {
+      secondPlayerDuration += secondPlayerMoveMadeTimes[i]
+          .difference(secondPlayerTimesBeforeCorrespondingMoveMade[i]);
+    }
 
     this.times[1].value =
         Duration(seconds: game.timeInSeconds) - secondPlayerDuration;

@@ -45,8 +45,8 @@ class GameEndStage extends Stage {
               ? Center(
                   child: Stack(
                     children: [
-                      stone != null
-                          ? StoneWidget(stone.color!.withOpacity(0.6), position)
+                      stone?.color != null
+                          ? StoneWidget(stone!.color!.withOpacity(0.6), position)
                           : const SizedBox.shrink(),
                       Center(
                         child: FractionallySizedBox(

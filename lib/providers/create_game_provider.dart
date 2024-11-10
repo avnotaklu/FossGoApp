@@ -14,7 +14,7 @@ class CreateGameProvider {
 
   Future<Either<AppError, Game>> createGame(String token) async {
     var game = await api.createGame(
-        GameCreationDto(rows: 9, columns: 9, timeInSeconds: 300), token);
+        GameCreationDto(rows: 9, columns: 9, timeInSeconds: 5), token);
     return game.mapLeft(AppError.fromApiError);
   }
 }
