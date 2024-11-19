@@ -23,14 +23,17 @@ import 'package:go/utils/widgets/buttons.dart';
 import 'package:go/views/my_app_bar.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatefulWidget {
+class CustomGamesPage extends StatefulWidget {
+  const CustomGamesPage({super.key});
+
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<CustomGamesPage> createState() => _CustomGamesPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _CustomGamesPageState extends State<CustomGamesPage> {
   bool joiningGame = false;
   String joinedGame = '';
+
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -56,11 +59,6 @@ class _HomePageState extends State<HomePage> {
             }
 
             return Scaffold(
-              appBar: MyAppBar(
-                "Home Page",
-                trailing: IconButton(
-                    onPressed: () {}, icon: const Icon(Icons.logout)),
-              ),
               body: Column(
                 children: [
                   const SizedBox(
@@ -167,9 +165,8 @@ class _HomePageState extends State<HomePage> {
                         ])
                       : const SizedBox.shrink(),
                   const SizedBox(height: 50),
-                  const Text("Active Players", style: TextStyle(fontSize: 30)),
-                  SizedBox(
-                    height: 300,
+                  const Text("Games", style: TextStyle(fontSize: 30)),
+                  Expanded(
                     child: ListView.builder(
                       shrinkWrap: true,
                       itemCount:
@@ -179,12 +176,6 @@ class _HomePageState extends State<HomePage> {
                             context.read<HomepageBloc>().availableGames[index];
                         return ListTile(
                           onTap: () async {
-                            // Navigator.of(context).pushReplacement(
-                            //     MaterialPageRoute(
-                            //         builder: (context) =>
-                            //             ChangeNotifierProvider.value(
-                            //                 value: signalRBloc,
-                            //                 builder: (context, child) {
                             var res = await homepageBloc.joinGame(game.gameId,
                                 context.read<AuthProvider>().token!);
                             res.fold((e) {

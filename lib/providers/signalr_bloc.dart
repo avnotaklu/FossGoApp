@@ -105,4 +105,9 @@ class SignalRProvider extends ChangeNotifier {
   void silenceMessages() {
     hubConnection.off('gameUpdate');
   }
+
+  Future<void> disconnect() async {
+    await hubConnection.stop();
+    silenceMessages();
+  }
 }

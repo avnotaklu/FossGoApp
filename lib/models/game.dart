@@ -6,6 +6,7 @@ import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/stone.dart';
 import 'package:go/models/stone_representation.dart';
+import 'package:go/models/time_control.dart';
 import 'package:go/providers/create_game_provider.dart';
 import 'package:go/services/game_over_message.dart';
 
@@ -24,7 +25,7 @@ class Game {
   final String gameId;
   final int rows;
   final int columns;
-  final int timeInSeconds;
+  final TimeControl timeControl;
   final Map<String, int> prisoners;
   final Map<Position, StoneType> playgroundMap;
   final List<GameMove> moves;
@@ -43,7 +44,7 @@ class Game {
     required this.gameId,
     required this.rows,
     required this.columns,
-    required this.timeInSeconds,
+    required this.timeControl,
     required this.playgroundMap,
     required this.moves,
     required this.players,
@@ -64,7 +65,7 @@ class Game {
       'gameId': gameId,
       'rows': rows,
       'columns': columns,
-      'timeInSeconds': timeInSeconds,
+      'timeControl': timeControl.toMap(),
       'playgroundMap': playgroundMap,
       'moves': moves.map((x) => x.toMap()).toList(),
       'players': players,
@@ -86,7 +87,7 @@ class Game {
       gameId: map['gameId'] as String,
       rows: map['rows'] as int,
       columns: map['columns'] as int,
-      timeInSeconds: map['timeInSeconds'] as int,
+      timeControl: TimeControl.fromMap(map['timeControl'] as Map<String, dynamic>),
       playgroundMap:
           Map<String, int>.from(map['playgroundMap']).map<Position, StoneType>(
         (key, value) => MapEntry(
@@ -141,7 +142,7 @@ class Game {
     String? gameId,
     int? rows,
     int? columns,
-    int? timeInSeconds,
+    TimeControl? timeControl,
     Map<String, int>? prisoners,
     Map<Position, StoneType>? playgroundMap,
     List<GameMove>? moves,
@@ -160,7 +161,7 @@ class Game {
       gameId: gameId ?? this.gameId,
       rows: rows ?? this.rows,
       columns: columns ?? this.columns,
-      timeInSeconds: timeInSeconds ?? this.timeInSeconds,
+      timeControl: timeControl ?? this.timeControl,
       prisoners: prisoners ?? this.prisoners,
       playgroundMap: playgroundMap ?? this.playgroundMap,
       moves: moves ?? this.moves,

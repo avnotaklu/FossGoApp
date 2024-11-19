@@ -15,8 +15,12 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.title, {
     this.showBackButton = false,
     this.trailing,
+    this.leading,
     super.key,
-  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
+  })  : preferredSize = const Size.fromHeight(kToolbarHeight),
+        assert(
+          showBackButton == false || leading == null,
+        );
 
   @override
   final Size preferredSize; // default is 56.0
@@ -24,6 +28,7 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title; // default is 56.0
   final bool showBackButton;
   final Widget? trailing;
+  final Widget? leading;
 
   @override
   _MyAppBarState createState() => _MyAppBarState();
@@ -40,7 +45,7 @@ class _MyAppBarState extends State<MyAppBar> {
                 Navigator.of(context).pop();
               },
             )
-          : const SizedBox.shrink(),
+          : widget.leading ?? const SizedBox.shrink(),
       centerTitle: true,
       title: Text(widget.title),
       actions: [

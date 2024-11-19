@@ -24,7 +24,7 @@ import 'package:http/http.dart' as http;
 // }
 
 class Api {
-  static const String baseUrl = "http://192.168.80.71:8080";
+  static const String baseUrl = "http://192.168.145.71:8080";
 
   Future<Either<ApiError, UserAuthenticationModel>> googleSignIn(
       GoogleSignInAuthentication userCreds) async {

@@ -5,13 +5,15 @@ import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/playfield/game_widget.dart';
-import 'package:go/ui/homepage/homepage.dart';
+import 'package:go/ui/homepage/custom_games_page.dart';
 import 'package:go/main.dart';
 import 'package:go/services/auth.dart';
 import 'package:go/views/error_screen.dart';
 import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
+  const SignIn({super.key});
+
   @override
   State<SignIn> createState() => _SignInState();
 }

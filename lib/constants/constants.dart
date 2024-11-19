@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go/models/position.dart';
 
-
 const String title = "Go";
 const List<String> boardsizes = ["9x9", "13x13", "19x19"];
 const List<Color> playerColors = [(Colors.black), (Colors.white)];
@@ -42,12 +41,25 @@ const Map<String, List<Position>> boardCircleDecoration = {
 //   }
 // }
 
-VisualTheme defaultTheme = VisualTheme(backgroundColor: Colors.grey.shade800, mainTextColor: Colors.white60, mainHighlightColor: Colors.blueGrey);
+VisualTheme defaultTheme = VisualTheme(
+  backgroundColor: Colors.grey.shade800,
+  mainTextColor: Colors.white60,
+  mainHighlightColor: Colors.blueGrey,
+  disabledColor: Colors.grey.shade400,
+  enabledColor: Colors.amber,
+);
 
 class VisualTheme {
   final Color backgroundColor;
   final Color mainTextColor;
   final Color mainHighlightColor;
+  final Color disabledColor;
+  final Color enabledColor;
 
-  const VisualTheme({required this.backgroundColor, required this.mainTextColor, required this.mainHighlightColor});
+  const VisualTheme(
+      {required this.backgroundColor,
+      required this.mainTextColor,
+      required this.mainHighlightColor,
+      required this.disabledColor,
+      required this.enabledColor});
 }

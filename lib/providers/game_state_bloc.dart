@@ -43,7 +43,7 @@ class GameStateBloc extends ChangeNotifier {
 
   int get turn => game.moves.length;
 
-  int get gametime => game.timeInSeconds;
+  int get gametime => game.timeControl.suddenDeathSeconds;
 
   Player get getPlayerWithTurn => _players[turn % 2];
   Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
@@ -116,8 +116,8 @@ class GameStateBloc extends ChangeNotifier {
     StageType curStageType,
     GameJoinMessage? joiningData,
   )   : times = [
-          ValueNotifier(Duration(seconds: game.timeInSeconds)),
-          ValueNotifier(Duration(seconds: game.timeInSeconds))
+          ValueNotifier(Duration(seconds: game.timeControl.suddenDeathSeconds)),
+          ValueNotifier(Duration(seconds: game.timeControl.suddenDeathSeconds))
         ],
         curStageTypeNotifier = ValueNotifier(curStageType),
         myPlayerUserInfo = PublicUserInfo(
@@ -342,7 +342,7 @@ class GameStateBloc extends ChangeNotifier {
     }
 
     this.times[0].value =
-        Duration(seconds: game.timeInSeconds) - firstPlayerDuration;
+        Duration(seconds: game.timeControl.suddenDeathSeconds) - firstPlayerDuration;
 
     var secondPlayerDuration = Duration.zero;
 
@@ -360,7 +360,7 @@ class GameStateBloc extends ChangeNotifier {
     }
 
     this.times[1].value =
-        Duration(seconds: game.timeInSeconds) - secondPlayerDuration;
+        Duration(seconds: game.timeControl.suddenDeathSeconds) - secondPlayerDuration;
 
     // If game has ended, apply game end time to player with turn
     if (game.gameState == GameState.ended) {

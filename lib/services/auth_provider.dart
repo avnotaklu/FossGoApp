@@ -150,6 +150,7 @@ class AuthProvider {
   Future<void> logout() async {
     await sharedPrefs.remove('user');
     await sharedPrefs.remove('token');
+    await signlRBloc.disconnect();
     _currentUserRaw = null;
     _token = null;
   }

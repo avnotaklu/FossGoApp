@@ -10,6 +10,7 @@ import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/stone.dart';
+import 'package:go/models/time_control.dart';
 import 'package:go/playfield/board_utilities.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
@@ -339,7 +340,7 @@ Game gameConstructor(
     gameId: "Test",
     rows: rows,
     columns: cols,
-    timeInSeconds: timeInSeconds, // 5 minutes
+    timeControl: blitz,
     playgroundMap: boardState.MakeHighLevelBoardRepresentationFromBoardState(
         boardState.BoardStateFromSimpleRepr(
       board,
@@ -355,6 +356,8 @@ Game gameConstructor(
     winnerId: null,
     komi: 6.5,
     finalTerritoryScores: [],
+    endTime: null,
+    gameOverMethod: null,
   );
 }
 
