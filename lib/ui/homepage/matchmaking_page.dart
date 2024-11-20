@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/ui/homepage/matchmaking_provider.dart';
+import 'package:go/utils/widgets/selection_badge.dart';
 import 'package:go/views/my_app_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -81,15 +82,11 @@ class MatchmakingPage extends StatelessWidget {
         color: defaultTheme.mainHighlightColor,
         child: Padding(
           padding: const EdgeInsets.only(right: 25.0, top: 5.0),
-          child: Badge(
-            backgroundColor: selected
-                ? defaultTheme.enabledColor
-                : defaultTheme.disabledColor,
-            label: selected ? const Icon(Icons.check_rounded, size: 20) : null,
-            largeSize: 3,
-            smallSize: 0,
+          child: SelectionBadge(
+            selected: selected,
             child: Center(
-                child: Text("${size.$1}x${size.$2}", style: pointTextStyle())),
+              child: Text("${size.$1}x${size.$2}", style: pointTextStyle()),
+            ),
           ),
         ),
       ),
@@ -107,13 +104,8 @@ class MatchmakingPage extends StatelessWidget {
         color: defaultTheme.mainHighlightColor,
         child: Padding(
           padding: const EdgeInsets.only(right: 25.0, top: 5.0),
-          child: Badge(
-            backgroundColor: selected
-                ? defaultTheme.enabledColor
-                : defaultTheme.disabledColor,
-            label: selected ? const Icon(Icons.check_rounded, size: 20) : null,
-            largeSize: 3,
-            smallSize: 0,
+          child: SelectionBadge(
+            selected: selected,
             child: Center(child: Text(timeControl.$1, style: pointTextStyle())),
           ),
         ),

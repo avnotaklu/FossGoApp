@@ -31,7 +31,7 @@ class CustomGamesPage extends StatefulWidget {
 }
 
 class _CustomGamesPageState extends State<CustomGamesPage> {
-  bool joiningGame = false;
+  // bool joiningGame = false;
   String joinedGame = '';
 
   final TextEditingController _controller = TextEditingController();
@@ -70,7 +70,8 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                         children: [
                           BadukButton(
                               onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
+                                showDialog(
+                                    context: context,
                                     builder: (context) => MultiProvider(
                                             providers: [
                                               ChangeNotifierProvider.value(
@@ -84,86 +85,13 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                                             ],
                                             builder: (context, child) {
                                               return const CreateGameScreen();
-                                            })));
+                                            }));
                               },
                               child: const Text("create game")),
-                          BadukButton(
-                              onPressed: () => setState(() {
-                                    joiningGame = true;
-                                  }),
-                              child: const Text("join game")),
                         ],
                       ),
                     ),
                   ),
-                  joiningGame
-                      ? Column(children: [
-                          TextField(
-                            controller: _controller,
-                            decoration: const InputDecoration(
-                                fillColor: Colors.red,
-                                border: OutlineInputBorder(),
-                                hintText: 'Enter game id'),
-                          ),
-                          BadukButton(
-                            onPressed: () {
-                              // TODO: What to even do here??
-                              // (Navigator.of(context).pushReplacement(
-                              //   MaterialPageRoute(
-                              //     builder: (context) =>
-                              //         // StreamBuilder(
-                              //         //   builder: (context, snapshot) =>
-                              //         StatefulBuilder(builder:
-                              //             (BuildContext context, StateSetter setState) {
-                              //       GameMatch? match;
-                              //       var matchBuilder = MultiplayerData.of(context)
-                              //           ?.database
-                              //           .child('game')
-                              //           .child(_controller.text)
-                              //           .orderByKey()
-                              //           .get()
-                              //           .then((value) {
-                              //         match = GameMatch.fromJson(value.value as Map);
-                              //         return match;
-                              //       }).asStream();
-
-                              //       return StreamBuilder(
-                              //           stream: matchBuilder,
-                              //           builder: (context,
-                              //               AsyncSnapshot<GameMatch?> snapshot) {
-                              //             // if (snapshot.data != null) { return GameScreen(snapshot.data); } // this is correct as it will not allow match to be null when joining game as expected
-                              //             try {
-                              //               if (snapshot.connectionState ==
-                              //                   ConnectionState.done) {
-                              //                 return CreateGame(snapshot.data);
-                              //               }
-                              //               {
-                              //                 return const Center(
-                              //                     child: SizedBox(
-                              //                         width: 40,
-                              //                         height: 50,
-                              //                         child:
-                              //                             CircularProgressIndicator()));
-                              //               }
-                              //             } catch (FirebaseException) {
-                              //               // TODO sometimes this exception is caused catch it correctly
-                              //               return const Center(
-                              //                   child: SizedBox(
-                              //                       width: 40,
-                              //                       height: 50,
-                              //                       child:
-                              //                           CircularProgressIndicator()));
-                              //             }
-                              //           });
-                              //     }),
-                              //   ),
-                              //   // ),
-                              // ));
-                            },
-                            child: const Text("enter game"),
-                          ),
-                        ])
-                      : const SizedBox.shrink(),
                   const SizedBox(height: 50),
                   const Text("Games", style: TextStyle(fontSize: 30)),
                   Expanded(
@@ -217,10 +145,6 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                             // })));
                           },
                           title: Text(game.gameId),
-                          // onTap: () {
-                          //   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          //       builder: (context) => CreateGame(null)));
-                          // },
                         );
                       },
                     ),

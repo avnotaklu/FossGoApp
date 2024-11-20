@@ -1,8 +1,127 @@
 import 'package:flutter/material.dart';
 import 'package:go/models/position.dart';
+import 'package:go/playfield/board.dart';
+
+class BoardSize {
+  final int rows;
+  final int cols;
+
+  const BoardSize(this.rows, this.cols);
+
+  @override
+  String toString() {
+    return "${rows}x$cols";
+  }
+}
 
 const String title = "Go";
-const List<String> boardsizes = ["9x9", "13x13", "19x19"];
+// const List<String> boardsizes = ["9x9", "13x13", "19x19"];
+// const List<(int rows, int cols)> boardsizes = [(9, 9), (13, 13), (19, 19)];
+
+const List<BoardSize> boardSizes = [
+  BoardSize(9, 9),
+  BoardSize(13, 13),
+  BoardSize(19, 19),
+];
+
+enum TimeFormat {
+  suddenDeath("Sudden Death"),
+  fischer("Fischer"),
+  byoYomi("Byo-Yomi");
+
+  final String formatName;
+
+  const TimeFormat(this.formatName);
+}
+
+// const List<String> timeFormats = [
+//   "Byo-Yomi",
+//   "Fischer",
+//   "Sudden Death",
+// ];
+
+enum TimeStandard {
+  blitz("Blitz"),
+  rapid("Rapid"),
+  classical("Classical");
+
+  final String standardName;
+
+  const TimeStandard(this.standardName);
+}
+
+const Map<TimeStandard, int> timeStandardMainTime = {
+  TimeStandard.blitz: 300,
+  TimeStandard.rapid: 1200,
+  TimeStandard.classical: 3600,
+};
+
+final Map<TimeStandard, List<int>> timeStandardMainTimeAlt = {
+  TimeStandard.blitz: [
+    timeStandardMainTime[TimeStandard.blitz]!,
+  ],
+  TimeStandard.rapid: [
+    timeStandardMainTime[TimeStandard.rapid]!,
+  ],
+  TimeStandard.classical: [
+    timeStandardMainTime[TimeStandard.classical]!,
+  ],
+};
+
+const Map<TimeStandard, int> timeStandardIncrement = {
+  TimeStandard.blitz: 2,
+  TimeStandard.rapid: 5,
+  TimeStandard.classical: 10,
+};
+
+final Map<TimeStandard, List<int>> timeStandardIncrementAlt = {
+  TimeStandard.blitz: [
+    timeStandardIncrement[TimeStandard.blitz]!,
+  ],
+  TimeStandard.rapid: [
+    timeStandardIncrement[TimeStandard.rapid]!,
+  ],
+  TimeStandard.classical: [
+    timeStandardIncrement[TimeStandard.classical]!,
+  ],
+};
+
+const Map<TimeStandard, int> timeStandardByoYomiTime = {
+  TimeStandard.blitz: 10,
+  TimeStandard.rapid: 30,
+  TimeStandard.classical: 60,
+};
+
+final Map<TimeStandard, List<int>> timeStandardByoYomiTimeAlt = {
+  TimeStandard.blitz: [
+    timeStandardByoYomiTime[TimeStandard.blitz]!,
+  ],
+  TimeStandard.rapid: [
+    timeStandardByoYomiTime[TimeStandard.rapid]!,
+  ],
+  TimeStandard.classical: [
+    timeStandardByoYomiTime[TimeStandard.classical]!,
+  ],
+};
+
+// const Map<TimeStandard, int> timeStandardByoYomiCount = {
+//   TimeStandard.blitz: 10,
+//   TimeStandard.rapid: 30,
+//   TimeStandard.classical: 60,
+// };
+
+// final Map<TimeStandard, List<int>> timeStandardByoYomiCountAlt = {
+//   TimeStandard.blitz: [
+//     timeStandardByoYomiCount[TimeStandard.blitz]!,
+//   ],
+//   TimeStandard.rapid: [
+//     timeStandardByoYomiCount[TimeStandard.rapid]!,
+//   ],
+//   TimeStandard.classical: [
+//     timeStandardByoYomiCount[TimeStandard.classical]!,
+//   ],
+// };
+
 const List<Color> playerColors = [(Colors.black), (Colors.white)];
 
 const Map<String, String> assets = {
@@ -44,6 +163,7 @@ const Map<String, List<Position>> boardCircleDecoration = {
 VisualTheme defaultTheme = VisualTheme(
   backgroundColor: Colors.grey.shade800,
   mainTextColor: Colors.white60,
+  secondaryTextColor: Colors.white,
   mainHighlightColor: Colors.blueGrey,
   disabledColor: Colors.grey.shade400,
   enabledColor: Colors.amber,
@@ -52,6 +172,7 @@ VisualTheme defaultTheme = VisualTheme(
 class VisualTheme {
   final Color backgroundColor;
   final Color mainTextColor;
+  final Color secondaryTextColor;
   final Color mainHighlightColor;
   final Color disabledColor;
   final Color enabledColor;
@@ -59,6 +180,7 @@ class VisualTheme {
   const VisualTheme(
       {required this.backgroundColor,
       required this.mainTextColor,
+      required this.secondaryTextColor,
       required this.mainHighlightColor,
       required this.disabledColor,
       required this.enabledColor});
