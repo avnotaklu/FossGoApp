@@ -2,28 +2,28 @@
 import 'dart:convert';
 
 final TimeControl blitz = TimeControl(
-    suddenDeathSeconds: 300, incrementSeconds: 0, byoYomiTime: null);
+    mainTimeSeconds: 300, incrementSeconds: 0, byoYomiTime: null);
 
 final TimeControl rapid = TimeControl(
-    suddenDeathSeconds: 1200, incrementSeconds: 0, byoYomiTime: null);
+    mainTimeSeconds: 1200, incrementSeconds: 0, byoYomiTime: null);
 
 final TimeControl classical = TimeControl(
-    suddenDeathSeconds: 3600, incrementSeconds: 0, byoYomiTime: null);
+    mainTimeSeconds: 3600, incrementSeconds: 0, byoYomiTime: null);
 
 class TimeControl {
-  final int suddenDeathSeconds;
+  final int mainTimeSeconds;
   final int? incrementSeconds;
   final ByoYomiTime? byoYomiTime;
 
   TimeControl({
-    required this.suddenDeathSeconds,
+    required this.mainTimeSeconds,
     this.incrementSeconds,
     this.byoYomiTime,
   });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'suddenDeathSeconds': suddenDeathSeconds,
+      'mainTimeSeconds': mainTimeSeconds,
       'incrementSeconds': incrementSeconds,
       'byoYomiTime': byoYomiTime?.toMap(),
     };
@@ -31,7 +31,7 @@ class TimeControl {
 
   factory TimeControl.fromMap(Map<String, dynamic> map) {
     return TimeControl(
-      suddenDeathSeconds: map['suddenDeathSeconds'] as int,
+      mainTimeSeconds: map['mainTimeSeconds'] as int,
       incrementSeconds: map['incrementSeconds'] != null
           ? map['incrementSeconds'] as int
           : null,

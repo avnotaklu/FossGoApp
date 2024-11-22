@@ -5,9 +5,8 @@ import 'package:async/async.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
-import 'package:go/core/system_utilities.dart';
+import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
-import 'package:go/gameplay/create/request_send_screen.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/playfield/game_widget.dart';
@@ -31,15 +30,8 @@ class CustomGamesPage extends StatefulWidget {
 }
 
 class _CustomGamesPageState extends State<CustomGamesPage> {
-  // bool joiningGame = false;
-  String joinedGame = '';
-
-  final TextEditingController _controller = TextEditingController();
-
   @override
   void initState() {
-    var homepageBloc = context.read<HomepageBloc>();
-    homepageBloc.getAvailableGames(context.read<AuthProvider>().token!);
     super.initState();
   }
 
@@ -77,10 +69,11 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                                               ChangeNotifierProvider.value(
                                                 value: signalRBloc,
                                               ),
-                                              Provider(
+                                              ChangeNotifierProvider(
                                                 create: (context) =>
                                                     CreateGameProvider(
-                                                        signalRBloc),
+                                                        signalRBloc)
+                                                      ..init(),
                                               )
                                             ],
                                             builder: (context, child) {

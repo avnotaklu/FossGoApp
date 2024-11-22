@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/services/app_user.dart';
 
 // class MultiplayerData extends InheritedWidget {

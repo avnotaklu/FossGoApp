@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
-import 'package:go/core/system_utilities.dart';
+import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';

@@ -39,4 +39,3 @@ class MatchmakingProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-

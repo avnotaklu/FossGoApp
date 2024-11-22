@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';

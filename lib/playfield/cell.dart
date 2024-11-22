@@ -4,7 +4,6 @@ import 'package:go/constants/constants.dart' as constants;
 
 import 'package:flutter/services.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
-import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/stage.dart';

@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
-import 'package:go/core/system_utilities.dart';
+import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/score_calculation_stage.dart';
@@ -43,7 +43,7 @@ class GameStateBloc extends ChangeNotifier {
 
   int get turn => game.moves.length;
 
-  int get gametime => game.timeControl.suddenDeathSeconds;
+  int get gametime => game.timeControl.mainTimeSeconds;
 
   Player get getPlayerWithTurn => _players[turn % 2];
   Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
@@ -116,8 +116,8 @@ class GameStateBloc extends ChangeNotifier {
     StageType curStageType,
     GameJoinMessage? joiningData,
   )   : times = [
-          ValueNotifier(Duration(seconds: game.timeControl.suddenDeathSeconds)),
-          ValueNotifier(Duration(seconds: game.timeControl.suddenDeathSeconds))
+          ValueNotifier(Duration(seconds: game.timeControl.mainTimeSeconds)),
+          ValueNotifier(Duration(seconds: game.timeControl.mainTimeSeconds))
         ],
         curStageTypeNotifier = ValueNotifier(curStageType),
         myPlayerUserInfo = PublicUserInfo(
@@ -342,7 +342,7 @@ class GameStateBloc extends ChangeNotifier {
     }
 
     this.times[0].value =
-        Duration(seconds: game.timeControl.suddenDeathSeconds) - firstPlayerDuration;
+        Duration(seconds: game.timeControl.mainTimeSeconds) - firstPlayerDuration;
 
     var secondPlayerDuration = Duration.zero;
 
@@ -360,7 +360,7 @@ class GameStateBloc extends ChangeNotifier {
     }
 
     this.times[1].value =
-        Duration(seconds: game.timeControl.suddenDeathSeconds) - secondPlayerDuration;
+        Duration(seconds: game.timeControl.mainTimeSeconds) - secondPlayerDuration;
 
     // If game has ended, apply game end time to player with turn
     if (game.gameState == GameState.ended) {

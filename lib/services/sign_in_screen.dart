@@ -26,6 +26,7 @@ class _SignInState extends State<SignIn> {
 
     authBloc.authResult.listen((res) async {
       res.fold((l) {
+        authBloc.logout();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (context) => ErrorPage(l),

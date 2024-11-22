@@ -104,24 +104,6 @@ final Map<TimeStandard, List<int>> timeStandardByoYomiTimeAlt = {
   ],
 };
 
-// const Map<TimeStandard, int> timeStandardByoYomiCount = {
-//   TimeStandard.blitz: 10,
-//   TimeStandard.rapid: 30,
-//   TimeStandard.classical: 60,
-// };
-
-// final Map<TimeStandard, List<int>> timeStandardByoYomiCountAlt = {
-//   TimeStandard.blitz: [
-//     timeStandardByoYomiCount[TimeStandard.blitz]!,
-//   ],
-//   TimeStandard.rapid: [
-//     timeStandardByoYomiCount[TimeStandard.rapid]!,
-//   ],
-//   TimeStandard.classical: [
-//     timeStandardByoYomiCount[TimeStandard.classical]!,
-//   ],
-// };
-
 const List<Color> playerColors = [(Colors.black), (Colors.white)];
 
 const Map<String, String> assets = {

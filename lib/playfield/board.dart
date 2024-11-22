@@ -2,7 +2,6 @@ import 'dart:ffi';
 
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
-import 'package:go/gameplay/middleware/game_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/stage.dart';
