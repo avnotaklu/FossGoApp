@@ -21,6 +21,7 @@ import 'package:go/providers/homepage_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
+import 'package:go/services/available_game.dart';
 import 'package:go/utils/widgets/buttons.dart';
 import 'package:go/views/my_app_bar.dart';
 import 'package:provider/provider.dart';
@@ -90,16 +91,21 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                   ),
                   const SizedBox(height: 50),
                   const Text("Games", style: TextStyle(fontSize: 30)),
+                  const SizedBox(height: 20),
                   Expanded(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount:
-                          context.read<HomepageBloc>().availableGames.length,
-                      itemBuilder: (context, index) {
-                        final game =
-                            context.read<HomepageBloc>().availableGames[index];
-                        return GameCard(game: game);
-                      },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount:
+                            context.read<HomepageBloc>().availableGames.length,
+                        itemBuilder: (context, index) {
+                          final game = context
+                              .read<HomepageBloc>()
+                              .availableGames[index];
+                          return AvailableGameCard(avlGame: game);
+                        },
+                      ),
                     ),
                   )
                 ],
@@ -112,13 +118,13 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
   }
 }
 
-class GameCard extends StatelessWidget {
-  const GameCard({
+class AvailableGameCard extends StatelessWidget {
+  const AvailableGameCard({
     super.key,
-    required this.game,
+    required this.avlGame,
   });
 
-  final Game game;
+  final AvailableGame avlGame;
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +134,9 @@ class GameCard extends StatelessWidget {
 
     void joinGame() async {
       var res = await homepageBloc.joinGame(
-          game.gameId, context.read<AuthProvider>().token!);
+        avlGame.game.gameId,
+        context.read<AuthProvider>().token!,
+      );
       res.fold((e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -152,7 +160,7 @@ class GameCard extends StatelessWidget {
                           Api(),
                           signalRBloc,
                           authBloc,
-                          game,
+                          avlGame.game,
                           systemUtils,
                           stage,
                           joinMessage,
@@ -172,18 +180,107 @@ class GameCard extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
+          color: defaultTheme.backgroundColor,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(game.gameId),
-            const SizedBox(height: 10),
-            Row(
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("You play: "),
-                StoneSelectionWidget(game.stoneSelectionType, false)
+                RichText(
+                  // ignore: prefer_const_constructors
+                  text: TextSpan(
+                    text: "VS  ",
+                    style: TextStyle(
+                        color: defaultTheme.secondaryTextColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.normal),
+                    children: [
+                      TextSpan(
+                        text: avlGame.creatorInfo.email,
+                        style: TextStyle(
+                            color: defaultTheme.secondaryTextColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    RichText(
+                      // ignore: prefer_const_constructors
+                      text: TextSpan(
+                        text: "Your Stone  ",
+                        style: TextStyle(
+                            color: defaultTheme.secondaryTextColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.normal),
+                      ),
+                    ),
+                    Container(
+                      height: 20,
+                      width: 20,
+                      child: StoneSelectionWidget(
+                        avlGame.game.stoneSelectionType !=
+                                StoneSelectionType.auto
+                            ? StoneSelectionType.values[
+                                1 - avlGame.game.stoneSelectionType.index]
+                            : avlGame.game.stoneSelectionType,
+                        false,
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                RichText(
+                  textAlign: TextAlign.end,
+                  text: TextSpan(
+                    text: "Board -  ",
+                    style: TextStyle(
+                        color: defaultTheme.secondaryTextColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.normal),
+                    children: [
+                      TextSpan(
+                        text: "${avlGame.game.rows}x${avlGame.game.columns}",
+                        style: TextStyle(
+                            color: defaultTheme.secondaryTextColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                RichText(
+                  textAlign: TextAlign.end,
+                  text: TextSpan(
+                    text: "Time -  ",
+                    style: TextStyle(
+                        color: defaultTheme.secondaryTextColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.normal),
+                    children: [
+                      TextSpan(
+                        text: avlGame.game.timeControl.repr(),
+                        style: TextStyle(
+                            color: defaultTheme.secondaryTextColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             )
           ],

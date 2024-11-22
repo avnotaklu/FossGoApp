@@ -9,6 +9,7 @@ import 'package:go/models/stone.dart';
 import 'package:go/models/stone_representation.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/providers/create_game_provider.dart';
+import 'package:go/services/available_game.dart';
 import 'package:go/services/game_over_message.dart';
 
 enum StoneType { black, white }
@@ -203,7 +204,7 @@ class Game {
 }
 
 class AvailableGames {
-  final List<Game> games;
+  final List<AvailableGame> games;
 
   AvailableGames({required this.games});
 
@@ -215,9 +216,9 @@ class AvailableGames {
 
   factory AvailableGames.fromMap(Map<String, dynamic> map) {
     return AvailableGames(
-      games: List<Game>.from(
-        (map['games'] as List).map<Game>(
-          (x) => Game.fromMap(x as Map<String, dynamic>),
+      games: List<AvailableGame>.from(
+        (map['games'] as List).map<AvailableGame>(
+          (x) => AvailableGame.fromMap(x as Map<String, dynamic>),
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
+import 'package:go/services/available_game.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
 
@@ -197,7 +198,7 @@ class NewMoveMessage extends SignalRMessageType {
 }
 
 class NewGameCreatedMessage extends SignalRMessageType {
-  final Game game;
+  final AvailableGame game;
   NewGameCreatedMessage(this.game);
 
   @override
@@ -209,7 +210,7 @@ class NewGameCreatedMessage extends SignalRMessageType {
 
   factory NewGameCreatedMessage.fromMap(Map<String, dynamic> map) {
     return NewGameCreatedMessage(
-      Game.fromMap(map['game']),
+      AvailableGame.fromMap(map['game']),
     );
   }
 

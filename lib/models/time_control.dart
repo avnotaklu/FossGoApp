@@ -1,14 +1,16 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-final TimeControl blitz = TimeControl(
-    mainTimeSeconds: 300, incrementSeconds: 0, byoYomiTime: null);
+import 'package:go/core/utils/string_formatting.dart';
 
-final TimeControl rapid = TimeControl(
-    mainTimeSeconds: 1200, incrementSeconds: 0, byoYomiTime: null);
+final TimeControl blitz =
+    TimeControl(mainTimeSeconds: 300, incrementSeconds: 0, byoYomiTime: null);
 
-final TimeControl classical = TimeControl(
-    mainTimeSeconds: 3600, incrementSeconds: 0, byoYomiTime: null);
+final TimeControl rapid =
+    TimeControl(mainTimeSeconds: 1200, incrementSeconds: 0, byoYomiTime: null);
+
+final TimeControl classical =
+    TimeControl(mainTimeSeconds: 3600, incrementSeconds: 0, byoYomiTime: null);
 
 class TimeControl {
   final int mainTimeSeconds;
@@ -45,6 +47,23 @@ class TimeControl {
 
   factory TimeControl.fromJson(String source) =>
       TimeControl.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  String repr() {
+    var repr = "";
+    final mainTimeString =
+        StringFormatting.totalSecondsToDurationRepr(mainTimeSeconds);
+    repr += mainTimeString;
+    if (incrementSeconds != null) {
+      final incrementTimeString =
+          StringFormatting.totalSecondsToDurationRepr(incrementSeconds!);
+      repr += " + $incrementTimeString";
+    }
+
+    if (byoYomiTime != null) {
+      repr += " + ${byoYomiTime!.byoYomis} x ${byoYomiTime!.byoYomiSeconds}s";
+    }
+    return repr;
+  }
 }
 
 class ByoYomiTime {

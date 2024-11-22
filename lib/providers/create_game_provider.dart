@@ -102,7 +102,7 @@ class CreateGameProvider extends ChangeNotifier {
     var timeControl = TimeControl(
       mainTimeSeconds: _mainTimeSeconds,
       incrementSeconds:
-          _timeFormat == Constants.TimeFormat.fischer ? _incrementSeconds : 0,
+          _timeFormat == Constants.TimeFormat.fischer ? _incrementSeconds : null,
       byoYomiTime: _timeFormat == Constants.TimeFormat.byoYomi
           ? ByoYomiTime(
               byoYomis: byoYomiCount,

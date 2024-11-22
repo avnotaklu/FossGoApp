@@ -8,13 +8,14 @@ import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
 import 'package:go/services/auth_provider.dart';
+import 'package:go/services/available_game.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
 import 'package:go/services/signal_r_message.dart';
 
 class HomepageBloc extends ChangeNotifier {
   List<AppUser> otherActivePlayers = [];
-  List<Game> availableGames = [];
+  List<AvailableGame> availableGames = [];
 
   var api = Api();
   final SignalRProvider signalRProvider;
