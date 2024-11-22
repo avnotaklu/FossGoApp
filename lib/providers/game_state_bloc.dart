@@ -341,12 +341,13 @@ class GameStateBloc extends ChangeNotifier {
           .difference(firstPlayerTimesBeforeCorrespondingMoveMade[i]);
     }
 
-    this.times[0].value =
-        Duration(seconds: game.timeControl.mainTimeSeconds) - firstPlayerDuration;
+    this.times[0].value = Duration(seconds: game.timeControl.mainTimeSeconds) -
+        firstPlayerDuration;
 
     var secondPlayerDuration = Duration.zero;
 
-    var secondPlayerArrangedTimes = times.skip(1).take(times.length - times.length % 2);
+    var secondPlayerArrangedTimes =
+        times.skip(1).take(times.length - times.length % 2);
     var secondPlayerTimesBeforeCorrespondingMoveMade = secondPlayerArrangedTimes
         .filterWithIndex((time, index) => index % 2 == 0)
         .toList();
@@ -359,8 +360,8 @@ class GameStateBloc extends ChangeNotifier {
           .difference(secondPlayerTimesBeforeCorrespondingMoveMade[i]);
     }
 
-    this.times[1].value =
-        Duration(seconds: game.timeControl.mainTimeSeconds) - secondPlayerDuration;
+    this.times[1].value = Duration(seconds: game.timeControl.mainTimeSeconds) -
+        secondPlayerDuration;
 
     // If game has ended, apply game end time to player with turn
     if (game.gameState == GameState.ended) {
@@ -473,22 +474,31 @@ class GameStateBloc extends ChangeNotifier {
     // TODO: call api
   }
 
-  int getRemotePlayerIndex() {
+  Player getRemotePlayer() {
     final stone = game.players[(authBloc.currentUserRaw).id];
     // game.players.indexWhere((k) => k != (authBloc.currentUserRaw)!.id);
     if (stone == null) {
+      if (authBloc.currentUserRaw.id == game.gameCreator) {
+        return players[1 -
+            (game.stoneSelectionType.index %
+                2) /* for now just wrapping around */];
+      }
       throw ("remote player not found");
     }
-    return 1 - stone.index;
+    return players[1 - stone.index];
   }
 
-  int getClientPlayerIndex() {
+  Player getClientPlayer() {
     final stone = game.players[(authBloc.currentUserRaw).id];
     // final index =
     //     game.players.indexWhere((k) => k == (authBloc.currentUserRaw)!.id);
     if (stone == null) {
+      if (authBloc.currentUserRaw.id == game.gameCreator) {
+        return players[(game.stoneSelectionType.index %
+            2) /* for now just wrapping around */];
+      }
       throw ("client player not found");
     }
-    return stone.index;
+    return players[stone.index];
   }
 }

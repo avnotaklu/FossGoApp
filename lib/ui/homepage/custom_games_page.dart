@@ -7,8 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
+import 'package:go/gameplay/create/stone_selection_widget.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/stage.dart';
+import 'package:go/models/game.dart';
+import 'package:go/models/stone_representation.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/main.dart';
 import 'package:go/models/game_match.dart';
@@ -95,50 +98,7 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                       itemBuilder: (context, index) {
                         final game =
                             context.read<HomepageBloc>().availableGames[index];
-                        return ListTile(
-                          onTap: () async {
-                            var res = await homepageBloc.joinGame(game.gameId,
-                                context.read<AuthProvider>().token!);
-                            res.fold((e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(e.message),
-                                ),
-                              );
-                            }, (joinMessage) {
-                              Navigator.pushReplacement(context,
-                                  MaterialPageRoute<void>(
-                                      builder: (BuildContext context) {
-                                var stage = StageType.BeforeStart;
-                                return MultiProvider(
-                                    providers: [
-                                      ChangeNotifierProvider.value(
-                                        value: signalRBloc,
-                                      )
-                                    ],
-                                    builder: (context, child) {
-                                      final authBloc =
-                                          context.read<AuthProvider>();
-                                      return ChangeNotifierProvider(
-                                          create: (context) => GameStateBloc(
-                                                Api(),
-                                                signalRBloc,
-                                                authBloc,
-                                                game,
-                                                systemUtils,
-                                                stage,
-                                                joinMessage,
-                                              ),
-                                          builder: (context, child) {
-                                            return GameWidget(false);
-                                          });
-                                    });
-                              }));
-                            });
-                            // })));
-                          },
-                          title: Text(game.gameId),
-                        );
+                        return GameCard(game: game);
                       },
                     ),
                   )
@@ -148,6 +108,87 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
           },
         );
       },
+    );
+  }
+}
+
+class GameCard extends StatelessWidget {
+  const GameCard({
+    super.key,
+    required this.game,
+  });
+
+  final Game game;
+
+  @override
+  Widget build(BuildContext context) {
+    final homepageBloc = context.read<HomepageBloc>();
+    final signalRBloc = context.read<SignalRProvider>();
+    final authBloc = context.read<AuthProvider>();
+
+    void joinGame() async {
+      var res = await homepageBloc.joinGame(
+          game.gameId, context.read<AuthProvider>().token!);
+      res.fold((e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+          ),
+        );
+      }, (joinMessage) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute<void>(builder: (BuildContext context) {
+          var stage = StageType.BeforeStart;
+          return MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(
+                  value: signalRBloc,
+                )
+              ],
+              builder: (context, child) {
+                final authBloc = context.read<AuthProvider>();
+                return ChangeNotifierProvider(
+                    create: (context) => GameStateBloc(
+                          Api(),
+                          signalRBloc,
+                          authBloc,
+                          game,
+                          systemUtils,
+                          stage,
+                          joinMessage,
+                        ),
+                    builder: (context, child) {
+                      return GameWidget(false);
+                    });
+              });
+        }));
+      });
+    }
+
+    return GestureDetector(
+      onTap: joinGame,
+      child: Card(
+          child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(game.gameId),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Text("You play: "),
+                StoneSelectionWidget(game.stoneSelectionType, false)
+              ],
+            )
+          ],
+        ),
+      )),
     );
   }
 }

@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:fpdart/fpdart.dart';
+import 'package:go/gameplay/create/stone_selection_widget.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/stone.dart';
@@ -39,6 +40,8 @@ class Game {
   final GameOverMethod? gameOverMethod;
   final List<int> finalTerritoryScores;
   final DateTime? endTime;
+  final StoneSelectionType stoneSelectionType;
+  final String? gameCreator;
 
   Game({
     required this.gameId,
@@ -58,6 +61,8 @@ class Game {
     required this.finalTerritoryScores,
     required this.gameOverMethod,
     required this.endTime,
+    required this.stoneSelectionType,
+    required this.gameCreator,
   });
 
   Map<String, dynamic> toMap() {
@@ -79,6 +84,8 @@ class Game {
       'finalTerritoryScores': finalTerritoryScores,
       'gameOverMethod': gameOverMethod?.index,
       'endTime': endTime?.toIso8601String(),
+      'stoneSelectionType': stoneSelectionType.index,
+      'gameCreator': gameCreator,
     };
   }
 
@@ -87,7 +94,8 @@ class Game {
       gameId: map['gameId'] as String,
       rows: map['rows'] as int,
       columns: map['columns'] as int,
-      timeControl: TimeControl.fromMap(map['timeControl'] as Map<String, dynamic>),
+      timeControl:
+          TimeControl.fromMap(map['timeControl'] as Map<String, dynamic>),
       playgroundMap:
           Map<String, int>.from(map['playgroundMap']).map<Position, StoneType>(
         (key, value) => MapEntry(
@@ -130,6 +138,8 @@ class Game {
       endTime: map['endTime'] == null
           ? null
           : DateTime.parse(map['endTime'] as String),
+      stoneSelectionType: StoneSelectionType.values[map['stoneSelectionType'] as int],
+      gameCreator: map['gameCreator'] as String?,
     );
   }
 
@@ -156,6 +166,8 @@ class Game {
     String? winnerId,
     GameOverMethod? gameOverMethod,
     DateTime? endTime,
+    StoneSelectionType? stoneSelectionType,
+    String? gameCreator,
   }) {
     return Game(
       gameId: gameId ?? this.gameId,
@@ -175,6 +187,8 @@ class Game {
       finalTerritoryScores: finalTerritoryScores ?? this.finalTerritoryScores,
       gameOverMethod: gameOverMethod ?? this.gameOverMethod,
       endTime: endTime ?? this.endTime,
+      stoneSelectionType: stoneSelectionType ?? this.stoneSelectionType,
+      gameCreator: gameCreator ?? this.gameCreator,
     );
   }
 
