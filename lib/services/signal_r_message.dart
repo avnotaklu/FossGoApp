@@ -224,11 +224,11 @@ class NewGameCreatedMessage extends SignalRMessageType {
 
 class GameJoinMessage extends SignalRMessageType {
   final DateTime time;
-  final List<PublicUserInfo> players;
+  final PublicUserInfo? otherPlayerData;
   final Game game;
   GameJoinMessage({
     required this.time,
-    required this.players,
+    required this.otherPlayerData,
     required this.game,
   });
 
@@ -236,7 +236,7 @@ class GameJoinMessage extends SignalRMessageType {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'time': time.toString(),
-      'players': players.map((x) => x.toMap()).toList(),
+      'otherPlayerData': otherPlayerData?.toMap(),
       'game': game.toMap(),
     };
   }
@@ -244,11 +244,8 @@ class GameJoinMessage extends SignalRMessageType {
   factory GameJoinMessage.fromMap(Map<String, dynamic> map) {
     return GameJoinMessage(
       time: DateTime.parse(map['time'] as String),
-      players: List<PublicUserInfo>.from(
-        (map['players']).map<PublicUserInfo>(
-          (x) => PublicUserInfo.fromMap(x as Map<String, dynamic>),
-        ),
-      ),
+      otherPlayerData: map['otherPlayerData'] == null ? null : PublicUserInfo.fromMap(
+          map['otherPlayerData'] as Map<String, dynamic>),
       game: Game.fromMap(map['game'] as Map<String, dynamic>),
     );
   }

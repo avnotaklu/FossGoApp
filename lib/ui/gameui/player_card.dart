@@ -1,6 +1,10 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
@@ -9,15 +13,20 @@ import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/ui/gameui/time_watch.dart';
-import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/utils/core_utils.dart';
 import 'package:go/utils/player.dart';
-import 'package:provider/provider.dart';
 
 enum PlayerCardType { my, other }
 
+class DisplayablePlayerData {
+  final String? email;
+  DisplayablePlayerData({
+    required this.email,
+  });
+}
+
 class PlayerDataUi extends StatefulWidget {
-  final PublicUserInfo? playerInfo;
+  final DisplayablePlayerData playerInfo;
   final Player player;
   final PlayerCardType type;
   @override

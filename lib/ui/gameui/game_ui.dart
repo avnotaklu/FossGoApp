@@ -69,7 +69,12 @@ class _GameUiState extends State<GameUi> {
                   Expanded(
                       flex: 3,
                       child: PlayerDataUi(
-                        context.read<GameStateBloc>().otherPlayerUserInfo,
+                        DisplayablePlayerData(
+                          email: context
+                              .read<GameStateBloc>()
+                              .otherPlayerUserInfo
+                              ?.email,
+                        ),
                         context.read<GameStateBloc>().getRemotePlayer(),
                         PlayerCardType.other,
                       )),
@@ -86,7 +91,12 @@ class _GameUiState extends State<GameUi> {
                   Expanded(
                       flex: 3,
                       child: PlayerDataUi(
-                        context.read<GameStateBloc>().myPlayerUserInfo,
+                        DisplayablePlayerData(
+                          email: context
+                              .read<GameStateBloc>()
+                              .myPlayerUserInfo
+                              .email,
+                        ),
                         context.read<GameStateBloc>().getClientPlayer(),
                         PlayerCardType.my,
                       )),

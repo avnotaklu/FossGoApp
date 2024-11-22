@@ -15,6 +15,7 @@ import 'package:go/models/position.dart';
 import 'package:go/models/stone.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
+import 'package:go/services/app_user.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
@@ -73,7 +74,7 @@ class GameStateBloc extends ChangeNotifier {
 
   // Join Data
 
-  PublicUserInfo myPlayerUserInfo;
+  AppUser myPlayerUserInfo;
   PublicUserInfo? otherPlayerUserInfo;
 
   List<ValueNotifier<Duration>> times;
@@ -120,10 +121,7 @@ class GameStateBloc extends ChangeNotifier {
           ValueNotifier(Duration(seconds: game.timeControl.mainTimeSeconds))
         ],
         curStageTypeNotifier = ValueNotifier(curStageType),
-        myPlayerUserInfo = PublicUserInfo(
-          authBloc.currentUserRaw.email,
-          authBloc.currentUserRaw.id,
-        ) {
+        myPlayerUserInfo = authBloc.currentUserRaw {
     setupGame(game, joiningData);
     setupStreams();
     subscriptions = [
@@ -139,7 +137,7 @@ class GameStateBloc extends ChangeNotifier {
     _players = [Player(0), Player(1)];
 
     if (joiningData != null) {
-      startGameplay(joiningData);
+      applyJoinMessage(joiningData);
     }
   }
 
@@ -189,31 +187,25 @@ class GameStateBloc extends ChangeNotifier {
 
   StreamSubscription listenFromGameJoin() {
     return listenForGameJoin.listen((message) {
-      startGameplay(message);
+      applyJoinMessage(message);
       debugPrint("Joined game BAHAHA");
       notifyListeners();
     });
   }
 
-  void startGameplay(GameJoinMessage joinMessage) {
-    // _startTime = DateTime.parse((joinMessage.time));
+  void applyJoinMessage(GameJoinMessage joinMessage) {
     game = joinMessage.game;
-
-    var myPlayerInfoIndex = joinMessage.players
-        .indexWhere((element) => element.id == authBloc.currentUserRaw.id);
-
-    myPlayerUserInfo = joinMessage.players[myPlayerInfoIndex];
-
-    otherPlayerUserInfo =
-        joinMessage.players.elementAtOrNull(myPlayerInfoIndex == 0 ? 1 : 0);
-
-    var now = systemUtilities.currentTime;
-    applyTimesOfDiscreteSections();
+    otherPlayerUserInfo = joinMessage.otherPlayerData;
 
     if (game.startTime != null && game.gameState == GameState.playing) {
+      var now = systemUtilities.currentTime;
+      setPlayerTimes();
       times[getPlayerWithTurn.turn].value =
           times[getPlayerWithTurn.turn].value -
-              now.difference(joinMessage.time);
+              now.difference(
+                game.playerTimeSnapshots[getPlayerWithTurn.turn]
+                    .snapshotTimestamp,
+              );
       startPausedTimerOfActivePlayer();
       curStageType = StageType.Gameplay;
     }
@@ -323,67 +315,78 @@ class GameStateBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  void applyTimesOfDiscreteSections() {
-    var times = [game.startTime!, ...game.moves.map((e) => e.time)];
+  // void applyTimesOfDiscreteSections() {
+  //   var times = [game.startTime!, ...game.moves.map((e) => e.time)];
 
-    var firstPlayerDuration = Duration.zero;
+  //   var firstPlayerDuration = Duration.zero;
 
-    var firstPlayerArrangedTimes = times.take(times.length - times.length % 2);
-    var firstPlayerTimesBeforeCorrespondingMoveMade = firstPlayerArrangedTimes
-        .filterWithIndex((time, index) => index % 2 == 0)
-        .toList();
-    var firstPlayerMoveMadeTimes = firstPlayerArrangedTimes
-        .filterWithIndex((time, index) => index % 2 == 1)
-        .toList();
+  //   var firstPlayerArrangedTimes = times.take(times.length - times.length % 2);
+  //   var firstPlayerTimesBeforeCorrespondingMoveMade = firstPlayerArrangedTimes
+  //       .filterWithIndex((time, index) => index % 2 == 0)
+  //       .toList();
+  //   var firstPlayerMoveMadeTimes = firstPlayerArrangedTimes
+  //       .filterWithIndex((time, index) => index % 2 == 1)
+  //       .toList();
 
-    for (int i = 0; i < (firstPlayerArrangedTimes.length / 2).floor(); i++) {
-      firstPlayerDuration += firstPlayerMoveMadeTimes[i]
-          .difference(firstPlayerTimesBeforeCorrespondingMoveMade[i]);
-    }
+  //   for (int i = 0; i < (firstPlayerArrangedTimes.length / 2).floor(); i++) {
+  //     firstPlayerDuration += firstPlayerMoveMadeTimes[i]
+  //         .difference(firstPlayerTimesBeforeCorrespondingMoveMade[i]);
+  //   }
 
-    this.times[0].value = Duration(seconds: game.timeControl.mainTimeSeconds) -
-        firstPlayerDuration;
+  //   this.times[0].value = Duration(seconds: game.timeControl.mainTimeSeconds) -
+  //       firstPlayerDuration;
 
-    var secondPlayerDuration = Duration.zero;
+  //   var secondPlayerDuration = Duration.zero;
 
-    var secondPlayerArrangedTimes =
-        times.skip(1).take(times.length - times.length % 2);
-    var secondPlayerTimesBeforeCorrespondingMoveMade = secondPlayerArrangedTimes
-        .filterWithIndex((time, index) => index % 2 == 0)
-        .toList();
-    var secondPlayerMoveMadeTimes = secondPlayerArrangedTimes
-        .filterWithIndex((time, index) => index % 2 == 1)
-        .toList();
+  //   var secondPlayerArrangedTimes =
+  //       times.skip(1).take(times.length - times.length % 2);
+  //   var secondPlayerTimesBeforeCorrespondingMoveMade = secondPlayerArrangedTimes
+  //       .filterWithIndex((time, index) => index % 2 == 0)
+  //       .toList();
+  //   var secondPlayerMoveMadeTimes = secondPlayerArrangedTimes
+  //       .filterWithIndex((time, index) => index % 2 == 1)
+  //       .toList();
 
-    for (int i = 0; i < (secondPlayerArrangedTimes.length / 2).floor(); i++) {
-      secondPlayerDuration += secondPlayerMoveMadeTimes[i]
-          .difference(secondPlayerTimesBeforeCorrespondingMoveMade[i]);
-    }
+  //   for (int i = 0; i < (secondPlayerArrangedTimes.length / 2).floor(); i++) {
+  //     secondPlayerDuration += secondPlayerMoveMadeTimes[i]
+  //         .difference(secondPlayerTimesBeforeCorrespondingMoveMade[i]);
+  //   }
 
-    this.times[1].value = Duration(seconds: game.timeControl.mainTimeSeconds) -
-        secondPlayerDuration;
+  //   this.times[1].value = Duration(seconds: game.timeControl.mainTimeSeconds) -
+  //       secondPlayerDuration;
 
-    // If game has ended, apply game end time to player with turn
-    if (game.gameState == GameState.ended) {
-      this.times[getPlayerWithTurn.turn].value -=
-          game.endTime!.difference(times.last);
-    }
+  //   // If game has ended, apply game end time to player with turn
+  //   if (game.gameState == GameState.ended) {
+  //     this.times[getPlayerWithTurn.turn].value -=
+  //         game.endTime!.difference(times.last);
+  //   }
+  // }
+
+  void setPlayerTimes() {
+    times[0].value = Duration(
+        milliseconds: game.playerTimeSnapshots[0].mainTimeMilliseconds);
+    times[1].value = Duration(
+        milliseconds: game.playerTimeSnapshots[1].mainTimeMilliseconds);
   }
 
   void setTurnTimerAfterMoveWasAdded() {
     int turn = this.turn;
 
+    setPlayerTimes();
+
     var turnPlayerTimer = timerController[turn % 2];
     turnPlayerTimer.start();
 
-    applyTimesOfDiscreteSections();
+    // applyTimesOfDiscreteSections();
 
     var nonTurnPlayerTimer = timerController[1 - turn % 2];
     nonTurnPlayerTimer.pause();
 
     // Also calculate the lag time and incorporate that for player with turn
-    this.times[getPlayerWithTurn.turn].value -=
-        systemUtilities.currentTime.difference(game.moves.last.time);
+    times[getPlayerWithTurn.turn].value -=
+        systemUtilities.currentTime.difference(
+      game.playerTimeSnapshots[getPlayerWithTurn.turn].snapshotTimestamp,
+    );
   }
 
   String getPlayerIdFromTurn(int turn) {
@@ -396,7 +399,7 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   void applyEndGame() {
-    applyTimesOfDiscreteSections();
+    setPlayerTimes();
 
     curStageType = StageType.GameEnd;
     timerController[0].pause();

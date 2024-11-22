@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:fpdart/fpdart.dart';
+
 import 'package:go/gameplay/create/stone_selection_widget.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
@@ -31,6 +32,7 @@ class Game {
   final Map<String, int> prisoners;
   final Map<Position, StoneType> playgroundMap;
   final List<GameMove> moves;
+  final List<PlayerTimeSnapshot> playerTimeSnapshots;
   final Map<String, StoneType> players;
   final DateTime? startTime;
   final Position? koPositionInLastMove;
@@ -64,6 +66,7 @@ class Game {
     required this.endTime,
     required this.stoneSelectionType,
     required this.gameCreator,
+    required this.playerTimeSnapshots,
   });
 
   Map<String, dynamic> toMap() {
@@ -87,6 +90,7 @@ class Game {
       'endTime': endTime?.toIso8601String(),
       'stoneSelectionType': stoneSelectionType.index,
       'gameCreator': gameCreator,
+      'playerTimeSnapshots': playerTimeSnapshots.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -139,8 +143,14 @@ class Game {
       endTime: map['endTime'] == null
           ? null
           : DateTime.parse(map['endTime'] as String),
-      stoneSelectionType: StoneSelectionType.values[map['stoneSelectionType'] as int],
+      stoneSelectionType:
+          StoneSelectionType.values[map['stoneSelectionType'] as int],
       gameCreator: map['gameCreator'] as String?,
+      playerTimeSnapshots: List<PlayerTimeSnapshot>.from(
+        (map['playerTimeSnapshots'] as List).map<PlayerTimeSnapshot>(
+          (e) => PlayerTimeSnapshot.fromMap(e as Map<String, dynamic>),
+        ),
+      ),
     );
   }
 
@@ -169,6 +179,7 @@ class Game {
     DateTime? endTime,
     StoneSelectionType? stoneSelectionType,
     String? gameCreator,
+    List<PlayerTimeSnapshot>? playerTimeSnapshots,
   }) {
     return Game(
       gameId: gameId ?? this.gameId,
@@ -190,6 +201,7 @@ class Game {
       endTime: endTime ?? this.endTime,
       stoneSelectionType: stoneSelectionType ?? this.stoneSelectionType,
       gameCreator: gameCreator ?? this.gameCreator,
+      playerTimeSnapshots: playerTimeSnapshots ?? this.playerTimeSnapshots,
     );
   }
 
@@ -227,4 +239,46 @@ class AvailableGames {
   String toJson() => json.encode(toMap());
   factory AvailableGames.fromJson(String source) =>
       AvailableGames.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
+class PlayerTimeSnapshot {
+  final DateTime snapshotTimestamp;
+  final int mainTimeMilliseconds;
+  final int? byoYomisLeft;
+  final bool byoYomiActive;
+  final bool timeActive;
+
+  PlayerTimeSnapshot({
+    required this.snapshotTimestamp,
+    required this.mainTimeMilliseconds,
+    required this.byoYomisLeft,
+    required this.byoYomiActive,
+    required this.timeActive,
+  });
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'snapshotTimestamp': snapshotTimestamp.toString(),
+      'mainTimeMilliseconds': mainTimeMilliseconds,
+      'byoYomisLeft': byoYomisLeft,
+      'byoYomiActive': byoYomiActive,
+      'timeActive': timeActive,
+    };
+  }
+
+  factory PlayerTimeSnapshot.fromMap(Map<String, dynamic> map) {
+    return PlayerTimeSnapshot(
+      snapshotTimestamp: DateTime.parse(map['snapshotTimestamp']),
+      mainTimeMilliseconds: map['mainTimeMilliseconds'] as int,
+      byoYomisLeft:
+          map['byoYomisLeft'] != null ? map['byoYomisLeft'] as int : null,
+      byoYomiActive: map['byoYomiActive'] as bool,
+      timeActive: map['timeActive'] as bool,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory PlayerTimeSnapshot.fromJson(String source) =>
+      PlayerTimeSnapshot.fromMap(json.decode(source) as Map<String, dynamic>);
 }
