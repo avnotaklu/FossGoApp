@@ -18,24 +18,23 @@ import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
 
 class GameUi extends StatefulWidget {
-  bool blackTimerStarted = false;
+  final bool blackTimerStarted = false;
+  final Widget boardWidget;
+
+  const GameUi({super.key, required this.boardWidget});
   @override
   State<GameUi> createState() => _GameUiState();
 }
 
 class _GameUiState extends State<GameUi> {
-
-  final Stream<String?> _bids = (() async* {
-    await Future<void>.delayed(const Duration(seconds: 0));
-    yield "hello";
-    // yield "hello";
-  })();
+  // final Stream<String?> _bids = (() async* {
+  //   await Future<void>.delayed(const Duration(seconds: 0));
+  //   yield "hello";
+  //   // yield "hello";
+  // })();
 
   @override
   Widget build(BuildContext context) {
-    // return LayoutBuilder(
-    // builder: (BuildContext context, BoxConstraints constraints){
-    int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;
     return Consumer<GameStateBloc>(
       builder: (context, value, child) {
         return Column(
@@ -64,8 +63,9 @@ class _GameUiState extends State<GameUi> {
                 ],
               ),
             ),
-            Spacer(
+            Expanded(
               flex: 18,
+              child: widget.boardWidget,
             ),
             Expanded(
               flex: 6,

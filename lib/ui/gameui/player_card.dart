@@ -39,11 +39,8 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
   @override
   Widget build(BuildContext context) {
     final game = context.read<GameStateBloc>().game;
+    final size = MediaQuery.of(context).size;
     return Container(
-      // decoration: BoxDecoration(
-      //   // borderRadius: BorderRadius.circular(10.5),
-      //   color: Constants.playerColors[widget.player],
-      // ),
       child: Row(
         children: [
           Expanded(
@@ -53,8 +50,8 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        flex: 2,
+                      Container(
+                        width: size.width * 0.09,
                         child: widget.playerInfo?.email == null
                             ? const Center(
                                 child: SizedBox(
@@ -72,35 +69,22 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                                         : Colors.lightGreenAccent),
                               ),
                       ),
-                      Expanded(
-                        flex: 10,
-                        child: Container(
-                          child: Text(
-                            // "${widget.player == 0 ? 'Sukhmander' : 'avnotaklu'}",
-                            widget.playerInfo?.email ?? "Unknown",
-                            style: TextStyle(
-                                color: Constants.defaultTheme.mainTextColor,
-                                fontSize: 18),
-                          ),
+                      Container(
+                        child: Text(
+                          // "${widget.player == 0 ? 'Sukhmander' : 'avnotaklu'}",
+                          widget.playerInfo?.email ?? "Unknown",
+                          style: TextStyle(
+                              color: Constants.defaultTheme.mainTextColor,
+                              fontSize: 18),
                         ),
                       ),
                     ],
                   ),
                   Row(
                     children: [
-                      const Spacer(
-                        flex: 1,
+                      Container(
+                        width: size.width * 0.09,
                       ),
-                      context.read<Stage>() is GameEndStage &&
-                              game.gameOverMethod == GameOverMethod.Score
-                          ? Text(
-                              "${game.finalTerritoryScores[widget.player.turn]} Points",
-                              style: TextStyle(
-                                  color: Constants.defaultTheme.mainTextColor),
-                            )
-                          : const Spacer(
-                              flex: 1,
-                            ),
                       ValueListenableBuilder(
                           valueListenable: context
                               .read<StoneLogic>()
@@ -126,14 +110,21 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                       ),
                     ],
                   ),
-                  context.read<GameStateBloc>().game.gameOverMethod ==
-                          GameOverMethod.Score
-                      ? Text(
-                          " = ${game.finalTerritoryScores[widget.player.turn] + game.prisoners[widget.player.turn] + (widget.player.turn * game.komi)}",
-                          style: TextStyle(
-                              color: Constants.defaultTheme.mainTextColor),
-                        )
-                      : const SizedBox.shrink(),
+                  Row(
+                    children: [
+                      Container(
+                        width: size.width * 0.09,
+                      ),
+                      context.read<GameStateBloc>().game.gameOverMethod ==
+                              GameOverMethod.Score
+                          ? Text(
+                              " = ${game.finalTerritoryScores[widget.player.turn] + game.prisoners[widget.player.turn] + (widget.player.turn * game.komi)}",
+                              style: TextStyle(
+                                  color: Constants.defaultTheme.mainTextColor),
+                            )
+                          : const SizedBox.shrink(),
+                    ],
+                  ),
                 ],
               )),
           Expanded(

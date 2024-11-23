@@ -6,6 +6,7 @@ import 'dart:math';
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go/core/utils/string_formatting.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
@@ -14,6 +15,7 @@ import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/stone_representation.dart';
+import 'package:go/models/time_control.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/game_board_bloc.dart';
@@ -23,6 +25,7 @@ import 'package:go/models/game_match.dart';
 import 'package:go/models/game.dart';
 import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
+import 'package:go/views/my_app_bar.dart';
 import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
 import 'dart:core';
@@ -34,10 +37,37 @@ import 'package:go/constants/constants.dart' as Constants;
 class GameWidget extends StatelessWidget {
   final bool enteredAsGameCreator;
 
+  String? byoYomiTime(TimeControl time) {
+    return time.byoYomiTime != null
+        ? "${time.byoYomiTime!.byoYomis} x ${time.byoYomiTime!.byoYomiSeconds}s"
+        : null;
+  }
+
+  String? mainTime(TimeControl time) {
+    return StringFormatting.totalSecondsToDurationRepr(time.mainTimeSeconds);
+  }
+
+  String? incrementTime(TimeControl time) {
+    if (time.incrementSeconds == null) return null;
+    return StringFormatting.totalSecondsToDurationRepr(time.incrementSeconds!);
+  }
+
+  String gameTitle(TimeControl time) {
+    final mTime = mainTime(time);
+    final iTime = incrementTime(time);
+    final bTime = byoYomiTime(time);
+
+    return "$mTime${iTime ?? ""}${bTime ?? ""}";
+  }
+
   const GameWidget(this.enteredAsGameCreator, {super.key}); // Board
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: MyAppBar(
+        gameTitle(context.read<GameStateBloc>().game.timeControl),
+        leading: Icon(Icons.menu),
+      ),
       backgroundColor: Colors.green,
       body: Consumer<GameStateBloc>(
         builder: (context, gameStateBloc, child) {
@@ -113,37 +143,47 @@ class _WrapperGameState extends State<WrapperGame> {
   @override
   Widget build(BuildContext context) {
     context.read<Stage>().initializeWhenAllMiddlewareAvailable(context);
-    return Stack(
-      children: [
-        Container(
-          //color: Colors.black,
-          decoration: BoxDecoration(
-            color: Constants.defaultTheme.backgroundColor,
-            //image: DecorationImage(image: AssetImage(Constants.assets['table']!), fit: BoxFit.fitHeight, repeat: ImageRepeat.repeatY),
-          ),
+    return Container(
+      //color: Colors.black,
+      decoration: BoxDecoration(
+        color: Constants.defaultTheme.backgroundColor,
+        //image: DecorationImage(image: AssetImage(Constants.assets['table']!), fit: BoxFit.fitHeight, repeat: ImageRepeat.repeatY),
+      ),
+      child: GameUi(
+        boardWidget: Board(
+          widget.game.rows,
+          widget.game.columns,
+          widget.game.playgroundMap,
         ),
-        Stack(
-          children: [
-            Column(children: [
-              Spacer(
-                flex: 6,
-              ),
-              Expanded(
-                flex: 18,
-                child: Board(
-                  widget.game.rows,
-                  widget.game.columns,
-                  widget.game.playgroundMap,
-                ),
-              ),
-              Spacer(
-                flex: 6,
-              ),
-            ]),
-            GameUi(),
-          ],
-        ),
-      ],
+      ),
     );
+
+    // return Stack(
+    //   children: [
+    //     Container(
+    //       //color: Colors.black,
+    //       decoration: BoxDecoration(
+    //         color: Constants.defaultTheme.backgroundColor,
+    //         //image: DecorationImage(image: AssetImage(Constants.assets['table']!), fit: BoxFit.fitHeight, repeat: ImageRepeat.repeatY),
+    //       ),
+    //     ),
+    //     Stack(
+    //       children: [
+    //         Column(children: [
+    //           Spacer(
+    //             flex: 6,
+    //           ),
+    //           Expanded(
+    //             flex: 18,
+    //             child: ,
+    //           ),
+    //           Spacer(
+    //             flex: 6,
+    //           ),
+    //         ]),
+    //       ],
+    //     ),
+    //   ],
+    // );
   }
 }
