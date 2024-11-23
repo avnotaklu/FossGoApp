@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go/services/game_over_message.dart';
 import 'package:provider/provider.dart';
 
 import 'package:go/constants/constants.dart' as Constants;
@@ -37,6 +38,7 @@ class PlayerDataUi extends StatefulWidget {
 class _PlayerDataUiState extends State<PlayerDataUi> {
   @override
   Widget build(BuildContext context) {
+    final game = context.read<GameStateBloc>().game;
     return Container(
       // decoration: BoxDecoration(
       //   // borderRadius: BorderRadius.circular(10.5),
@@ -45,105 +47,92 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
       child: Row(
         children: [
           Expanded(
-              flex: 6,
+              flex: 4,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: widget.playerInfo?.email == null
-                              ? const Center(
-                                  child: SizedBox(
-                                      width: 25,
-                                      height: 25,
-                                      child: CircularProgressIndicator()),
-                                )
-                              : Container(
-                                  width: 15,
-                                  height: 15,
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: widget.playerInfo?.email == null
-                                          ? Colors.grey
-                                          : Colors.lightGreenAccent),
-                                ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: widget.playerInfo?.email == null
+                            ? const Center(
+                                child: SizedBox(
+                                    width: 25,
+                                    height: 25,
+                                    child: CircularProgressIndicator()),
+                              )
+                            : Container(
+                                width: 15,
+                                height: 15,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: widget.playerInfo?.email == null
+                                        ? Colors.grey
+                                        : Colors.lightGreenAccent),
+                              ),
+                      ),
+                      Expanded(
+                        flex: 10,
+                        child: Container(
+                          child: Text(
+                            // "${widget.player == 0 ? 'Sukhmander' : 'avnotaklu'}",
+                            widget.playerInfo?.email ?? "Unknown",
+                            style: TextStyle(
+                                color: Constants.defaultTheme.mainTextColor,
+                                fontSize: 18),
+                          ),
                         ),
-                        Expanded(
-                          flex: 10,
-                          child: Container(
-                            child: Text(
-                              // "${widget.player == 0 ? 'Sukhmander' : 'avnotaklu'}",
-                              widget.playerInfo?.email ?? "Unknown",
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Spacer(
+                        flex: 1,
+                      ),
+                      context.read<Stage>() is GameEndStage
+                          ? Text(
+                              "${game.finalTerritoryScores[widget.player.turn]} Points",
                               style: TextStyle(
-                                  color: Constants.defaultTheme.mainTextColor,
-                                  fontSize: 18),
+                                  color: Constants.defaultTheme.mainTextColor),
+                            )
+                          : const Spacer(
+                              flex: 1,
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ValueListenableBuilder(
+                          valueListenable: context
+                              .read<StoneLogic>()
+                              .prisoners[widget.player.turn],
+                          builder: (context, snapshot, child) {
+                            return Text(
+                              " + $snapshot Prisoners",
+                              style: TextStyle(
+                                  color: Constants.defaultTheme.mainTextColor),
+                            );
+                          }),
+                      widget.player.turn == 1
+                          ? Text(
+                              " + ${game.komi} komi",
+                              style: TextStyle(
+                                  color: Constants.defaultTheme.mainTextColor),
+                            )
+                          : const Spacer(
+                              flex: 2,
+                            ),
+                      const Spacer(
+                        flex: 3,
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    flex: 3,
-                    child: Row(
-                      children: [
-                        const Spacer(
-                          flex: 1,
-                        ),
-                        context.read<Stage>() is GameEndStage
-                            ? Expanded(
-                                flex: 2,
-                                child: Text(
-                                  "${context.read<ScoreCalculationBloc>().scores(context)[widget.player.turn]} + ",
-                                  style: TextStyle(
-                                      color:
-                                          Constants.defaultTheme.mainTextColor),
-                                ),
-                              )
-                            : const Spacer(
-                                flex: 1,
-                              ),
-                        Expanded(
-                          flex: 5,
-                          child: Container(
-                            child: ValueListenableBuilder(
-                                valueListenable: context
-                                    .read<StoneLogic>()
-                                    .prisoners[widget.player.turn],
-                                builder: (context, snapshot, child) {
-                                  return Text(
-                                    "Prisoners ${snapshot}",
-                                    style: TextStyle(
-                                        color: Constants
-                                            .defaultTheme.mainTextColor),
-                                  );
-                                }),
-                          ),
-                        ),
-                        widget.player == 1
-                            ? Expanded(
-                                flex: 2,
-                                child: Container(
-                                    child: Text(
-                                  "+ 6.5",
-                                  style: TextStyle(
-                                      color:
-                                          Constants.defaultTheme.mainTextColor),
-                                )),
-                              )
-                            : const Spacer(
-                                flex: 2,
-                              ),
-                        const Spacer(
-                          flex: 3,
-                        ),
-                      ],
-                    ),
-                  ),
+                  context.read<GameStateBloc>().game.gameOverMethod ==
+                          GameOverMethod.Score
+                      ? Text(
+                          " = ${game.finalTerritoryScores[widget.player.turn] + game.prisoners[widget.player.turn] + (widget.player.turn * game.komi)}",
+                          style: TextStyle(
+                              color: Constants.defaultTheme.mainTextColor),
+                        )
+                      : const SizedBox.shrink()
                 ],
               )),
           Expanded(

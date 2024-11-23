@@ -24,23 +24,6 @@ class GameUi extends StatefulWidget {
 }
 
 class _GameUiState extends State<GameUi> {
-  // Timer? _everySecond;
-  // String? _now;
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  //   // sets first value
-  //   _now = DateTime.now().second.toString();
-  //   print("objecht");
-
-  //   // defines a timer
-  //   _everySecond = Timer.periodic(Duration(seconds: 1), (Timer t) {
-  //     setState(() {
-  //       _now = DateTime.now().second.toString();
-  //     });
-  //   });
-  // }
 
   final Stream<String?> _bids = (() async* {
     await Future<void>.delayed(const Duration(seconds: 0));
@@ -164,7 +147,7 @@ class _GameUiState extends State<GameUi> {
   String getWinningMethod(BuildContext context) {
     final gameStateBloc = context.read<GameStateBloc>();
     if (gameStateBloc.game.gameOverMethod == GameOverMethod.Score) {
-      return "${(gameStateBloc.getSummedPlayerScores.fold(0.0, (tot, prev) => tot - prev)).abs()} Point(s)";
+      return "${(gameStateBloc.getSummedPlayerScores[0] - gameStateBloc.getSummedPlayerScores[1]).abs()} Point(s)";
     }
     return gameStateBloc.game.gameOverMethod!.actualName;
   }

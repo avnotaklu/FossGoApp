@@ -29,7 +29,7 @@ class Game {
   final int rows;
   final int columns;
   final TimeControl timeControl;
-  final Map<String, int> prisoners;
+  final List<int> prisoners;
   final Map<Position, StoneType> playgroundMap;
   final List<GameMove> moves;
   final List<PlayerTimeSnapshot> playerTimeSnapshots;
@@ -121,7 +121,7 @@ class Game {
           ),
         ),
       ),
-      prisoners: Map<String, int>.from((map['prisoners'])),
+      prisoners: List<int>.from((map['prisoners'])),
       startTime: map['startTime'] == null
           ? null
           : DateTime.parse(map['startTime'] as String),
@@ -164,7 +164,7 @@ class Game {
     int? rows,
     int? columns,
     TimeControl? timeControl,
-    Map<String, int>? prisoners,
+    List<int>? prisoners,
     Map<Position, StoneType>? playgroundMap,
     List<GameMove>? moves,
     Map<String, StoneType>? players,

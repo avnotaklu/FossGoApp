@@ -38,7 +38,7 @@ class CreateGameScreen extends StatelessWidget {
     return Dialog(
       child: Consumer<CreateGameProvider>(builder: (context, cgp, child) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.7,
+          height: MediaQuery.of(context).size.height * 0.9,
           width: MediaQuery.of(context).size.width * 0.8,
           padding: const EdgeInsets.all(20),
           child: Column(

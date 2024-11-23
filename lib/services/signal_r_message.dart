@@ -67,6 +67,8 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
       return EditDeadStoneMessage.fromMap(map);
     case SignalRMessageTypes.gameOver:
       return GameOverMessage.fromMap(map);
+    case SignalRMessageTypes.gameTimerUpdate:
+      return GameTimerUpdateMessage.fromMap(map);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     case SignalRMessageTypes.acceptedScores:
@@ -90,6 +92,8 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
       return EditDeadStoneMessage.fromJson(json);
     case SignalRMessageTypes.gameOver:
       return GameOverMessage.fromJson(json);
+    case SignalRMessageTypes.gameTimerUpdate:
+      return GameTimerUpdateMessage.fromJson(json);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     case SignalRMessageTypes.acceptedScores:
@@ -108,11 +112,44 @@ class SignalRMessageTypes {
   static const String scoreCaculationStarted = "ScoreCaculationStarted";
   static const String acceptedScores = "AcceptedScores";
   static const String gameOver = "GameOver";
+  static const String gameTimerUpdate = "GameTimerUpdate";
 }
 
 abstract class SignalRMessageType {
   Map<String, dynamic> toMap();
   String toJson();
+}
+
+class GameTimerUpdateMessage extends SignalRMessageType {
+  final PlayerTimeSnapshot currentPlayerTime;
+  final StoneType player;
+  GameTimerUpdateMessage({
+    required this.currentPlayerTime,
+    required this.player,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'currentPlayerTime': currentPlayerTime.toMap(),
+      'player': player.index,
+    };
+  }
+
+  factory GameTimerUpdateMessage.fromMap(Map<String, dynamic> map) {
+    return GameTimerUpdateMessage(
+      currentPlayerTime: PlayerTimeSnapshot.fromMap(
+          map['currentPlayerTime'] as Map<String, dynamic>),
+      player: StoneType.values[map['player'] as int],
+    );
+  }
+
+  @override
+  String toJson() => json.encode(toMap());
+
+  factory GameTimerUpdateMessage.fromJson(String source) =>
+      GameTimerUpdateMessage.fromMap(
+          json.decode(source) as Map<String, dynamic>);
 }
 
 class EditDeadStoneMessage extends SignalRMessageType {
@@ -244,8 +281,10 @@ class GameJoinMessage extends SignalRMessageType {
   factory GameJoinMessage.fromMap(Map<String, dynamic> map) {
     return GameJoinMessage(
       time: DateTime.parse(map['time'] as String),
-      otherPlayerData: map['otherPlayerData'] == null ? null : PublicUserInfo.fromMap(
-          map['otherPlayerData'] as Map<String, dynamic>),
+      otherPlayerData: map['otherPlayerData'] == null
+          ? null
+          : PublicUserInfo.fromMap(
+              map['otherPlayerData'] as Map<String, dynamic>),
       game: Game.fromMap(map['game'] as Map<String, dynamic>),
     );
   }

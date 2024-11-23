@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';

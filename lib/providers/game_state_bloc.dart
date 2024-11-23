@@ -22,6 +22,7 @@ import 'package:go/services/game_over_message.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/join_message.dart';
 import 'package:go/services/signal_r_message.dart';
+import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/utils/player.dart';
 import 'package:ntp/ntp.dart';
 import 'package:signalr_netcore/errors.dart';
@@ -57,11 +58,8 @@ class GameStateBloc extends ChangeNotifier {
   GameOverMethod? get getGameOverMethod => game.gameOverMethod;
 
   List<double> get getSummedPlayerScores => [
-        game.finalTerritoryScores[0].toDouble() +
-            game.prisoners[getPlayerIdFromStoneType(StoneType.black)]!,
-        game.finalTerritoryScores[1].toDouble() +
-            game.prisoners[getPlayerIdFromStoneType(StoneType.white)]! +
-            game.komi,
+        game.finalTerritoryScores[0].toDouble() + game.prisoners[0],
+        game.finalTerritoryScores[1].toDouble() + game.prisoners[1] + game.komi,
       ];
 
   String getPlayerIdFromStoneType(StoneType stone) {
@@ -104,6 +102,7 @@ class GameStateBloc extends ChangeNotifier {
   late final Stream<EditDeadStoneMessage> listenForEditDeadStone;
   late final Stream<NewMoveMessage> listenFromMove;
   late final Stream<GameOverMessage> listenFromGameOver;
+  late final Stream<GameTimerUpdateMessage> listenFromGameTimerUpdate;
   late final Stream<Null> listenFromAcceptScores;
   late final Stream<ContinueGameMessage> listenFromContinueGame;
 
@@ -129,7 +128,8 @@ class GameStateBloc extends ChangeNotifier {
       listenForMove(),
       listenForContinueGame(),
       listenForAcceptScore(),
-      listenForGameOver()
+      listenForGameOver(),
+      listenForGameTimerUpdate()
     ];
   }
 
@@ -181,6 +181,12 @@ class GameStateBloc extends ChangeNotifier {
     listenFromGameOver = gameMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.gameOver) {
         yield message.data as GameOverMessage;
+      }
+    });
+
+    listenFromGameTimerUpdate = gameMessageStream.asyncExpand((message) async* {
+      if (message.type == SignalRMessageTypes.gameTimerUpdate) {
+        yield message.data as GameTimerUpdateMessage;
       }
     });
   }
@@ -252,6 +258,19 @@ class GameStateBloc extends ChangeNotifier {
     });
   }
 
+  StreamSubscription listenForGameTimerUpdate() {
+    return listenFromGameTimerUpdate.listen((message) {
+      debugPrint(
+          "Signal R said, ::${SignalRMessageTypes.gameTimerUpdate}::\n\t\t${message.toMap()}");
+      final newPlayerTimeSnapshots = game.playerTimeSnapshots;
+      newPlayerTimeSnapshots[message.player.index] = message.currentPlayerTime;
+      game.copyWith(playerTimeSnapshots: newPlayerTimeSnapshots);
+      setTurnTimer();
+
+      notifyListeners();
+    });
+  }
+
   Future<Either<AppError, GameMove>> playMove(
       Position? position, StoneLogic stoneLogic) async {
     bool canPlayMove = isMyTurn();
@@ -306,7 +325,7 @@ class GameStateBloc extends ChangeNotifier {
   void applyMoveResult(Game game) {
     this.game = game;
 
-    setTurnTimerAfterMoveWasAdded();
+    setTurnTimer();
 
     if (game.gameState == GameState.scoreCalculation) {
       curStageType = StageType.ScoreCalculation;
@@ -369,7 +388,7 @@ class GameStateBloc extends ChangeNotifier {
         milliseconds: game.playerTimeSnapshots[1].mainTimeMilliseconds);
   }
 
-  void setTurnTimerAfterMoveWasAdded() {
+  void setTurnTimer() {
     int turn = this.turn;
 
     setPlayerTimes();

@@ -32,129 +32,18 @@ import 'board.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
 class GameWidget extends StatelessWidget {
-  // Board board;
-  // Game game;
-  bool enteredAsGameCreator;
+  final bool enteredAsGameCreator;
 
-  GameWidget(this.enteredAsGameCreator); // Board
-  // : board = Board(game.rows, game.columns, game.playgroundMap)
-  // {
-  //   for (var element in game.moves) {
-  //     print(element.toString());
-  //   }
-  // }
+  const GameWidget(this.enteredAsGameCreator, {super.key}); // Board
   @override
   Widget build(BuildContext context) {
-    // return StatefulBuilder(
-    // StreamController<bool> controller = StreamController<
-    //     bool>.broadcast(); // TODO: improve this so that stream controller and stream itself are one part not seperate like this
-    // var authBloc = Provider.of<AuthProvider>(context, listen: false);
-
-    // Map<Position?, StoneWidget?> finalPlaygroundMap = {};
-
-    // TODO: this part was done in board but now because ui needs some info this is done here see `TODO: inherited_widget_restructure`
-    // for (var i = 0; i < game.rows; i++) {
-    //   for (var j = 0; j < game.columns; j++) {
-    //     // playgroundMap[Position(i, j)] = Player(Colors.black);
-    //     var tmpPos = Position(i, j);
-    //     if (game.playgroundMap.keys.contains(tmpPos)) {
-    //       finalPlaygroundMap[Position(i, j)] = game.playgroundMap[tmpPos];
-    //     } else {
-    //       finalPlaygroundMap[Position(i, j)] = null;
-    //     }
-    //   }
-    // }
-
     return Scaffold(
-      // appBar: AppBar(
-      //   toolbarHeight: kToolbarHeight / 2,
-      //   actions: <Widget>[
-      //     TextButton(onPressed: authBloc.logout, child: const Text("logout")),
-      //   ],
-      // ),
       backgroundColor: Colors.green,
-      body:
-          // GameData(
-          //   curStage: curStage,
-          //   match: game,
-          //   pplayer: players,
-          //   mChild:
-          // StatefulBuilder(
-          //   builder: (context, setState) {
-          // TODO: make this so that below check isn't done and all of this functionality is in stages in this case gameplay_stage and game_end stage
-          // if (game.runStatus == true) {
-          //   var checkGameStateStream =
-          //       checkGameEnterable(context, game, controller)
-          //           .listen((event) {
-          //     if (event == true) {
-          //       if (enteredAsGameCreator) {
-          //         // this sets time so only should be called by one player
-          //         var lastTimeAndDate;
-          //         NTP.now().then((value) {
-          //           game.startTime = value;
-          //           game.lastTimeAndDate.clear();
-          //           game.lastTimeAndDate.add(TimeAndDuration(
-          //               game.startTime as DateTime,
-          //               Duration(seconds: game.time)));
-          //           game.lastTimeAndDate.add(TimeAndDuration(
-          //               game.startTime as DateTime,
-          //               Duration(seconds: game.time)));
-          //           game.runStatus = true;
-
-          //           MultiplayerData.of(context)!.curGameReferences!.game.set(game
-          //               .toJson()); // TODO Instead of writing entire match again write only changed values
-          //           GameData.of(context)!.onGameStart(context);
-          //           setState(() => game = game);
-          //         });
-          //       } else {
-          //         // if game enterable start timer of black
-
-          //         MultiplayerData.of(context)
-          //             ?.curGameReferences
-          //             ?.startTime
-          //             .onValue
-          //             .listen((snaphot) {
-          //           game.startTime =
-          //               DateTime.parse(snaphot.snapshot.value as String);
-          //           game.lastTimeAndDate.clear();
-          //           game.lastTimeAndDate.add(TimeAndDuration(
-          //               game.startTime as DateTime,
-          //               Duration(seconds: game.time)));
-          //           game.lastTimeAndDate.add(TimeAndDuration(
-          //               game.startTime as DateTime,
-          //               Duration(seconds: game.time)));
-          //           game.runStatus = true;
-
-          //           GameData.of(context)!.onGameStart(context);
-
-          //           setState(() => game = game);
-          //         });
-          //       }
-
-          //       // close controller once game is enterable
-          //       controller.close();
-          //     }
-          //   });
-          // } else if (game.runStatus == false) {
-
-          // }
-
-          // GameData.of(context)?.timerController[0].pause();
-          // GameData.of(context)?.timerController[1].pause();
-
-          // TODO: inherited_widget_restructure :: both stonelogic and score calculation should not be this up in widget tree find a way to construct them in board and still access in game ui maybe with streams or something
-
-          Consumer<GameStateBloc>(
+      body: Consumer<GameStateBloc>(
         builder: (context, gameStateBloc, child) {
           final game = gameStateBloc.game;
           return MultiProvider(
             providers: [
-              // ChangeNotifierProvider(
-              //     create: (context) => GameStateBloc(
-              //           context.read<SignalRBloc>(),
-              //           context.read<AuthBloc>(),
-              //           game,
-              //         )),
               ChangeNotifierProvider(
                   create: (context) => GameBoardBloc(context.read()))
             ],

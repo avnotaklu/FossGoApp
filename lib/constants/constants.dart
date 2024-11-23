@@ -58,6 +58,8 @@ const Map<TimeStandard, int> timeStandardMainTime = {
 
 final Map<TimeStandard, List<int>> timeStandardMainTimeAlt = {
   TimeStandard.blitz: [
+    30,
+    120,
     timeStandardMainTime[TimeStandard.blitz]!,
   ],
   TimeStandard.rapid: [

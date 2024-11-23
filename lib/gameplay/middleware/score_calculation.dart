@@ -40,27 +40,6 @@ class ScoreCalculationBloc extends ChangeNotifier {
   final GameStateBloc gameStateBloc;
   final GameBoardBloc gameBoardBloc;
 
-  // Player getWinner(BuildContext context) {
-  //   StoneLogic stoneLogic = context.read();
-  //   gameStateBloc.getPlayerWithTurn.score =
-  //       _territoryScores[gameStateBloc.getPlayerWithTurn.turn] +
-  //           stoneLogic.prisoners[gameStateBloc.getPlayerWithTurn.turn].value +
-  //           (playerColors[gameStateBloc.getPlayerWithTurn.turn] == Colors.white
-  //               ? 6.5
-  //               : 0);
-  //   gameStateBloc.getPlayerWithoutTurn.score = _territoryScores[
-  //           gameStateBloc.getPlayerWithoutTurn.turn] +
-  //       stoneLogic.prisoners[gameStateBloc.getPlayerWithoutTurn.turn].value +
-  //       (playerColors[gameStateBloc.getPlayerWithoutTurn.turn] == Colors.white
-  //           ? 6.5
-  //           : 0);
-  //   Player winner = (gameStateBloc.getPlayerWithTurn.score >
-  //           gameStateBloc.getPlayerWithoutTurn.score)
-  //       ? gameStateBloc.getPlayerWithTurn
-  //       : gameStateBloc.getPlayerWithoutTurn;
-  //   return winner;
-  // }
-
   // GETTERS
   List<int> scores(context) {
     if (_territoryScores.isNotEmpty) return _territoryScores;

@@ -51,7 +51,8 @@ class GameBoardBloc extends ChangeNotifier {
 
   void setupGame(Game game) {
     koDelete = gameStateBloc.game.koPositionInLastMove;
-    prisoners = game.playerIdsSorted.map((e) => game.prisoners[e]!).toList();
+    prisoners = game
+        .prisoners; //  game.playerIdsSorted.map((e) => game.prisoners[e]!).toList();
 
     var board = BoardStateUtilities(
       game.rows,

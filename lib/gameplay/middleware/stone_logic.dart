@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
