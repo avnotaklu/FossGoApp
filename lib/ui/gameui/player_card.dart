@@ -91,7 +91,8 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                       const Spacer(
                         flex: 1,
                       ),
-                      context.read<Stage>() is GameEndStage
+                      context.read<Stage>() is GameEndStage &&
+                              game.gameOverMethod == GameOverMethod.Score
                           ? Text(
                               "${game.finalTerritoryScores[widget.player.turn]} Points",
                               style: TextStyle(
@@ -132,7 +133,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                           style: TextStyle(
                               color: Constants.defaultTheme.mainTextColor),
                         )
-                      : const SizedBox.shrink()
+                      : const SizedBox.shrink(),
                 ],
               )),
           Expanded(

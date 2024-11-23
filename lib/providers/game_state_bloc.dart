@@ -212,14 +212,24 @@ class GameStateBloc extends ChangeNotifier {
                 game.playerTimeSnapshots[getPlayerWithTurn.turn]
                     .snapshotTimestamp,
               );
-      startPausedTimerOfActivePlayer();
+
+      // HACK: This is a hack to make sure that the timer starts after the ui is rendered
+      // The reason is that the timer controller is not started even when called start() function
+      // The controller checks for presense of onStart method, which is supplied via ui
+      // check `CountdownController.start() in timer_controller.dart`
+
+      Future.delayed(Duration(milliseconds: 300), () {
+        startPausedTimerOfActivePlayer();
+      });
       curStageType = StageType.Gameplay;
+      notifyListeners();
     }
     if (GameState.scoreCalculation == game.gameState) {
       curStageType = StageType.ScoreCalculation;
+      notifyListeners();
     }
     if (game.gameState == GameState.ended) {
-      curStageType = StageType.GameEnd;
+      applyEndGame();
     }
   }
 
