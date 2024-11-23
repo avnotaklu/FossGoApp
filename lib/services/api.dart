@@ -4,11 +4,13 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
+import 'package:go/services/available_game.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/join_message.dart';
+import 'package:go/services/my_games.dart';
 import 'package:go/services/new_move_result.dart';
 import 'package:go/services/register_player_dto.dart';
 import 'package:go/services/register_user_result.dart';
@@ -205,8 +207,7 @@ class Api {
     }
   }
 
-  Future<Either<ApiError, Game>> resignGame(
-      String token, String gameId) async {
+  Future<Either<ApiError, Game>> resignGame(String token, String gameId) async {
     // var data = MovePosition(x: 0, y: 0);
     var res = await http.post(
       Uri.parse("$baseUrl/Game/$gameId/ResignGame"),
@@ -223,9 +224,6 @@ class Api {
       //     ApiError(message: res.body, statusCode: res.statusCode));
     }
   }
-
-
-
 
   Future<Either<ApiError, Game>> editDeadStoneCluster(
       EditDeadStoneClusterDto dto, String token, String gameId) async {
@@ -258,6 +256,23 @@ class Api {
     );
     if (res.statusCode == 200) {
       return Either.right(AvailableGames.fromJson(res.body));
+    } else {
+      return Either.left(getErrorFromResponse(res));
+      // return Either.left(
+      //     ApiError(message: res.body, statusCode: res.statusCode));
+    }
+  }
+
+  Future<Either<ApiError, MyGames>> getMyGames(String token) async {
+    var res = await http.get(
+      Uri.parse("$baseUrl/Player/MyGames"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      },
+    );
+    if (res.statusCode == 200) {
+      return Either.right(MyGames.fromJson(res.body));
     } else {
       return Either.left(getErrorFromResponse(res));
       // return Either.left(

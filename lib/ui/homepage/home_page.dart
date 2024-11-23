@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     var homepageBloc = context.read<HomepageBloc>();
     homepageBloc.getAvailableGames(context.read<AuthProvider>().token!);
+    homepageBloc.getMyGames(context.read<AuthProvider>().token!);
   }
 
   int currentPageIndex = 0;

@@ -11,11 +11,13 @@ import 'package:go/services/auth_provider.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
+import 'package:go/services/my_games.dart';
 import 'package:go/services/signal_r_message.dart';
 
 class HomepageBloc extends ChangeNotifier {
   List<AppUser> otherActivePlayers = [];
   List<AvailableGame> availableGames = [];
+  List<MyGame> myGames = [];
 
   var api = Api();
   final SignalRProvider signalRProvider;
@@ -31,17 +33,8 @@ class HomepageBloc extends ChangeNotifier {
 
   Future<Either<AppError, GameJoinMessage?>> joinGame(
       String gameId, String token) async {
-    // final myId = authBloc.currentUserRaw!.id;
-    // if (availableGames
-    //     .firstWhere((a) => a.gameId == gameId)
-    //     .players
-    //     .keys
-    //     .contains(myId)) {
-    //   return right(null);
-    // } else {
     var game = await api.joinGame(GameJoinDto(gameId: gameId), token);
     return game.mapLeft(AppError.fromApiError);
-    // }
   }
 
   Future<void> getAvailableGames(String token) async {
@@ -50,6 +43,16 @@ class HomepageBloc extends ChangeNotifier {
       debugPrint("Couldn't get available games");
     }, (games) {
       availableGames.addAll(games.games);
+      notifyListeners();
+    });
+  }
+
+  Future<void> getMyGames(String token) async {
+    var game = await api.getMyGames(token);
+    game.fold((e) {
+      debugPrint("Couldn't get available games");
+    }, (games) {
+      myGames.addAll(games.games);
       notifyListeners();
     });
   }
@@ -63,10 +66,15 @@ class HomepageBloc extends ChangeNotifier {
         throw "messages count ${messageList.length}, WHAT TO DO?";
       }
       var message = messageList.first;
-      if (message.type == "NewGame") {
+      if (message.type == SignalRMessageTypes.newGame) {
         debugPrint("Found new game");
         final newGameMessage = (message.data as NewGameCreatedMessage);
-        availableGames.add(newGameMessage.game);
+        if (newGameMessage.game.creatorInfo.id == authBloc.currentUserRaw.id) {
+          myGames.add(
+              MyGame(game: newGameMessage.game.game, opposingPlayer: null));
+        } else {
+          availableGames.add(newGameMessage.game);
+        }
         debugPrint("Found new game done");
         notifyListeners();
       }

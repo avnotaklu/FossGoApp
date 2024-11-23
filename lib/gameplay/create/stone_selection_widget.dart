@@ -7,9 +7,8 @@ enum StoneSelectionType { black, white, auto }
 
 class StoneSelectionWidget extends StatelessWidget {
   final StoneSelectionType type;
-  final bool selected;
 
-  const StoneSelectionWidget(this.type, this.selected, {super.key});
+  const StoneSelectionWidget(this.type, {super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -12,6 +12,7 @@ import 'package:go/models/time_control.dart';
 import 'package:go/providers/create_game_provider.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/game_over_message.dart';
+import 'package:signalr_netcore/errors.dart';
 
 enum StoneType { black, white }
 
@@ -213,32 +214,49 @@ class Game {
       )
       .map((e) => e.key)
       .toList();
-}
 
-class AvailableGames {
-  final List<AvailableGame> games;
+  String? getPlayerIdWithTurn() {
+    if (startTime == null) return null;
 
-  AvailableGames({required this.games});
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'games': games.map((x) => x.toMap()).toList(),
-    };
+    final turn = moves.length;
+    for (var item in players.entries) {
+      if (item.value.index == (turn % 2)) {
+        return item.key;
+      }
+    }
+    throw StateError(
+        "This path shouldn't be reachable, as there always exists one user with supposed next turn");
   }
 
-  factory AvailableGames.fromMap(Map<String, dynamic> map) {
-    return AvailableGames(
-      games: List<AvailableGame>.from(
-        (map['games'] as List).map<AvailableGame>(
-          (x) => AvailableGame.fromMap(x as Map<String, dynamic>),
-        ),
-      ),
-    );
+  StoneType? getStoneFromPlayerId(String id) {
+    return players[id];
   }
 
-  String toJson() => json.encode(toMap());
-  factory AvailableGames.fromJson(String source) =>
-      AvailableGames.fromMap(json.decode(source) as Map<String, dynamic>);
+  StoneType? getOtherStoneFromPlayerId(String id) {
+    final myStone = getStoneFromPlayerId(id)?.index;
+    if (myStone == null) return null;
+    return StoneType.values[1 - myStone];
+  }
+
+  String? getPlayerIdFromStoneType(StoneType stone) {
+    if (startTime == null) return null;
+    for (var item in players.entries) {
+      if (item.value == stone) {
+        return item.key;
+      }
+    }
+    throw StateError("Player: {stone} has not yet joined the game");
+  }
+
+  String? getOtherPlayerIdFromPlayerId(String id) {
+    var getOtherPlayerStone = getOtherStoneFromPlayerId(id);
+    if (getOtherPlayerStone == null) return null;
+    return getPlayerIdFromStoneType(getOtherPlayerStone);
+  }
+
+  bool didStart() {
+    return gameState != GameState.waitingForStart;
+  }
 }
 
 class PlayerTimeSnapshot {

@@ -286,8 +286,6 @@ class CreateGameScreen extends StatelessWidget {
             width: 30,
             child: StoneSelectionWidget(
               type,
-              cgp.mStoneType == type,
-              // ),
             ),
           ),
         ),

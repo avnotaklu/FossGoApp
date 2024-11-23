@@ -22,6 +22,8 @@ import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/services/available_game.dart';
+import 'package:go/services/signal_r_message.dart';
+import 'package:go/ui/homepage/game_card.dart';
 import 'package:go/utils/widgets/buttons.dart';
 import 'package:go/views/my_app_bar.dart';
 import 'package:provider/provider.dart';
@@ -103,7 +105,10 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                           final game = context
                               .read<HomepageBloc>()
                               .availableGames[index];
-                          return AvailableGameCard(avlGame: game);
+                          return GameCard(
+                            game: game.game,
+                            otherPlayerData: game.creatorInfo,
+                          );
                         },
                       ),
                     ),
@@ -114,178 +119,6 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
           },
         );
       },
-    );
-  }
-}
-
-class AvailableGameCard extends StatelessWidget {
-  const AvailableGameCard({
-    super.key,
-    required this.avlGame,
-  });
-
-  final AvailableGame avlGame;
-
-  @override
-  Widget build(BuildContext context) {
-    final homepageBloc = context.read<HomepageBloc>();
-    final signalRBloc = context.read<SignalRProvider>();
-    final authBloc = context.read<AuthProvider>();
-
-    void joinGame() async {
-      var res = await homepageBloc.joinGame(
-        avlGame.game.gameId,
-        context.read<AuthProvider>().token!,
-      );
-      res.fold((e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message),
-          ),
-        );
-      }, (joinMessage) {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute<void>(builder: (BuildContext context) {
-          var stage = StageType.BeforeStart;
-          return MultiProvider(
-              providers: [
-                ChangeNotifierProvider.value(
-                  value: signalRBloc,
-                )
-              ],
-              builder: (context, child) {
-                final authBloc = context.read<AuthProvider>();
-                return ChangeNotifierProvider(
-                    create: (context) => GameStateBloc(
-                          Api(),
-                          signalRBloc,
-                          authBloc,
-                          avlGame.game,
-                          systemUtils,
-                          stage,
-                          joinMessage,
-                        ),
-                    builder: (context, child) {
-                      return GameWidget(false);
-                    });
-              });
-        }));
-      });
-    }
-
-    return GestureDetector(
-      onTap: joinGame,
-      child: Card(
-          child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: defaultTheme.backgroundColor,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RichText(
-                  // ignore: prefer_const_constructors
-                  text: TextSpan(
-                    text: "VS  ",
-                    style: TextStyle(
-                        color: defaultTheme.secondaryTextColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal),
-                    children: [
-                      TextSpan(
-                        text: avlGame.creatorInfo.email,
-                        style: TextStyle(
-                            color: defaultTheme.secondaryTextColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    RichText(
-                      // ignore: prefer_const_constructors
-                      text: TextSpan(
-                        text: "Your Stone  ",
-                        style: TextStyle(
-                            color: defaultTheme.secondaryTextColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.normal),
-                      ),
-                    ),
-                    Container(
-                      height: 20,
-                      width: 20,
-                      child: StoneSelectionWidget(
-                        avlGame.game.stoneSelectionType !=
-                                StoneSelectionType.auto
-                            ? StoneSelectionType.values[
-                                1 - avlGame.game.stoneSelectionType.index]
-                            : avlGame.game.stoneSelectionType,
-                        false,
-                      ),
-                    )
-                  ],
-                )
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                RichText(
-                  textAlign: TextAlign.end,
-                  text: TextSpan(
-                    text: "Board -  ",
-                    style: TextStyle(
-                        color: defaultTheme.secondaryTextColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal),
-                    children: [
-                      TextSpan(
-                        text: "${avlGame.game.rows}x${avlGame.game.columns}",
-                        style: TextStyle(
-                            color: defaultTheme.secondaryTextColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                RichText(
-                  textAlign: TextAlign.end,
-                  text: TextSpan(
-                    text: "Time -  ",
-                    style: TextStyle(
-                        color: defaultTheme.secondaryTextColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal),
-                    children: [
-                      TextSpan(
-                        text: avlGame.game.timeControl.repr(),
-                        style: TextStyle(
-                            color: defaultTheme.secondaryTextColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
-      )),
     );
   }
 }
