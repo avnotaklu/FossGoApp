@@ -13,7 +13,7 @@ import 'package:signalr_netcore/signalr_client.dart';
 
 class SignalRProvider extends ChangeNotifier {
   // The location of the SignalR Server.
-  final serverUrl = "${Api.baseUrl}/gameHub";
+  final serverUrl = "${Api.baseUrl}/mainHub";
   Either<SignalRError, String> connectionId;
   // connectionCompleter.future;
   // final Either<SignalRError, String> connectionCompleter =
@@ -48,43 +48,14 @@ class SignalRProvider extends ChangeNotifier {
     }
   }
 
-  void setupHubConnection() {
-    // hubConnection.onclose(({error}) => debugPrint("Connection Closed"));
-
-    // hubConnection.stateStream.listen((data) async {
-    //   debugPrint("Connection State is now: ${data.name}");
-    //   if (data == HubConnectionState.Connected) {
-    //     final registerRes = await authBloc.registerUser(
-    //         authBloc.currentUserRaw!, authBloc.token!, conId);
-    //     registerRes.fold(
-    //       (e) {
-    //         hubConnection.stop();
-    //         debugPrint(e.toString());
-    //       },
-    //       (v) {
-    //         connectionId = (Either.right(conId));
-    //         _timeoutTimer.cancel();
-    //         notifyListeners();
-    //       },
-    //     );
-    //   }
-    //   if (data == HubConnectionState.Disconnected) {
-    //     hubConnection.start();
-    //     debugPrint("Connection Disconnected");
-    //   }
-    // });
-    // _timeoutTimer = Timer(const Duration(seconds: 5), () {
-    //   if (hubConnection.state != HubConnectionState.Connected) {
-    //     connectionId = (Either.left(SignalRError(
-    //         message: "Connection Timed Out",
-    //         connectionState: RegisterationConnectionState.Disconnected)));
-    //   }
-    // });
-  }
-
   Stream<SignalRMessage> get gameMessageStream => _gameMessageController.stream;
 
   final StreamController<SignalRMessage> _gameMessageController =
+      StreamController<SignalRMessage>.broadcast();
+
+  Stream<SignalRMessage> get userMessagesStream => _gameMessageController.stream;
+
+  final StreamController<SignalRMessage> _userMessageController =
       StreamController<SignalRMessage>.broadcast();
 
   void listenMessages() {
@@ -99,6 +70,19 @@ class SignalRProvider extends ChangeNotifier {
       var message = messageList.first;
 
       _gameMessageController.add(message);
+    });
+
+    hubConnection.on('userUpdate', (SignalRMessageListRaw? messagesRaw) {
+      assert(messagesRaw != null, "Message can't be null");
+
+      if (messagesRaw!.length != 1) {
+        throw "messages count ${messagesRaw.length}, WHAT TO DO?";
+      }
+
+      var messageList = messagesRaw.signalRMessageList;
+      var message = messageList.first;
+
+      _userMessageController.add(message);
     });
   }
 

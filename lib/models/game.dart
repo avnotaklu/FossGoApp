@@ -25,6 +25,100 @@ enum GameState {
   ended
 }
 
+
+class GameFieldNames {
+  // Game
+  static const String ID = "iD";
+  static const String Rows = "rows";
+  static const String Cols = "cols";
+  static const String TimeControl = "timeControl";
+  static const String PlayerTimeSnapshots = "playerTimeSnapshots";
+  static const String PlaygroundMap = "playgroundMap";
+  static const String Moves = "moves";
+  static const String Players = "players";
+  static const String Prisoners = "prisoners";
+  static const String StartTime = "startTime";
+  static const String EndTime = "endTime";
+  static const String KoPositionInLastMove = "koPositionInLastMove";
+  static const String GameState = "gameState";
+  static const String DeadStones = "deadStones";
+  static const String WinnerId = "winnerId";
+  static const String FinalTerritoryScores = "finalTerritoryScores";
+  static const String Komi = "komi";
+  static const String GameOverMethod = "gameOverMethod";
+  static const String StoneSelectionType = "stoneSelectionType";
+  static const String GameCreator = "gameCreator";
+  static const String PlayersRatings = "playersRatings";
+  static const String PlayersRatingsDiff = "playersRatingsDiff";
+
+  // control Control
+  static const String MainTimeSeconds = "mts"; // time control only mainTimeSeconds seconds
+  static const String IncrementSeconds = "incrementSeconds";
+  static const String ByoYomiTime = "byoYomiTime";
+  static const String TimeStandard = "timeStandard";
+  static const String ByoYomiCount = "byoYomiCount";
+  static const String ByoYomiSeconds = "byoYomiSeconds";
+
+  // Player time Snapshot
+  static const String SnapshotTimestamp = "snapshotTimestamp";
+  static const String MainTimeMilliseconds = "mainTimeMilliseconds";
+  static const String ByoYomisLeft = "byoYomisLeft";
+  static const String ByoYomiActive = "byoYomiActive";
+  static const String TimeActive = "timeActive";
+
+  // move Move
+  static const String Time = "time";
+  static const String X = "x";
+  static const String Y = "y";
+}
+
+
+// GameFieldNames {
+//   // Game
+//   static const String ID = "id";
+//   static const String Rows = "r";
+//   static const String Cols = "c";
+//   static const String TimeControl = "tc";
+//   static const String PlayerTimeSnapshots = "ts";
+//   static const String PlaygroundMap = "map";
+//   static const String Moves = "mv";
+//   static const String Players = "p";
+//   static const String Prisoners = "pr";
+//   static const String StartTime = "st";
+//   static const String EndTime = "et";
+//   static const String KoPositionInLastMove = "ko";
+//   static const String GameState = "gs";
+//   static const String DeadStones = "ds";
+//   static const String WinnerId = "wi";
+//   static const String FinalTerritoryScores = "fts";
+//   static const String Komi = "k";
+//   static const String GameOverMethod = "gom";
+//   static const String StoneSelectionType = "sst";
+//   static const String GameCreator = "gc";
+//   static const String PlayersRatings = "rts";
+//   static const String PlayersRatingsDiff = "prd";
+
+//   // Time Control
+//   static const String MainTimeSeconds = "mts"; // time control only takes seconds
+//   static const String IncrementSeconds = "is";
+//   static const String ByoYomiTime = "byt";
+//   static const String TimeStandard = "ts";
+//   static const String ByoYomiCount = "byc";
+//   static const String ByoYomiSeconds = "bys";
+
+//   // Player Time Snapshot
+//   static const String SnapshotTimestamp = "st";
+//   static const String MainTimeMilliseconds = "mt";
+//   static const String ByoYomisLeft = "byl";
+//   static const String ByoYomiActive = "bya";
+//   static const String TimeActive = "ta";
+
+//   // Game Move
+//   static const String Time = "t";
+//   static const String X = "x";
+//   static const String Y = "y";
+// }
+
 class Game {
   final String gameId;
   final int rows;
@@ -46,6 +140,8 @@ class Game {
   final DateTime? endTime;
   final StoneSelectionType stoneSelectionType;
   final String? gameCreator;
+  final List<int>? playersRatings;
+  final List<int>? playersRatingsDiff;
 
   Game({
     required this.gameId,
@@ -68,90 +164,111 @@ class Game {
     required this.stoneSelectionType,
     required this.gameCreator,
     required this.playerTimeSnapshots,
+    required this.playersRatings,
+    required this.playersRatingsDiff,
   });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'gameId': gameId,
-      'rows': rows,
-      'columns': columns,
-      'timeControl': timeControl.toMap(),
-      'playgroundMap': playgroundMap,
-      'moves': moves.map((x) => x.toMap()).toList(),
-      'players': players,
-      'prisoners': prisoners,
-      'startTime': startTime?.toIso8601String(),
-      'koPositionInLastMove': koPositionInLastMove?.toString(),
-      'gameState': gameState.toString(),
-      'deadStones': deadStones.map((e) => e.toString()).toList(),
-      'winnerId': winnerId,
-      'komi': komi,
-      'finalTerritoryScores': finalTerritoryScores,
-      'gameOverMethod': gameOverMethod?.index,
-      'endTime': endTime?.toIso8601String(),
-      'stoneSelectionType': stoneSelectionType.index,
-      'gameCreator': gameCreator,
-      'playerTimeSnapshots': playerTimeSnapshots.map((e) => e.toMap()).toList(),
+      GameFieldNames.Rows: rows,
+      GameFieldNames.Cols: columns,
+      GameFieldNames.TimeControl: timeControl.toMap(),
+      GameFieldNames.PlaygroundMap: playgroundMap.map<String, int>(
+        (key, value) => MapEntry(
+          key.toString(),
+          value.index,
+        ),
+      ),
+      GameFieldNames.Moves: moves.map((x) => x.toMap()).toList(),
+      GameFieldNames.Players: players.map<String, int>(
+        (key, value) => MapEntry(
+          key,
+          value.index,
+        ),
+      ),
+      GameFieldNames.Prisoners: prisoners,
+      GameFieldNames.StartTime: startTime?.toIso8601String(),
+      GameFieldNames.KoPositionInLastMove: koPositionInLastMove?.toString(),
+      GameFieldNames.GameState: gameState.index,
+      GameFieldNames.DeadStones: deadStones.map((e) => e.toString()).toList(),
+      GameFieldNames.WinnerId: winnerId,
+      GameFieldNames.Komi: komi,
+      GameFieldNames.FinalTerritoryScores: finalTerritoryScores,
+      GameFieldNames.GameOverMethod: gameOverMethod?.index,
+      GameFieldNames.EndTime: endTime?.toIso8601String(),
+      GameFieldNames.StoneSelectionType: stoneSelectionType.index,
+      GameFieldNames.GameCreator: gameCreator,
+      GameFieldNames.PlayerTimeSnapshots:
+          playerTimeSnapshots.map((e) => e.toMap()).toList(),
+      GameFieldNames.PlayersRatings: playersRatings,
+      GameFieldNames.PlayersRatingsDiff: playersRatingsDiff,
     };
   }
 
   factory Game.fromMap(Map<String, dynamic> map) {
     return Game(
-      gameId: map['gameId'] as String,
-      rows: map['rows'] as int,
-      columns: map['columns'] as int,
-      timeControl:
-          TimeControl.fromMap(map['timeControl'] as Map<String, dynamic>),
-      playgroundMap:
-          Map<String, int>.from(map['playgroundMap']).map<Position, StoneType>(
+      gameId: map[GameFieldNames.ID] as String,
+      rows: map[GameFieldNames.Rows] as int,
+      columns: map[GameFieldNames.Cols] as int,
+      timeControl: TimeControl.fromMap(
+          map[GameFieldNames.TimeControl] as Map<String, dynamic>),
+      playgroundMap: Map<String, int>.from(map[GameFieldNames.PlaygroundMap])
+          .map<Position, StoneType>(
         (key, value) => MapEntry(
           Position.fromString(key),
           StoneType.values[value],
         ),
       ),
       moves: List<GameMove>.from(
-        (map['moves'] as List).map<GameMove>(
+        (map[GameFieldNames.Moves] as List).map<GameMove>(
           (x) => GameMove.fromMap(x as Map<String, dynamic>),
         ),
       ),
       players: Map<String, StoneType>.from(
-        Map<String, int>.from(map['players']).map(
+        Map<String, int>.from(map[GameFieldNames.Players]).map(
           (key, value) => MapEntry(
             key,
             StoneType.values[value],
           ),
         ),
       ),
-      prisoners: List<int>.from((map['prisoners'])),
-      startTime: map['startTime'] == null
+      prisoners: List<int>.from((map[GameFieldNames.Prisoners])),
+      startTime: map[GameFieldNames.StartTime] == null
           ? null
-          : DateTime.parse(map['startTime'] as String),
-      koPositionInLastMove: map['koPositionInLastMove'] != null
-          ? Position.fromString(map['koPositionInLastMove'] as String)
+          : DateTime.parse(map[GameFieldNames.StartTime] as String),
+      koPositionInLastMove: map[GameFieldNames.KoPositionInLastMove] != null
+          ? Position.fromString(
+              map[GameFieldNames.KoPositionInLastMove] as String)
           : null,
-      gameState: GameState.values[map['gameState'] as int],
+      gameState: GameState.values[map[GameFieldNames.GameState] as int],
       deadStones: List<Position>.from(
-        (map['deadStones'] as List).map<Position>(
+        (map[GameFieldNames.DeadStones] as List).map<Position>(
           (e) => Position.fromString(e as String),
         ),
       ),
-      winnerId: map['winnerId'] as String?,
-      komi: map['komi'] as double,
-      finalTerritoryScores: List<int>.from(map['finalTerritoryScores'] as List),
-      gameOverMethod: map['gameOverMethod'] == null
+      winnerId: map[GameFieldNames.WinnerId] as String?,
+      komi: map[GameFieldNames.Komi] as double,
+      finalTerritoryScores:
+          List<int>.from(map[GameFieldNames.FinalTerritoryScores] as List),
+      gameOverMethod: map[GameFieldNames.GameOverMethod] == null
           ? null
-          : GameOverMethod.values[map['gameOverMethod'] as int],
-      endTime: map['endTime'] == null
+          : GameOverMethod.values[map[GameFieldNames.GameOverMethod] as int],
+      endTime: map[GameFieldNames.EndTime] == null
           ? null
-          : DateTime.parse(map['endTime'] as String),
-      stoneSelectionType:
-          StoneSelectionType.values[map['stoneSelectionType'] as int],
-      gameCreator: map['gameCreator'] as String?,
+          : DateTime.parse(map[GameFieldNames.EndTime] as String),
+      stoneSelectionType: StoneSelectionType
+          .values[map[GameFieldNames.StoneSelectionType] as int],
+      gameCreator: map[GameFieldNames.GameCreator] as String?,
       playerTimeSnapshots: List<PlayerTimeSnapshot>.from(
-        (map['playerTimeSnapshots'] as List).map<PlayerTimeSnapshot>(
+        (map[GameFieldNames.PlayerTimeSnapshots] as List)
+            .map<PlayerTimeSnapshot>(
           (e) => PlayerTimeSnapshot.fromMap(e as Map<String, dynamic>),
         ),
       ),
+      playersRatings:
+          List<int>.from(map[GameFieldNames.PlayersRatings] as List),
+      playersRatingsDiff:
+          List<int>.from(map[GameFieldNames.PlayersRatingsDiff] as List),
     );
   }
 
@@ -181,6 +298,8 @@ class Game {
     StoneSelectionType? stoneSelectionType,
     String? gameCreator,
     List<PlayerTimeSnapshot>? playerTimeSnapshots,
+    List<int>? playersRatings,
+    List<int>? playersRatingsDiff,
   }) {
     return Game(
       gameId: gameId ?? this.gameId,
@@ -203,6 +322,8 @@ class Game {
       stoneSelectionType: stoneSelectionType ?? this.stoneSelectionType,
       gameCreator: gameCreator ?? this.gameCreator,
       playerTimeSnapshots: playerTimeSnapshots ?? this.playerTimeSnapshots,
+      playersRatings: playersRatings ?? this.playersRatings,
+      playersRatingsDiff: playersRatingsDiff ?? this.playersRatingsDiff,
     );
   }
 
@@ -276,22 +397,21 @@ class PlayerTimeSnapshot {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'snapshotTimestamp': snapshotTimestamp.toString(),
-      'mainTimeMilliseconds': mainTimeMilliseconds,
-      'byoYomisLeft': byoYomisLeft,
-      'byoYomiActive': byoYomiActive,
-      'timeActive': timeActive,
+      GameFieldNames.SnapshotTimestamp: snapshotTimestamp.toIso8601String(),
+      GameFieldNames.MainTimeMilliseconds: mainTimeMilliseconds,
+      GameFieldNames.ByoYomisLeft: byoYomisLeft,
+      GameFieldNames.ByoYomiActive: byoYomiActive,
+      GameFieldNames.TimeActive: timeActive,
     };
   }
 
   factory PlayerTimeSnapshot.fromMap(Map<String, dynamic> map) {
     return PlayerTimeSnapshot(
-      snapshotTimestamp: DateTime.parse(map['snapshotTimestamp']),
-      mainTimeMilliseconds: map['mainTimeMilliseconds'] as int,
-      byoYomisLeft:
-          map['byoYomisLeft'] != null ? map['byoYomisLeft'] as int : null,
-      byoYomiActive: map['byoYomiActive'] as bool,
-      timeActive: map['timeActive'] as bool,
+      snapshotTimestamp: DateTime.parse(map[GameFieldNames.SnapshotTimestamp] as String),
+      mainTimeMilliseconds: map[GameFieldNames.MainTimeMilliseconds] as int,
+      byoYomisLeft: map[GameFieldNames.ByoYomisLeft] as int?,
+      byoYomiActive: map[GameFieldNames.ByoYomiActive] as bool,
+      timeActive: map[GameFieldNames.TimeActive] as bool,
     );
   }
 

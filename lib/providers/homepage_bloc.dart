@@ -58,16 +58,9 @@ class HomepageBloc extends ChangeNotifier {
   }
 
   void listenForNewGame() {
-    signalRProvider.hubConnection.on('gameUpdate',
-        (SignalRMessageListRaw? messagesRaw) {
-      assert(messagesRaw != null, "New Game data can't be null");
-      var messageList = messagesRaw!.signalRMessageList;
-      if (messageList.length != 1) {
-        throw "messages count ${messageList.length}, WHAT TO DO?";
-      }
-      var message = messageList.first;
+    signalRProvider.userMessagesStream.listen((message) {
       if (message.type == SignalRMessageTypes.newGame) {
-        debugPrint("Found new game");
+        debugPrint("New game was recieved");
         final newGameMessage = (message.data as NewGameCreatedMessage);
         if (newGameMessage.game.creatorInfo.id == authBloc.currentUserRaw.id) {
           myGames.add(
@@ -75,7 +68,6 @@ class HomepageBloc extends ChangeNotifier {
         } else {
           availableGames.add(newGameMessage.game);
         }
-        debugPrint("Found new game done");
         notifyListeners();
       }
     });

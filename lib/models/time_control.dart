@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:go/core/utils/string_formatting.dart';
+import 'package:go/models/game.dart';
 
 final TimeControl blitz =
     TimeControl(mainTimeSeconds: 300, incrementSeconds: 0, byoYomiTime: null);
@@ -25,20 +26,19 @@ class TimeControl {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'mainTimeSeconds': mainTimeSeconds,
-      'incrementSeconds': incrementSeconds,
-      'byoYomiTime': byoYomiTime?.toMap(),
+      GameFieldNames.MainTimeSeconds: mainTimeSeconds,
+      GameFieldNames.IncrementSeconds: incrementSeconds,
+      GameFieldNames.ByoYomiTime: byoYomiTime?.toMap(),
     };
   }
 
   factory TimeControl.fromMap(Map<String, dynamic> map) {
     return TimeControl(
-      mainTimeSeconds: map['mainTimeSeconds'] as int,
-      incrementSeconds: map['incrementSeconds'] != null
-          ? map['incrementSeconds'] as int
-          : null,
-      byoYomiTime: map['byoYomiTime'] != null
-          ? ByoYomiTime.fromMap(map['byoYomiTime'] as Map<String, dynamic>)
+      mainTimeSeconds: map[GameFieldNames.MainTimeSeconds] as int,
+      incrementSeconds: map[GameFieldNames.IncrementSeconds] as int?,
+      byoYomiTime: map[GameFieldNames.ByoYomiTime] != null
+          ? ByoYomiTime.fromMap(
+              map[GameFieldNames.ByoYomiTime] as Map<String, dynamic>)
           : null,
     );
   }
