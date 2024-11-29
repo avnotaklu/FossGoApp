@@ -30,8 +30,7 @@ class LogInProvider {
     }
 
     var logInRes = TaskEither(
-            () => api.passwordLogin(UserDetailsDto(email, false, password)))
-        .mapLeft(AppError.fromApiError);
+        () => api.passwordLogin(UserDetailsDto(email, false, password)));
 
     var res = logInRes.flatMap(
         (r) => TaskEither(() => authBloc.registerUser(r.token, r.user)));

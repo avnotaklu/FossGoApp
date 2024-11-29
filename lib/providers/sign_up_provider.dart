@@ -32,8 +32,7 @@ class SignUpProvider {
     }
 
     var logInRes = TaskEither(
-            () => api.passwordSignUp(UserDetailsDto(email, false, password)))
-        .mapLeft(AppError.fromApiError);
+        () => api.passwordSignUp(UserDetailsDto(email, false, password)));
 
     var res = logInRes.flatMap(
         (r) => TaskEither(() => authBloc.registerUser(r.token, r.user)));

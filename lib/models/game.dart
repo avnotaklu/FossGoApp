@@ -52,7 +52,7 @@ class GameFieldNames {
   static const String PlayersRatingsDiff = "playersRatingsDiff";
 
   // control Control
-  static const String MainTimeSeconds = "mts"; // time control only mainTimeSeconds seconds
+  static const String MainTimeSeconds = "mainTimeSeconds"; // time control only mainTimeSeconds seconds
   static const String IncrementSeconds = "incrementSeconds";
   static const String ByoYomiTime = "byoYomiTime";
   static const String TimeStandard = "timeStandard";

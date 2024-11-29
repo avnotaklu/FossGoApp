@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
+import 'package:go/core/error_handling/app_error.dart';
+import 'package:go/core/error_handling/http_error.dart';
+import 'package:go/core/foundation/either.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/services/available_game.dart';
@@ -28,256 +33,157 @@ import 'package:http/http.dart' as http;
 class Api {
   static const String baseUrl = "http://192.168.145.71:8080";
 
-  Future<Either<ApiError, UserAuthenticationModel>> googleSignIn(
+  Future<Either<HttpError, http.Response>> get(Uri url, String? token) async {
+    try {
+      var res = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) ...{"Authorization": "Bearer $token"}
+        },
+      );
+      return right(res);
+    } on SocketException {
+      return left(HttpError(message: "No internet connection"));
+    } on HttpException {
+      return left(HttpError(message: "Can't find the server"));
+    } on FormatException {
+      rethrow;
+    }
+  }
+
+  Future<Either<HttpError, http.Response>> post(
+      Uri url, String? body, String? token) async {
+    try {
+      var res = await http.post(
+        url,
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) ...{"Authorization": "Bearer $token"}
+        },
+      );
+      return right(res);
+    } on SocketException {
+      return left(HttpError(message: "No internet connection"));
+    } on HttpException {
+      return left(HttpError(message: "Can't find the server"));
+    } on FormatException {
+      rethrow;
+    }
+  }
+
+  Future<Either<AppError, UserAuthenticationModel>> googleSignIn(
       GoogleSignInAuthentication userCreds) async {
     var idToken = userCreds.idToken!;
-    var res = await http.get(Uri.parse("$baseUrl/Authentication/GoogleSignIn"),
-        headers: {"Authorization": "Bearer $idToken"});
-    if (res.statusCode == 200) {
-      return Either.right(UserAuthenticationModel.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(ApiError(
-      //     message: "Couldn't sign in with google", statusCode: res.statusCode));
-    }
+    var res =
+        await get(Uri.parse("$baseUrl/Authentication/GoogleSignIn"), idToken);
+    return convert(res, (a) => UserAuthenticationModel.fromJson(a));
   }
 
-  Future<Either<ApiError, UserAuthenticationModel>> passwordSignUp(
+  Future<Either<AppError, UserAuthenticationModel>> passwordSignUp(
       UserDetailsDto details) async {
-    var res = await http.post(
+    var res = await post(
       Uri.parse("$baseUrl/Authentication/PasswordSignUp"),
-      body: details.toJson(),
-      headers: {"Content-Type": "application/json"},
+      details.toJson(),
+      null,
     );
-    if (res.statusCode == 200) {
-      return Either.right(UserAuthenticationModel.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+
+    return convert(res, (a) => UserAuthenticationModel.fromJson(a));
   }
 
-  Future<Either<ApiError, UserAuthenticationModel>> passwordLogin(
+  Future<Either<AppError, UserAuthenticationModel>> passwordLogin(
       UserDetailsDto details) async {
-    var res = await http.post(
-      Uri.parse("$baseUrl/Authentication/PasswordLogIn"),
-      body: details.toJson(),
-      headers: {"Content-Type": "application/json"},
-    );
-    if (res.statusCode == 200) {
-      return Either.right(UserAuthenticationModel.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res = await post(Uri.parse("$baseUrl/Authentication/PasswordLogIn"),
+        details.toJson(), null);
+
+    return convert(res, (a) => UserAuthenticationModel.fromJson(a));
   }
 
-  Future<Either<ApiError, UserAuthenticationModel>> getUser(
+  Future<Either<AppError, UserAuthenticationModel>> getUser(
       String token) async {
-    var res = await http.get(
-      Uri.parse("$baseUrl/Authentication/GetUser"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(UserAuthenticationModel.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res = await get(Uri.parse("$baseUrl/Authentication/GetUser"), token);
+
+    return convert(res, (a) => UserAuthenticationModel.fromJson(a));
   }
 
-  Future<Either<ApiError, RegisterUserResult>> registerPlayer(
+  Future<Either<AppError, RegisterUserResult>> registerPlayer(
       RegisterPlayerDto data, String token) async {
-    var res = await http.post(
-      Uri.parse("$baseUrl/Player/RegisterPlayer"),
-      body: data.toJson(),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(RegisterUserResult.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res = await post(
+        Uri.parse("$baseUrl/Player/RegisterPlayer"), data.toJson(), token);
+
+    return convert(res, (a) => RegisterUserResult.fromJson(a));
   }
 
-  Future<Either<ApiError, Game>> createGame(
+  Future<Either<AppError, Game>> createGame(
       GameCreationDto data, String token) async {
-    var res = await http.post(
-      Uri.parse("$baseUrl/Player/CreateGame"),
-      body: data.toJson(),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(Game.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res = await post(
+        Uri.parse("$baseUrl/Player/CreateGame"), data.toJson(), token);
+
+    return convert(res, (a) => Game.fromJson(a));
   }
 
-  Future<Either<ApiError, GameJoinMessage>> joinGame(
+  Future<Either<AppError, GameJoinMessage>> joinGame(
       GameJoinDto data, String token) async {
-    var res = await http.post(
-      Uri.parse("$baseUrl/Player/JoinGame"),
-      body: data.toJson(),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(GameJoinMessage.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res =
+        await post(Uri.parse("$baseUrl/Player/JoinGame"), data.toJson(), token);
+
+    return convert(res, (a) => GameJoinMessage.fromJson(a));
   }
 
-  Future<Either<ApiError, NewMoveResult>> makeMove(
+  Future<Either<AppError, NewMoveResult>> makeMove(
       MovePosition data, String token, String gameId) async {
     // var data = MovePosition(x: 0, y: 0);
-    var res = await http.post(
-      Uri.parse("$baseUrl/Game/$gameId/MakeMove"),
-      body: data.toJson(),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(NewMoveResult.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res = await post(
+        Uri.parse("$baseUrl/Game/$gameId/MakeMove"), data.toJson(), token);
+
+    return convert(res, (a) => NewMoveResult.fromJson(a));
   }
 
-  Future<Either<ApiError, Game>> continueGame(
+  Future<Either<AppError, Game>> continueGame(
       String token, String gameId) async {
     // var data = MovePosition(x: 0, y: 0);
-    var res = await http.post(
-      Uri.parse("$baseUrl/Game/$gameId/ContinueGame"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(Game.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res = await post(
+        Uri.parse("$baseUrl/Game/$gameId/ContinueGame"), null, token);
+
+    return convert(res, (a) => Game.fromJson(a));
   }
 
-  Future<Either<ApiError, Game>> acceptScores(
+  Future<Either<AppError, Game>> acceptScores(
       String token, String gameId) async {
     // var data = MovePosition(x: 0, y: 0);
-    var res = await http.post(
-      Uri.parse("$baseUrl/Game/$gameId/AcceptScores"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(Game.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res = await post(
+        Uri.parse("$baseUrl/Game/$gameId/AcceptScores"), null, token);
+
+    return convert(res, (a) => Game.fromJson(a));
   }
 
-  Future<Either<ApiError, Game>> resignGame(String token, String gameId) async {
+  Future<Either<AppError, Game>> resignGame(String token, String gameId) async {
     // var data = MovePosition(x: 0, y: 0);
-    var res = await http.post(
-      Uri.parse("$baseUrl/Game/$gameId/ResignGame"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(Game.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res =
+        await post(Uri.parse("$baseUrl/Game/$gameId/ResignGame"), null, token);
+    return convert(res, (a) => Game.fromJson(a));
   }
 
-  Future<Either<ApiError, Game>> editDeadStoneCluster(
+  Future<Either<AppError, Game>> editDeadStoneCluster(
       EditDeadStoneClusterDto dto, String token, String gameId) async {
     // var data = MovePosition(x: 0, y: 0);
-    var res = await http.post(
-      Uri.parse("$baseUrl/Game/$gameId/EditDeadStoneCluster"),
-      body: dto.toJson(),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(Game.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res = await post(
+        Uri.parse("$baseUrl/Game/$gameId/EditDeadStoneCluster"),
+        dto.toJson(),
+        token);
+    return convert(res, (a) => Game.fromJson(a));
   }
 
-  Future<Either<ApiError, AvailableGames>> getAvailableGames(
+  Future<Either<AppError, AvailableGames>> getAvailableGames(
       String token) async {
-    var res = await http.get(
-      Uri.parse("$baseUrl/Player/AvailableGames"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(AvailableGames.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+    var res = await get(Uri.parse("$baseUrl/Player/AvailableGames"), token);
+    return convert(res, (a) => AvailableGames.fromJson(a));
   }
 
-  Future<Either<ApiError, MyGames>> getMyGames(String token) async {
-    var res = await http.get(
-      Uri.parse("$baseUrl/Player/MyGames"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-    );
-    if (res.statusCode == 200) {
-      return Either.right(MyGames.fromJson(res.body));
-    } else {
-      return Either.left(getErrorFromResponse(res));
-      // return Either.left(
-      //     ApiError(message: res.body, statusCode: res.statusCode));
-    }
+  Future<Either<AppError, MyGames>> getMyGames(String token) async {
+    var res = await get(Uri.parse("$baseUrl/Player/MyGames"), token);
+    return convert(res, (a) => MyGames.fromJson(a));
   }
 
   static ApiError getErrorFromResponse(http.Response res) {
@@ -285,5 +191,18 @@ class Api {
         message: res.body,
         statusCode: res.statusCode,
         reasonPhrase: res.reasonPhrase);
+  }
+
+  static Either<AppError, T> convert<T>(
+      Either<HttpError, http.Response> res, T Function(String) fromJson) {
+    return res.mapLeft(AppError.fromHttpError).mapUp<T>(
+      (a) {
+        if (a.statusCode == 200) {
+          return Either.right(fromJson(a.body));
+        } else {
+          return Either.left(AppError.fromApiError(getErrorFromResponse(a)));
+        }
+      },
+    ).flatMap((a) => a);
   }
 }

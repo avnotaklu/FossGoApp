@@ -34,7 +34,7 @@ class HomepageBloc extends ChangeNotifier {
   Future<Either<AppError, GameJoinMessage?>> joinGame(
       String gameId, String token) async {
     var game = await api.joinGame(GameJoinDto(gameId: gameId), token);
-    return game.mapLeft(AppError.fromApiError);
+    return game;
   }
 
   Future<void> getAvailableGames(String token) async {

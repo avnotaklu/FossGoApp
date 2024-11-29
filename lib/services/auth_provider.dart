@@ -69,8 +69,7 @@ class AuthProvider {
       //     idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
 
       // final result = await authService.signInWithCredentials(credential);
-      final result = TaskEither(() => api.googleSignIn(googleAuth))
-          .mapLeft(AppError.fromApiError);
+      final result = TaskEither(() => api.googleSignIn(googleAuth));
 
       var res = result.flatMap((r) {
         return TaskEither(() => registerUser(r.token, r.user));
@@ -118,7 +117,7 @@ class AuthProvider {
       RegisterPlayerDto(connectionId: signalRConnectionId),
       token,
     );
-    return registerRes.mapLeft(AppError.fromApiError);
+    return registerRes;
     // registerRes.fold((e) {
     //   debugPrint(e.toString());
     // }, (v) {
@@ -144,7 +143,7 @@ class AuthProvider {
   Future<Either<AppError, UserAuthenticationModel>> getUser(
       String token) async {
     var res = await api.getUser(token);
-    return res.mapLeft((AppError.fromApiError));
+    return res;
   }
 
   Future<void> logout() async {

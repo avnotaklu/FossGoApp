@@ -460,7 +460,7 @@ class GameStateBloc extends ChangeNotifier {
 
   Future<Either<AppError, Game>> continueGame() async {
     return (await api.continueGame(authBloc.token!, game.gameId))
-        .fold((l) => left(AppError.fromApiError(l)), (r) {
+        .fold((l) => left(l), (r) {
       game = r;
       applyContinue();
       return right(r);
@@ -490,7 +490,7 @@ class GameStateBloc extends ChangeNotifier {
 
   Future<Either<AppError, Game>> resignGame() async {
     return (await api.resignGame(authBloc.token!, game.gameId))
-        .fold((l) => left(AppError.fromApiError(l)), (r) {
+        .fold((l) => left(l), (r) {
       game = r;
       applyEndGame();
       return right(r);

@@ -112,6 +112,6 @@ class CreateGameProvider extends ChangeNotifier {
     );
     var game = await api.createGame(
         GameCreationDto(rows: boardSize.rows, columns: boardSize.cols, timeControl: timeControl, firstPlayerStone: _mStoneType), token);
-    return game.mapLeft(AppError.fromApiError);
+    return game;
   }
 }
