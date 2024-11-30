@@ -28,9 +28,9 @@ enum GameState {
 
 class GameFieldNames {
   // Game
-  static const String ID = "iD";
+  static const String ID = "gameId";
   static const String Rows = "rows";
-  static const String Cols = "cols";
+  static const String Columns = "columns";
   static const String TimeControl = "timeControl";
   static const String PlayerTimeSnapshots = "playerTimeSnapshots";
   static const String PlaygroundMap = "playgroundMap";
@@ -171,7 +171,7 @@ class Game {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       GameFieldNames.Rows: rows,
-      GameFieldNames.Cols: columns,
+      GameFieldNames.Columns: columns,
       GameFieldNames.TimeControl: timeControl.toMap(),
       GameFieldNames.PlaygroundMap: playgroundMap.map<String, int>(
         (key, value) => MapEntry(
@@ -209,7 +209,7 @@ class Game {
     return Game(
       gameId: map[GameFieldNames.ID] as String,
       rows: map[GameFieldNames.Rows] as int,
-      columns: map[GameFieldNames.Cols] as int,
+      columns: map[GameFieldNames.Columns] as int,
       timeControl: TimeControl.fromMap(
           map[GameFieldNames.TimeControl] as Map<String, dynamic>),
       playgroundMap: Map<String, int>.from(map[GameFieldNames.PlaygroundMap])
