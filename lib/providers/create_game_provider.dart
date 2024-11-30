@@ -8,6 +8,7 @@ import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/constants/constants.dart' as Constants;
+import 'package:go/services/time_control_dto.dart';
 import 'package:provider/provider.dart';
 
 class CreateGameProvider extends ChangeNotifier {
@@ -16,8 +17,8 @@ class CreateGameProvider extends ChangeNotifier {
   var api = Api();
 
   // static const title = 'Grid List';
-  Constants.BoardSize _boardSize = Constants.boardSizes[0];
-  Constants.BoardSize get boardSize => _boardSize;
+  Constants.BoardSizeData _boardSize = Constants.boardSizes[0];
+  Constants.BoardSizeData get boardSize => _boardSize;
 
   StoneSelectionType _mStoneType = StoneSelectionType.auto;
   StoneSelectionType get mStoneType => _mStoneType;
@@ -26,20 +27,20 @@ class CreateGameProvider extends ChangeNotifier {
   Constants.TimeFormat _timeFormat = Constants.TimeFormat.suddenDeath;
   Constants.TimeFormat get timeFormat => _timeFormat;
 
-  Constants.TimeStandard _timeStandard = Constants.TimeStandard.blitz;
-  Constants.TimeStandard get timeStandard => _timeStandard;
+  TimeStandard _timeStandard = TimeStandard.blitz;
+  TimeStandard get timeStandard => _timeStandard;
 
-  int _mainTimeSeconds =
-      Constants.timeStandardMainTime[Constants.TimeStandard.blitz]!;
-  int get mainTimeSeconds => _mainTimeSeconds;
+  Duration _mainTime =
+      Constants.timeStandardMainTime[TimeStandard.blitz]!;
+  Duration get mainTimeSeconds => _mainTime;
 
-  int _incrementSeconds =
-      Constants.timeStandardIncrement[Constants.TimeStandard.blitz]!;
-  int get incrementSeconds => _incrementSeconds;
+  Duration _increment =
+      Constants.timeStandardIncrement[TimeStandard.blitz]!;
+  Duration get incrementSeconds => _increment;
 
-  int _byoYomiSeconds =
-      Constants.timeStandardByoYomiTime[Constants.TimeStandard.blitz]!;
-  int get byoYomiSeconds => _byoYomiSeconds;
+  Duration _byoYomi =
+      Constants.timeStandardByoYomiTime[TimeStandard.blitz]!;
+  Duration get byoYomiSeconds => _byoYomi;
 
   final byoYomiCountController = TextEditingController();
 
@@ -50,7 +51,7 @@ class CreateGameProvider extends ChangeNotifier {
     byoYomiCountController.text = "3";
   }
 
-  void changeBoardSize(Constants.BoardSize size) {
+  void changeBoardSize(Constants.BoardSizeData size) {
     _boardSize = size;
     notifyListeners();
   }
@@ -65,28 +66,28 @@ class CreateGameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeTimeStandard(Constants.TimeStandard standard) {
+  void changeTimeStandard(TimeStandard standard) {
     _timeStandard = standard;
 
-    _mainTimeSeconds = Constants.timeStandardMainTime[standard]!;
-    _incrementSeconds = Constants.timeStandardIncrement[standard]!;
-    _byoYomiSeconds = Constants.timeStandardByoYomiTime[standard]!;
+    _mainTime = Constants.timeStandardMainTime[standard]!;
+    _increment = Constants.timeStandardIncrement[standard]!;
+    _byoYomi = Constants.timeStandardByoYomiTime[standard]!;
 
     notifyListeners();
   }
 
-  void changeMainTimeSeconds(int seconds) {
-    _mainTimeSeconds = seconds;
+  void changeMainTimeSeconds(Duration d) {
+    _mainTime = d;
     notifyListeners();
   }
 
-  void changeIncrementSeconds(int seconds) {
-    _incrementSeconds = seconds;
+  void changeIncrementSeconds(Duration d) {
+    _increment = d;
     notifyListeners();
   }
 
-  void changeByoYomiSeconds(int seconds) {
-    _byoYomiSeconds = seconds;
+  void changeByoYomiSeconds(Duration d) {
+    _byoYomi = d;
     notifyListeners();
   }
 
@@ -99,19 +100,26 @@ class CreateGameProvider extends ChangeNotifier {
   }
 
   Future<Either<AppError, Game>> createGame(String token) async {
-    var timeControl = TimeControl(
-      mainTimeSeconds: _mainTimeSeconds,
-      incrementSeconds:
-          _timeFormat == Constants.TimeFormat.fischer ? _incrementSeconds : null,
+    var timeControl = TimeControlDto(
+      mainTimeSeconds: _mainTime.inSeconds,
+      incrementSeconds: _timeFormat == Constants.TimeFormat.fischer
+          ? _increment.inSeconds
+          : null,
       byoYomiTime: _timeFormat == Constants.TimeFormat.byoYomi
           ? ByoYomiTime(
               byoYomis: byoYomiCount,
-              byoYomiSeconds: _byoYomiSeconds,
+              byoYomiSeconds: _byoYomi.inSeconds,
             )
           : null,
     );
     var game = await api.createGame(
-        GameCreationDto(rows: boardSize.rows, columns: boardSize.cols, timeControl: timeControl, firstPlayerStone: _mStoneType), token);
+        GameCreationDto(
+          rows: boardSize.rows,
+          columns: boardSize.cols,
+          timeControl: timeControl,
+          firstPlayerStone: _mStoneType,
+        ),
+        token);
     return game;
   }
 }

@@ -6,6 +6,8 @@ import 'package:go/models/position.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
+import 'package:go/services/public_user_info.dart';
+import 'package:go/ui/homepage/find_match_result.dart';
 
 class SignalRMessage {
   final String type;
@@ -69,6 +71,8 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
       return GameOverMessage.fromMap(map);
     case SignalRMessageTypes.gameTimerUpdate:
       return GameTimerUpdateMessage.fromMap(map);
+    case SignalRMessageTypes.matchFound:
+      return FindMatchResult.fromMap(map);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     case SignalRMessageTypes.acceptedScores:
@@ -94,6 +98,8 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
       return GameOverMessage.fromJson(json);
     case SignalRMessageTypes.gameTimerUpdate:
       return GameTimerUpdateMessage.fromJson(json);
+    case SignalRMessageTypes.matchFound:
+      return FindMatchResult.fromJson(json);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     case SignalRMessageTypes.acceptedScores:
@@ -113,6 +119,7 @@ class SignalRMessageTypes {
   static const String acceptedScores = "AcceptedScores";
   static const String gameOver = "GameOver";
   static const String gameTimerUpdate = "GameTimerUpdate";
+  static const String matchFound = "MatchFound";
 }
 
 abstract class SignalRMessageType {
@@ -294,30 +301,4 @@ class GameJoinMessage extends SignalRMessageType {
 
   factory GameJoinMessage.fromJson(String source) =>
       GameJoinMessage.fromMap(json.decode(source) as Map<String, dynamic>);
-}
-
-class PublicUserInfo {
-  final String email;
-  final String id;
-
-  PublicUserInfo(this.email, this.id);
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'email': email,
-      'id': id,
-    };
-  }
-
-  factory PublicUserInfo.fromMap(Map<String, dynamic> map) {
-    return PublicUserInfo(
-      map['email'] as String,
-      map['id'] as String,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory PublicUserInfo.fromJson(String source) =>
-      PublicUserInfo.fromMap(json.decode(source) as Map<String, dynamic>);
 }

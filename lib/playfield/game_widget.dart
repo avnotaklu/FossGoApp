@@ -6,7 +6,9 @@ import 'dart:math';
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/string_formatting.dart';
+import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
@@ -44,12 +46,12 @@ class GameWidget extends StatelessWidget {
   }
 
   String? mainTime(TimeControl time) {
-    return StringFormatting.totalSecondsToDurationRepr(time.mainTimeSeconds);
+    return Duration(seconds: time.mainTimeSeconds).durationRepr();
   }
 
   String? incrementTime(TimeControl time) {
     if (time.incrementSeconds == null) return null;
-    return StringFormatting.totalSecondsToDurationRepr(time.incrementSeconds!);
+    return Duration(seconds: time.incrementSeconds!).durationRepr();
   }
 
   String gameTitle(TimeControl time) {

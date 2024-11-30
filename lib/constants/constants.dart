@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:go/models/position.dart';
+import 'package:go/models/time_control.dart';
 import 'package:go/playfield/board.dart';
+import 'package:go/services/time_control_dto.dart';
 
-class BoardSize {
+class BoardSizeData {
   final int rows;
   final int cols;
 
-  const BoardSize(this.rows, this.cols);
+  BoardSize get boardSize {
+    if (rows == 9 && cols == 9) {
+      return BoardSize.nine;
+    } else if (rows == 13 && cols == 13) {
+      return BoardSize.thirteen;
+    } else if (rows == 19 && cols == 19) {
+      return BoardSize.nineteen;
+    } else {
+      return BoardSize.other;
+    }
+  }
+
+  const BoardSizeData(this.rows, this.cols);
 
   @override
   String toString() {
@@ -18,10 +32,17 @@ const String title = "Go";
 // const List<String> boardsizes = ["9x9", "13x13", "19x19"];
 // const List<(int rows, int cols)> boardsizes = [(9, 9), (13, 13), (19, 19)];
 
-const List<BoardSize> boardSizes = [
-  BoardSize(9, 9),
-  BoardSize(13, 13),
-  BoardSize(19, 19),
+enum BoardSize {
+  nine,
+  thirteen,
+  nineteen,
+  other,
+}
+
+const List<BoardSizeData> boardSizes = [
+  BoardSizeData(9, 9),
+  BoardSizeData(13, 13),
+  BoardSizeData(19, 19),
 ];
 
 enum TimeFormat {
@@ -34,32 +55,49 @@ enum TimeFormat {
   const TimeFormat(this.formatName);
 }
 
-// const List<String> timeFormats = [
-//   "Byo-Yomi",
-//   "Fischer",
-//   "Sudden Death",
-// ];
+final List<TimeControlDto> timeControlsForMatch = [
+  // TimeStandard.blitz
+  TimeControlDto(
+    mainTimeSeconds: 30,
+    incrementSeconds: 3,
+    byoYomiTime: null,
+  ),
+  TimeControlDto(
+      mainTimeSeconds: 30,
+      incrementSeconds: null,
+      byoYomiTime: ByoYomiTime(byoYomis: 5, byoYomiSeconds: 10)),
+  // TimeStandard.rapid
+  TimeControlDto(
+    mainTimeSeconds: 5 * 60,
+    incrementSeconds: 5,
+    byoYomiTime: null,
+  ),
+  TimeControlDto(
+      mainTimeSeconds: 5 * 60,
+      incrementSeconds: null,
+      byoYomiTime: ByoYomiTime(byoYomis: 5, byoYomiSeconds: 30)),
 
-enum TimeStandard {
-  blitz("Blitz"),
-  rapid("Rapid"),
-  classical("Classical");
+  TimeControlDto(
+    mainTimeSeconds: 10 * 60,
+    incrementSeconds: 10,
+    byoYomiTime: null,
+  ),
+  TimeControlDto(
+      mainTimeSeconds: 20 * 60,
+      incrementSeconds: null,
+      byoYomiTime: ByoYomiTime(byoYomis: 5, byoYomiSeconds: 30)),
+];
 
-  final String standardName;
-
-  const TimeStandard(this.standardName);
-}
-
-const Map<TimeStandard, int> timeStandardMainTime = {
-  TimeStandard.blitz: 300,
-  TimeStandard.rapid: 1200,
-  TimeStandard.classical: 3600,
+const Map<TimeStandard, Duration> timeStandardMainTime = {
+  TimeStandard.blitz: Duration(seconds: 300),
+  TimeStandard.rapid: Duration(seconds: 1200),
+  TimeStandard.classical: Duration(seconds: 3600),
+  TimeStandard.correspondence: Duration(days: 1),
 };
 
-final Map<TimeStandard, List<int>> timeStandardMainTimeAlt = {
+final Map<TimeStandard, List<Duration>> timeStandardMainTimeAlt = {
   TimeStandard.blitz: [
-    30,
-    120,
+    const Duration(seconds: 180),
     timeStandardMainTime[TimeStandard.blitz]!,
   ],
   TimeStandard.rapid: [
@@ -68,15 +106,19 @@ final Map<TimeStandard, List<int>> timeStandardMainTimeAlt = {
   TimeStandard.classical: [
     timeStandardMainTime[TimeStandard.classical]!,
   ],
+  TimeStandard.correspondence: [
+    timeStandardMainTime[TimeStandard.correspondence]!,
+  ],
 };
 
-const Map<TimeStandard, int> timeStandardIncrement = {
-  TimeStandard.blitz: 2,
-  TimeStandard.rapid: 5,
-  TimeStandard.classical: 10,
+const Map<TimeStandard, Duration> timeStandardIncrement = {
+  TimeStandard.blitz: Duration(seconds: 2),
+  TimeStandard.rapid: Duration(seconds: 5),
+  TimeStandard.classical: Duration(seconds: 10),
+  TimeStandard.correspondence: Duration(hours: 1)
 };
 
-final Map<TimeStandard, List<int>> timeStandardIncrementAlt = {
+final Map<TimeStandard, List<Duration>> timeStandardIncrementAlt = {
   TimeStandard.blitz: [
     timeStandardIncrement[TimeStandard.blitz]!,
   ],
@@ -86,15 +128,19 @@ final Map<TimeStandard, List<int>> timeStandardIncrementAlt = {
   TimeStandard.classical: [
     timeStandardIncrement[TimeStandard.classical]!,
   ],
+  TimeStandard.correspondence: [
+    timeStandardIncrement[TimeStandard.correspondence]!,
+  ],
 };
 
-const Map<TimeStandard, int> timeStandardByoYomiTime = {
-  TimeStandard.blitz: 10,
-  TimeStandard.rapid: 30,
-  TimeStandard.classical: 60,
+const Map<TimeStandard, Duration> timeStandardByoYomiTime = {
+  TimeStandard.blitz: Duration(seconds: 10),
+  TimeStandard.rapid: Duration(seconds: 30),
+  TimeStandard.classical: Duration(seconds: 60),
+  TimeStandard.correspondence: Duration(minutes: 5)
 };
 
-final Map<TimeStandard, List<int>> timeStandardByoYomiTimeAlt = {
+final Map<TimeStandard, List<Duration>> timeStandardByoYomiTimeAlt = {
   TimeStandard.blitz: [
     timeStandardByoYomiTime[TimeStandard.blitz]!,
   ],
@@ -103,6 +149,9 @@ final Map<TimeStandard, List<int>> timeStandardByoYomiTimeAlt = {
   ],
   TimeStandard.classical: [
     timeStandardByoYomiTime[TimeStandard.classical]!,
+  ],
+  TimeStandard.correspondence: [
+    timeStandardByoYomiTime[TimeStandard.correspondence]!,
   ],
 };
 

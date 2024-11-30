@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/string_formatting.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
@@ -137,11 +138,12 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
                               .byoYomisLeft!
                               .toString()
                           : (context
-                              .read<GameStateBloc>()
-                              .game
-                              .timeControl
-                              .byoYomiTime
-                              ?.byoYomis ?? "")
+                                      .read<GameStateBloc>()
+                                      .game
+                                      .timeControl
+                                      .byoYomiTime
+                                      ?.byoYomis ??
+                                  "")
                               .toString(),
                       style: TextStyle(
                         fontSize: 20,
@@ -149,7 +151,7 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
                       ),
                     ),
                     Text(
-                      " x ${StringFormatting.totalSecondsToDurationRepr(context.read<GameStateBloc>().game.timeControl.byoYomiTime!.byoYomiSeconds)}",
+                      " x ${(Duration(seconds: context.read<GameStateBloc>().game.timeControl.byoYomiTime!.byoYomiSeconds)).durationRepr()}",
                       style: TextStyle(
                         fontSize: 20,
                         color: Constants.playerColors[widget.player.turn],

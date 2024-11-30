@@ -118,14 +118,6 @@ class AuthProvider {
       token,
     );
     return registerRes;
-    // registerRes.fold((e) {
-    //   debugPrint(e.toString());
-    // }, (v) {
-    //   otherActivePlayers = v.otherActivePlayers;
-
-    //   if (!locallyInitialedAuth) {
-    //   }
-    // });
   }
 
   void storeToken(String token) {

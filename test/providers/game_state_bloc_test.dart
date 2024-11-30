@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
+import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/utils/system_utilities.dart';
+import 'package:go/gameplay/create/stone_selection_widget.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
@@ -19,7 +21,9 @@ import 'package:go/services/app_user.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/new_move_result.dart';
+import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
+import 'package:go/services/user_rating.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -139,7 +143,7 @@ void main() {
       ));
     }
 
-    return right<ApiError, NewMoveResult>(
+    return right<AppError, NewMoveResult>(
         NewMoveResult(game: gameResult, result: true));
   });
 
@@ -184,7 +188,7 @@ void main() {
   final joinMessage = GameJoinMessage(
     // The time server says the user joined at
     time: currentTime,
-    players: [player1(), player2()],
+    otherPlayerData: player2(),
     game: sGame,
   );
 
@@ -273,11 +277,11 @@ void main() {
 }
 
 PublicUserInfo player1() {
-  return PublicUserInfo("1@1.com", "1");
+  return PublicUserInfo("1@1.com", "1", UserRating(userId: "1", ratings: {}));
 }
 
 PublicUserInfo player2() {
-  return PublicUserInfo("2@2.com", "2");
+  return PublicUserInfo("2@2.com", "2", UserRating(userId: "2", ratings: {}));
 }
 
 List<List<List<int>> Function()> getBoardForMoveCount() {
@@ -348,7 +352,7 @@ Game gameConstructor(
     )),
     moves: moves,
     players: {"1": StoneType.black, "2": StoneType.white},
-    prisoners: {"1": scores[0], "2": scores[1]},
+    prisoners: [scores[0], scores[1]],
     startTime: startTime,
     koPositionInLastMove: koPosition,
     gameState: GameState.playing,
@@ -358,6 +362,11 @@ Game gameConstructor(
     finalTerritoryScores: [],
     endTime: null,
     gameOverMethod: null,
+    playerTimeSnapshots: [],
+    gameCreator: "1",
+    stoneSelectionType: StoneSelectionType.black,
+    playersRatings: [],
+    playersRatingsDiff: [],
   );
 }
 

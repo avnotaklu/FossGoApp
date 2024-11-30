@@ -8,7 +8,10 @@ import 'package:go/services/api.dart';
 import 'package:go/services/auth.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/services/signal_r_message.dart';
+import 'package:go/ui/homepage/find_match_dto.dart';
+import 'package:signalr_netcore/default_reconnect_policy.dart';
 import 'package:signalr_netcore/hub_connection_builder.dart';
+import 'package:signalr_netcore/json_hub_protocol.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
 class SignalRProvider extends ChangeNotifier {
@@ -33,7 +36,13 @@ class SignalRProvider extends ChangeNotifier {
           message: "Connection not started",
           connectionState: RegisterationConnectionState.Disconnected,
         )) {
-    hubConnection = HubConnectionBuilder().withUrl(serverUrl).build();
+    hubConnection = HubConnectionBuilder()
+        .withUrl(serverUrl)
+        // .withHubProtocol(JsonHubProtocol())
+        .build();
+    hubConnection.onclose(({Exception? error}) {
+      debugPrint(error.toString());
+    });
     listenMessages();
   }
 
@@ -53,7 +62,8 @@ class SignalRProvider extends ChangeNotifier {
   final StreamController<SignalRMessage> _gameMessageController =
       StreamController<SignalRMessage>.broadcast();
 
-  Stream<SignalRMessage> get userMessagesStream => _gameMessageController.stream;
+  Stream<SignalRMessage> get userMessagesStream =>
+      _gameMessageController.stream;
 
   final StreamController<SignalRMessage> _userMessageController =
       StreamController<SignalRMessage>.broadcast();
@@ -86,6 +96,18 @@ class SignalRProvider extends ChangeNotifier {
     });
   }
 
+  // Hub methods
+  Future<void> findMatch(FindMatchDto dto) async {
+    var res = await hubConnection
+        .invoke('FindMatch', args: [dto.toMap()]).catchError((e) {
+      var err = "Error in findMatch: $e";
+      debugPrint(err);
+      return err;
+    });
+    debugPrint(res.toString());
+  }
+
+  // Utils
   void silenceMessages() {
     hubConnection.off('gameUpdate');
   }

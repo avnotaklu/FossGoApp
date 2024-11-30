@@ -10,6 +10,7 @@ import 'package:go/providers/homepage_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
+import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:provider/provider.dart';
 

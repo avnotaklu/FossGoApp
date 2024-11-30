@@ -4,6 +4,7 @@ import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/string_formatting.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/gameplay/create/stone_selection_widget.dart';
@@ -124,7 +125,7 @@ class CreateGameScreen extends StatelessWidget {
                 height: MediaQuery.sizeOf(context).height * 0.08,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
-                  children: Constants.TimeStandard.values.map((item) {
+                  children: TimeStandard.values.take(4).map((item) {
                     return Expanded(
                       child: GestureDetector(
                         onTap: () {
@@ -165,7 +166,7 @@ class CreateGameScreen extends StatelessWidget {
                         ),
                       ),
                       if (cgp.timeFormat == Constants.TimeFormat.fischer) ...[
-                        Spacer(),
+                        const Spacer(),
                         Expanded(
                           flex: 3,
                           child: timeSelectionDropdown(
@@ -180,7 +181,7 @@ class CreateGameScreen extends StatelessWidget {
                     ],
                   ),
                   // Byo yomi stuff
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
 
@@ -191,7 +192,7 @@ class CreateGameScreen extends StatelessWidget {
                             flex: 3,
                             child: timeSelectionTextField(
                                 "Byo-Yomis", cgp.byoYomiCountController)),
-                        Spacer(),
+                        const Spacer(),
                         Expanded(
                           flex: 3,
                           child: timeSelectionDropdown(
@@ -249,7 +250,7 @@ class CreateGameScreen extends StatelessWidget {
                               value: signalRProvider,
                             )
                           ],
-                          builder: (context, child) => GameWidget(true),
+                          builder: (context, child) => const GameWidget(true),
                         ),
                       ),
                     );
@@ -295,19 +296,19 @@ class CreateGameScreen extends StatelessWidget {
 
   Widget sectionHeading(String heading) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Text(
         heading,
-        style: TextStyle(color: Colors.white70, fontSize: 22),
+        style: const TextStyle(color: Colors.white70, fontSize: 22),
       ),
     );
   }
 
-  Widget timeSelectionDropdown(List<int> altTimes, int selectedTime,
-      void Function(int) onTap, String label) {
+  Widget timeSelectionDropdown(List<Duration> altTimes, Duration selectedTime,
+      void Function(Duration) onTap, String label) {
     return Container(
       height: 60,
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
@@ -319,7 +320,7 @@ class CreateGameScreen extends StatelessWidget {
           border: InputBorder.none,
           label: Text(
             label,
-            style: TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: 14),
           ),
         ),
         child: DropdownButtonHideUnderline(
@@ -331,7 +332,7 @@ class CreateGameScreen extends StatelessWidget {
                 value: entry,
                 child: Container(
                   child: Text(
-                    StringFormatting.totalSecondsToDurationRepr(entry),
+                    entry.durationRepr(),
                     style: TextStyle(color: defaultTheme.mainHighlightColor),
                   ),
                 ),
@@ -359,7 +360,7 @@ class CreateGameScreen extends StatelessWidget {
       String label, TextEditingController controller) {
     return Container(
       height: 60,
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
@@ -368,15 +369,15 @@ class CreateGameScreen extends StatelessWidget {
       // dropdown below..
       child: TextField(
         controller: controller,
-        keyboardType: TextInputType.numberWithOptions(),
+        keyboardType: const TextInputType.numberWithOptions(),
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
         ],
         decoration: InputDecoration(
-          border: UnderlineInputBorder(),
+          border: const UnderlineInputBorder(),
           label: Text(
             label,
-            style: TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: 14),
           ),
         ),
       ),

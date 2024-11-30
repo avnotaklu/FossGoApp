@@ -21,6 +21,7 @@ import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/join_message.dart';
+import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/ui/gameui/time_watch.dart';
 import 'package:go/utils/player.dart';

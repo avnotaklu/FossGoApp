@@ -1,25 +1,51 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:go/constants/constants.dart';
+import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/string_formatting.dart';
+import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/models/game.dart';
 
-final TimeControl blitz =
-    TimeControl(mainTimeSeconds: 300, incrementSeconds: 0, byoYomiTime: null);
+enum TimeStandard {
+  blitz("Blitz"),
+  rapid("Rapid"),
+  classical("Classical"),
+  correspondence("Correspondence"),
+  other("Other");
 
-final TimeControl rapid =
-    TimeControl(mainTimeSeconds: 1200, incrementSeconds: 0, byoYomiTime: null);
+  final String standardName;
 
-final TimeControl classical =
-    TimeControl(mainTimeSeconds: 3600, incrementSeconds: 0, byoYomiTime: null);
+  const TimeStandard(this.standardName);
+}
+
+final TimeControl blitz = TimeControl(
+    mainTimeSeconds: 300,
+    incrementSeconds: 0,
+    byoYomiTime: null,
+    timeStandard: TimeStandard.blitz);
+
+final TimeControl rapid = TimeControl(
+    mainTimeSeconds: 1200,
+    incrementSeconds: 0,
+    byoYomiTime: null,
+    timeStandard: TimeStandard.rapid);
+
+final TimeControl classical = TimeControl(
+    mainTimeSeconds: 3600,
+    incrementSeconds: 0,
+    byoYomiTime: null,
+    timeStandard: TimeStandard.classical);
 
 class TimeControl {
   final int mainTimeSeconds;
   final int? incrementSeconds;
   final ByoYomiTime? byoYomiTime;
+  final TimeStandard timeStandard;
 
   TimeControl({
     required this.mainTimeSeconds,
+    required this.timeStandard,
     this.incrementSeconds,
     this.byoYomiTime,
   });
@@ -27,6 +53,7 @@ class TimeControl {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       GameFieldNames.MainTimeSeconds: mainTimeSeconds,
+      GameFieldNames.TimeStandard: timeStandard.index,
       GameFieldNames.IncrementSeconds: incrementSeconds,
       GameFieldNames.ByoYomiTime: byoYomiTime?.toMap(),
     };
@@ -35,6 +62,8 @@ class TimeControl {
   factory TimeControl.fromMap(Map<String, dynamic> map) {
     return TimeControl(
       mainTimeSeconds: map[GameFieldNames.MainTimeSeconds] as int,
+      timeStandard:
+          TimeStandard.values[map[GameFieldNames.TimeStandard] as int],
       incrementSeconds: map[GameFieldNames.IncrementSeconds] as int?,
       byoYomiTime: map[GameFieldNames.ByoYomiTime] != null
           ? ByoYomiTime.fromMap(
@@ -50,12 +79,11 @@ class TimeControl {
 
   String repr() {
     var repr = "";
-    final mainTimeString =
-        StringFormatting.totalSecondsToDurationRepr(mainTimeSeconds);
+    final mainTimeString = Duration(seconds: mainTimeSeconds).durationRepr();
     repr += mainTimeString;
     if (incrementSeconds != null) {
       final incrementTimeString =
-          StringFormatting.totalSecondsToDurationRepr(incrementSeconds!);
+          Duration(seconds: incrementSeconds!).durationRepr();
       repr += " + $incrementTimeString";
     }
 

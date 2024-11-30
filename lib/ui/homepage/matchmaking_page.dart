@@ -2,19 +2,32 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/foundation/duration.dart';
+import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/models/time_control.dart';
+import 'package:go/providers/signalr_bloc.dart';
+import 'package:go/services/time_control_dto.dart';
+import 'package:go/ui/homepage/find_match_dto.dart';
 import 'package:go/ui/homepage/matchmaking_provider.dart';
 import 'package:go/utils/widgets/selection_badge.dart';
 import 'package:go/views/my_app_bar.dart';
 import 'package:provider/provider.dart';
 
-class MatchmakingPage extends StatelessWidget {
+class MatchmakingPage extends StatefulWidget {
   const MatchmakingPage({super.key});
+
+  @override
+  State<MatchmakingPage> createState() => _MatchmakingPageState();
+}
+
+class _MatchmakingPageState extends State<MatchmakingPage> {
+  @override
+  void initState() {}
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => MatchmakingProvider(),
+      create: (context) => MatchmakingProvider(context.read<SignalRProvider>()),
       builder: (context, child) => Scaffold(
         appBar: const MyAppBar(
           'Baduk',
@@ -29,14 +42,14 @@ class MatchmakingPage extends StatelessWidget {
                 'Board Size',
                 style: headingTextStyle(),
               ),
-              Container(
+              SizedBox(
                   height: MediaQuery.sizeOf(context).width * 0.15,
                   child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: provider.allBoardSizes
                           .map(
                             (size) => Expanded(
-                              child: BoardSizeSelector(size, provider),
+                              child: boardSizeSelector(size, provider),
                             ),
                           )
                           .toList())),
@@ -44,23 +57,35 @@ class MatchmakingPage extends StatelessWidget {
                 'Time Controls',
                 style: headingTextStyle(),
               ),
-              Container(
-                  height: MediaQuery.sizeOf(context).width * 0.25,
-                  child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: provider.allTimeControls
-                          .map(
-                            (timeControl) => Expanded(
-                                child: TimeSelector(timeControl, provider)),
-                          )
-                          .toList())),
+              Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: provider.allTimeControls
+                      .map(
+                        (timeControl) => Container(
+                          height: MediaQuery.sizeOf(context).width * 0.15,
+                          child: timeSelector(timeControl, provider),
+                        ),
+                      )
+                      .toList()),
               Spacer(),
               Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      provider.findMatch();
+
+                      context
+                          .read<MatchmakingProvider>()
+                          .onMatchmakingUpdated
+                          .stream
+                          .listen((event) {
+                        if (context.mounted) {
+                          Navigator.pushNamed(context, '/game');
+                        }
+                      });
+                    },
                     child: Text("Find", style: headingTextStyle()),
                   ),
                 ],
@@ -72,7 +97,8 @@ class MatchmakingPage extends StatelessWidget {
     );
   }
 
-  Widget BoardSizeSelector((int, int) size, MatchmakingProvider provider) {
+  Widget boardSizeSelector(
+      MatchableBoardSizes size, MatchmakingProvider provider) {
     var selected = provider.selectedBoardSizes.contains(size);
     return GestureDetector(
       onTap: () {
@@ -85,7 +111,7 @@ class MatchmakingPage extends StatelessWidget {
           child: SelectionBadge(
             selected: selected,
             child: Center(
-              child: Text("${size.$1}x${size.$2}", style: pointTextStyle()),
+              child: Text(size.boardName, style: pointTextStyle()),
             ),
           ),
         ),
@@ -93,12 +119,12 @@ class MatchmakingPage extends StatelessWidget {
     );
   }
 
-  Widget TimeSelector(
-      (String, TimeControl) timeControl, MatchmakingProvider provider) {
-    var selected = provider.selectedTimeControls.contains(timeControl.$2);
+  Widget timeSelector(
+      TimeControlDto timeControl, MatchmakingProvider provider) {
+    var selected = provider.selectedTimeControls.contains(timeControl);
     return GestureDetector(
       onTap: () {
-        provider.modifyTimeControl(timeControl.$2, !selected);
+        provider.modifyTimeControl(timeControl, !selected);
       },
       child: Card(
         color: defaultTheme.mainHighlightColor,
@@ -106,7 +132,8 @@ class MatchmakingPage extends StatelessWidget {
           padding: const EdgeInsets.only(right: 25.0, top: 5.0),
           child: SelectionBadge(
             selected: selected,
-            child: Center(child: Text(timeControl.$1, style: pointTextStyle())),
+            child: Center(
+                child: Text(timeControl.repr(), style: pointTextStyle())),
           ),
         ),
       ),
