@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:barebones_timer/timer_controller.dart';
+import 'package:barebones_timer/timer_display.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'package:go/core/utils/string_formatting.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/models/game_move.dart';
+import 'package:go/models/time_control.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/services/auth_provider.dart';
@@ -21,13 +24,12 @@ import 'package:timer_count_down/timer_count_down.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
 class GameTimer extends StatefulWidget {
-  final CountdownController mController;
+  final TimerController mController;
   final Player player;
-  final Duration time;
 
   @override
   State<GameTimer> createState() => _GameTimerState();
-  const GameTimer(this.time, controller, {super.key, required pplayer})
+  const GameTimer(controller, {super.key, required pplayer})
       : mController = controller,
         player = pplayer;
 }
@@ -43,7 +45,6 @@ class _GameTimerState extends State<GameTimer> {
   Widget build(BuildContext context) {
     return PlayerCountdownTimer(
       controller: widget.mController,
-      time: widget.time,
       player: widget.player,
     );
   }
@@ -53,13 +54,11 @@ class PlayerCountdownTimer extends StatefulWidget {
   const PlayerCountdownTimer({
     super.key,
     required this.controller,
-    required this.time,
     required this.player,
   });
 
   final Player player;
-  final Duration time;
-  final CountdownController controller;
+  final TimerController controller;
 
   @override
   State<PlayerCountdownTimer> createState() => _PlayerCountdownTimerState();
@@ -90,15 +89,11 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
         ));
   }
 
-  Countdown timer() {
-    debugPrint("Building with time : ${widget.time.durationRepr()}");
-    return Countdown(
+  Widget timer() {
+    return TimerDisplay(
       controller: widget.controller,
-      // seconds: GameData.of(context)!.match.time,
-      duration: widget.time > const Duration(seconds: 0)
-          ? widget.time
-          : const Duration(seconds: 0),
-      build: (BuildContext context, double time) {
+      builder: (controller) {
+        var time = controller.duration.inSeconds;
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -162,12 +157,6 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
             ]
           ],
         );
-      },
-
-      interval: const Duration(milliseconds: 100),
-
-      onFinished: () {
-        print('Timer is done!');
       },
     );
   }

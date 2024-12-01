@@ -145,11 +145,10 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                   //     .times[context.read<GameStateBloc>().otherStone.index],
                   // builder: (context, value, child) {
                   Consumer<GameStateBloc>(builder: (context, bloc, child) {
-                debugPrint(
-                    "New Time with time : ${bloc.times[widget.player.turn].durationRepr()}");
+                // debugPrint(
+                //     "New Time with time : ${bloc.times[widget.player.turn].durationRepr()}");
 
                 return GameTimer(
-                  bloc.times[widget.player.turn],
                   context
                       .read<GameStateBloc>()
                       .timerController[widget.player.turn],

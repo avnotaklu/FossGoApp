@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:barebones_timer/timer_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
@@ -77,14 +78,10 @@ class GameStateBloc extends ChangeNotifier {
   AppUser myPlayerUserInfo;
   PublicUserInfo? otherPlayerUserInfo;
 
-  List<Duration> times;
+  // List<Duration> times;
+  final List<TimerController> _controller;
 
-  final List<CountdownController> _controller = [
-    CountdownController(autoStart: false),
-    CountdownController(autoStart: false)
-  ];
-
-  List<CountdownController> get timerController => _controller;
+  List<TimerController> get timerController => _controller;
 
   StageType curStageTypeNotifier;
   StageType get curStageType => curStageTypeNotifier;
@@ -117,9 +114,17 @@ class GameStateBloc extends ChangeNotifier {
     // this.curStage,
     StageType curStageType,
     GameJoinMessage? joiningData,
-  )   : times = [
-          Duration(seconds: game.timeControl.mainTimeSeconds),
-          Duration(seconds: game.timeControl.mainTimeSeconds)
+  )   : _controller = [
+          TimerController(
+            autoStart: false,
+            updateInterval: const Duration(milliseconds: 100),
+            duration: Duration(seconds: game.timeControl.mainTimeSeconds),
+          ),
+          TimerController(
+            autoStart: false,
+            updateInterval: const Duration(milliseconds: 100),
+            duration: Duration(seconds: game.timeControl.mainTimeSeconds),
+          )
         ],
         curStageTypeNotifier = curStageType,
         myPlayerUserInfo = authBloc.currentUserRaw {
@@ -216,7 +221,7 @@ class GameStateBloc extends ChangeNotifier {
       // The controller checks for presense of onStart method, which is supplied via ui
       // check `CountdownController.start() in timer_controller.dart`
 
-      Future.delayed(Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         startPausedTimerOfActivePlayer();
       });
       curStageType = StageType.Gameplay;
@@ -335,33 +340,33 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   void applyMoveResult(Game game) {
-    var curTime = systemUtilities.currentTime;
-    debugPrint(curTime.toString());
-    var lastPlayerPreInc =
-        this.game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds -
-            (curTime.difference(this
-                    .game
-                    .playerTimeSnapshots[1 - playerTurn]
-                    .snapshotTimestamp))
-                .inMilliseconds;
+    // var curTime = systemUtilities.currentTime;
+    // debugPrint(curTime.toString());
+    // var lastPlayerPreInc =
+    //     this.game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds -
+    //         (curTime.difference(this
+    //                 .game
+    //                 .playerTimeSnapshots[1 - playerTurn]
+    //                 .snapshotTimestamp))
+    //             .inMilliseconds;
 
     this.game = game;
 
     setPlayerTimes();
     recalculatePlayerLagTime();
 
-    if (game.timeControl.incrementSeconds != null) {
-      var lastPlayerNewTime = times[1 - playerTurn].inMilliseconds;
-      // this.game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds - (curTime.difference(this
-      //             .game
-      //             .playerTimeSnapshots[1 - playerTurn]
-      //             .snapshotTimestamp))
-      //         .inMilliseconds;
+    // if (game.timeControl.incrementSeconds != null) {
+    //   var lastPlayerNewTime = times[1 - playerTurn].inMilliseconds;
+    //   // this.game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds - (curTime.difference(this
+    //   //             .game
+    //   //             .playerTimeSnapshots[1 - playerTurn]
+    //   //             .snapshotTimestamp))
+    //   //         .inMilliseconds;
 
-      var inc = game.timeControl.incrementSeconds! * 1000;
-      // assert((lastPlayerNewTime - lastPlayerPreInc - inc).abs() < 100,
-      //     "Increment not added correctly $lastPlayerNewTime != $lastPlayerPreInc + $inc");
-    }
+    //   var inc = game.timeControl.incrementSeconds! * 1000;
+    //   // assert((lastPlayerNewTime - lastPlayerPreInc - inc).abs() < 100,
+    //   //     "Increment not added correctly $lastPlayerNewTime != $lastPlayerPreInc + $inc");
+    // }
 
     if (game.gameState == GameState.scoreCalculation) {
       curStageType = StageType.ScoreCalculation;
@@ -420,19 +425,21 @@ class GameStateBloc extends ChangeNotifier {
   // }
 
   void setPlayerTimes() {
-    times[playerTurn] = Duration(
+    _controller[playerTurn].updateDuration(Duration(
         milliseconds:
-            game.playerTimeSnapshots[playerTurn].mainTimeMilliseconds);
-    times[1 - playerTurn] = Duration(
+            game.playerTimeSnapshots[playerTurn].mainTimeMilliseconds));
+
+    _controller[1 - playerTurn].updateDuration(Duration(
         milliseconds:
-            game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds);
+            game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds));
   }
 
   void recalculatePlayerLagTime() {
     // Also calculate the lag time and incorporate that for player with turn
-    times[playerTurn] -= systemUtilities.currentTime.difference(
-      game.playerTimeSnapshots[playerTurn].snapshotTimestamp,
-    );
+    _controller[playerTurn].updateDuration(_controller[playerTurn].duration -
+        systemUtilities.currentTime.difference(
+          game.playerTimeSnapshots[playerTurn].snapshotTimestamp,
+        ));
   }
 
   void setTurnTimer() {

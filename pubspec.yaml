@@ -36,10 +36,15 @@ dependencies:
   cupertino_icons: ^1.0.2
   share_plus: ^10.0.2
   web_socket_channel: ^3.0.1
-  timer_count_down:
+  barebones_timer:
     git:
-      url: git@github.com:avnotaklu/simple_count_down.git
+      url: git@github.com:avnotaklu/barebones_timer.git
       ref: master
+  timer_count_down:
+    # git:
+    #   url: git@github.com:avnotaklu/simple_count_down.git
+    #   ref: master
+    path: /home/ssp/dart/packages/simple_count_down
   ntp: ^2.0.0
  #  firebase_core:  any
     # ^1.8.0
