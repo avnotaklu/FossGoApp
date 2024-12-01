@@ -2,6 +2,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go/core/foundation/duration.dart';
+import 'package:go/models/game.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:provider/provider.dart';
 
@@ -128,30 +130,35 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                 ],
               )),
           Expanded(
-            flex: 2,
-            child:
-                //  GameData.of(context)?.match.uid[widget.player] == null
-                //     ? const Center(child: CircularProgressIndicator())
-                //     :
-                ValueListenableBuilder(
-              valueListenable:
+              flex: 2,
+              child:
+                  //  GameData.of(context)?.match.uid[widget.player] == null
+                  //     ? const Center(child: CircularProgressIndicator())
+                  //     :
+                  //   ValueListenableBuilder(
+                  // valueListenable:
                   // widget.type == PlayerCardType.my
                   // ?
-                  context.read<GameStateBloc>().times[widget.player.turn],
-              // : context
-              //     .read<GameStateBloc>()
-              //     .times[context.read<GameStateBloc>().otherStone.index],
-              builder: (context, value, child) {
+                  // context.read<GameStateBloc>().times[widget.player.turn],
+                  // : context
+                  //     .read<GameStateBloc>()
+                  //     .times[context.read<GameStateBloc>().otherStone.index],
+                  // builder: (context, value, child) {
+                  Consumer<GameStateBloc>(builder: (context, bloc, child) {
+                debugPrint(
+                    "New Time with time : ${bloc.times[widget.player.turn].durationRepr()}");
+
                 return GameTimer(
-                  value,
+                  bloc.times[widget.player.turn],
                   context
                       .read<GameStateBloc>()
                       .timerController[widget.player.turn],
                   pplayer: widget.player,
                 );
-              },
-            ),
-          ),
+              })
+              // },
+              // ),
+              ),
         ],
       ),
     );

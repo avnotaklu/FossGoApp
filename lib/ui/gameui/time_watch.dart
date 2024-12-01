@@ -86,88 +86,89 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
         ),
         child: Align(
           alignment: Alignment.centerRight,
-          child: Countdown(
-            controller: widget.controller,
-            // seconds: GameData.of(context)!.match.time,
-            duration: widget.time > const Duration(seconds: 0)
-                ? widget.time
-                : const Duration(seconds: 0),
-            build: (BuildContext context, double time) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    (time.toInt() ~/ 60).toString(),
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Constants.playerColors[widget.player.turn],
-                    ),
-                  ),
-                  Text(
-                    ':',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Constants.playerColors[widget.player.turn],
-                    ),
-                  ),
-                  Text((time.toInt() % 60).toString(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Constants.playerColors[widget.player.turn],
-                      )),
-                  if (context
-                          .read<GameStateBloc>()
-                          .game
-                          .timeControl
-                          .byoYomiTime !=
-                      null) ...[
-                    Text(
-                      ' + ',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Constants.playerColors[widget.player.turn],
-                      ),
-                    ),
-                    Text(
-                      context.read<GameStateBloc>().game.startTime != null
-                          ? context
-                              .read<GameStateBloc>()
-                              .game
-                              .playerTimeSnapshots[widget.player.turn]
-                              .byoYomisLeft!
-                              .toString()
-                          : (context
-                                      .read<GameStateBloc>()
-                                      .game
-                                      .timeControl
-                                      .byoYomiTime
-                                      ?.byoYomis ??
-                                  "")
-                              .toString(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Constants.playerColors[widget.player.turn],
-                      ),
-                    ),
-                    Text(
-                      " x ${(Duration(seconds: context.read<GameStateBloc>().game.timeControl.byoYomiTime!.byoYomiSeconds)).durationRepr()}",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Constants.playerColors[widget.player.turn],
-                      ),
-                    ),
-                  ]
-                ],
-              );
-            },
-
-            interval: const Duration(milliseconds: 100),
-
-            onFinished: () {
-              print('Timer is done!');
-            },
-          ),
+          child: timer(),
         ));
+  }
+
+  Countdown timer() {
+    debugPrint("Building with time : ${widget.time.durationRepr()}");
+    return Countdown(
+      controller: widget.controller,
+      // seconds: GameData.of(context)!.match.time,
+      duration: widget.time > const Duration(seconds: 0)
+          ? widget.time
+          : const Duration(seconds: 0),
+      build: (BuildContext context, double time) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              (time.toInt() ~/ 60).toString(),
+              style: TextStyle(
+                fontSize: 20,
+                color: Constants.playerColors[widget.player.turn],
+              ),
+            ),
+            Text(
+              ':',
+              style: TextStyle(
+                fontSize: 20,
+                color: Constants.playerColors[widget.player.turn],
+              ),
+            ),
+            Text((time.toInt() % 60).toString(),
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Constants.playerColors[widget.player.turn],
+                )),
+            if (context.read<GameStateBloc>().game.timeControl.byoYomiTime !=
+                null) ...[
+              Text(
+                ' + ',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Constants.playerColors[widget.player.turn],
+                ),
+              ),
+              Text(
+                context.read<GameStateBloc>().game.startTime != null
+                    ? context
+                        .read<GameStateBloc>()
+                        .game
+                        .playerTimeSnapshots[widget.player.turn]
+                        .byoYomisLeft!
+                        .toString()
+                    : (context
+                                .read<GameStateBloc>()
+                                .game
+                                .timeControl
+                                .byoYomiTime
+                                ?.byoYomis ??
+                            "")
+                        .toString(),
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Constants.playerColors[widget.player.turn],
+                ),
+              ),
+              Text(
+                " x ${(Duration(seconds: context.read<GameStateBloc>().game.timeControl.byoYomiTime!.byoYomiSeconds)).durationRepr()}",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Constants.playerColors[widget.player.turn],
+                ),
+              ),
+            ]
+          ],
+        );
+      },
+
+      interval: const Duration(milliseconds: 100),
+
+      onFinished: () {
+        print('Timer is done!');
+      },
+    );
   }
 }

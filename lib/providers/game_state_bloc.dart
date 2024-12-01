@@ -45,6 +45,7 @@ class GameStateBloc extends ChangeNotifier {
   StoneType get otherStone => StoneType.values[1 - myStone.index];
 
   int get turn => game.moves.length;
+  int get playerTurn => game.moves.length % 2;
 
   int get gametime => game.timeControl.mainTimeSeconds;
 
@@ -76,7 +77,7 @@ class GameStateBloc extends ChangeNotifier {
   AppUser myPlayerUserInfo;
   PublicUserInfo? otherPlayerUserInfo;
 
-  List<ValueNotifier<Duration>> times;
+  List<Duration> times;
 
   final List<CountdownController> _controller = [
     CountdownController(autoStart: false),
@@ -85,11 +86,11 @@ class GameStateBloc extends ChangeNotifier {
 
   List<CountdownController> get timerController => _controller;
 
-  ValueNotifier<StageType> curStageTypeNotifier;
-  StageType get curStageType => curStageTypeNotifier.value;
+  StageType curStageTypeNotifier;
+  StageType get curStageType => curStageTypeNotifier;
   set curStageType(StageType stage) {
     // cur_stage.disposeStage();
-    curStageTypeNotifier.value = stage;
+    curStageTypeNotifier = stage;
   }
   // Stream<bool> listenForGameEndRequest() {
   //   return signalRbloc.gameMessageController.stream
@@ -117,10 +118,10 @@ class GameStateBloc extends ChangeNotifier {
     StageType curStageType,
     GameJoinMessage? joiningData,
   )   : times = [
-          ValueNotifier(Duration(seconds: game.timeControl.mainTimeSeconds)),
-          ValueNotifier(Duration(seconds: game.timeControl.mainTimeSeconds))
+          Duration(seconds: game.timeControl.mainTimeSeconds),
+          Duration(seconds: game.timeControl.mainTimeSeconds)
         ],
-        curStageTypeNotifier = ValueNotifier(curStageType),
+        curStageTypeNotifier = curStageType,
         myPlayerUserInfo = authBloc.currentUserRaw {
     setupGame(game, joiningData);
     setupStreams();
@@ -206,13 +207,9 @@ class GameStateBloc extends ChangeNotifier {
 
     if (game.startTime != null && game.gameState == GameState.playing) {
       var now = systemUtilities.currentTime;
+
       setPlayerTimes();
-      times[getPlayerWithTurn.turn].value =
-          times[getPlayerWithTurn.turn].value -
-              now.difference(
-                game.playerTimeSnapshots[getPlayerWithTurn.turn]
-                    .snapshotTimestamp,
-              );
+      recalculatePlayerLagTime();
 
       // HACK: This is a hack to make sure that the timer starts after the ui is rendered
       // The reason is that the timer controller is not started even when called start() function
@@ -276,9 +273,13 @@ class GameStateBloc extends ChangeNotifier {
       final newPlayerTimeSnapshots = game.playerTimeSnapshots;
       newPlayerTimeSnapshots[message.player.index] = message.currentPlayerTime;
       game.copyWith(playerTimeSnapshots: newPlayerTimeSnapshots);
-      setTurnTimer();
+
+      setPlayerTimes();
+      recalculatePlayerLagTime();
 
       notifyListeners();
+
+      setTurnTimer();
     });
   }
 
@@ -334,15 +335,41 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   void applyMoveResult(Game game) {
+    var curTime = systemUtilities.currentTime;
+    debugPrint(curTime.toString());
+    var lastPlayerPreInc =
+        this.game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds -
+            (curTime.difference(this
+                    .game
+                    .playerTimeSnapshots[1 - playerTurn]
+                    .snapshotTimestamp))
+                .inMilliseconds;
+
     this.game = game;
 
-    setTurnTimer();
+    setPlayerTimes();
+    recalculatePlayerLagTime();
+
+    if (game.timeControl.incrementSeconds != null) {
+      var lastPlayerNewTime = times[1 - playerTurn].inMilliseconds;
+      // this.game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds - (curTime.difference(this
+      //             .game
+      //             .playerTimeSnapshots[1 - playerTurn]
+      //             .snapshotTimestamp))
+      //         .inMilliseconds;
+
+      var inc = game.timeControl.incrementSeconds! * 1000;
+      // assert((lastPlayerNewTime - lastPlayerPreInc - inc).abs() < 100,
+      //     "Increment not added correctly $lastPlayerNewTime != $lastPlayerPreInc + $inc");
+    }
 
     if (game.gameState == GameState.scoreCalculation) {
       curStageType = StageType.ScoreCalculation;
     }
 
     notifyListeners();
+
+    setTurnTimer();
   }
 
   // void applyTimesOfDiscreteSections() {
@@ -393,30 +420,29 @@ class GameStateBloc extends ChangeNotifier {
   // }
 
   void setPlayerTimes() {
-    times[0].value = Duration(
-        milliseconds: game.playerTimeSnapshots[0].mainTimeMilliseconds);
-    times[1].value = Duration(
-        milliseconds: game.playerTimeSnapshots[1].mainTimeMilliseconds);
+    times[playerTurn] = Duration(
+        milliseconds:
+            game.playerTimeSnapshots[playerTurn].mainTimeMilliseconds);
+    times[1 - playerTurn] = Duration(
+        milliseconds:
+            game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds);
+  }
+
+  void recalculatePlayerLagTime() {
+    // Also calculate the lag time and incorporate that for player with turn
+    times[playerTurn] -= systemUtilities.currentTime.difference(
+      game.playerTimeSnapshots[playerTurn].snapshotTimestamp,
+    );
   }
 
   void setTurnTimer() {
-    int turn = this.turn;
-
-    setPlayerTimes();
-
-    var turnPlayerTimer = timerController[turn % 2];
+    var turnPlayerTimer = timerController[playerTurn];
     turnPlayerTimer.start();
 
     // applyTimesOfDiscreteSections();
 
-    var nonTurnPlayerTimer = timerController[1 - turn % 2];
+    var nonTurnPlayerTimer = timerController[1 - playerTurn];
     nonTurnPlayerTimer.pause();
-
-    // Also calculate the lag time and incorporate that for player with turn
-    times[getPlayerWithTurn.turn].value -=
-        systemUtilities.currentTime.difference(
-      game.playerTimeSnapshots[getPlayerWithTurn.turn].snapshotTimestamp,
-    );
   }
 
   String getPlayerIdFromTurn(int turn) {

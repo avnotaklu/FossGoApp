@@ -75,7 +75,8 @@ class GameWidget extends StatelessWidget {
         GameState.paused => StageType.BeforeStart,
       };
 
-  const GameWidget({required this.game, required this.joinMessage, super.key}); // Board
+  const GameWidget(
+      {required this.game, required this.joinMessage, super.key}); // Board
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -101,7 +102,10 @@ class GameWidget extends StatelessWidget {
                 return MultiProvider(
                   providers: [
                     ChangeNotifierProvider(
-                        create: (context) => GameBoardBloc(context.read()))
+                      create: (context) => GameBoardBloc(
+                        context.read(),
+                      ),
+                    )
                   ],
                   builder: (context, child) {
                     context.read<GameBoardBloc>().setupGame(game);
@@ -121,26 +125,29 @@ class GameWidget extends StatelessWidget {
                             gameBoardBloc: context.read<GameBoardBloc>(),
                           );
                         },
-                        builder: (context, child) =>
-                            ValueListenableBuilder<StageType>(
-                          valueListenable: context
+                        builder: (context, child) {
+                          // return ValueListenableBuilder<StageType>( valueListenable: context
+                          //     .read<GameStateBloc>()!
+                          //     .curStageTypeNotifier,
+                          // builder: (context, stageType, idk) {
+                          var stage = context
                               .read<GameStateBloc>()!
-                              .curStageTypeNotifier,
-                          builder: (context, stageType, idk) {
-                            var stage = stageType.stageConstructor(
-                              context,
-                              context.read(),
-                            );
-                            return ChangeNotifierProvider<Stage>.value(
-                              value: stage,
-                              builder: (context, child) {
-                                return Consumer<ScoreCalculationBloc>(
-                                    builder: (context, dyn, child) =>
-                                        WrapperGame(game));
-                              },
-                            );
-                          },
-                        ),
+                              .curStageTypeNotifier
+                              .stageConstructor(
+                                context,
+                                context.read(),
+                              );
+                          return ChangeNotifierProvider<Stage>.value(
+                            value: stage,
+                            builder: (context, child) {
+                              return Consumer<ScoreCalculationBloc>(
+                                  builder: (context, dyn, child) =>
+                                      WrapperGame(game));
+                            },
+                          );
+                        },
+                        // );
+                        // },
                       ),
                     );
                   },
