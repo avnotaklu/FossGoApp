@@ -31,7 +31,7 @@ import 'package:http/http.dart' as http;
 // }
 
 class Api {
-  static const String baseUrl = "http://192.168.145.71:8080";
+  static const String baseUrl = "http://192.168.109.71:8080";
 
   Future<Either<HttpError, http.Response>> get(Uri url, String? token) async {
     try {

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/string_formatting.dart';
+import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/create/utils.dart';
 import 'package:go/gameplay/middleware/multiplayer_data.dart';
@@ -22,9 +23,12 @@ import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/game_board_bloc.dart';
 import 'package:go/providers/signalr_bloc.dart';
+import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/models/game_match.dart';
 import 'package:go/models/game.dart';
+import 'package:go/services/join_message.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:go/ui/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:go/views/my_app_bar.dart';
@@ -37,7 +41,8 @@ import 'board.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
 class GameWidget extends StatelessWidget {
-  final bool enteredAsGameCreator;
+  final Game game;
+  final GameJoinMessage? joinMessage;
 
   String? byoYomiTime(TimeControl time) {
     return time.byoYomiTime != null
@@ -62,67 +67,88 @@ class GameWidget extends StatelessWidget {
     return "$mTime${iTime ?? ""}${bTime ?? ""}";
   }
 
-  const GameWidget(this.enteredAsGameCreator, {super.key}); // Board
+  StageType getStageType() => switch (game.gameState) {
+        GameState.waitingForStart => StageType.BeforeStart,
+        GameState.playing => StageType.Gameplay,
+        GameState.scoreCalculation => StageType.ScoreCalculation,
+        GameState.ended => StageType.GameEnd,
+        GameState.paused => StageType.BeforeStart,
+      };
+
+  const GameWidget({required this.game, required this.joinMessage, super.key}); // Board
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MyAppBar(
-        gameTitle(context.read<GameStateBloc>().game.timeControl),
-        leading: Icon(Icons.menu),
-      ),
-      backgroundColor: Colors.green,
-      body: Consumer<GameStateBloc>(
-        builder: (context, gameStateBloc, child) {
-          final game = gameStateBloc.game;
-          return MultiProvider(
-            providers: [
-              ChangeNotifierProvider(
-                  create: (context) => GameBoardBloc(context.read()))
-            ],
-            builder: (context, child) {
-              context.read<GameBoardBloc>().setupGame(game);
-              return Provider(
-                create: (context) => StoneLogic(
-                  rows: game.rows,
-                  cols: game.columns,
-                  gameStateBloc: context.read<GameStateBloc>(),
-                  gameBoardBloc: context.read<GameBoardBloc>(),
-                ),
-                builder: (context, child) => ChangeNotifierProvider(
-                  create: (context) {
-                    return ScoreCalculationBloc(
-                      api: context.read<AuthProvider>().api,
-                      authBloc: context.read<AuthProvider>(),
-                      gameStateBloc: context.read<GameStateBloc>(),
-                      gameBoardBloc: context.read<GameBoardBloc>(),
+    return ChangeNotifierProvider(
+        create: (context) => GameStateBloc(
+              Api(),
+              context.read<SignalRProvider>(),
+              context.read<AuthProvider>(),
+              game,
+              systemUtils,
+              getStageType(),
+              joinMessage,
+            ),
+        builder: (context, child) {
+          return Scaffold(
+            appBar: MyAppBar(
+              gameTitle(context.read<GameStateBloc>().game.timeControl),
+              leading: Icon(Icons.menu),
+            ),
+            backgroundColor: Colors.green,
+            body: Consumer<GameStateBloc>(
+              builder: (context, gameStateBloc, child) {
+                final game = gameStateBloc.game;
+                return MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider(
+                        create: (context) => GameBoardBloc(context.read()))
+                  ],
+                  builder: (context, child) {
+                    context.read<GameBoardBloc>().setupGame(game);
+                    return Provider(
+                      create: (context) => StoneLogic(
+                        rows: game.rows,
+                        cols: game.columns,
+                        gameStateBloc: context.read<GameStateBloc>(),
+                        gameBoardBloc: context.read<GameBoardBloc>(),
+                      ),
+                      builder: (context, child) => ChangeNotifierProvider(
+                        create: (context) {
+                          return ScoreCalculationBloc(
+                            api: context.read<AuthProvider>().api,
+                            authBloc: context.read<AuthProvider>(),
+                            gameStateBloc: context.read<GameStateBloc>(),
+                            gameBoardBloc: context.read<GameBoardBloc>(),
+                          );
+                        },
+                        builder: (context, child) =>
+                            ValueListenableBuilder<StageType>(
+                          valueListenable: context
+                              .read<GameStateBloc>()!
+                              .curStageTypeNotifier,
+                          builder: (context, stageType, idk) {
+                            var stage = stageType.stageConstructor(
+                              context,
+                              context.read(),
+                            );
+                            return ChangeNotifierProvider<Stage>.value(
+                              value: stage,
+                              builder: (context, child) {
+                                return Consumer<ScoreCalculationBloc>(
+                                    builder: (context, dyn, child) =>
+                                        WrapperGame(game));
+                              },
+                            );
+                          },
+                        ),
+                      ),
                     );
                   },
-                  builder: (context, child) =>
-                      ValueListenableBuilder<StageType>(
-                    valueListenable:
-                        context.read<GameStateBloc>()!.curStageTypeNotifier,
-                    builder: (context, stageType, idk) {
-                      var stage = stageType.stageConstructor(
-                        context,
-                        context.read(),
-                      );
-                      return ChangeNotifierProvider<Stage>.value(
-                        value: stage,
-                        builder: (context, child) {
-                          return Consumer<ScoreCalculationBloc>(
-                              builder: (context, dyn, child) =>
-                                  WrapperGame(game));
-                        },
-                      );
-                    },
-                  ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
-        },
-      ),
-    );
+        });
   }
 }
 

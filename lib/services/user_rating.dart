@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:fpdart/fpdart.dart';
+import 'package:go/core/foundation/either.dart';
+
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class UserRating {
   final String userId;
@@ -19,8 +22,9 @@ class UserRating {
   factory UserRating.fromMap(Map<String, dynamic> map) {
     return UserRating(
       userId: map['userId'] as String,
-      ratings: Map<String, PlayerRatingData>.from(
-        (map['ratings'] as Map<String, PlayerRatingData>),
+      ratings:
+          Map<String, Map<String, dynamic>>.from((map['ratings'])).mapValue(
+        (value) => PlayerRatingData.fromMap(value),
       ),
     );
   }
@@ -58,10 +62,10 @@ class PlayerRatingData {
       glicko: GlickoRating.fromMap(map['glicko'] as Map<String, dynamic>),
       nb: map['nb'] as int,
       recent: List<int>.from(
-        (map['recent'] as List<int>),
+        (map['recent'] as List),
       ),
       latest: map['latest'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['latest'] as int)
+          ? DateTime.parse(map['latest'] as String)
           : null,
     );
   }
@@ -92,13 +96,14 @@ class GlickoRating {
 
   factory GlickoRating.fromMap(Map<String, dynamic> map) {
     return GlickoRating(
-      rating: map['rating'] as double,
-      deviation: map['deviation'] as double,
-      volatility: map['volatility'] as double,
+      rating: (map['rating'] as num).toDouble(),
+      deviation: (map['deviation'] as num).toDouble(),
+      volatility: (map['volatility'] as num).toDouble(),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory GlickoRating.fromJson(String source) => GlickoRating.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory GlickoRating.fromJson(String source) =>
+      GlickoRating.fromMap(json.decode(source) as Map<String, dynamic>);
 }

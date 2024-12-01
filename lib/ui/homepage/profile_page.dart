@@ -21,6 +21,10 @@ class ProfilePage extends StatelessWidget {
                 SizedBox(
                   height: 100,
                 ),
+                Center(
+                  child:
+                      Text(context.read<AuthProvider>().currentUserRaw.email),
+                ),
                 ElevatedButton(
                   onPressed: () {
                     authProvider.logout();

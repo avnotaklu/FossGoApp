@@ -63,7 +63,7 @@ class SignalRProvider extends ChangeNotifier {
       StreamController<SignalRMessage>.broadcast();
 
   Stream<SignalRMessage> get userMessagesStream =>
-      _gameMessageController.stream;
+      _userMessageController.stream;
 
   final StreamController<SignalRMessage> _userMessageController =
       StreamController<SignalRMessage>.broadcast();
@@ -79,6 +79,8 @@ class SignalRProvider extends ChangeNotifier {
       var messageList = messagesRaw.signalRMessageList;
       var message = messageList.first;
 
+      debugPrint("Got user update: ${message.toJson()}");
+
       _gameMessageController.add(message);
     });
 
@@ -91,6 +93,8 @@ class SignalRProvider extends ChangeNotifier {
 
       var messageList = messagesRaw.signalRMessageList;
       var message = messageList.first;
+
+      debugPrint("Got user update: ${message.toJson()}");
 
       _userMessageController.add(message);
     });

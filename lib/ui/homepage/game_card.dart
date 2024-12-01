@@ -41,29 +41,10 @@ class GameCard extends StatelessWidget {
     }, (joinMessage) {
       Navigator.pushReplacement(context,
           MaterialPageRoute<void>(builder: (BuildContext context) {
-        var stage = StageType.BeforeStart;
-        return MultiProvider(
-            providers: [
-              ChangeNotifierProvider.value(
-                value: signalRBloc,
-              )
-            ],
-            builder: (context, child) {
-              final authBloc = context.read<AuthProvider>();
-              return ChangeNotifierProvider(
-                  create: (context) => GameStateBloc(
-                        Api(),
-                        signalRBloc,
-                        authBloc,
-                        game,
-                        systemUtils,
-                        stage,
-                        joinMessage,
-                      ),
-                  builder: (context, child) {
-                    return const GameWidget(false);
-                  });
-            });
+        return GameWidget(
+          game: game,
+          joinMessage: joinMessage,
+        );
       }));
     });
   }

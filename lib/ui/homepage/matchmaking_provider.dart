@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/providers/signalr_bloc.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/ui/homepage/find_match_dto.dart';
 import 'package:go/ui/homepage/find_match_result.dart';
@@ -24,14 +25,15 @@ class MatchmakingProvider extends ChangeNotifier {
     // TODO: this should also maybe have some notification to the user
 
     signalRProvider.userMessagesStream.listen((event) {
-      if (event case FindMatchResult res) {
+      if (event.data case GameJoinMessage res) {
+        debugPrint("Got matchmaking update");
         onMatchmakingUpdated.add(res);
       }
     });
   }
 
-  StreamController<FindMatchResult> onMatchmakingUpdated =
-      StreamController<FindMatchResult>.broadcast();
+  StreamController<GameJoinMessage> onMatchmakingUpdated =
+      StreamController<GameJoinMessage>.broadcast();
 
   List<MatchableBoardSizes> selectedBoardSizes = [MatchableBoardSizes.nine];
 

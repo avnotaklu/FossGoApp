@@ -231,29 +231,13 @@ class CreateGameScreen extends StatelessWidget {
                     var stage = StageType.BeforeStart;
                     // final gameStatebloc = context.read<GameStateBloc>();
                     Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => MultiProvider(
-                          providers: [
-                            ChangeNotifierProvider(
-                              create: (context) => GameStateBloc(
-                                Api(),
-                                signalRProvider,
-                                authBloc,
-                                game,
-                                systemUtils,
-                                stage,
-                                null,
-                              ),
-                            ),
-                            ChangeNotifierProvider.value(
-                              value: signalRProvider,
-                            )
-                          ],
-                          builder: (context, child) => const GameWidget(true),
-                        ),
-                      ),
-                    );
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) => GameWidget(
+                            game: game,
+                            joinMessage: null,
+                          ),
+                        ));
                   });
                 },
                 child: const Text("Create"),

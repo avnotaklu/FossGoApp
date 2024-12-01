@@ -5,7 +5,9 @@ import 'package:go/constants/constants.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/models/time_control.dart';
+import 'package:go/playfield/game_widget.dart';
 import 'package:go/providers/signalr_bloc.dart';
+import 'package:go/services/auth_provider.dart';
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/ui/homepage/find_match_dto.dart';
 import 'package:go/ui/homepage/matchmaking_provider.dart';
@@ -29,10 +31,23 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
     return ChangeNotifierProvider(
       create: (context) => MatchmakingProvider(context.read<SignalRProvider>()),
       builder: (context, child) => Scaffold(
-        appBar: const MyAppBar(
-          'Baduk',
-          leading: Icon(Icons.menu),
+        drawer: Container(
+          width: MediaQuery.sizeOf(context).width * 0.7,
+          child: Center(
+            child: Text(context.read<AuthProvider>().currentUserRaw.email),
+          ),
         ),
+        appBar: MyAppBar('Baduk',
+            leading: IconButton(
+              onPressed: () {
+                if (Scaffold.of(context).isDrawerOpen) {
+                  Scaffold.of(context).closeDrawer();
+                } else {
+                  Scaffold.of(context).openDrawer();
+                }
+              },
+              icon: Icon(Icons.menu),
+            )),
         body: Consumer<MatchmakingProvider>(
           builder: (context, provider, child) => Padding(
             padding: const EdgeInsets.all(20.0),
@@ -82,7 +97,13 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                           .stream
                           .listen((event) {
                         if (context.mounted) {
-                          Navigator.pushNamed(context, '/game');
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return GameWidget(
+                              game: event.game,
+                              joinMessage: event,
+                            );
+                          }));
                         }
                       });
                     },
