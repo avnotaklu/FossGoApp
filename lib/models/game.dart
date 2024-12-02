@@ -15,6 +15,13 @@ import 'package:go/services/available_game.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:signalr_netcore/errors.dart';
 
+extension StoneTypeExtension on StoneType {
+  String get color => switch (this) {
+        StoneType.black => "Black",
+        StoneType.white => "White",
+      };
+}
+
 enum StoneType { black, white }
 
 enum GameState {

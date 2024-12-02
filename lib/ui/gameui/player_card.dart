@@ -23,27 +23,6 @@ import 'package:go/ui/gameui/game_timer.dart';
 import 'package:go/utils/core_utils.dart';
 import 'package:go/utils/player.dart';
 
-class DisplayablePlayerData {
-  final String? displayName;
-  final StoneType? stoneType;
-  final UserRating? rating;
-
-  DisplayablePlayerData({
-    required this.displayName,
-    required this.stoneType,
-    required this.rating,
-  });
-
-  factory DisplayablePlayerData.from(
-      PublicUserInfo? publicUserInfo, StoneType? stoneType) {
-    return DisplayablePlayerData(
-      displayName: publicUserInfo?.email,
-      stoneType: stoneType,
-      rating: publicUserInfo?.rating,
-    );
-  }
-}
-
 class PlayerDataUi extends StatefulWidget {
   final DisplayablePlayerData? playerInfo;
   final Game game;
@@ -97,9 +76,9 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                             fontSize: 18),
                       ),
                       if (ratings != null)
-                        if (getGameRatingData(game, ratings) != null)
+                        if (player?.rating != null)
                           Text(
-                            "(${getGameRatingData(game, ratings)!.glicko.rating})",
+                            "(${player!.rating!.glicko.rating})",
                             style: TextStyle(
                                 color: Constants.defaultTheme.mainTextColor,
                                 fontSize: 14),
@@ -196,9 +175,5 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
 
   PlayerTimeSnapshot getPlayerTimeSnapshot(Game game, StoneType player) {
     return game.playerTimeSnapshots[player.index];
-  }
-
-  PlayerRatingData? getGameRatingData(Game game, UserRating ratings) {
-    return ratings.getRatingForGame(game);
   }
 }

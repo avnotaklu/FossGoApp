@@ -7,6 +7,7 @@ import 'package:go/models/game.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/homepage_bloc.dart';
+import 'package:go/providers/live_game_interactor.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
@@ -42,9 +43,13 @@ class GameCard extends StatelessWidget {
       Navigator.pushReplacement(context,
           MaterialPageRoute<void>(builder: (BuildContext context) {
         return GameWidget(
-          game: game,
-          joinMessage: joinMessage,
-        );
+            game: game,
+            gameInteractor: LiveGameInteractor(
+              api: Api(),
+              authBloc: context.read<AuthProvider>(),
+              signalRbloc: context.read<SignalRProvider>(),
+              joiningData: joinMessage,
+            ));
       }));
     });
   }

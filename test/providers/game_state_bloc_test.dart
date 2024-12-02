@@ -15,6 +15,7 @@ import 'package:go/models/stone.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/playfield/board_utilities.dart';
 import 'package:go/providers/game_state_bloc.dart';
+import 'package:go/providers/live_game_interactor.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
@@ -67,6 +68,9 @@ void main() {
 
   registerFallbackValue(ma1);
   registerFallbackValue(ma2);
+
+  registerFallbackValue(StoneType.black);
+
   // registerFallbackValue(MovePosition(x: 1, y: 0));
   // });
 
@@ -181,7 +185,8 @@ void main() {
   const curStage = StageType.Gameplay;
 
   // joins game on client1 when constructing gameStateBloc
-  bloc = GameStateBloc(api, signalR, auth, sGame, utils, curStage, null);
+  final l1 = LiveGameInteractor(api: api, authBloc: auth, signalRbloc: signalR);
+  bloc = GameStateBloc(sGame, l1, utils);
 
   // Join Message recieved from server
 
@@ -201,8 +206,13 @@ void main() {
   ));
 
   // joins game on client2 when constructing gameStateBloc
-  bloc2 =
-      GameStateBloc(api, signalR2, auth2, sGame, utils2, curStage, joinMessage);
+  final l2 = LiveGameInteractor(
+    api: api,
+    authBloc: auth2,
+    signalRbloc: signalR2,
+    joiningData: joinMessage,
+  );
+  bloc2 = GameStateBloc(sGame, l2, utils2);
 
   group("GameStateBloc", () {
     // test("30 minutes passed in mock", () {
@@ -210,6 +220,10 @@ void main() {
     //   expect(
     //       _1980Jan1_1_30PM.add(const Duration(minutes: 30)), utils.currentTime);
     // });
+
+    test("Test test", () {
+      expect(5, 5);
+    });
 
     test("Join delay should be player 1: 1 second, player 2: 0 seconds",
         () async {
@@ -277,11 +291,13 @@ void main() {
 }
 
 PublicUserInfo player1() {
-  return PublicUserInfo("1@1.com", "1", UserRating(userId: "1", ratings: {}));
+  return PublicUserInfo(
+      email: "1@1.com", id: "1", rating: UserRating(userId: "1", ratings: {}));
 }
 
 PublicUserInfo player2() {
-  return PublicUserInfo("2@2.com", "2", UserRating(userId: "2", ratings: {}));
+  return PublicUserInfo(
+      email: "2@2.com", id: "2", rating: UserRating(userId: "2", ratings: {}));
 }
 
 List<List<List<int>> Function()> getBoardForMoveCount() {

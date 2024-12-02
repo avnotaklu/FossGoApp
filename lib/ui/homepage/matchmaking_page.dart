@@ -6,7 +6,9 @@ import 'package:go/core/foundation/duration.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/playfield/game_widget.dart';
+import 'package:go/providers/live_game_interactor.dart';
 import 'package:go/providers/signalr_bloc.dart';
+import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/ui/homepage/find_match_dto.dart';
@@ -100,9 +102,13 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
                             return GameWidget(
-                              game: event.game,
-                              joinMessage: event,
-                            );
+                                game: event.game,
+                                gameInteractor: LiveGameInteractor(
+                                  api: Api(),
+                                  authBloc: context.read<AuthProvider>(),
+                                  signalRbloc: context.read<SignalRProvider>(),
+                                  joiningData: event,
+                                ));
                           }));
                         }
                       });

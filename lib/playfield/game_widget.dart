@@ -21,6 +21,7 @@ import 'package:go/models/time_control.dart';
 import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/game_board_bloc.dart';
+import 'package:go/providers/live_game_interactor.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
@@ -41,7 +42,7 @@ import 'package:go/constants/constants.dart' as Constants;
 
 class GameWidget extends StatelessWidget {
   final Game game;
-  final GameJoinMessage? joinMessage;
+  final GameInteractor gameInteractor;
 
   String? byoYomiTime(TimeControl time) {
     return time.byoYomiTime != null
@@ -74,19 +75,18 @@ class GameWidget extends StatelessWidget {
         GameState.paused => StageType.BeforeStart,
       };
 
-  const GameWidget(
-      {required this.game, required this.joinMessage, super.key}); // Board
+  const GameWidget({
+    required this.game,
+    required this.gameInteractor,
+    super.key,
+  }); // Board
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
         create: (context) => GameStateBloc(
-              Api(),
-              context.read<SignalRProvider>(),
-              context.read<AuthProvider>(),
               game,
+              gameInteractor,
               systemUtils,
-              getStageType(),
-              joinMessage,
             ),
         builder: (context, child) {
           return Scaffold(
@@ -101,9 +101,7 @@ class GameWidget extends StatelessWidget {
                 return MultiProvider(
                   providers: [
                     ChangeNotifierProvider(
-                      create: (context) => GameBoardBloc(
-                        context.read(),
-                      ),
+                      create: (context) => GameBoardBloc(game),
                     )
                   ],
                   builder: (context, child) {
@@ -112,7 +110,6 @@ class GameWidget extends StatelessWidget {
                       create: (context) => StoneLogic(
                         rows: game.rows,
                         cols: game.columns,
-                        gameStateBloc: context.read<GameStateBloc>(),
                         gameBoardBloc: context.read<GameBoardBloc>(),
                       ),
                       builder: (context, child) => ChangeNotifierProvider(

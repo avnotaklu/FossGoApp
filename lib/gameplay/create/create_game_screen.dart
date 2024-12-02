@@ -19,6 +19,7 @@ import 'package:go/playfield/stone_widget.dart';
 import 'package:go/providers/create_game_provider.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/homepage_bloc.dart';
+import 'package:go/providers/live_game_interactor.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/auth_provider.dart';
@@ -224,17 +225,18 @@ class CreateGameScreen extends StatelessWidget {
                       ),
                     );
                   }, (game) {
-                    final signalRProvider = context.read<SignalRProvider>();
-
-                    final authBloc = context.read<AuthProvider>();
-                    var stage = StageType.BeforeStart;
                     // final gameStatebloc = context.read<GameStateBloc>();
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) => GameWidget(
                             game: game,
-                            joinMessage: null,
+                            gameInteractor: LiveGameInteractor(
+                              api: Api(),
+                              authBloc: context.read<AuthProvider>(),
+                              signalRbloc: context.read<SignalRProvider>(),
+                              joiningData: null,
+                            ),
                           ),
                         ));
                   });

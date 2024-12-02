@@ -14,14 +14,11 @@ class GameBoardBloc extends ChangeNotifier {
   final Map<Position, Stone> _stones = {};
   Map<Position, Stone> get stones => Map.from(_stones);
 
-  Game get game => gameStateBloc.game;
-  final GameStateBloc gameStateBloc;
-
   late Position? koDelete;
   late List<int> prisoners;
 
-  int get rows => game.rows;
-  int get cols => game.columns;
+  final int rows;
+  final int cols;
 
   Stone? stoneAt(Position? pos) {
     if (pos == null) {
@@ -45,12 +42,14 @@ class GameBoardBloc extends ChangeNotifier {
     return pos.x > -1 && pos.x < rows && pos.y < cols && pos.y > -1;
   }
 
-  GameBoardBloc(this.gameStateBloc) {
+  GameBoardBloc(Game game)
+      : rows = game.rows,
+        cols = game.columns {
     setupGame(game);
   }
 
   void setupGame(Game game) {
-    koDelete = gameStateBloc.game.koPositionInLastMove;
+    koDelete = game.koPositionInLastMove;
     prisoners = game
         .prisoners; //  game.playerIdsSorted.map((e) => game.prisoners[e]!).toList();
 

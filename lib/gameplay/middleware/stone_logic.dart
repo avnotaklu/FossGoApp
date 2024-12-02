@@ -15,25 +15,14 @@ import 'package:go/models/position.dart';
 class StoneLogic {
   final int rows;
   final int cols;
-  // Map<Position?, ValueNotifier<StoneWidget?>> _playgroundMap = {};
-  // Map<Position, Stone> _playgroundMap = {};
-  // StoneWidget? _teststone;
-  Position? _position;
-  // var newStoneStream;
 
   Position? get koDelete => gameBoardBloc.koDelete;
 
   set koDelete(Position? pos) {
     // Do nothing from now, it's set using api response
   }
-  // Position? koInsert;
 
-  // FIXME: This stone_login and score_calculation relation sucks now we are placing scoring functionality in stone_logic because of this because context is required to access each other and these are circular dependency so the inherited widget can have other one as null
   List<ValueNotifier<int>> prisoners = [ValueNotifier(0), ValueNotifier(0)];
-
-  // ValueNotifier<StoneWidget?> stoneNotifierAt(Position) {
-  //   return playground_Map[Position]!;
-  // }
 
   Stone? stoneAt(Position? pos) {
     return gameBoardBloc.stoneAt(pos);
@@ -47,56 +36,13 @@ class StoneLogic {
     gameBoardBloc.removeStoneAt(pos);
   }
 
-  // Getters
-  // Map<Position?, ValueNotifier<StoneWidget?>> get playground_Map =>
-  //     _playgroundMap; // TODO:NP2 nullable_position_1 maybe Position? can be just Position see NP1
-
-  // final Map<Position, Stone> _playgroundMap;
-  // Map<Position, Stone> get playgroundMap => _playgroundMap;
-
-  // get teststone => _teststone;
-
-  // Database update
-  // this function wouldn't work in any other inherited widget because it requires StoneLogic which is built later than other inherited widgets.
-
-  // Constructor
-  // StoneLogic(
-  //     {required Map<Position?, StoneWidget?> playgroundMap,
-  //     required this.mChild,
-  //     required this.rows,
-  //     required this.cols})
-  //     // : _playgroundMap = Map.from(playgroundMap)
-  //     : super(child: mChild) {
-  //   _playgroundMap = Map<Position?, ValueNotifier<StoneWidget?>>.from(
-  //       playgroundMap.map((key, value) => MapEntry(key, ValueNotifier(value))));
-  // }
-
   final GameBoardBloc gameBoardBloc;
 
-  StoneLogic(
-      {required this.gameStateBloc,
-      required this.gameBoardBloc,
-      required this.rows,
-      required this.cols});
-
-  // Inheritance Widget related functions
-
-  // @override
-  // bool updateShouldNotify(StoneLogic oldWidget) {
-  //   return oldWidget._position == _position;
-  //   // return oldWidget.playgroundMap == playgroundMap;
-  // }
-
-  // static StoneLogic? of(BuildContext context) =>
-  //     context.dependOnInheritedWidgetOfExactType<StoneLogic>();
-
-  // Helper functions
-  // printEntireGrid() {
-  //   playgroundMap.forEach((i, j) {
-  //     debugPrint(
-  //         " ${i.x} ${i.y} => color : ${j.player.toString()} ${j.cluster.freedoms.toString()}");
-  //   });
-  // }
+  StoneLogic({
+    required this.gameBoardBloc,
+    required this.rows,
+    required this.cols,
+  });
 
   Cluster? getClusterFromPosition(Position pos) {
     return stoneAt(pos)?.cluster;
@@ -161,48 +107,16 @@ class StoneLogic {
     return insertable;
   }
 
-  // Hack
-  // bool _checkInsertable(Position position) {
-  //   if (koDelete == position) {
-  //     return false;
-  //   }
-  //   bool insertable = false;
-  //   doActionOnNeighbors(
-  //       position,
-  //       (curpos, neighbor) => {
-  //             if (stoneAt(neighbor) != null)
-  //               {
-  //                 if (!insertable)
-  //                   {
-  //                     if (stoneAt(neighbor)?.player == stoneAt(curpos)?.player)
-  //                       insertable =
-  //                           !(getClusterFromPosition(neighbor)?.freedoms == 1)
-  //                     else
-  //                       insertable =
-  //                           getClusterFromPosition(neighbor)?.freedoms == 1,
-  //                   }
-  //               }
-  //             else if (checkIfInsideBounds(neighbor))
-  //               {
-  //                 insertable = true,
-  //               }
-  //           });
-
-  //   return insertable;
-  // }
-
   // Update Freedom by going through all stone in cluster and counting freedom for every stone
 
   /* From here */
   void calculateFreedomForPosition(Position position) {
     doActionOnNeighbors(position, (Position curpos, Position neighbor) {
-      // if( stoneAt(neighbor) == null && checkOutofBounds(neighbor) && alreadyAdded.contains(neighbor) == false)//  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
       if (stoneAt(neighbor) == null &&
           checkIfInsideBounds(neighbor) &&
           ((traversed[neighbor]?.contains(getClusterFromPosition(curpos)) ??
                   false) ==
               false))
-      //  && (traversed[neighbor]?.contains(getClusterFromPosition(curpos)) == false) )
       // neighbor are the possible free position here unlike recalculateFreedomsForNeighborsOfDeleted where deletedStonePosition is the free position and neighbors are possible clusters for which we will increment freedoms
       {
         stoneAt(curpos)?.cluster.freedoms += 1;
@@ -297,20 +211,14 @@ class StoneLogic {
 
   // Deletion ---
 
-  final GameStateBloc gameStateBloc;
-
-  bool handleStoneUpdate(Position? position) {
+  bool handleStoneUpdate(Position? position, int playerTurn, StoneType stone) {
     if (position == null) {
       return true;
     }
-    _position = position;
+
     Position? thisCurrentCell = position;
 
-    final playerTurn = gameStateBloc.playerTurn;
-    final myStone = gameStateBloc.myStone;
-    // StoneWidget(gameStateBloc?.getPlayerWithTurn.mColor, position);
-
-    if (checkInsertable(position, myStone)) {
+    if (checkInsertable(position, stone)) {
       final currentCluster = Cluster({position}, {}, 0, playerTurn);
 
       setStoneAt(
@@ -330,14 +238,6 @@ class StoneLogic {
       calculateFreedomForCluster(currentCluster);
       updateFreedomsFromNewlyInsertedStone(position);
       traversed.clear();
-
-      // playgroundMap.cast<String,dynamic>;
-      // Map<String,dynamic> tmp1;
-      // var tmp2 = tmp1.cast<int,dynamic>;
-
-      //TODO:NP2 nullable_position_1 key! is another proof that maybe Position? can just be Position see NP1
-      // gameStateBloc?.match.playgroundMap =
-      //     playgroundMap.map((key, value) => MapEntry(key!, value.value));
 
       return true;
     }

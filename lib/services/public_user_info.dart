@@ -10,7 +10,11 @@ class PublicUserInfo {
   final String id;
   final UserRating rating;
 
-  PublicUserInfo(this.email, this.id, this.rating);
+  PublicUserInfo({
+    required this.email,
+    required this.id,
+    required this.rating,
+  });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -22,9 +26,9 @@ class PublicUserInfo {
 
   factory PublicUserInfo.fromMap(Map<String, dynamic> map) {
     return PublicUserInfo(
-      map['email'] as String,
-      map['id'] as String,
-      UserRating.fromMap(map['rating'] as Map<String, dynamic>),
+      email: map['email'] as String,
+      id: map['id'] as String,
+      rating: UserRating.fromMap(map['rating'] as Map<String, dynamic>),
     );
   }
 

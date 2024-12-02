@@ -50,10 +50,7 @@ class _GameUiState extends State<GameUi> {
                   Expanded(
                     flex: 3,
                     child: PlayerDataUi(
-                      DisplayablePlayerData.from(
-                        gameStateBloc.otherPlayerUserInfo,
-                        gameStateBloc.getRemoteStone(),
-                      ),
+                      gameStateBloc.topPlayerUserInfo,
                       gameStateBloc.game,
                     ),
                   ),
@@ -71,10 +68,7 @@ class _GameUiState extends State<GameUi> {
                   Expanded(
                     flex: 3,
                     child: PlayerDataUi(
-                      DisplayablePlayerData.from(
-                        gameStateBloc.myPlayerUserInfo,
-                        gameStateBloc.getMyStone(),
-                      ),
+                      gameStateBloc.bottomPlayerUserInfo,
                       gameStateBloc.game,
                     ),
                   ),
@@ -216,7 +210,7 @@ class Accept extends StatelessWidget {
         gameStateBloc.acceptScores();
       },
       "Accept",
-      isDisabled: gameStateBloc.iAccepted,
+      // isDisabled: gameStateBloc.iAccepted,
     );
   }
 }

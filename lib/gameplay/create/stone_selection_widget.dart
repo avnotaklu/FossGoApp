@@ -2,6 +2,15 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go/models/game.dart';
+
+extension StoneSelectionTypeExtension on StoneSelectionType {
+  StoneType? get type => switch (this) {
+        StoneSelectionType.black => StoneType.black,
+        StoneSelectionType.white => StoneType.white,
+        StoneSelectionType.auto => null,
+      };
+}
 
 enum StoneSelectionType { black, white, auto }
 

@@ -14,6 +14,7 @@ import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/stone.dart';
+import 'package:go/providers/live_game_interactor.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
@@ -24,6 +25,7 @@ import 'package:go/services/move_position.dart';
 import 'package:go/services/join_message.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
+import 'package:go/services/user_rating.dart';
 import 'package:go/ui/gameui/game_timer.dart';
 import 'package:go/utils/player.dart';
 import 'package:ntp/ntp.dart';
@@ -31,28 +33,25 @@ import 'package:signalr_netcore/errors.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'package:timer_count_down/timer_controller.dart';
 
+class DisplayablePlayerData {
+  final String? displayName;
+  final StoneType? stoneType;
+  final PlayerRatingData? rating;
+
+  DisplayablePlayerData({
+    required this.displayName,
+    required this.stoneType,
+    required this.rating,
+  });
+}
 
 class GameStateBloc extends ChangeNotifier {
-  final Api api;
-  final AuthProvider authBloc;
-  final SignalRProvider signalRbloc;
-  final SystemUtilities systemUtilities;
   Game game;
-  // Stage curStage;
-
-  // late final List<Player> _players;
-  // List<Player> get players => List.unmodifiable(_players);
-
-  StoneType get myStone => game.players[authBloc.currentUserRaw.id]!;
-  StoneType get otherStone => StoneType.values[1 - myStone.index];
 
   int get turn => game.moves.length;
   int get playerTurn => game.moves.length % 2;
 
   int get gametime => game.timeControl.mainTimeSeconds;
-
-  // Player get getPlayerWithTurn => _players[turn % 2];
-  // Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
 
   StoneType? get getWinnerStone => game.players[game.winnerId];
   StoneType? get getLoserStone => game.players[game.winnerId] == null
@@ -72,50 +71,40 @@ class GameStateBloc extends ChangeNotifier {
         .key;
   }
 
-  bool iAccepted = false;
+  Map<StoneType, bool> acceptedBy = {
+    StoneType.black: false,
+    StoneType.white: false
+  };
 
   // Join Data
 
-  PublicUserInfo myPlayerUserInfo;
-  PublicUserInfo? otherPlayerUserInfo;
+  DisplayablePlayerData get bottomPlayerUserInfo =>
+      gameInteractor.myPlayerData(game);
+  DisplayablePlayerData get topPlayerUserInfo =>
+      gameInteractor.otherPlayerData(game);
 
   // List<Duration> times;
   final List<TimerController> _controller;
 
   List<TimerController> get timerController => _controller;
 
-  StageType curStageTypeNotifier;
+  late final StageType curStageTypeNotifier;
   StageType get curStageType => curStageTypeNotifier;
 
   set curStageType(StageType stage) {
     // cur_stage.disposeStage();
     curStageTypeNotifier = stage;
   }
-  // Stream<bool> listenForGameEndRequest() {
-  //   return signalRbloc.gameMessageController.stream
-  //       .where((message) => message.placeholder is bool)
-  //       .cast();
-  // }
 
-  late final List<StreamSubscription> subscriptions;
-  late final Stream<GameJoinMessage> listenForGameJoin;
-  late final Stream<EditDeadStoneMessage> listenForEditDeadStone;
-  late final Stream<NewMoveMessage> listenFromMove;
-  late final Stream<GameOverMessage> listenFromGameOver;
-  late final Stream<GameTimerUpdateMessage> listenFromGameTimerUpdate;
-  late final Stream<Null> listenFromAcceptScores;
-  late final Stream<ContinueGameMessage> listenFromContinueGame;
+  final GameInteractor gameInteractor;
+  final SystemUtilities systemUtilities;
+  late final StreamSubscription<GameUpdate> gameUpdateListener;
 
   GameStateBloc(
-    this.api,
-    this.signalRbloc,
-    this.authBloc,
     this.game,
+    this.gameInteractor,
     this.systemUtilities,
-    // this.curStage,
-    StageType curStageType,
-    GameJoinMessage? joiningData,
-  )   : _controller = [
+  ) : _controller = [
           TimerController(
             autoStart: false,
             updateInterval: const Duration(milliseconds: 100),
@@ -126,231 +115,45 @@ class GameStateBloc extends ChangeNotifier {
             updateInterval: const Duration(milliseconds: 100),
             duration: Duration(seconds: game.timeControl.mainTimeSeconds),
           )
-        ],
-        curStageTypeNotifier = curStageType,
-        myPlayerUserInfo = PublicUserInfo(
-          authBloc.currentUserRaw.email,
-          authBloc.currentUserRaw.id,
-          authBloc.currentUserRating,
-        ) {
-    setupGame(game, joiningData);
-    setupStreams();
-    subscriptions = [
-      listenFromGameJoin(),
-      listenForMove(),
-      listenForContinueGame(),
-      listenForAcceptScore(),
-      listenForGameOver(),
-      listenForGameTimerUpdate()
-    ];
-  }
+        ] {
+    updateStateFromGame(game);
 
-  void setupGame(Game game, GameJoinMessage? joiningData) {
-    // _players = [Player(0), Player(1)];
-
-    if (joiningData != null) {
-      applyJoinMessage(joiningData);
-    }
-  }
-
-  void setupStreams() {
-    var gameMessageStream = signalRbloc.gameMessageStream;
-    listenForGameJoin = gameMessageStream.asyncExpand((message) async* {
-      if (message.type == SignalRMessageTypes.gameJoin) {
-        yield message.data as GameJoinMessage;
-      }
-    });
-
-    listenForEditDeadStone = gameMessageStream.asyncExpand((message) async* {
-      if (message.type == SignalRMessageTypes.editDeadStone) {
-        yield message.data as EditDeadStoneMessage;
-      }
-    });
-    listenFromMove = gameMessageStream.asyncExpand((message) async* {
-      if (message.type == SignalRMessageTypes.newMove) {
-        yield message.data as NewMoveMessage;
-      }
-    });
-
-    listenFromContinueGame = gameMessageStream.asyncExpand((message) async* {
-      if (message.type == SignalRMessageTypes.continueGame) {
-        yield message.data as ContinueGameMessage;
-      }
-    });
-
-    listenFromAcceptScores = gameMessageStream.asyncExpand((message) async* {
-      if (message.type == SignalRMessageTypes.acceptedScores) {
-        yield message.data as Null;
-      }
-    });
-
-    listenFromGameOver = gameMessageStream.asyncExpand((message) async* {
-      if (message.type == SignalRMessageTypes.gameOver) {
-        yield message.data as GameOverMessage;
-      }
-    });
-
-    listenFromGameTimerUpdate = gameMessageStream.asyncExpand((message) async* {
-      if (message.type == SignalRMessageTypes.gameTimerUpdate) {
-        yield message.data as GameTimerUpdateMessage;
-      }
+    gameUpdateListener = gameInteractor.gameUpdate.listen((event) {
+      updateStateFromGame(event.makeCopyFromOldGame(game));
     });
   }
 
-  StreamSubscription listenFromGameJoin() {
-    return listenForGameJoin.listen((message) {
-      applyJoinMessage(message);
-      debugPrint("Joined game BAHAHA");
-      notifyListeners();
-    });
-  }
-
-  void applyJoinMessage(GameJoinMessage joinMessage) {
-    game = joinMessage.game;
-    otherPlayerUserInfo = joinMessage.otherPlayerData;
-
-    if (game.startTime != null && game.gameState == GameState.playing) {
-      setPlayerTimes();
-      recalculatePlayerLagTime();
-
-      // NOTE: the below hack seems to be fixed now, test it and remove the hack
-      // HACK: This is a hack to make sure that the timer starts after the ui is rendered
-      // The reason is that the timer controller is not started even when called start() function
-      // The controller checks for presense of onStart method, which is supplied via ui
-      // check `CountdownController.start() in timer_controller.dart`
-
-      // Future.delayed(const Duration(milliseconds: 300), () {
-      //   startPausedTimerOfActivePlayer();
-      // });
-
-      startPausedTimerOfActivePlayer();
-
-      curStageType = StageType.Gameplay;
-      notifyListeners();
-    }
-    if (GameState.scoreCalculation == game.gameState) {
-      curStageType = StageType.ScoreCalculation;
-      notifyListeners();
-    }
-    if (game.gameState == GameState.ended) {
-      applyEndGame();
-    }
-  }
-
-  StreamSubscription listenForContinueGame() {
-    return listenFromContinueGame.listen((message) {
-      debugPrint(
-          "Signal R said, ::${SignalRMessageTypes.continueGame}::\n\t\t${message.toMap()}");
-      applyContinue();
-    });
-    // signalRbloc.hubConnection.on('gameMove', (data) {});
-  }
-
-  StreamSubscription listenForMove() {
-    return listenFromMove.listen((message) {
-      final game = message.game;
-      debugPrint(
-          "Signal R said, ::${SignalRMessageTypes.newMove}::\n\t\t${message.toMap()}");
-      // assert(data != null, "Game move data can't be null");
-      applyMoveResult(game);
-    });
-    // signalRbloc.hubConnection.on('gameMove', (data) {});
-  }
-
-  StreamSubscription listenForAcceptScore() {
-    return listenFromAcceptScores.listen((message) {
-      debugPrint("Signal R said, ::${SignalRMessageTypes.acceptedScores}::");
-    });
-  }
-
-  StreamSubscription listenForGameOver() {
-    return listenFromGameOver.listen((message) {
-      debugPrint(
-          "Signal R said, ::${SignalRMessageTypes.gameOver}::\n\t\t${message.toMap()}");
-      game = message.game;
-      applyEndGame();
-    });
-  }
-
-  StreamSubscription listenForGameTimerUpdate() {
-    return listenFromGameTimerUpdate.listen((message) {
-      debugPrint(
-          "Signal R said, ::${SignalRMessageTypes.gameTimerUpdate}::\n\t\t${message.toMap()}");
-      final newPlayerTimeSnapshots = game.playerTimeSnapshots;
-      newPlayerTimeSnapshots[message.player.index] = message.currentPlayerTime;
-      game.copyWith(playerTimeSnapshots: newPlayerTimeSnapshots);
-
-      setPlayerTimes();
-      recalculatePlayerLagTime();
-
-      notifyListeners();
-
-      setTurnTimer();
-    });
-  }
-
-  Future<Either<AppError, GameMove>> playMove(
+  Future<Either<AppError, Game>> playMove(
       Position? position, StoneLogic stoneLogic) async {
-    bool canPlayMove = isMyTurn();
+    bool canPlayMove = gameInteractor.isThisAccountsTurn(game);
+    var updateStone = gameInteractor.thisAccountStone(game);
+
     if (position == null && canPlayMove) {
       canPlayMove = true;
     } else if (position != null && canPlayMove) {
       canPlayMove = (stoneLogic.stoneAt(position) == null) &&
-          stoneLogic.checkInsertable(position, myStone);
+          stoneLogic.checkInsertable(position, updateStone);
     }
 
     if (!canPlayMove) {
       return left(AppError(message: "You can't play here"));
     }
 
-    // If there is no stone at this position and this is users turn, place stone
     final move = MovePosition(
-      // playedAt: value,
       x: position?.x,
       y: position?.y,
     );
 
-    var token = authBloc.token!;
-
     if (!move.isPass()) {
-      stoneLogic.handleStoneUpdate(position);
+      stoneLogic.handleStoneUpdate(position, playerTurn, updateStone);
     }
 
-    var updatedGame = await api.makeMove(
-      move,
-      token,
-      game.gameId,
-    );
-
-    return updatedGame.fold((l) {
-      debugPrint("Move failure ${l.message}");
-      return left(AppError(message: l.message));
-    }, (r) {
-      if (r.result) {
-        applyMoveResult(r.game);
-        return right(game.moves.last);
-      } else {
-        return left(AppError(message: "Invalid move"));
-      }
+    return (await gameInteractor.playMove(game, move)).map((g) {
+      return updateStateFromGame(g);
     });
   }
 
-  void applyMoveResult(Game game) {
-    this.game = game;
-
-    setPlayerTimes();
-    recalculatePlayerLagTime();
-
-    if (game.gameState == GameState.scoreCalculation) {
-      curStageType = StageType.ScoreCalculation;
-    }
-
-    notifyListeners();
-
-    setTurnTimer();
-  }
-
-  void setPlayerTimes() {
+  void updateNewPlayerTimes(Game game) {
     _controller[playerTurn].updateDuration(Duration(
         milliseconds:
             game.playerTimeSnapshots[playerTurn].mainTimeMilliseconds));
@@ -361,21 +164,10 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   void recalculatePlayerLagTime() {
-    // Also calculate the lag time and incorporate that for player with turn
     _controller[playerTurn].updateDuration(_controller[playerTurn].duration -
         systemUtilities.currentTime.difference(
           game.playerTimeSnapshots[playerTurn].snapshotTimestamp,
         ));
-  }
-
-  void setTurnTimer() {
-    var turnPlayerTimer = timerController[playerTurn];
-    turnPlayerTimer.start();
-
-    // applyTimesOfDiscreteSections();
-
-    var nonTurnPlayerTimer = timerController[1 - playerTurn];
-    nonTurnPlayerTimer.pause();
   }
 
   String getPlayerIdFromTurn(int turn) {
@@ -387,19 +179,60 @@ class GameStateBloc extends ChangeNotifier {
     throw NotImplementedException();
   }
 
-  void applyEndGame() {
-    setPlayerTimes();
-
-    curStageType = StageType.GameEnd;
-    timerController[0].pause();
-    timerController[1].pause();
-    notifyListeners();
+  Future<Either<AppError, Game>> continueGame() async {
+    return (await gameInteractor.continueGame(game)).map((g) {
+      return updateStateFromGame(g);
+    });
   }
 
-  bool isMyTurn() {
-    return game.players[authBloc.currentUserRaw.id]!.index == turn % 2;
+  Future<Either<AppError, Game>> acceptScores() async {
+    return (await gameInteractor.acceptScores(game)).map((g) {
+      return updateStateFromGame(g);
+    });
   }
 
+  Future<Either<AppError, Game>> resignGame() async {
+    return (await gameInteractor.resignGame(game)).map((g) {
+      return updateStateFromGame(g);
+    });
+  }
+
+  void startPausedTimerOfActivePlayer() {
+    timerController[playerTurn].start();
+    timerController[1 - playerTurn].pause();
+  }
+
+  Game updateStateFromGame(Game game) {
+    this.game = game;
+    updateStageType(game.gameState);
+
+    if (game.didStart()) {
+      updateNewPlayerTimes(game);
+    }
+
+    if (game.gameState == GameState.playing) {
+      recalculatePlayerLagTime();
+      startPausedTimerOfActivePlayer();
+    } else {
+      timerController[0].pause();
+      timerController[1].pause();
+    }
+    return game;
+  }
+
+  void updateStageType(GameState state) {
+    if (state == GameState.playing) {
+      curStageType = StageType.Gameplay;
+    } else if (state == GameState.scoreCalculation) {
+      curStageType = StageType.ScoreCalculation;
+    } else if (state == GameState.ended) {
+      curStageType = StageType.GameEnd;
+    } else if (state == GameState.waitingForStart) {
+      curStageType = StageType.BeforeStart;
+    }
+  }
+
+  // Helpers
   bool hasPassedTwice() {
     var prev;
     bool hasPassedTwice = false;
@@ -416,60 +249,5 @@ class GameStateBloc extends ChangeNotifier {
       }
     }
     return hasPassedTwice;
-  }
-
-  Future<Either<AppError, Game>> continueGame() async {
-    return (await api.continueGame(authBloc.token!, game.gameId))
-        .fold((l) => left(l), (r) {
-      game = r;
-      applyContinue();
-      return right(r);
-    });
-  }
-
-  void applyContinue() {
-    curStageType = StageType.Gameplay;
-    startPausedTimerOfActivePlayer();
-  }
-
-  Future<void> acceptScores() async {
-    if (iAccepted) return;
-    final token = authBloc.token!;
-    final gameId = game.gameId;
-    final res = await api.acceptScores(token, gameId);
-
-    res.fold((l) {
-      debugPrint("Accept scores failed ${l.message}");
-    }, (r) {
-      game = r;
-      if (game.gameOverMethod != null) {
-        applyEndGame();
-      }
-    });
-  }
-
-  Future<Either<AppError, Game>> resignGame() async {
-    return (await api.resignGame(authBloc.token!, game.gameId))
-        .fold((l) => left(l), (r) {
-      game = r;
-      applyEndGame();
-      return right(r);
-    });
-  }
-
-  void startPausedTimerOfActivePlayer() {
-    timerController[playerTurn].start();
-  }
-
-  StoneType? getRemoteStone() {
-    if (!game.didStart()) return null;
-    return game.players.entries
-        .firstWhere((element) => element.key != authBloc.currentUserRaw.id)
-        .value;
-  }
-
-  StoneType? getMyStone() {
-    if (!game.didStart()) return null;
-    return game.players[authBloc.currentUserRaw.id];
   }
 }

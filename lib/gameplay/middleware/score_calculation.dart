@@ -120,11 +120,15 @@ class ScoreCalculationBloc extends ChangeNotifier {
   }
 
   StreamSubscription listenFromEditDeadStone() {
-    return gameStateBloc.listenForEditDeadStone.listen((message) {
-      applyDeadStones(message.position, message.state);
-      debugPrint(
-        "Dead stone edited at position ${message.position} to ${message.state}",
-      );
+    return gameStateBloc.gameInteractor.gameUpdate.listen((message) {
+      var pos = message.deadStonePosition;
+      var state = message.deadStoneState;
+      if (pos != null && state != null) {
+        applyDeadStones(pos, state);
+        debugPrint(
+          "Dead stone edited at position $pos to $state",
+        );
+      }
     });
   }
 
