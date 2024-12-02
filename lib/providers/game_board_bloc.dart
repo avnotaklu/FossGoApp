@@ -56,7 +56,7 @@ class GameBoardBloc extends ChangeNotifier {
     var board = BoardStateUtilities(
       game.rows,
       game.columns,
-    ).BoardStateFromGame(game);
+    ).boardStateFromGame(game);
 
     _stones.clear();
     _stones.addAll(board.playgroundMap);

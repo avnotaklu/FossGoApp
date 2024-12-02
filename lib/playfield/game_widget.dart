@@ -107,11 +107,7 @@ class GameWidget extends StatelessWidget {
                   builder: (context, child) {
                     context.read<GameBoardBloc>().setupGame(game);
                     return Provider(
-                      create: (context) => StoneLogic(
-                        rows: game.rows,
-                        cols: game.columns,
-                        gameBoardBloc: context.read<GameBoardBloc>(),
-                      ),
+                      create: (context) => StoneLogic(game),
                       builder: (context, child) => ChangeNotifierProvider(
                         create: (context) {
                           return ScoreCalculationBloc(
@@ -127,8 +123,8 @@ class GameWidget extends StatelessWidget {
                           //     .curStageTypeNotifier,
                           // builder: (context, stageType, idk) {
                           var stage = context
-                              .read<GameStateBloc>()!
-                              .curStageTypeNotifier
+                              .read<GameStateBloc>()
+                              .curStageType
                               .stageConstructor(
                                 context,
                                 context.read(),

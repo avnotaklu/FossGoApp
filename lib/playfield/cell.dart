@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/stage.dart';
+import 'package:go/providers/game_board_bloc.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:provider/provider.dart';
 import 'stone_widget.dart';
@@ -33,8 +34,8 @@ class _CellState extends State<Cell> {
     //   valueListenable: StoneLogic.of(context)!.stoneNotifierAt(widget.position),
     //   builder: (BuildContext context, dyn, wid) {
 
-    StoneLogic stoneLogic = context.read();
-    final stone = stoneLogic.stoneAt(widget.position);
+    GameBoardBloc gameBoard = context.read();
+    final stone = gameBoard.stoneAt(widget.position);
     final stage = context.read<Stage>();
     return GestureDetector(
       onTap: () {

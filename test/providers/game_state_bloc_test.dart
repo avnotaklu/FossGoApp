@@ -112,7 +112,6 @@ void main() {
   api = MockApi();
   stoneLogic = MockStoneLogic();
 
-  when(() => stoneLogic.stoneAt(any())).thenReturn(null);
   when(() => stoneLogic.checkInsertable(any(), any())).thenReturn(true);
 
   when(() => api.makeMove(any(), any(), any())).thenAnswer((inv) async {
@@ -185,8 +184,9 @@ void main() {
   const curStage = StageType.Gameplay;
 
   // joins game on client1 when constructing gameStateBloc
-  final l1 = LiveGameInteractor(api: api, authBloc: auth, signalRbloc: signalR);
-  bloc = GameStateBloc(sGame, l1, utils);
+  // final l1 = LiveGameInteractor(api: api, authBloc: auth, signalRbloc: signalR);
+  final i1 = FaceToFaceGameInteractor(sGame, utils);
+  bloc = GameStateBloc(sGame, i1, utils);
 
   // Join Message recieved from server
 
@@ -206,13 +206,15 @@ void main() {
   ));
 
   // joins game on client2 when constructing gameStateBloc
-  final l2 = LiveGameInteractor(
-    api: api,
-    authBloc: auth2,
-    signalRbloc: signalR2,
-    joiningData: joinMessage,
-  );
-  bloc2 = GameStateBloc(sGame, l2, utils2);
+  // final l2 = LiveGameInteractor(
+  //   api: api,
+  //   authBloc: auth2,
+  //   signalRbloc: signalR2,
+  //   joiningData: joinMessage,
+  // );
+
+  final i2 = FaceToFaceGameInteractor(sGame, utils2);
+  bloc2 = GameStateBloc(sGame, i2, utils2);
 
   group("GameStateBloc", () {
     // test("30 minutes passed in mock", () {
@@ -350,7 +352,6 @@ Game gameConstructor(
   DateTime startTime, [
   List<GameMove> moves = const [],
   List<int> scores = const [0, 0],
-  int timeInSeconds = 300,
 ]) {
   var rows = board.length;
   var cols = board[0].length;
@@ -361,8 +362,8 @@ Game gameConstructor(
     rows: rows,
     columns: cols,
     timeControl: blitz,
-    playgroundMap: boardState.MakeHighLevelBoardRepresentationFromBoardState(
-        boardState.BoardStateFromSimpleRepr(
+    playgroundMap: boardState.makeHighLevelBoardRepresentationFromBoardState(
+        boardState.boardStateFromSimpleRepr(
       board,
       koPosition,
     )),
@@ -378,7 +379,10 @@ Game gameConstructor(
     finalTerritoryScores: [],
     endTime: null,
     gameOverMethod: null,
-    playerTimeSnapshots: [],
+    playerTimeSnapshots: [
+      blitz.getStartingSnapshot(startTime, true),
+      blitz.getStartingSnapshot(startTime, false),
+    ],
     gameCreator: "1",
     stoneSelectionType: StoneSelectionType.black,
     playersRatings: [],

@@ -1,77 +1,66 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
+
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/models/cluster.dart';
 import 'package:go/models/game.dart';
+import 'package:go/models/position.dart';
 import 'package:go/models/stone.dart';
+import 'package:go/playfield/board_utilities.dart';
 import 'package:go/playfield/game_widget.dart';
 import 'package:go/playfield/stone_widget.dart';
-import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/providers/game_board_bloc.dart';
+import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/utils/player.dart';
-import 'package:go/models/position.dart';
 
 class StoneLogic {
-  final int rows;
-  final int cols;
+  BoardState board;
 
-  Position? get koDelete => gameBoardBloc.koDelete;
+  StoneLogic(Game game)
+      : board = BoardStateUtilities(game.rows, game.columns)
+            .boardStateFromGame(game);
 
-  set koDelete(Position? pos) {
-    // Do nothing from now, it's set using api response
+  StoneLogic.fromBoardState(this.board);
+
+  void _setBoardState(BoardState board) {
+    this.board = board;
   }
 
-  List<ValueNotifier<int>> prisoners = [ValueNotifier(0), ValueNotifier(0)];
-
-  Stone? stoneAt(Position? pos) {
-    return gameBoardBloc.stoneAt(pos);
+  Stone? _stoneAt(Position pos) {
+    return board.playgroundMap[pos];
   }
 
-  void setStoneAt(Position pos, Stone stone) {
-    gameBoardBloc.setStoneAt(pos, stone);
+  void _setStoneAt(Position pos, Stone stone) {
+    board.playgroundMap[pos] = stone;
   }
 
-  void removeStoneAt(Position pos) {
-    gameBoardBloc.removeStoneAt(pos);
-  }
-
-  final GameBoardBloc gameBoardBloc;
-
-  StoneLogic({
-    required this.gameBoardBloc,
-    required this.rows,
-    required this.cols,
-  });
-
-  Cluster? getClusterFromPosition(Position pos) {
-    return stoneAt(pos)?.cluster;
+  Cluster? _getClusterFromPosition(Position pos) {
+    return _stoneAt(pos)?.cluster;
   }
 
   /// returns true if not out of bounds
-  bool checkIfInsideBounds(Position pos) {
-    return gameBoardBloc.checkIfInsideBounds(pos);
+  bool _checkIfInsideBounds(Position pos) {
+    return pos.x > -1 && pos.x < board.rows && pos.y < board.cols && pos.y > -1;
   }
 
   /* Main Stone Logic functionality */
 
-  // --- finally update freedoms for newly inserted stone
-  // Update freedom by calculating only current stones neighbor( We can increment and decrement for neighbors in this way)
-  void updateFreedomsFromNewlyInsertedStone(Position position) {
+  /// --- finally update freedoms for newly inserted stone
+  ///
+  /// Update freedom by calculating only current stones neighbor( We can increment and decrement for neighbors in this way)
+  void _updateFreedomsFromNewlyInsertedStone(Position position) {
     doActionOnNeighbors(position, (Position curpos, Position neighbor) {
-      if ((traversed[curpos]?.contains(getClusterFromPosition(neighbor)) ??
+      if ((traversed[curpos]?.contains(_getClusterFromPosition(neighbor)) ??
               false) ==
           false) {
-        // if( stoneAt(neighbor) == null && checkOutofBounds(neighbor))
-        // {
-        //   stoneAt(curpos)?.cluster.freedoms += 1;
-        // }
-        if (stoneAt(neighbor)?.player != stoneAt(curpos)?.player) {
-          getClusterFromPosition(neighbor)?.freedoms -= 1;
+        if (_stoneAt(neighbor)?.player != _stoneAt(curpos)?.player) {
+          _getClusterFromPosition(neighbor)?.freedoms -= 1;
           if (traversed[curpos] == null) {
-            traversed[curpos] = [getClusterFromPosition(neighbor)];
+            traversed[curpos] = [_getClusterFromPosition(neighbor)];
           } else {
-            traversed[curpos]!.add(getClusterFromPosition(neighbor));
+            traversed[curpos]!.add(_getClusterFromPosition(neighbor));
           }
         }
       }
@@ -79,26 +68,27 @@ class StoneLogic {
   }
 
   bool checkInsertable(Position position, StoneType playerStone) {
-    if (koDelete == position) {
+    if (_stoneAt(position) != null) return false;
+    if (board.koDelete == position) {
       return false;
     }
     bool insertable = false;
     doActionOnNeighbors(
         position,
         (curpos, neighbor) => {
-              if (stoneAt(neighbor) != null)
+              if (_stoneAt(neighbor) != null)
                 {
                   if (!insertable)
                     {
-                      if (stoneAt(neighbor)?.player == playerStone.index)
+                      if (_stoneAt(neighbor)?.player == playerStone.index)
                         insertable =
-                            !(getClusterFromPosition(neighbor)?.freedoms == 1)
+                            !(_getClusterFromPosition(neighbor)?.freedoms == 1)
                       else
                         insertable =
-                            getClusterFromPosition(neighbor)?.freedoms == 1,
+                            _getClusterFromPosition(neighbor)?.freedoms == 1,
                     }
                 }
-              else if (checkIfInsideBounds(neighbor))
+              else if (_checkIfInsideBounds(neighbor))
                 {
                   insertable = true,
                 }
@@ -110,45 +100,45 @@ class StoneLogic {
   // Update Freedom by going through all stone in cluster and counting freedom for every stone
 
   /* From here */
-  void calculateFreedomForPosition(Position position) {
+  void _calculateFreedomForPosition(Position position) {
     doActionOnNeighbors(position, (Position curpos, Position neighbor) {
-      if (stoneAt(neighbor) == null &&
-          checkIfInsideBounds(neighbor) &&
-          ((traversed[neighbor]?.contains(getClusterFromPosition(curpos)) ??
+      if (_stoneAt(neighbor) == null &&
+          _checkIfInsideBounds(neighbor) &&
+          ((traversed[neighbor]?.contains(_getClusterFromPosition(curpos)) ??
                   false) ==
               false))
       // neighbor are the possible free position here unlike recalculateFreedomsForNeighborsOfDeleted where deletedStonePosition is the free position and neighbors are possible clusters for which we will increment freedoms
       {
-        stoneAt(curpos)?.cluster.freedoms += 1;
-        traversed[neighbor] = [getClusterFromPosition(curpos)];
+        _stoneAt(curpos)?.cluster.freedoms += 1;
+        traversed[neighbor] = [_getClusterFromPosition(curpos)];
       }
     });
   }
 
-  calculateFreedomForCluster(Cluster cluster) {
+  void _calculateFreedomForCluster(Cluster cluster) {
     for (var i in cluster.data) {
-      calculateFreedomForPosition(i);
+      _calculateFreedomForPosition(i);
     }
   }
   /* to here */
 
   // --- Step 1
-  void addAllOfNeighborToCurpos(
+  void _addAllOfNeighborToCurpos(
       Position curpos, Position? neighbor) // done on all neighbors
   {
     if (neighbor != null &&
-        stoneAt(neighbor)?.player == stoneAt(curpos)?.player) {
+        _stoneAt(neighbor)?.player == _stoneAt(curpos)?.player) {
       // If neighbor isn't null and both neighbor and curpos both have same color
-      for (var i in getClusterFromPosition(neighbor)!.data) {
+      for (var i in _getClusterFromPosition(neighbor)!.data) {
         // add all of neighbors Position to cluster of curpos
-        stoneAt(curpos)?.cluster.data.add(i);
+        _stoneAt(curpos)?.cluster.data.add(i);
       }
     }
   }
 
-  void updateAllInTheClusterWithCorrectCluster(Cluster correctCluster) {
+  void _updateAllInTheClusterWithCorrectCluster(Cluster correctCluster) {
     for (var i in correctCluster.data) {
-      setStoneAt(i, stoneAt(i)!.copyWith(cluster: correctCluster));
+      _setStoneAt(i, _stoneAt(i)!.copyWith(cluster: correctCluster));
     }
   }
   // Step 1 ---
@@ -157,11 +147,12 @@ class StoneLogic {
   // Traversed key gives the empty freedom point position and value is the list of cluster that has recieved freedom from that point
   Map<Position?, List<Cluster?>?> traversed = {
     null: null
-  }; // TODO: Find a way to do this without making this data member
-  deleteStonesInDeletableCluster(Position curpos, Position neighbor) {
-    if (stoneAt(neighbor)?.player != stoneAt(curpos)?.player &&
-        stoneAt(neighbor)?.cluster.freedoms == 1) {
-      for (var i in getClusterFromPosition(neighbor)!.data) {
+  }; // REVIEW: should i do this using recursion
+
+  void _deleteStonesInDeletableCluster(Position curpos, Position neighbor) {
+    if (_stoneAt(neighbor)?.player != _stoneAt(curpos)?.player &&
+        _stoneAt(neighbor)?.cluster.freedoms == 1) {
+      for (var i in _getClusterFromPosition(neighbor)!.data) {
         // This supposedly works because a
         // position where delete occurs in such a way that ko is possible
         // the cluster at that position can only have one member because
@@ -173,23 +164,23 @@ class StoneLogic {
         // we check that against newly entered stone and stone can only be deleted when neighboring cells will be opposite
         //
 
-        if (getClusterFromPosition(i)!.data.length == 1) {
-          koDelete = neighbor;
+        if (_getClusterFromPosition(i)!.data.length == 1) {
+          _setBoardState(board.copyWith(koDelete: neighbor));
         }
 
         // prisoners[Constants.playerColors.indexWhere(
         //         (element) => element != stoneAt(i)?.value?.color)]
         //     .value += 1;
 
-        prisoners[1 - stoneAt(i)!.player].value += 1;
-        removeStoneAt(i);
+        board.prisoners[1 - _stoneAt(i)!.player] += 1;
+        board.playgroundMap.remove(i);
 
-        recalculateFreedomsForNeighborsOfDeleted(i);
+        _recalculateFreedomsForNeighborsOfDeleted(i);
       }
     }
   }
 
-  recalculateFreedomsForNeighborsOfDeleted(Position deletedStonePosition) {
+  void _recalculateFreedomsForNeighborsOfDeleted(Position deletedStonePosition) {
     // If a deleted position( free position ) has already contributed to the freedoms of a cluster it should not contribute again as that will result in duplication
     // A list of clusters is stored to keep track of what cluster has recieved freedoms points one free position can't give two freedoms to one cluster
     // but it can give freedom to different cluster
@@ -199,53 +190,54 @@ class StoneLogic {
         traversed[curpos] = [null];
         // :assert(traversed[curpos]!.contains(getClusterFromPosition(neighbor)));
       }
-      if ((traversed[curpos]?.contains(getClusterFromPosition(neighbor)) ??
+      if ((traversed[curpos]?.contains(_getClusterFromPosition(neighbor)) ??
               false) ==
           false) {
-        getClusterFromPosition(neighbor)?.freedoms += 1;
-        traversed[curpos]?.add(getClusterFromPosition(neighbor));
-        assert(traversed[curpos]!.contains(getClusterFromPosition(neighbor)));
+        _getClusterFromPosition(neighbor)?.freedoms += 1;
+        traversed[curpos]?.add(_getClusterFromPosition(neighbor));
+        assert(traversed[curpos]!.contains(_getClusterFromPosition(neighbor)));
       }
     });
   }
 
   // Deletion ---
 
-  bool handleStoneUpdate(Position? position, int playerTurn, StoneType stone) {
+  ({bool result, BoardState board}) handleStoneUpdate(
+      Position? position, StoneType stone) {
     if (position == null) {
-      return true;
+      return (result: true, board: board);
     }
 
     Position? thisCurrentCell = position;
 
     if (checkInsertable(position, stone)) {
-      final currentCluster = Cluster({position}, {}, 0, playerTurn);
+      final currentCluster = Cluster({position}, {}, 0, stone.index);
 
-      setStoneAt(
+      _setStoneAt(
         thisCurrentCell,
         Stone(
           position: position,
-          player: playerTurn,
+          player: stone.index,
           cluster: currentCluster,
         ),
       );
 
       // if stone can be inserted at this position
-      koDelete = null;
-      doActionOnNeighbors(position, addAllOfNeighborToCurpos);
-      updateAllInTheClusterWithCorrectCluster(currentCluster);
-      doActionOnNeighbors(position, deleteStonesInDeletableCluster);
-      calculateFreedomForCluster(currentCluster);
-      updateFreedomsFromNewlyInsertedStone(position);
+      _setBoardState(board.copyWith(koDelete: null));
+      doActionOnNeighbors(position, _addAllOfNeighborToCurpos);
+      _updateAllInTheClusterWithCorrectCluster(currentCluster);
+      doActionOnNeighbors(position, _deleteStonesInDeletableCluster);
+      _calculateFreedomForCluster(currentCluster);
+      _updateFreedomsFromNewlyInsertedStone(position);
       traversed.clear();
 
-      return true;
+      return (result: true, board: board);
     }
 
-    return false;
+    return (result: false, board: board);
   }
 
-  static doActionOnNeighbors(Position thisCell,
+  static void doActionOnNeighbors(Position thisCell,
       Function(Position curPos, Position neighbor) doAction) {
     var rowPlusOne = Position(thisCell.x + 1, thisCell.y);
     doAction(thisCell, rowPlusOne);
@@ -256,10 +248,6 @@ class StoneLogic {
     var colMinusOne = Position(thisCell.x, thisCell.y - 1);
     doAction(thisCell, colMinusOne);
   }
-
-  // Scoring
-
-  // Extend outward by checking all neighbors approach
 }
 
 class Area {
@@ -274,9 +262,7 @@ class Area {
         owner = null;
 }
 
-
-
-  // Failed approach in this i started from 0 0 and went horizontaly till end then next row and so on
+// Failed approach in this i started from 0 0 and went horizontaly till end then next row and so on
 /* calculateFinalScore() {
     // REPRESENTATION
     // * -> white stone

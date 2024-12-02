@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:go/models/cluster.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
@@ -20,6 +21,22 @@ class BoardState {
       required this.koDelete,
       required this.prisoners,
       required this.playgroundMap});
+
+  BoardState copyWith({
+    int? rows,
+    int? cols,
+    Position? koDelete,
+    List<int>? prisoners,
+    Map<Position, Stone>? playgroundMap,
+  }) {
+    return BoardState(
+      rows: rows ?? this.rows,
+      cols: cols ?? this.cols,
+      koDelete: koDelete ?? this.koDelete,
+      prisoners: prisoners ?? this.prisoners,
+      playgroundMap: playgroundMap ?? this.playgroundMap,
+    );
+  }
 }
 
 class BoardStateUtilities {
@@ -27,28 +44,29 @@ class BoardStateUtilities {
   final int cols;
   BoardStateUtilities(this.rows, this.cols);
 
-  BoardState BoardStateFromGame(Game game) {
+  BoardState boardStateFromGame(Game game) {
     var map = game.playgroundMap;
 
-    var simpleB = SimpleBoardRepresentation(map);
-    var clusters = GetClusters(simpleB);
-    var stones = GetStones(clusters);
-    var board = ConstructBoard(rows, cols, stones, game.koPositionInLastMove);
+    var simpleB = simpleBoardRepresentation(map);
+    var clusters = getClusters(simpleB);
+    var stones = getStones(clusters);
+    var board = constructBoard(rows, cols, stones, game.koPositionInLastMove);
 
     return board;
   }
 
-  BoardState BoardStateFromSimpleRepr(
+  BoardState boardStateFromSimpleRepr(
       List<List<int>> simpleB, Position? koPosition) {
-    var clusters = GetClusters(simpleB);
-    var stones = GetStones(clusters);
-    var board = ConstructBoard(rows, cols, stones, koPosition);
+    var clusters = getClusters(simpleB);
+    var stones = getStones(clusters);
+    var board = constructBoard(rows, cols, stones, koPosition);
 
     return board;
   }
 
-  List<List<int>> SimpleBoardRepresentation(HighLevelBoardRepresentation map) {
-    List<List<int>> board = List.generate(cols, (i) => List.generate(rows, (i) => 0));
+  List<List<int>> simpleBoardRepresentation(HighLevelBoardRepresentation map) {
+    List<List<int>> board =
+        List.generate(cols, (i) => List.generate(rows, (i) => 0));
     // List<List<int>> board = List.filled(cols, List.filled(rows, 0));
 
     for (var item in map.entries) {
@@ -59,10 +77,10 @@ class BoardStateUtilities {
     return board;
   }
 
-  List<Cluster> GetClusters(List<List<int>> board) {
+  List<Cluster> getClusters(List<List<int>> board) {
     Map<Position, Cluster> clusters = {};
 
-    void MergeClusters(Cluster a, Cluster b) {
+    void mergeClusters(Cluster a, Cluster b) {
       a.data.addAll(b.data);
       a.freedomPositions.addAll(b.freedomPositions);
       a.freedoms = a.freedomPositions.length;
@@ -74,13 +92,13 @@ class BoardStateUtilities {
 
     for (int i = 0; i < board.length; i++) {
       for (int j = 0; j < board[i].length; j++) {
-        var curpos = new Position(i, j);
+        var curpos = Position(i, j);
 
         List<Position> neighbors = [
-          new Position(i - 1, j),
-          new Position(i, j - 1),
-          new Position(i, j + 1),
-          new Position(i + 1, j),
+          Position(i - 1, j),
+          Position(i, j - 1),
+          Position(i, j + 1),
+          Position(i + 1, j),
         ];
 
         neighbors.removeWhere((p) => !checkIfInsideBounds(p));
@@ -89,7 +107,7 @@ class BoardStateUtilities {
           for (var n in neighbors) {
             if (!clusters.containsKey(curpos)) {
               clusters[curpos] =
-                  new Cluster({new Position(i, j)}, {}, 0, board[i][j] - 1);
+                  Cluster({Position(i, j)}, {}, 0, board[i][j] - 1);
             }
             if (board[n.x][n.y] == 0) {
               clusters[curpos]!.freedomPositions.add(n);
@@ -98,7 +116,7 @@ class BoardStateUtilities {
             }
 
             if (board[i][j] == board[n.x][n.y] && clusters.containsKey(n)) {
-              MergeClusters(clusters[curpos]!, clusters[n]!);
+              mergeClusters(clusters[curpos]!, clusters[n]!);
             }
           }
         }
@@ -115,20 +133,10 @@ class BoardStateUtilities {
         clustersList.add(cluster);
       }
     }
-
-    // for (var cluster in clustersList)
-    // {
-    //     HashSet<Position> freedomPositions = [];
-    //     for (var pos in cluster.data)
-    //     {
-    //         if ()
-
-    //     }
-    // }
     return clustersList;
   }
 
-  List<Stone> GetStones(List<Cluster> clusters) {
+  List<Stone> getStones(List<Cluster> clusters) {
     List<Stone> stones = [];
     for (var cluster in clusters) {
       for (var position in cluster.data) {
@@ -139,8 +147,8 @@ class BoardStateUtilities {
     return stones;
   }
 
-  BoardState ConstructBoard(int rows, int cols, List<Stone> stones,
-      [Position? koDelete = null]) {
+  BoardState constructBoard(int rows, int cols, List<Stone> stones,
+      [Position? koDelete]) {
     return BoardState(
         rows: rows,
         cols: cols,
@@ -150,7 +158,7 @@ class BoardStateUtilities {
         prisoners: [0, 0]);
   }
 
-  HighLevelBoardRepresentation MakeHighLevelBoardRepresentationFromBoardState(
+  HighLevelBoardRepresentation makeHighLevelBoardRepresentationFromBoardState(
       BoardState boardState) {
     return boardState.playgroundMap
         .map((e, v) => MapEntry(e, StoneType.values[v.player]));

@@ -48,6 +48,18 @@ final TimeControl classical = TimeControl(
     byoYomiTime: null,
     timeStandard: TimeStandard.classical);
 
+extension TimeControlExt on TimeControl {
+  PlayerTimeSnapshot getStartingSnapshot(DateTime startTime, bool isActive) {
+    return PlayerTimeSnapshot(
+      mainTimeMilliseconds: mainTimeSeconds * 1000,
+      byoYomiActive: byoYomiTime != null && mainTimeSeconds <= 0 && isActive,
+      byoYomisLeft: byoYomiTime?.byoYomis,
+      timeActive: isActive,
+      snapshotTimestamp: startTime,
+    );
+  }
+}
+
 class TimeControl {
   final int mainTimeSeconds;
   final int? incrementSeconds;

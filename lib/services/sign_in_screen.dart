@@ -1,6 +1,8 @@
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:go/core/utils/system_utilities.dart';
+import 'package:go/providers/live_game_interactor.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/playfield/game_widget.dart';
@@ -76,7 +78,29 @@ class _SignInState extends State<SignIn> {
                   '/LogIn',
                 );
               },
-              child: Text("Log In"))
+              child: Text("Log In")),
+          SizedBox(
+            height: 20,
+          ),
+          ElevatedButton(
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      var game = testGameConstructor();
+                      return GameWidget(
+                        game: game,
+                        gameInteractor: FaceToFaceGameInteractor(
+                          game,
+                          systemUtils,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text("Over the board"))
         ]),
       ),
     );

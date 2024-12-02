@@ -10,6 +10,7 @@ import 'package:go/models/position.dart';
 import 'package:go/models/stone.dart';
 import 'package:go/models/stone_representation.dart';
 import 'package:go/models/time_control.dart';
+import 'package:go/playfield/board_utilities.dart';
 import 'package:go/providers/create_game_provider.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/game_over_message.dart';
@@ -125,6 +126,72 @@ class GameFieldNames {
 //   static const String X = "x";
 //   static const String Y = "y";
 // }
+
+extension GameExts on Game {
+  List<String> get playerIdsSorted => players
+      .toSortedList(
+        Order.from(
+          (a, b) => players[a]!.index.compareTo(players[b]!.index),
+        ),
+      )
+      .map((e) => e.key)
+      .toList();
+
+  String? getPlayerIdWithTurn() {
+    if (startTime == null) return null;
+
+    final turn = moves.length;
+    for (var item in players.entries) {
+      if (item.value.index == (turn % 2)) {
+        return item.key;
+      }
+    }
+    throw StateError(
+        "This path shouldn't be reachable, as there always exists one user with supposed next turn");
+  }
+
+  StoneType? getStoneFromPlayerId(String id) {
+    return players[id];
+  }
+
+  StoneType? getOtherStoneFromPlayerId(String id) {
+    final myStone = getStoneFromPlayerId(id)?.index;
+    if (myStone == null) return null;
+    return StoneType.values[1 - myStone];
+  }
+
+  String? getPlayerIdFromStoneType(StoneType stone) {
+    if (startTime == null) return null;
+    for (var item in players.entries) {
+      if (item.value == stone) {
+        return item.key;
+      }
+    }
+    throw StateError("Player: {stone} has not yet joined the game");
+  }
+
+  String? getOtherPlayerIdFromPlayerId(String id) {
+    var getOtherPlayerStone = getOtherStoneFromPlayerId(id);
+    if (getOtherPlayerStone == null) return null;
+    return getPlayerIdFromStoneType(getOtherPlayerStone);
+  }
+
+  BoardSizeData get boardSizeData => BoardSizeData(rows, columns);
+  TimeStandard get timeStandard => timeControl.timeStandard;
+
+  bool didStart() {
+    return gameState != GameState.waitingForStart;
+  }
+
+  Game buildWithNewBoardState(BoardState b) {
+    return copyWith(
+      playgroundMap:
+          b.playgroundMap.mapValue((a) => StoneType.values[a.player]),
+      koPositionInLastMove: b.koDelete,
+      prisoners: b.prisoners,
+    );
+  }
+}
 
 class Game {
   final String gameId;
@@ -332,61 +399,6 @@ class Game {
       playersRatings: playersRatings ?? this.playersRatings,
       playersRatingsDiff: playersRatingsDiff ?? this.playersRatingsDiff,
     );
-  }
-
-  List<String> get playerIdsSorted => players
-      .toSortedList(
-        Order.from(
-          (a, b) => players[a]!.index.compareTo(players[b]!.index),
-        ),
-      )
-      .map((e) => e.key)
-      .toList();
-
-  String? getPlayerIdWithTurn() {
-    if (startTime == null) return null;
-
-    final turn = moves.length;
-    for (var item in players.entries) {
-      if (item.value.index == (turn % 2)) {
-        return item.key;
-      }
-    }
-    throw StateError(
-        "This path shouldn't be reachable, as there always exists one user with supposed next turn");
-  }
-
-  StoneType? getStoneFromPlayerId(String id) {
-    return players[id];
-  }
-
-  StoneType? getOtherStoneFromPlayerId(String id) {
-    final myStone = getStoneFromPlayerId(id)?.index;
-    if (myStone == null) return null;
-    return StoneType.values[1 - myStone];
-  }
-
-  String? getPlayerIdFromStoneType(StoneType stone) {
-    if (startTime == null) return null;
-    for (var item in players.entries) {
-      if (item.value == stone) {
-        return item.key;
-      }
-    }
-    throw StateError("Player: {stone} has not yet joined the game");
-  }
-
-  String? getOtherPlayerIdFromPlayerId(String id) {
-    var getOtherPlayerStone = getOtherStoneFromPlayerId(id);
-    if (getOtherPlayerStone == null) return null;
-    return getPlayerIdFromStoneType(getOtherPlayerStone);
-  }
-
-  BoardSizeData get boardSizeData => BoardSizeData(rows, columns);
-  TimeStandard get timeStandard => timeControl.timeStandard;
-
-  bool didStart() {
-    return gameState != GameState.waitingForStart;
   }
 }
 

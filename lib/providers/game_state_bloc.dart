@@ -88,13 +88,7 @@ class GameStateBloc extends ChangeNotifier {
 
   List<TimerController> get timerController => _controller;
 
-  late final StageType curStageTypeNotifier;
-  StageType get curStageType => curStageTypeNotifier;
-
-  set curStageType(StageType stage) {
-    // cur_stage.disposeStage();
-    curStageTypeNotifier = stage;
-  }
+  late StageType curStageType;
 
   final GameInteractor gameInteractor;
   final SystemUtilities systemUtilities;
@@ -131,8 +125,7 @@ class GameStateBloc extends ChangeNotifier {
     if (position == null && canPlayMove) {
       canPlayMove = true;
     } else if (position != null && canPlayMove) {
-      canPlayMove = (stoneLogic.stoneAt(position) == null) &&
-          stoneLogic.checkInsertable(position, updateStone);
+      canPlayMove = stoneLogic.checkInsertable(position, updateStone);
     }
 
     if (!canPlayMove) {
@@ -143,10 +136,6 @@ class GameStateBloc extends ChangeNotifier {
       x: position?.x,
       y: position?.y,
     );
-
-    if (!move.isPass()) {
-      stoneLogic.handleStoneUpdate(position, playerTurn, updateStone);
-    }
 
     return (await gameInteractor.playMove(game, move)).map((g) {
       return updateStateFromGame(g);
@@ -217,6 +206,8 @@ class GameStateBloc extends ChangeNotifier {
       timerController[0].pause();
       timerController[1].pause();
     }
+
+    notifyListeners();
     return game;
   }
 

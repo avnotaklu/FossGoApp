@@ -10,7 +10,7 @@ void main() {
   group("Board Utilities", () {
     test("Simple board repr from high level repr", () {
       var boardState = BoardStateUtilities(5, 5);
-      var board = boardState.SimpleBoardRepresentation(
+      var board = boardState.simpleBoardRepresentation(
         _4_2_highLevelBoardRepresentation_5x5(),
       );
 

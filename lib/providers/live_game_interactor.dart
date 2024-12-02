@@ -5,6 +5,9 @@ import 'dart:math';
 import 'package:barebones_timer/timer_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go/gameplay/middleware/time_calculator.dart';
+import 'package:go/models/time_control.dart';
+import 'package:go/playfield/board_utilities.dart';
 import 'package:ntp/ntp.dart';
 import 'package:signalr_netcore/errors.dart';
 import 'package:signalr_netcore/signalr_client.dart';
@@ -326,6 +329,12 @@ class LiveGameInteractor extends GameInteractor {
 
   @override
   Future<Either<AppError, Game>> playMove(Game game, MovePosition move) async {
+    // final sl = StoneLogic(game);
+
+    // if (!move.isPass()) {
+    //   sl.handleStoneUpdate(Position(move.x!, move.y!), thisAccountStone(game));
+    // }
+
     return (await api.makeMove(move, authBloc.token!, game.gameId))
         .map((a) => a.game);
   }
@@ -345,7 +354,10 @@ class LiveGameInteractor extends GameInteractor {
 // This assumes the two player's ids are "bottom" and "top"
 
 class FaceToFaceGameInteractor extends GameInteractor {
-  FaceToFaceGameInteractor(game) : assert(game.didStart());
+  final SystemUtilities systemUtilities;
+
+  FaceToFaceGameInteractor(Game game, this.systemUtilities)
+      : assert(game.didStart());
 
   String get myPlayerId => "bottom";
   String get otherPlayerId => "top";
@@ -389,16 +401,105 @@ class FaceToFaceGameInteractor extends GameInteractor {
 
   @override
   Future<Either<AppError, Game>> playMove(Game game, MovePosition move) async {
-    throw NotImplementedException();
+    final gp = LocalGameplay(game, systemUtilities);
+    var newGame = gp.playMove(move, thisAccountStone(game));
+    return newGame;
   }
 
   @override
   bool isThisAccountsTurn(Game game) {
-    throw NotImplementedException();
+    return true;
   }
 
   @override
   StoneType thisAccountStone(Game game) {
-    throw NotImplementedException();
+    return game.getStoneFromPlayerId(game.getPlayerIdWithTurn()!)!;
   }
+}
+
+class LocalGameplay {
+  final StoneLogic stoneLogic;
+  final TimeCalculator timeCalculator;
+  final SystemUtilities systemUtilities;
+  final Game game;
+
+  DateTime get now => systemUtilities.currentTime;
+
+  LocalGameplay(this.game, this.systemUtilities)
+      : stoneLogic = StoneLogic(game),
+        timeCalculator = TimeCalculator();
+
+  Either<AppError, Game> playMove(MovePosition move, StoneType stone) {
+    if (!move.isPass()) {
+      var res = stoneLogic.handleStoneUpdate(Position(move.x!, move.y!), stone);
+      if (res.result) {
+        return right(putMove(move, game, res.board, stone));
+      } else {
+        return left(AppError(message: "Couldn't play at position"));
+      }
+    } else {
+      return right(putMove(move, game, null, stone));
+    }
+  }
+
+  Game putMove(
+      MovePosition move, Game game, BoardState? board, StoneType stone) {
+    Game newGame = game;
+
+    newGame.moves.add(GameMove(time: now, x: move.x, y: move.y));
+
+    if (board != null) {
+      newGame = game.buildWithNewBoardState(board);
+    }
+
+    var newTimes = timeCalculator.recalculateTurnPlayerTimeSnapshots(
+      StoneType.values[1 - stone.index], // This is the actual current player
+      newGame.playerTimeSnapshots,
+      newGame.timeControl,
+      now,
+    );
+
+    newGame = newGame.copyWith(playerTimeSnapshots: newTimes);
+
+    return newGame;
+  }
+}
+
+// This is for testing only
+
+Game testGameConstructor() {
+  var rows = 9;
+  var cols = 9;
+  var boardState = BoardStateUtilities(rows, cols);
+
+  Position? koPosition;
+  var startTime = systemUtils.currentTime;
+
+  return Game(
+    gameId: "Test",
+    rows: rows,
+    columns: cols,
+    timeControl: blitz,
+    playgroundMap: {},
+    moves: [],
+    players: {"bottom": StoneType.black, "top": StoneType.white},
+    prisoners: [0, 0],
+    startTime: startTime,
+    koPositionInLastMove: koPosition,
+    gameState: GameState.playing,
+    deadStones: [],
+    winnerId: null,
+    komi: 6.5,
+    finalTerritoryScores: [],
+    endTime: null,
+    gameOverMethod: null,
+    playerTimeSnapshots: [
+      blitz.getStartingSnapshot(startTime, true),
+      blitz.getStartingSnapshot(startTime, false),
+    ],
+    gameCreator: null,
+    stoneSelectionType: StoneSelectionType.auto,
+    playersRatings: [],
+    playersRatingsDiff: [],
+  );
 }
