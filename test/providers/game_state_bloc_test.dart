@@ -215,12 +215,12 @@ void main() {
         () async {
       await pumpEventQueue();
 
-      expect(bloc2.times[0].value.inSeconds, 300);
-      expect(bloc2.times[1].value.inSeconds, 300);
+      expect(bloc2.timerController[0].duration.inSeconds, 300);
+      expect(bloc2.timerController[1].duration.inSeconds, 300);
 
       // After bloc 1 has recieved the join message, we need to incorporate server lag
-      expect(bloc.times[0].value.inSeconds, 299);
-      expect(bloc.times[1].value.inSeconds, 300);
+      expect(bloc.timerController[0].duration.inSeconds, 299);
+      expect(bloc.timerController[1].duration.inSeconds, 300);
     });
 
     test(
@@ -231,8 +231,8 @@ void main() {
 
       await bloc.playMove(a1, stoneLogic);
 
-      expect(bloc.times[0].value.inSeconds, 296);
-      expect(bloc.times[1].value.inSeconds, 300);
+      expect(bloc.timerController[0].duration.inSeconds, 296);
+      expect(bloc.timerController[1].duration.inSeconds, 300);
     });
 
     test("Player 2 should have accurate time considering 1 second A1",
@@ -244,8 +244,8 @@ void main() {
 
       // expect(bloc.times[1].value.inSeconds, 299);
       await pumpEventQueue();
-      expect(bloc2.times[0].value.inSeconds, 296);
-      expect(bloc2.times[1].value.inSeconds, 299);
+      expect(bloc2.timerController[0].duration.inSeconds, 296);
+      expect(bloc2.timerController[1].duration.inSeconds, 299);
     });
 
     test("Player 2 played his move after 5 seconds", () async {
@@ -257,8 +257,8 @@ void main() {
 
       await bloc2.playMove(a2, stoneLogic);
 
-      expect(bloc2.times[0].value.inSeconds, 296);
-      expect(bloc2.times[1].value.inSeconds, 294);
+      expect(bloc2.timerController[0].duration.inSeconds, 296);
+      expect(bloc2.timerController[1].duration.inSeconds, 294);
     });
 
     test("Player 1 should have accurate time considering 1 second lag of A2",
@@ -270,8 +270,8 @@ void main() {
 
       // expect(bloc.times[1].value.inSeconds, 299);
       await pumpEventQueue();
-      expect(bloc.times[0].value.inSeconds, 295);
-      expect(bloc.times[1].value.inSeconds, 294);
+      expect(bloc.timerController[0].duration.inSeconds, 295);
+      expect(bloc.timerController[1].duration.inSeconds, 294);
     });
   });
 }

@@ -9,7 +9,6 @@ import 'package:go/core/utils/string_formatting.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/gameplay/create/stone_selection_widget.dart';
 import 'package:go/gameplay/create/utils.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';

@@ -22,6 +22,7 @@ import 'package:go/services/register_user_result.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/user_authentication_model.dart';
 import 'package:go/services/user_details_dto.dart';
+import 'package:go/services/user_rating_result.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
@@ -31,6 +32,7 @@ import 'package:http/http.dart' as http;
 // }
 
 class Api {
+  static const String basePath = "192.168.109.71:8080";
   static const String baseUrl = "http://192.168.109.71:8080";
 
   Future<Either<HttpError, http.Response>> get(Uri url, String? token) async {
@@ -113,6 +115,16 @@ class Api {
         Uri.parse("$baseUrl/Player/RegisterPlayer"), data.toJson(), token);
 
     return convert(res, (a) => RegisterUserResult.fromJson(a));
+  }
+
+  Future<Either<AppError, UserRatingResult>> getUserRating(
+      String userId, String token) async {
+    var res = await get(
+      Uri.http(basePath, "/User/GetUserRatings", {'userId': userId}),
+      token,
+    );
+
+    return convert(res, (a) => UserRatingResult.fromJson(a));
   }
 
   Future<Either<AppError, Game>> createGame(

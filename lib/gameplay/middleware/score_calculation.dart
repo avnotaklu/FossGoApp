@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';

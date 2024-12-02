@@ -1,7 +1,6 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:go/firebase_options.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/providers/create_game_provider.dart';
 import 'package:go/providers/homepage_bloc.dart';
 import 'package:go/providers/sign_up_provider.dart';

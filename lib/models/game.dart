@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:fpdart/fpdart.dart';
+import 'package:go/constants/constants.dart';
 
 import 'package:go/gameplay/create/stone_selection_widget.dart';
 import 'package:go/models/game_move.dart';
@@ -24,7 +25,6 @@ enum GameState {
   paused,
   ended
 }
-
 
 class GameFieldNames {
   // Game
@@ -52,7 +52,8 @@ class GameFieldNames {
   static const String PlayersRatingsDiff = "playersRatingsDiff";
 
   // control Control
-  static const String MainTimeSeconds = "mainTimeSeconds"; // time control only mainTimeSeconds seconds
+  static const String MainTimeSeconds =
+      "mainTimeSeconds"; // time control only mainTimeSeconds seconds
   static const String IncrementSeconds = "incrementSeconds";
   static const String ByoYomiTime = "byoYomiTime";
   static const String TimeStandard = "timeStandard";
@@ -71,7 +72,6 @@ class GameFieldNames {
   static const String X = "x";
   static const String Y = "y";
 }
-
 
 // GameFieldNames {
 //   // Game
@@ -375,6 +375,9 @@ class Game {
     return getPlayerIdFromStoneType(getOtherPlayerStone);
   }
 
+  BoardSizeData get boardSizeData => BoardSizeData(rows, columns);
+  TimeStandard get timeStandard => timeControl.timeStandard;
+
   bool didStart() {
     return gameState != GameState.waitingForStart;
   }
@@ -407,7 +410,8 @@ class PlayerTimeSnapshot {
 
   factory PlayerTimeSnapshot.fromMap(Map<String, dynamic> map) {
     return PlayerTimeSnapshot(
-      snapshotTimestamp: DateTime.parse(map[GameFieldNames.SnapshotTimestamp] as String),
+      snapshotTimestamp:
+          DateTime.parse(map[GameFieldNames.SnapshotTimestamp] as String),
       mainTimeMilliseconds: map[GameFieldNames.MainTimeMilliseconds] as int,
       byoYomisLeft: map[GameFieldNames.ByoYomisLeft] as int?,
       byoYomiActive: map[GameFieldNames.ByoYomiActive] as bool,

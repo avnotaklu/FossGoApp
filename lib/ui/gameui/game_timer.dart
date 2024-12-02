@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/string_formatting.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
+import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/playfield/game_widget.dart';
@@ -24,72 +24,51 @@ import 'package:timer_count_down/timer_count_down.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
 class GameTimer extends StatefulWidget {
-  final TimerController mController;
-  final Player player;
+  const GameTimer({
+    super.key,
+    required this.controller,
+    required this.player,
+    required this.isMyTurn,
+    required this.timeControl,
+    required this.playerTimeSnapshot,
+  });
+
+  final StoneType player;
+  final TimeControl timeControl;
+  final PlayerTimeSnapshot? playerTimeSnapshot;
+  final TimerController controller;
+  final bool isMyTurn;
 
   @override
   State<GameTimer> createState() => _GameTimerState();
-  const GameTimer(controller, {super.key, required pplayer})
-      : mController = controller,
-        player = pplayer;
 }
 
 class _GameTimerState extends State<GameTimer> {
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return PlayerCountdownTimer(
-      controller: widget.mController,
-      player: widget.player,
-    );
-  }
-}
-
-class PlayerCountdownTimer extends StatefulWidget {
-  const PlayerCountdownTimer({
-    super.key,
-    required this.controller,
-    required this.player,
-  });
-
-  final Player player;
-  final TimerController controller;
-
-  @override
-  State<PlayerCountdownTimer> createState() => _PlayerCountdownTimerState();
-}
-
-class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
-  @override
-  Widget build(BuildContext context) {
-    // WidgetsBinding.instance?.addPostFrameCallback((__) {
-    //   // after seconds have been modified then do the stuff
-    //   context
-    //       .read<GameStateBloc>()
-    //       .timerController[widget.player.turn]
-    //       .reset(); // This restarts with new seconds value
-    // });
-
     return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.5),
-          color: context.read<GameStateBloc>().turn.player_turn ==
-                  widget.player.turn
+          color: widget.isMyTurn
               ? Constants.defaultTheme.enabledColor
               : Constants.defaultTheme.disabledColor,
         ),
         child: Align(
           alignment: Alignment.centerRight,
-          child: timer(),
+          child: timer(
+            color: Constants.playerColors[widget.player.index],
+            timeControl: widget.timeControl,
+            playerTimeSnapshot: widget.playerTimeSnapshot,
+          ),
         ));
   }
 
-  Widget timer() {
+  Widget timer({
+    required TimeControl timeControl,
+    required PlayerTimeSnapshot? playerTimeSnapshot,
+    required Color color,
+  }) {
+    // var color = ;
     return TimerDisplay(
       controller: widget.controller,
       builder: (controller) {
@@ -102,56 +81,43 @@ class _PlayerCountdownTimerState extends State<PlayerCountdownTimer> {
               (time.toInt() ~/ 60).toString(),
               style: TextStyle(
                 fontSize: 20,
-                color: Constants.playerColors[widget.player.turn],
+                color: color,
               ),
             ),
             Text(
               ':',
               style: TextStyle(
                 fontSize: 20,
-                color: Constants.playerColors[widget.player.turn],
+                color: color,
               ),
             ),
             Text((time.toInt() % 60).toString(),
                 style: TextStyle(
                   fontSize: 20,
-                  color: Constants.playerColors[widget.player.turn],
+                  color: color,
                 )),
-            if (context.read<GameStateBloc>().game.timeControl.byoYomiTime !=
-                null) ...[
+            if (timeControl.byoYomiTime != null) ...[
               Text(
                 ' + ',
                 style: TextStyle(
                   fontSize: 20,
-                  color: Constants.playerColors[widget.player.turn],
+                  color: color,
                 ),
               ),
               Text(
-                context.read<GameStateBloc>().game.startTime != null
-                    ? context
-                        .read<GameStateBloc>()
-                        .game
-                        .playerTimeSnapshots[widget.player.turn]
-                        .byoYomisLeft!
-                        .toString()
-                    : (context
-                                .read<GameStateBloc>()
-                                .game
-                                .timeControl
-                                .byoYomiTime
-                                ?.byoYomis ??
-                            "")
-                        .toString(),
+                playerTimeSnapshot != null
+                    ? (playerTimeSnapshot.byoYomisLeft ?? "").toString()
+                    : (timeControl.byoYomiTime?.byoYomis ?? "").toString(),
                 style: TextStyle(
                   fontSize: 20,
-                  color: Constants.playerColors[widget.player.turn],
+                  color: color,
                 ),
               ),
               Text(
-                " x ${(Duration(seconds: context.read<GameStateBloc>().game.timeControl.byoYomiTime!.byoYomiSeconds)).durationRepr()}",
+                " x ${(Duration(seconds: timeControl.byoYomiTime!.byoYomiSeconds)).durationRepr()}",
                 style: TextStyle(
                   fontSize: 20,
-                  color: Constants.playerColors[widget.player.turn],
+                  color: color,
                 ),
               ),
             ]

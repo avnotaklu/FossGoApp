@@ -11,7 +11,6 @@ import 'package:go/core/utils/string_formatting.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/create/utils.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/middleware/stone_logic.dart';
 import 'package:go/gameplay/stages/before_start_stage.dart';

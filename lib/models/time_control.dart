@@ -6,6 +6,17 @@ import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/string_formatting.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/models/game.dart';
+import 'package:go/services/user_rating.dart';
+
+extension TimeStandardExt on TimeStandard {
+  RateableTimeStandard? get rateable => switch (this) {
+        TimeStandard.blitz => RateableTimeStandard.blitz,
+        TimeStandard.rapid => RateableTimeStandard.rapid,
+        TimeStandard.classical => RateableTimeStandard.classical,
+        TimeStandard.correspondence => RateableTimeStandard.correspondence,
+        TimeStandard.other => null,
+      };
+}
 
 enum TimeStandard {
   blitz("Blitz"),

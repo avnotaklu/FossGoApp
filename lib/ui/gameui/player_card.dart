@@ -1,10 +1,14 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:barebones_timer/timer_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/models/game.dart';
+import 'package:go/models/time_control.dart';
 import 'package:go/services/game_over_message.dart';
+import 'package:go/services/public_user_info.dart';
+import 'package:go/services/user_rating.dart';
 import 'package:provider/provider.dart';
 
 import 'package:go/constants/constants.dart' as Constants;
@@ -15,33 +19,49 @@ import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/providers/game_state_bloc.dart';
 import 'package:go/services/signal_r_message.dart';
-import 'package:go/ui/gameui/time_watch.dart';
+import 'package:go/ui/gameui/game_timer.dart';
 import 'package:go/utils/core_utils.dart';
 import 'package:go/utils/player.dart';
 
-enum PlayerCardType { my, other }
-
 class DisplayablePlayerData {
-  final String? email;
+  final String? displayName;
+  final StoneType? stoneType;
+  final UserRating? rating;
+
   DisplayablePlayerData({
-    required this.email,
+    required this.displayName,
+    required this.stoneType,
+    required this.rating,
   });
+
+  factory DisplayablePlayerData.from(
+      PublicUserInfo? publicUserInfo, StoneType? stoneType) {
+    return DisplayablePlayerData(
+      displayName: publicUserInfo?.email,
+      stoneType: stoneType,
+      rating: publicUserInfo?.rating,
+    );
+  }
 }
 
 class PlayerDataUi extends StatefulWidget {
-  final DisplayablePlayerData playerInfo;
-  final Player player;
-  final PlayerCardType type;
+  final DisplayablePlayerData? playerInfo;
+  final Game game;
+
   @override
   State<PlayerDataUi> createState() => _PlayerDataUiState();
-  const PlayerDataUi(this.playerInfo, this.player, this.type, {super.key});
+  const PlayerDataUi(this.playerInfo, this.game, {super.key});
 }
 
 class _PlayerDataUiState extends State<PlayerDataUi> {
   @override
   Widget build(BuildContext context) {
-    final game = context.read<GameStateBloc>().game;
+    final game = widget.game;
+    final player = widget.playerInfo;
+    final ratings = widget.playerInfo?.rating;
+
     final size = MediaQuery.of(context).size;
+
     return Container(
       child: Row(
         children: [
@@ -54,7 +74,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                     children: [
                       Container(
                         width: size.width * 0.09,
-                        child: widget.playerInfo?.email == null
+                        child: player == null
                             ? const Center(
                                 child: SizedBox(
                                     width: 25,
@@ -64,22 +84,26 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                             : Container(
                                 width: 15,
                                 height: 15,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: widget.playerInfo?.email == null
-                                        ? Colors.grey
-                                        : Colors.lightGreenAccent),
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.lightGreenAccent,
+                                ),
                               ),
                       ),
-                      Container(
-                        child: Text(
-                          // "${widget.player == 0 ? 'Sukhmander' : 'avnotaklu'}",
-                          widget.playerInfo?.email ?? "Unknown",
-                          style: TextStyle(
-                              color: Constants.defaultTheme.mainTextColor,
-                              fontSize: 18),
-                        ),
+                      Text(
+                        player?.displayName ?? "Unknown",
+                        style: TextStyle(
+                            color: Constants.defaultTheme.mainTextColor,
+                            fontSize: 18),
                       ),
+                      if (ratings != null)
+                        if (getGameRatingData(game, ratings) != null)
+                          Text(
+                            "(${getGameRatingData(game, ratings)!.glicko.rating})",
+                            style: TextStyle(
+                                color: Constants.defaultTheme.mainTextColor,
+                                fontSize: 14),
+                          ),
                     ],
                   ),
                   Row(
@@ -87,26 +111,21 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                       Container(
                         width: size.width * 0.09,
                       ),
-                      ValueListenableBuilder(
-                          valueListenable: context
-                              .read<StoneLogic>()
-                              .prisoners[widget.player.turn],
-                          builder: (context, snapshot, child) {
-                            return Text(
-                              " + $snapshot Prisoners",
-                              style: TextStyle(
-                                  color: Constants.defaultTheme.mainTextColor),
-                            );
-                          }),
-                      widget.player.turn == 1
-                          ? Text(
-                              " + ${game.komi} komi",
-                              style: TextStyle(
-                                  color: Constants.defaultTheme.mainTextColor),
-                            )
-                          : const Spacer(
-                              flex: 2,
-                            ),
+                      if (player?.stoneType != null)
+                        Text(
+                          " + ${getPrisonersCount(game, player!.stoneType!)} Prisoners",
+                          style: TextStyle(
+                              color: Constants.defaultTheme.mainTextColor),
+                        ),
+                      if (player?.stoneType != null)
+                        Text(
+                          " + ${getKomi(game, player!.stoneType!)} Komi",
+                          style: TextStyle(
+                              color: Constants.defaultTheme.mainTextColor),
+                        ),
+                      // : const Spacer(
+                      //     flex: 2,
+                      //   ),
                       const Spacer(
                         flex: 3,
                       ),
@@ -117,49 +136,69 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                       Container(
                         width: size.width * 0.09,
                       ),
-                      context.read<GameStateBloc>().game.gameOverMethod ==
-                              GameOverMethod.Score
-                          ? Text(
-                              " = ${game.finalTerritoryScores[widget.player.turn] + game.prisoners[widget.player.turn] + (widget.player.turn * game.komi)}",
-                              style: TextStyle(
-                                  color: Constants.defaultTheme.mainTextColor),
-                            )
-                          : const SizedBox.shrink(),
+                      if (player?.stoneType != null)
+                        gameOverScore(game, player!.stoneType!)
                     ],
                   ),
                 ],
               )),
-          Expanded(
+          if (player?.stoneType != null)
+            Expanded(
               flex: 2,
-              child:
-                  //  GameData.of(context)?.match.uid[widget.player] == null
-                  //     ? const Center(child: CircularProgressIndicator())
-                  //     :
-                  //   ValueListenableBuilder(
-                  // valueListenable:
-                  // widget.type == PlayerCardType.my
-                  // ?
-                  // context.read<GameStateBloc>().times[widget.player.turn],
-                  // : context
-                  //     .read<GameStateBloc>()
-                  //     .times[context.read<GameStateBloc>().otherStone.index],
-                  // builder: (context, value, child) {
-                  Consumer<GameStateBloc>(builder: (context, bloc, child) {
-                // debugPrint(
-                //     "New Time with time : ${bloc.times[widget.player.turn].durationRepr()}");
-
-                return GameTimer(
-                  context
-                      .read<GameStateBloc>()
-                      .timerController[widget.player.turn],
-                  pplayer: widget.player,
-                );
-              })
-              // },
-              // ),
+              child: Consumer<GameStateBloc>(
+                builder: (context, bloc, child) {
+                  return GameTimer(
+                    controller: getTimerController(player!.stoneType!),
+                    player: player.stoneType!,
+                    isMyTurn: isPlayerTurn(player.stoneType!),
+                    timeControl: game.timeControl,
+                    playerTimeSnapshot:
+                        getPlayerTimeSnapshot(game, player.stoneType!),
+                  );
+                },
               ),
+            )
+          else
+            const SizedBox.shrink(),
         ],
       ),
     );
+  }
+
+  int getPrisonersCount(Game game, StoneType stone) {
+    return game.prisoners[stone.index];
+  }
+
+  double getKomi(Game game, StoneType stone) {
+    if (stone == StoneType.white) {
+      return game.komi;
+    } else {
+      return 0;
+    }
+  }
+
+  Widget gameOverScore(Game game, StoneType stone) {
+    return game.gameOverMethod == GameOverMethod.Score
+        ? Text(
+            " = ${game.finalTerritoryScores[stone.index] + game.prisoners[stone.index] + (stone.index * game.komi)}",
+            style: TextStyle(color: Constants.defaultTheme.mainTextColor),
+          )
+        : const SizedBox.shrink();
+  }
+
+  TimerController getTimerController(StoneType player) {
+    return context.read<GameStateBloc>().timerController[player.index];
+  }
+
+  bool isPlayerTurn(StoneType player) {
+    return context.read<GameStateBloc>().playerTurn == player.index;
+  }
+
+  PlayerTimeSnapshot getPlayerTimeSnapshot(Game game, StoneType player) {
+    return game.playerTimeSnapshots[player.index];
+  }
+
+  PlayerRatingData? getGameRatingData(Game game, UserRating ratings) {
+    return ratings.getRatingForGame(game);
   }
 }

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/stages/game_end_stage.dart';
 import 'package:go/gameplay/stages/gameplay_stage.dart';
@@ -36,7 +35,7 @@ class _GameUiState extends State<GameUi> {
   @override
   Widget build(BuildContext context) {
     return Consumer<GameStateBloc>(
-      builder: (context, value, child) {
+      builder: (context, gameStateBloc, child) {
         return Column(
           children: [
             Expanded(
@@ -49,17 +48,15 @@ class _GameUiState extends State<GameUi> {
 
                   // FIXME: hack to emulate getRemotePlayer which is not usable before game has started because it used id that is assigned after player joins and game starts
                   Expanded(
-                      flex: 3,
-                      child: PlayerDataUi(
-                        DisplayablePlayerData(
-                          email: context
-                              .read<GameStateBloc>()
-                              .otherPlayerUserInfo
-                              ?.email,
-                        ),
-                        context.read<GameStateBloc>().getRemotePlayer(),
-                        PlayerCardType.other,
-                      )),
+                    flex: 3,
+                    child: PlayerDataUi(
+                      DisplayablePlayerData.from(
+                        gameStateBloc.otherPlayerUserInfo,
+                        gameStateBloc.getRemoteStone(),
+                      ),
+                      gameStateBloc.game,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -72,26 +69,20 @@ class _GameUiState extends State<GameUi> {
               child: Column(
                 children: [
                   Expanded(
-                      flex: 3,
-                      child: PlayerDataUi(
-                        DisplayablePlayerData(
-                          email: context
-                              .read<GameStateBloc>()
-                              .myPlayerUserInfo
-                              .email,
-                        ),
-                        context.read<GameStateBloc>().getClientPlayer(),
-                        PlayerCardType.my,
-                      )),
+                    flex: 3,
+                    child: PlayerDataUi(
+                      DisplayablePlayerData.from(
+                        gameStateBloc.myPlayerUserInfo,
+                        gameStateBloc.getMyStone(),
+                      ),
+                      gameStateBloc.game,
+                    ),
+                  ),
                   context.read<Stage>() is GameEndStage &&
-                          context.read<GameStateBloc>().game.winnerId != null
+                          gameStateBloc.game.winnerId != null
                       ? Text(
                           "${() {
-                            return context
-                                        .read<GameStateBloc>()
-                                        .getWinnerStone!
-                                        .index ==
-                                    0
+                            return gameStateBloc.getWinnerStone!.index == 0
                                 ? 'Black'
                                 : 'White';
                           }.call()} won by ${getWinningMethod(context)}",
@@ -109,7 +100,7 @@ class _GameUiState extends State<GameUi> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // context.read<GameStateBloc>().cur_stage.buttons()[0],
+                            // gameStateBloc.cur_stage.buttons()[0],
                             Expanded(
                               flex: 3,
                               child:
@@ -236,54 +227,6 @@ class ContinueGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomButton(() async {
-      // MultiplayerData.of(context)!
-      //     .curGameReferences!
-      //     .finalOurConfirmation(context)
-      //     .set(false);
-      // // GameData.of(context).acceptFinal();
-      // MultiplayerData.of(context)!
-      //     .curGameReferences!
-      //     .finalRemovedClusters
-      //     .remove();
-
-      // NTP.now().then((value) {
-      //   GameData.of(context)!.match.lastTimeAndDate[
-      //           GameData.of(context)!.getPlayerWithoutTurn.turn] =
-      //       TimeAndDuration(
-      //           value,
-      //           GameData.of(context)!
-      //               .match
-      //               .lastTimeAndDate[
-      //                   GameData.of(context)!.getPlayerWithoutTurn.turn]!
-      //               .duration);
-      //   MultiplayerData.of(context)!
-      //       .curGameReferences!
-      //       .lastTimeAndDuration
-      //       .child(GameData.of(context)!.getPlayerWithoutTurn.turn.toString())
-      //       .set(GameData.of(context)!
-      //           .match
-      //           .lastTimeAndDate[
-      //               GameData.of(context)!.getPlayerWithoutTurn.turn]
-      //           .toString());
-
-      //   GameData.of(context)!.match.lastTimeAndDate[
-      //       GameData.of(context)!
-      //           .getPlayerWithTurn
-      //           .turn] = TimeAndDuration(
-      //       value,
-      //       GameData.of(context)!
-      //           .match
-      //           .lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn]!
-      //           .duration);
-      //   MultiplayerData.of(context)!
-      //       .curGameReferences!
-      //       .lastTimeAndDuration
-      //       .child(GameData.of(context)!.getPlayerWithTurn.turn.toString())
-      //       .set(GameData.of(context)!
-      //           .match
-      //           .lastTimeAndDate[GameData.of(context)!.getPlayerWithTurn.turn]
-      //           .toString());
-
       final res = await context.read<GameStateBloc>()!.continueGame();
       res.fold((e) {
         ScaffoldMessenger.of(context).showSnackBar(

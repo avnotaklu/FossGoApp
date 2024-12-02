@@ -1,7 +1,6 @@
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/providers/signalr_bloc.dart';
 import 'package:go/services/auth_provider.dart';
 import 'package:go/playfield/game_widget.dart';

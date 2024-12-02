@@ -24,12 +24,13 @@ import 'package:go/services/move_position.dart';
 import 'package:go/services/join_message.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
-import 'package:go/ui/gameui/time_watch.dart';
+import 'package:go/ui/gameui/game_timer.dart';
 import 'package:go/utils/player.dart';
 import 'package:ntp/ntp.dart';
 import 'package:signalr_netcore/errors.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'package:timer_count_down/timer_controller.dart';
+
 
 class GameStateBloc extends ChangeNotifier {
   final Api api;
@@ -39,8 +40,8 @@ class GameStateBloc extends ChangeNotifier {
   Game game;
   // Stage curStage;
 
-  late final List<Player> _players;
-  List<Player> get players => List.unmodifiable(_players);
+  // late final List<Player> _players;
+  // List<Player> get players => List.unmodifiable(_players);
 
   StoneType get myStone => game.players[authBloc.currentUserRaw.id]!;
   StoneType get otherStone => StoneType.values[1 - myStone.index];
@@ -50,8 +51,8 @@ class GameStateBloc extends ChangeNotifier {
 
   int get gametime => game.timeControl.mainTimeSeconds;
 
-  Player get getPlayerWithTurn => _players[turn % 2];
-  Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
+  // Player get getPlayerWithTurn => _players[turn % 2];
+  // Player get getPlayerWithoutTurn => _players[turn % 2 == 0 ? 1 : 0];
 
   StoneType? get getWinnerStone => game.players[game.winnerId];
   StoneType? get getLoserStone => game.players[game.winnerId] == null
@@ -75,7 +76,7 @@ class GameStateBloc extends ChangeNotifier {
 
   // Join Data
 
-  AppUser myPlayerUserInfo;
+  PublicUserInfo myPlayerUserInfo;
   PublicUserInfo? otherPlayerUserInfo;
 
   // List<Duration> times;
@@ -85,6 +86,7 @@ class GameStateBloc extends ChangeNotifier {
 
   StageType curStageTypeNotifier;
   StageType get curStageType => curStageTypeNotifier;
+
   set curStageType(StageType stage) {
     // cur_stage.disposeStage();
     curStageTypeNotifier = stage;
@@ -97,7 +99,6 @@ class GameStateBloc extends ChangeNotifier {
 
   late final List<StreamSubscription> subscriptions;
   late final Stream<GameJoinMessage> listenForGameJoin;
-  late final Stream<bool> listenFromOpponentConfirmation;
   late final Stream<EditDeadStoneMessage> listenForEditDeadStone;
   late final Stream<NewMoveMessage> listenFromMove;
   late final Stream<GameOverMessage> listenFromGameOver;
@@ -127,7 +128,11 @@ class GameStateBloc extends ChangeNotifier {
           )
         ],
         curStageTypeNotifier = curStageType,
-        myPlayerUserInfo = authBloc.currentUserRaw {
+        myPlayerUserInfo = PublicUserInfo(
+          authBloc.currentUserRaw.email,
+          authBloc.currentUserRaw.id,
+          authBloc.currentUserRating,
+        ) {
     setupGame(game, joiningData);
     setupStreams();
     subscriptions = [
@@ -141,7 +146,7 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   void setupGame(Game game, GameJoinMessage? joiningData) {
-    _players = [Player(0), Player(1)];
+    // _players = [Player(0), Player(1)];
 
     if (joiningData != null) {
       applyJoinMessage(joiningData);
@@ -153,12 +158,6 @@ class GameStateBloc extends ChangeNotifier {
     listenForGameJoin = gameMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.gameJoin) {
         yield message.data as GameJoinMessage;
-      }
-    });
-    listenFromOpponentConfirmation =
-        gameMessageStream.asyncExpand((message) async* {
-      if (message.data is bool) {
-        yield message.data as bool;
       }
     });
 
@@ -211,19 +210,21 @@ class GameStateBloc extends ChangeNotifier {
     otherPlayerUserInfo = joinMessage.otherPlayerData;
 
     if (game.startTime != null && game.gameState == GameState.playing) {
-      var now = systemUtilities.currentTime;
-
       setPlayerTimes();
       recalculatePlayerLagTime();
 
+      // NOTE: the below hack seems to be fixed now, test it and remove the hack
       // HACK: This is a hack to make sure that the timer starts after the ui is rendered
       // The reason is that the timer controller is not started even when called start() function
       // The controller checks for presense of onStart method, which is supplied via ui
       // check `CountdownController.start() in timer_controller.dart`
 
-      Future.delayed(const Duration(milliseconds: 300), () {
-        startPausedTimerOfActivePlayer();
-      });
+      // Future.delayed(const Duration(milliseconds: 300), () {
+      //   startPausedTimerOfActivePlayer();
+      // });
+
+      startPausedTimerOfActivePlayer();
+
       curStageType = StageType.Gameplay;
       notifyListeners();
     }
@@ -332,41 +333,13 @@ class GameStateBloc extends ChangeNotifier {
         return left(AppError(message: "Invalid move"));
       }
     });
-
-    // var tmpMove = GameMove(time: DateTime.now(), x: moveDto.x, y: moveDto.y);
-    // var tmpGame = game.copyWith(moves: [...game.moves, tmpMove]);
-
-    // applyMoveResult(tmpGame);
   }
 
   void applyMoveResult(Game game) {
-    // var curTime = systemUtilities.currentTime;
-    // debugPrint(curTime.toString());
-    // var lastPlayerPreInc =
-    //     this.game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds -
-    //         (curTime.difference(this
-    //                 .game
-    //                 .playerTimeSnapshots[1 - playerTurn]
-    //                 .snapshotTimestamp))
-    //             .inMilliseconds;
-
     this.game = game;
 
     setPlayerTimes();
     recalculatePlayerLagTime();
-
-    // if (game.timeControl.incrementSeconds != null) {
-    //   var lastPlayerNewTime = times[1 - playerTurn].inMilliseconds;
-    //   // this.game.playerTimeSnapshots[1 - playerTurn].mainTimeMilliseconds - (curTime.difference(this
-    //   //             .game
-    //   //             .playerTimeSnapshots[1 - playerTurn]
-    //   //             .snapshotTimestamp))
-    //   //         .inMilliseconds;
-
-    //   var inc = game.timeControl.incrementSeconds! * 1000;
-    //   // assert((lastPlayerNewTime - lastPlayerPreInc - inc).abs() < 100,
-    //   //     "Increment not added correctly $lastPlayerNewTime != $lastPlayerPreInc + $inc");
-    // }
 
     if (game.gameState == GameState.scoreCalculation) {
       curStageType = StageType.ScoreCalculation;
@@ -376,53 +349,6 @@ class GameStateBloc extends ChangeNotifier {
 
     setTurnTimer();
   }
-
-  // void applyTimesOfDiscreteSections() {
-  //   var times = [game.startTime!, ...game.moves.map((e) => e.time)];
-
-  //   var firstPlayerDuration = Duration.zero;
-
-  //   var firstPlayerArrangedTimes = times.take(times.length - times.length % 2);
-  //   var firstPlayerTimesBeforeCorrespondingMoveMade = firstPlayerArrangedTimes
-  //       .filterWithIndex((time, index) => index % 2 == 0)
-  //       .toList();
-  //   var firstPlayerMoveMadeTimes = firstPlayerArrangedTimes
-  //       .filterWithIndex((time, index) => index % 2 == 1)
-  //       .toList();
-
-  //   for (int i = 0; i < (firstPlayerArrangedTimes.length / 2).floor(); i++) {
-  //     firstPlayerDuration += firstPlayerMoveMadeTimes[i]
-  //         .difference(firstPlayerTimesBeforeCorrespondingMoveMade[i]);
-  //   }
-
-  //   this.times[0].value = Duration(seconds: game.timeControl.mainTimeSeconds) -
-  //       firstPlayerDuration;
-
-  //   var secondPlayerDuration = Duration.zero;
-
-  //   var secondPlayerArrangedTimes =
-  //       times.skip(1).take(times.length - times.length % 2);
-  //   var secondPlayerTimesBeforeCorrespondingMoveMade = secondPlayerArrangedTimes
-  //       .filterWithIndex((time, index) => index % 2 == 0)
-  //       .toList();
-  //   var secondPlayerMoveMadeTimes = secondPlayerArrangedTimes
-  //       .filterWithIndex((time, index) => index % 2 == 1)
-  //       .toList();
-
-  //   for (int i = 0; i < (secondPlayerArrangedTimes.length / 2).floor(); i++) {
-  //     secondPlayerDuration += secondPlayerMoveMadeTimes[i]
-  //         .difference(secondPlayerTimesBeforeCorrespondingMoveMade[i]);
-  //   }
-
-  //   this.times[1].value = Duration(seconds: game.timeControl.mainTimeSeconds) -
-  //       secondPlayerDuration;
-
-  //   // If game has ended, apply game end time to player with turn
-  //   if (game.gameState == GameState.ended) {
-  //     this.times[getPlayerWithTurn.turn].value -=
-  //         game.endTime!.difference(times.last);
-  //   }
-  // }
 
   void setPlayerTimes() {
     _controller[playerTurn].updateDuration(Duration(
@@ -532,39 +458,18 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   void startPausedTimerOfActivePlayer() {
-    timerController[getPlayerWithTurn.turn].start();
+    timerController[playerTurn].start();
   }
 
-  Set<Cluster> getRemovedClusters() {
-    return {};
-    // TODO: call api
+  StoneType? getRemoteStone() {
+    if (!game.didStart()) return null;
+    return game.players.entries
+        .firstWhere((element) => element.key != authBloc.currentUserRaw.id)
+        .value;
   }
 
-  Player getRemotePlayer() {
-    final stone = game.players[(authBloc.currentUserRaw).id];
-    // game.players.indexWhere((k) => k != (authBloc.currentUserRaw)!.id);
-    if (stone == null) {
-      if (authBloc.currentUserRaw.id == game.gameCreator) {
-        return players[1 -
-            (game.stoneSelectionType.index %
-                2) /* for now just wrapping around */];
-      }
-      throw ("remote player not found");
-    }
-    return players[1 - stone.index];
-  }
-
-  Player getClientPlayer() {
-    final stone = game.players[(authBloc.currentUserRaw).id];
-    // final index =
-    //     game.players.indexWhere((k) => k == (authBloc.currentUserRaw)!.id);
-    if (stone == null) {
-      if (authBloc.currentUserRaw.id == game.gameCreator) {
-        return players[(game.stoneSelectionType.index %
-            2) /* for now just wrapping around */];
-      }
-      throw ("client player not found");
-    }
-    return players[stone.index];
+  StoneType? getMyStone() {
+    if (!game.didStart()) return null;
+    return game.players[authBloc.currentUserRaw.id];
   }
 }

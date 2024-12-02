@@ -8,7 +8,6 @@ import 'package:go/constants/constants.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/gameplay/create/create_game_screen.dart';
 import 'package:go/gameplay/create/stone_selection_widget.dart';
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/stages/stage.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/stone_representation.dart';

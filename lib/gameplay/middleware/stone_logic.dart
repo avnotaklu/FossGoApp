@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart' as Constants;
-import 'package:go/gameplay/middleware/multiplayer_data.dart';
 import 'package:go/gameplay/middleware/score_calculation.dart';
 import 'package:go/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/models/cluster.dart';
@@ -307,18 +306,18 @@ class StoneLogic {
     _position = position;
     Position? thisCurrentCell = position;
 
-    final player = gameStateBloc.getPlayerWithTurn.turn;
+    final playerTurn = gameStateBloc.playerTurn;
     final myStone = gameStateBloc.myStone;
     // StoneWidget(gameStateBloc?.getPlayerWithTurn.mColor, position);
 
     if (checkInsertable(position, myStone)) {
-      final currentCluster = Cluster({position}, {}, 0, player);
+      final currentCluster = Cluster({position}, {}, 0, playerTurn);
 
       setStoneAt(
         thisCurrentCell,
         Stone(
           position: position,
-          player: player,
+          player: playerTurn,
           cluster: currentCluster,
         ),
       );

@@ -3,6 +3,7 @@ import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/playfield/board.dart';
 import 'package:go/services/time_control_dto.dart';
+import 'package:go/services/user_rating.dart';
 
 class BoardSizeData {
   final int rows;
@@ -31,6 +32,15 @@ class BoardSizeData {
 const String title = "Go";
 // const List<String> boardsizes = ["9x9", "13x13", "19x19"];
 // const List<(int rows, int cols)> boardsizes = [(9, 9), (13, 13), (19, 19)];
+
+extension BoardSizeDataExt on BoardSize {
+  RateableBoardSize? get rateable => switch (this) {
+        BoardSize.nine => RateableBoardSize.nine,
+        BoardSize.thirteen => RateableBoardSize.thirteen,
+        BoardSize.nineteen => RateableBoardSize.nineteen,
+        BoardSize.other => null
+      };
+}
 
 enum BoardSize {
   nine,

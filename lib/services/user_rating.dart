@@ -1,12 +1,61 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/core/foundation/either.dart';
+import 'package:go/models/game.dart';
+import 'package:go/models/time_control.dart';
+
+enum RateableBoardSize { nine, thirteen, nineteen }
+
+enum RateableTimeStandard { blitz, rapid, classical, correspondence }
+
+class CategoryCons {}
+
+class Category {
+  final RateableBoardSize boardSize;
+  final RateableTimeStandard timeStandard;
+
+  Category({
+    required this.boardSize,
+    required this.timeStandard,
+  });
+
+  factory Category.fromString(String repr) {
+    final parts = repr.split('-');
+    final boardS = int.parse(parts[0].substring(1));
+    final timeSt = int.parse(parts[1].substring(1));
+    return Category(
+      boardSize: RateableBoardSize.values[boardS],
+      timeStandard: RateableTimeStandard.values[timeSt],
+    );
+  }
+
+  String stringRepr() {
+    return 'B${boardSize.index}-S${timeStandard.index}';
+  }
+}
+
+extension UserRatingsExt on UserRating {
+  PlayerRatingData? getRatingForGame(Game game) {
+    var rB = game.boardSizeData.boardSize.rateable;
+    if (rB == null) {
+      return null;
+    }
+    var rT = game.timeStandard.rateable;
+    if (rT == null) {
+      return null;
+    }
+
+    return ratings[Category(boardSize: rB, timeStandard: rT)];
+  }
+}
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class UserRating {
   final String userId;
-  final Map<String, PlayerRatingData> ratings;
+  final Map<Category, PlayerRatingData> ratings;
   UserRating({
     required this.userId,
     required this.ratings,
@@ -15,16 +64,19 @@ class UserRating {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'userId': userId,
-      'ratings': ratings,
+      'ratings': ratings
+          .map((key, value) => MapEntry(key.stringRepr(), value.toMap())),
     };
   }
 
   factory UserRating.fromMap(Map<String, dynamic> map) {
     return UserRating(
       userId: map['userId'] as String,
-      ratings:
-          Map<String, Map<String, dynamic>>.from((map['ratings'])).mapValue(
-        (value) => PlayerRatingData.fromMap(value),
+      ratings: Map<String, Map<String, dynamic>>.from((map['ratings'])).map(
+        (key, value) => MapEntry(
+          Category.fromString(key),
+          PlayerRatingData.fromMap(value),
+        ),
       ),
     );
   }
