@@ -96,7 +96,7 @@ packages:
     source: hosted
     version: "6.2.5"
   cloud_firestore_web:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: cloud_firestore_web
       sha256: "89dfa1304d3da48b3039abbb2865e3d30896ef858e569a16804a99f4362283a9"
@@ -192,7 +192,7 @@ packages:
     source: hosted
     version: "7.3.0"
   firebase_auth_web:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: firebase_auth_web
       sha256: c7b1379ccef7abf4b6816eede67a868c44142198e42350f51c01d8fc03f95a7d
@@ -216,7 +216,7 @@ packages:
     source: hosted
     version: "5.3.0"
   firebase_core_web:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: firebase_core_web
       sha256: f967a7138f5d2ffb1ce15950e2a382924239eaa521150a8f144af34e68b3b3e5
@@ -240,7 +240,7 @@ packages:
     source: hosted
     version: "0.2.5+35"
   firebase_database_web:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: firebase_database_web
       sha256: a6008395dd20e8b8dde0691b441c181a1216c3866f89f48dcb6889d34fd35905
@@ -282,7 +282,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_web_plugins:
-    dependency: transitive
+    dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -359,7 +359,7 @@ packages:
     source: hosted
     version: "2.4.5"
   google_sign_in_web:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: google_sign_in_web
       sha256: ada595df6c30cead48e66b1f3a050edf0c5cf2ba60c185d69690e08adcc6281b
@@ -367,7 +367,7 @@ packages:
     source: hosted
     version: "0.12.4+3"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       sha256: b9c29a161230ee03d3ccf545097fccd9b87a5264228c5d348202e0f0c28f9010

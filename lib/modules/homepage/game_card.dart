@@ -4,7 +4,7 @@ import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/homepage/homepage_bloc.dart';
-import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
+import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
@@ -40,7 +40,7 @@ class GameCard extends StatelessWidget {
           MaterialPageRoute<void>(builder: (BuildContext context) {
         return GameWidget(
             game: game,
-            gameInteractor: LiveGameInteractor(
+            gameInteractor: LiveGameOracle(
               api: Api(),
               authBloc: context.read<AuthProvider>(),
               signalRbloc: context.read<SignalRProvider>(),

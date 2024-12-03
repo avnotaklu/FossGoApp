@@ -10,7 +10,6 @@ enum GameOverMethod {
   Score("Score"),
   Abandon("Abandonment"),;
 
-
   final String actualName;
 
   const GameOverMethod(this.actualName);

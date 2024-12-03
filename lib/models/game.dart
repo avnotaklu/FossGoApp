@@ -2,19 +2,23 @@
 import 'dart:convert';
 
 import 'package:fpdart/fpdart.dart';
-import 'package:go/constants/constants.dart';
 
-import 'package:go/modules/homepage/stone_selection_widget.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
+import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/services/game_over_message.dart';
 
 extension StoneTypeExtension on StoneType {
   String get color => switch (this) {
         StoneType.black => "Black",
         StoneType.white => "White",
+      };
+  StoneType get other => switch (this) {
+        StoneType.black => StoneType.white,
+        StoneType.white => StoneType.black,
       };
 }
 
@@ -437,4 +441,20 @@ class PlayerTimeSnapshot {
 
   factory PlayerTimeSnapshot.fromJson(String source) =>
       PlayerTimeSnapshot.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  PlayerTimeSnapshot copyWith({
+    DateTime? snapshotTimestamp,
+    int? mainTimeMilliseconds,
+    int? byoYomisLeft,
+    bool? byoYomiActive,
+    bool? timeActive,
+  }) {
+    return PlayerTimeSnapshot(
+      snapshotTimestamp: snapshotTimestamp ?? this.snapshotTimestamp,
+      mainTimeMilliseconds: mainTimeMilliseconds ?? this.mainTimeMilliseconds,
+      byoYomisLeft: byoYomisLeft ?? this.byoYomisLeft,
+      byoYomiActive: byoYomiActive ?? this.byoYomiActive,
+      timeActive: timeActive ?? this.timeActive,
+    );
+  }
 }

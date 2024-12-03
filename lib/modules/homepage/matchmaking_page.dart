@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
-import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
+import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
@@ -99,7 +99,7 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                               MaterialPageRoute(builder: (context) {
                             return GameWidget(
                                 game: event.game,
-                                gameInteractor: LiveGameInteractor(
+                                gameInteractor: LiveGameOracle(
                                   api: Api(),
                                   authBloc: context.read<AuthProvider>(),
                                   signalRbloc: context.read<SignalRProvider>(),

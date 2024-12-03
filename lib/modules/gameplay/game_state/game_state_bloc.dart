@@ -9,7 +9,8 @@ import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
-import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
+import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
+import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/user_rating.dart';
@@ -73,7 +74,7 @@ class GameStateBloc extends ChangeNotifier {
 
   late StageType curStageType;
 
-  final GameInteractor gameInteractor;
+  final GameStateOracle gameInteractor;
   final SystemUtilities systemUtilities;
   late final StreamSubscription<GameUpdate> gameUpdateListener;
 
@@ -169,6 +170,29 @@ class GameStateBloc extends ChangeNotifier {
     });
   }
 
+  // void addDeadStones(Position pos) async {
+  //   final token = authBloc.token!;
+  //   final res = await api.editDeadStoneCluster(
+  //     EditDeadStoneClusterDto(position: pos, state: DeadStoneState.Dead),
+  //     token,
+  //     gameStateBloc.game.gameId,
+  //   );
+
+  //   res.fold((e) {}, (r) {
+  //     applyDeadStones(pos, DeadStoneState.Dead);
+  //   });
+  // }
+
+  // void removeDeadStones(Position pos) async {
+  //   final token = authBloc.token!;
+  //   applyDeadStones(pos, DeadStoneState.Alive);
+  // }
+
+  Future<Either<AppError, Game>> editDeadStone(
+      Position pos, DeadStoneState state) async {
+    return gameInteractor.editDeadStoneCluster(game, pos, state);
+  }
+
   void startPausedTimerOfActivePlayer() {
     timerController[playerTurn].start();
     timerController[1 - playerTurn].pause();
@@ -204,23 +228,5 @@ class GameStateBloc extends ChangeNotifier {
     } else if (state == GameState.waitingForStart) {
       curStageType = StageType.BeforeStart;
     }
-  }
-
-  // Helpers
-  bool hasPassedTwice() {
-    GameMove? prev;
-    bool hasPassedTwice = false;
-    for (var i in (game.moves).reversed) {
-      if (prev == null) {
-        prev = i;
-        continue;
-      }
-      if (i.isPass() && prev.isPass()) {
-        hasPassedTwice = !hasPassedTwice;
-      } else {
-        break;
-      }
-    }
-    return hasPassedTwice;
   }
 }

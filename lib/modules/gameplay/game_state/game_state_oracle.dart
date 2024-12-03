@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go/modules/gameplay/middleware/score_calculator.dart';
 import 'package:go/modules/gameplay/middleware/time_calculator.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
@@ -25,7 +26,6 @@ import 'package:go/services/move_position.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/user_rating.dart';
-
 
 // HACK: `GameUpdate` object is a hack as signalR messages don't always give the full game state
 extension GameExt on Game {
@@ -107,7 +107,7 @@ class GameUpdate {
   get state => null;
 }
 
-abstract class GameInteractor {
+abstract class GameStateOracle {
   final StreamController<GameUpdate> gameUpdateC = StreamController.broadcast();
   Stream<GameUpdate> get gameUpdate => gameUpdateC.stream;
 
@@ -118,12 +118,14 @@ abstract class GameInteractor {
   Future<Either<AppError, Game>> acceptScores(Game game);
   Future<Either<AppError, Game>> continueGame(Game game);
   Future<Either<AppError, Game>> playMove(Game game, MovePosition move);
+  Future<Either<AppError, Game>> editDeadStoneCluster(
+      Game game, Position pos, DeadStoneState state);
 
   bool isThisAccountsTurn(Game game);
   StoneType thisAccountStone(Game game);
 }
 
-class LiveGameInteractor extends GameInteractor {
+class LiveGameOracle extends GameStateOracle {
   final Api api;
   final AuthProvider authBloc;
   final SignalRProvider signalRbloc;
@@ -180,7 +182,7 @@ class LiveGameInteractor extends GameInteractor {
     });
   }
 
-  LiveGameInteractor({
+  LiveGameOracle({
     required this.api,
     required this.authBloc,
     required this.signalRbloc,
@@ -329,6 +331,17 @@ class LiveGameInteractor extends GameInteractor {
   }
 
   @override
+  Future<Either<AppError, Game>> editDeadStoneCluster(
+      Game game, Position pos, DeadStoneState state) async {
+    final res = await api.editDeadStoneCluster(
+      EditDeadStoneClusterDto(position: pos, state: DeadStoneState.Alive),
+      authBloc.token!,
+      game.gameId,
+    );
+    return res;
+  }
+
+  @override
   bool isThisAccountsTurn(Game game) {
     return game.getPlayerIdWithTurn() == authBloc.currentUserRaw.id;
   }
@@ -342,11 +355,10 @@ class LiveGameInteractor extends GameInteractor {
 // This assumes the game is already started at time of creation
 // This assumes the two player's ids are "bottom" and "top"
 
-class FaceToFaceGameInteractor extends GameInteractor {
-  final SystemUtilities systemUtilities;
+class FaceToFaceGameOracle extends GameStateOracle {
+  final LocalGameplayServer gp;
 
-  FaceToFaceGameInteractor(Game game, this.systemUtilities)
-      : assert(game.didStart());
+  FaceToFaceGameOracle(this.gp);
 
   String get myPlayerId => "bottom";
   String get otherPlayerId => "top";
@@ -375,24 +387,28 @@ class FaceToFaceGameInteractor extends GameInteractor {
 
   @override
   Future<Either<AppError, Game>> resignGame(Game game) async {
-    throw NotImplementedException();
+    return gp.resignGame(thisAccountStone(game));
   }
 
   @override
   Future<Either<AppError, Game>> acceptScores(Game game) async {
-    throw NotImplementedException();
+    return gp.acceptScores(thisAccountStone(game));
   }
 
   @override
   Future<Either<AppError, Game>> continueGame(Game game) async {
-    throw NotImplementedException();
+    return gp.continueGame();
   }
 
   @override
   Future<Either<AppError, Game>> playMove(Game game, MovePosition move) async {
-    final gp = LocalGameplay(game, systemUtilities);
-    var newGame = gp.playMove(move, thisAccountStone(game));
+    var newGame = gp.makeMove(move, thisAccountStone(game));
     return newGame;
+  }
+
+  Future<Either<AppError, Game>> editDeadStoneCluster(
+      Game game, Position pos, DeadStoneState state) async {
+    return gp.editDeadStone(thisAccountStone(game), pos, state);
   }
 
   @override
@@ -406,89 +422,260 @@ class FaceToFaceGameInteractor extends GameInteractor {
   }
 }
 
-class LocalGameplay {
-  final StoneLogic stoneLogic;
+class LocalGameplayServer {
   final TimeCalculator timeCalculator;
-  final SystemUtilities systemUtilities;
-  final Game game;
 
+  BoardStateUtilities get boardUtils => BoardStateUtilities(_rows, _columns);
+
+  SystemUtilities systemUtilities;
   DateTime get now => systemUtilities.currentTime;
 
-  LocalGameplay(this.game, this.systemUtilities)
-      : stoneLogic = StoneLogic(game),
-        timeCalculator = TimeCalculator();
+  int _rows;
+  int _columns;
+  TimeControl _timeControl;
+  late List<int> _prisoners;
+  late Map<Position, StoneType> _playgroundMap;
+  late List<GameMove> _moves;
+  late List<PlayerTimeSnapshot> _playerTimeSnapshots;
+  late Map<String, StoneType> _players;
+  late DateTime _startTime;
+  Position? _koPositionInLastMove;
+  late GameState _gameState;
+  late Map<Position, DeadStoneState> _stoneStates;
 
-  Either<AppError, Game> playMove(MovePosition move, StoneType stone) {
-    if (!move.isPass()) {
-      var res = stoneLogic.handleStoneUpdate(Position(move.x!, move.y!), stone);
-      if (res.result) {
-        return right(putMove(move, game, res.board, stone));
-      } else {
-        return left(AppError(message: "Couldn't play at position"));
+  List<Position> get deadStones => _stoneStates.entries
+      .where((e) => e.value == DeadStoneState.Dead)
+      .map((e) => e.key)
+      .toList();
+
+  String? _winnerId;
+  late double _komi;
+  GameOverMethod? _gameOverMethod;
+  late List<int> _finalTerritoryScores;
+  DateTime? _endTime;
+
+  int get turn => _moves.length;
+  int get turnPlayer => turn % 2;
+
+  final List<StoneType> _scoresAcceptedBy = [];
+
+  LocalGameplayServer(this._rows, this._columns, this._timeControl)
+      : systemUtilities = systemUtils,
+        timeCalculator = TimeCalculator() {
+    initializeFields();
+  }
+
+  void initializeFields() {
+    _startTime = now;
+
+    _prisoners = [0, 0];
+    _playgroundMap = {};
+    _moves = [];
+    _playerTimeSnapshots = [
+      _timeControl.getStartingSnapshot(_startTime, true),
+      _timeControl.getStartingSnapshot(_startTime, false),
+    ];
+    _players = {"bottom": StoneType.black, "top": StoneType.white};
+    _koPositionInLastMove = null;
+    _gameState = GameState.playing;
+    _stoneStates = {};
+    _winnerId = null;
+    _komi = 6.5;
+    _gameOverMethod = null;
+    _finalTerritoryScores = [];
+    _endTime = null;
+  }
+
+  Game getGame() {
+    return Game(
+      gameId: "LocalGame",
+      rows: _rows,
+      columns: _columns,
+      timeControl: _timeControl,
+      playgroundMap: _playgroundMap,
+      moves: _moves,
+      players: _players,
+      prisoners: _prisoners,
+      startTime: _startTime,
+      koPositionInLastMove: _koPositionInLastMove,
+      gameState: _gameState,
+      deadStones: deadStones,
+      winnerId: _winnerId,
+      komi: _komi,
+      finalTerritoryScores: _finalTerritoryScores,
+      endTime: _endTime,
+      gameOverMethod: _gameOverMethod,
+      playerTimeSnapshots: _playerTimeSnapshots,
+      gameCreator: null,
+      stoneSelectionType: StoneSelectionType.auto,
+      playersRatings: [],
+      playersRatingsDiff: [],
+    );
+  }
+
+  log(String m) {
+    debugPrint(m);
+  }
+
+  Either<AppError, Game> makeMove(MovePosition move, StoneType stone) {
+    assert(turnPlayer == stone.index, "It's not this player's turn");
+    final stoneLogic = StoneLogic(getGame());
+    try {
+      if (!move.isPass()) {
+        var res =
+            stoneLogic.handleStoneUpdate(Position(move.x!, move.y!), stone);
+        if (res.result) {
+          _playgroundMap = boardUtils
+              .makeHighLevelBoardRepresentationFromBoardState(res.board);
+          _prisoners = res.board.prisoners
+              .zip(_prisoners)
+              .map((a) => a.$1 + a.$2)
+              .toList();
+          _koPositionInLastMove = res.board.koDelete;
+        } else {
+          log("Couldn't play at position");
+          return left(AppError(message: "Couldn't play at position"));
+        }
       }
-    } else {
-      return right(putMove(move, game, null, stone));
+
+      var moveTime = now;
+
+      _moves.add(GameMove(time: moveTime, x: move.x, y: move.y));
+
+      _setTimes(moveTime);
+
+      log("Move played ${_moves.last.toJson()}");
+
+      if (hasPassedTwice()) {
+        log("Setting score calc");
+        _setScoreCalculationStage();
+      }
+
+      return right(getGame());
+    } on Exception catch (e) {
+      return left(AppError(message: e.toString()));
     }
   }
 
-  Game putMove(
-      MovePosition move, Game game, BoardState? board, StoneType stone) {
-    Game newGame = game;
+  void _setScoreCalculationStage() {
+    assert(_gameState == GameState.playing, "Game is not in playing state");
+    assert(hasPassedTwice(), "Both players haven't passed twice");
 
-    newGame.moves.add(GameMove(time: now, x: move.x, y: move.y));
+    _gameState = GameState.scoreCalculation;
+  }
 
-    if (board != null) {
-      newGame = game.buildWithNewBoardState(board);
-    }
-
-    var newTimes = timeCalculator.recalculateTurnPlayerTimeSnapshots(
-      StoneType.values[1 - stone.index], // This is the actual current player
-      newGame.playerTimeSnapshots,
-      newGame.timeControl,
-      now,
+  void _setTimes(DateTime time) {
+    var times = timeCalculator.recalculateTurnPlayerTimeSnapshots(
+      StoneType.values[turnPlayer],
+      _playerTimeSnapshots,
+      _timeControl,
+      time,
     );
 
-    newGame = newGame.copyWith(playerTimeSnapshots: newTimes);
+    _playerTimeSnapshots = times;
 
-    return newGame;
+    // TODO: Send an event after this
+    log("Reset clock to ${_playerTimeSnapshots[turnPlayer].mainTimeMilliseconds / 1000} seconds");
   }
-}
 
-// This is for testing only
+  Either<AppError, Game> resignGame(StoneType playerStone) {
+    if (_gameState == GameState.ended) {
+      return left(AppError(message: "Game is already ended"));
+    }
 
-Game testGameConstructor() {
-  var rows = 9;
-  var cols = 9;
-  var boardState = BoardStateUtilities(rows, cols);
+    _endGame(GameOverMethod.Resign, playerStone.other);
 
-  Position? koPosition;
-  var startTime = systemUtils.currentTime;
+    return right(getGame());
+  }
 
-  return Game(
-    gameId: "Test",
-    rows: rows,
-    columns: cols,
-    timeControl: blitz,
-    playgroundMap: {},
-    moves: [],
-    players: {"bottom": StoneType.black, "top": StoneType.white},
-    prisoners: [0, 0],
-    startTime: startTime,
-    koPositionInLastMove: koPosition,
-    gameState: GameState.playing,
-    deadStones: [],
-    winnerId: null,
-    komi: 6.5,
-    finalTerritoryScores: [],
-    endTime: null,
-    gameOverMethod: null,
-    playerTimeSnapshots: [
-      blitz.getStartingSnapshot(startTime, true),
-      blitz.getStartingSnapshot(startTime, false),
-    ],
-    gameCreator: null,
-    stoneSelectionType: StoneSelectionType.auto,
-    playersRatings: [],
-    playersRatingsDiff: [],
-  );
+  Either<AppError, Game> acceptScores(StoneType stone) {
+    if (_gameState != GameState.scoreCalculation) {
+      return left(AppError(message: "Game is not in score calculation stage"));
+    }
+
+    _scoresAcceptedBy.add(stone);
+
+    if (_scoresAcceptedBy.length == 2) {
+      _endGame(GameOverMethod.Score, null);
+    }
+
+    return right(getGame());
+  }
+
+  Either<AppError, Game> continueGame() {
+    _gameState = GameState.playing;
+    _stoneStates.clear();
+    _scoresAcceptedBy.clear();
+
+    return right(getGame());
+  }
+
+  Either<AppError, Game> editDeadStone(
+      StoneType stone, Position pos, DeadStoneState state) {
+    if (_gameState != GameState.scoreCalculation) {
+      throw Exception("Game is not in score calculation stage");
+    }
+
+    _scoresAcceptedBy.clear();
+
+    if (_stoneStates[pos] != state) {
+      final newBoard = boardUtils.boardStateFromGame(getGame());
+
+      for (var pos in (newBoard.playgroundMap[pos]?.cluster.data ?? {})) {
+        _stoneStates[pos] = state;
+      }
+    }
+
+    return right(getGame());
+  }
+
+  void _endGame(
+    GameOverMethod method,
+    StoneType? winner,
+  ) {
+    final List<int> scores = [];
+    final stoneLogic = StoneLogic(getGame());
+
+    if (method == GameOverMethod.Score) {
+      final calc = ScoreCalculator(
+        rows: _rows,
+        cols: _columns,
+        komi: _komi,
+        deadStones: deadStones,
+        prisoners: _prisoners,
+        playground: stoneLogic.board.playgroundMap,
+      );
+
+      scores.addAll(calc.territoryScores);
+      winner = StoneType.values[calc.getWinner()];
+    }
+
+    _gameState = GameState.ended;
+    _playerTimeSnapshots = [
+      _playerTimeSnapshots[0].copyWith(timeActive: false),
+      _playerTimeSnapshots[1].copyWith(timeActive: false),
+    ];
+    _finalTerritoryScores = scores;
+    _winnerId = _players.keys.firstWhere((k) => _players[k] == winner);
+    _gameOverMethod = method;
+    _endTime = now;
+  }
+
+  // Helpers
+  bool hasPassedTwice() {
+    GameMove? prev;
+    bool hasPassedTwice = false;
+    for (var i in (_moves).reversed) {
+      if (prev == null) {
+        prev = i;
+        continue;
+      }
+      if (i.isPass() && prev.isPass()) {
+        hasPassedTwice = !hasPassedTwice;
+      } else {
+        break;
+      }
+    }
+    return hasPassedTwice;
+  }
 }

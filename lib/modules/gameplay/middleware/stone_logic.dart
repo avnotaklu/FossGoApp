@@ -6,7 +6,6 @@ import 'package:go/models/position.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 
-
 class StoneLogic {
   BoardState board;
 
@@ -65,26 +64,19 @@ class StoneLogic {
       return false;
     }
     bool insertable = false;
-    doActionOnNeighbors(
-        position,
-        (curpos, neighbor) => {
-              if (_stoneAt(neighbor) != null)
-                {
-                  if (!insertable)
-                    {
-                      if (_stoneAt(neighbor)?.player == playerStone.index)
-                        insertable =
-                            !(_getClusterFromPosition(neighbor)?.freedoms == 1)
-                      else
-                        insertable =
-                            _getClusterFromPosition(neighbor)?.freedoms == 1,
-                    }
-                }
-              else if (_checkIfInsideBounds(neighbor))
-                {
-                  insertable = true,
-                }
-            });
+    doActionOnNeighbors(position, (curpos, neighbor) {
+      if (_stoneAt(neighbor) != null) {
+        if (!insertable) {
+          if (_stoneAt(neighbor)?.player == playerStone.index) {
+            insertable = !(_getClusterFromPosition(neighbor)?.freedoms == 1);
+          } else {
+            insertable = _getClusterFromPosition(neighbor)?.freedoms == 1;
+          }
+        }
+      } else if (_checkIfInsideBounds(neighbor)) {
+        insertable = true;
+      }
+    });
 
     return insertable;
   }
@@ -172,7 +164,8 @@ class StoneLogic {
     }
   }
 
-  void _recalculateFreedomsForNeighborsOfDeleted(Position deletedStonePosition) {
+  void _recalculateFreedomsForNeighborsOfDeleted(
+      Position deletedStonePosition) {
     // If a deleted position( free position ) has already contributed to the freedoms of a cluster it should not contribute again as that will result in duplication
     // A list of clusters is stored to keep track of what cluster has recieved freedoms points one free position can't give two freedoms to one cluster
     // but it can give freedom to different cluster
@@ -230,7 +223,7 @@ class StoneLogic {
   }
 
   static void doActionOnNeighbors(Position thisCell,
-      Function(Position curPos, Position neighbor) doAction) {
+      void Function(Position curPos, Position neighbor) doAction) {
     var rowPlusOne = Position(thisCell.x + 1, thisCell.y);
     doAction(thisCell, rowPlusOne);
     var rowMinusOne = Position(thisCell.x - 1, thisCell.y);

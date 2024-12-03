@@ -13,7 +13,6 @@ import 'package:go/services/edit_dead_stone_dto.dart';
 
 import 'package:go/models/position.dart';
 
-
 class ScoreCalculationBloc extends ChangeNotifier {
   final Map<Position, ValueNotifier<Area?>> areaMap = {};
   // final List<Cluster> clusterEncountered = [];
@@ -44,7 +43,7 @@ class ScoreCalculationBloc extends ChangeNotifier {
     required this.gameStateBloc,
     required this.gameBoardBloc,
   }) {
-    editStoneSubscription = listenFromEditDeadStone();
+    // editStoneSubscription = listenFromEditDeadStone();
     setupScore();
   }
 
@@ -68,33 +67,16 @@ class ScoreCalculationBloc extends ChangeNotifier {
     calculateScore();
   }
 
-  @override
-  void dispose() {
-    editStoneSubscription.cancel();
-  }
-
-  void addDeadStones(Position pos) async {
-    final token = authBloc.token!;
-    final res = await api.editDeadStoneCluster(
-      EditDeadStoneClusterDto(position: pos, state: DeadStoneState.Dead),
-      token,
-      gameStateBloc.game.gameId,
-    );
-
-    res.fold((e) {}, (r) {
-      applyDeadStones(pos, DeadStoneState.Dead);
-    });
-  }
-
-  void removeDeadStones(Position pos) async {
-    final token = authBloc.token!;
-    final res = await api.editDeadStoneCluster(
-      EditDeadStoneClusterDto(position: pos, state: DeadStoneState.Alive),
-      token,
-      gameStateBloc.game.gameId,
-    );
-    res.fold((e) {}, (r) {
-      applyDeadStones(pos, DeadStoneState.Alive);
+  StreamSubscription listenFromEditDeadStone() {
+    return gameStateBloc.gameInteractor.gameUpdate.listen((message) {
+      var pos = message.deadStonePosition;
+      var state = message.deadStoneState;
+      if (pos != null && state != null) {
+        applyDeadStones(pos, state);
+        debugPrint(
+          "Dead stone edited at position $pos to $state",
+        );
+      }
     });
   }
 
@@ -109,26 +91,21 @@ class ScoreCalculationBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  StreamSubscription listenFromEditDeadStone() {
-    return gameStateBloc.gameInteractor.gameUpdate.listen((message) {
-      var pos = message.deadStonePosition;
-      var state = message.deadStoneState;
-      if (pos != null && state != null) {
-        applyDeadStones(pos, state);
-        debugPrint(
-          "Dead stone edited at position $pos to $state",
-        );
-      }
-    });
-  }
-
-  void onClickStone(Position pos) {
+  void onClickStone(Position pos) async {
     final cluster = gameBoardBloc.stoneAt(pos)!.cluster;
     if (virtualRemovedCluster.contains(cluster)) {
-      removeDeadStones(pos);
+      var res = await gameStateBloc.editDeadStone(pos, DeadStoneState.Alive);
+      res.map((res) => {applyDeadStones(pos, DeadStoneState.Alive)});
     } else {
-      addDeadStones(pos);
+      var res = await gameStateBloc.editDeadStone(pos, DeadStoneState.Dead);
+      res.map((res) => {applyDeadStones(pos, DeadStoneState.Dead)});
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    editStoneSubscription.cancel();
   }
 
   onGameEnd(GameStateBloc gameState, removedCluster) {

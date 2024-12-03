@@ -31,7 +31,7 @@ class BoardState {
     return BoardState(
       rows: rows ?? this.rows,
       cols: cols ?? this.cols,
-      koDelete: koDelete ?? this.koDelete,
+      koDelete: koDelete,
       prisoners: prisoners ?? this.prisoners,
       playgroundMap: playgroundMap ?? this.playgroundMap,
     );

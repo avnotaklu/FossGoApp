@@ -10,7 +10,7 @@ import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
-import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
+import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 
 import 'package:go/models/game.dart';
@@ -25,7 +25,7 @@ import 'package:go/constants/constants.dart' as Constants;
 
 class GameWidget extends StatelessWidget {
   final Game game;
-  final GameInteractor gameInteractor;
+  final GameStateOracle gameInteractor;
 
   String? byoYomiTime(TimeControl time) {
     return time.byoYomiTime != null

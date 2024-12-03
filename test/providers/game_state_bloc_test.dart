@@ -15,7 +15,7 @@ import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
+import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
@@ -185,7 +185,7 @@ void main() {
 
   // joins game on client1 when constructing gameStateBloc
   // final l1 = LiveGameInteractor(api: api, authBloc: auth, signalRbloc: signalR);
-  final i1 = FaceToFaceGameInteractor(sGame, utils);
+  final i1 = FaceToFaceGameOracle(sGame, utils);
   bloc = GameStateBloc(sGame, i1, utils);
 
   // Join Message recieved from server
@@ -213,7 +213,7 @@ void main() {
   //   joiningData: joinMessage,
   // );
 
-  final i2 = FaceToFaceGameInteractor(sGame, utils2);
+  final i2 = FaceToFaceGameOracle(sGame, utils2);
   bloc2 = GameStateBloc(sGame, i2, utils2);
 
   group("GameStateBloc", () {

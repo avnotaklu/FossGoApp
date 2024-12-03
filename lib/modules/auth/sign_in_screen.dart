@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:go/core/utils/system_utilities.dart';
-import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
+import 'package:go/models/time_control.dart';
+import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
@@ -86,13 +87,10 @@ class _SignInState extends State<SignIn> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      var game = testGameConstructor();
+                      var localGame = LocalGameplayServer(9, 9, blitz);
                       return GameWidget(
-                        game: game,
-                        gameInteractor: FaceToFaceGameInteractor(
-                          game,
-                          systemUtils,
-                        ),
+                        game: localGame.getGame(),
+                        gameInteractor: FaceToFaceGameOracle(localGame),
                       );
                     },
                   ),
