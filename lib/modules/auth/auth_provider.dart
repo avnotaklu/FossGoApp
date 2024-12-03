@@ -113,8 +113,11 @@ class AuthProvider {
     });
 
     var res = (await userRatingTas.run()).flatMap((r) {
-      _setUser(r.userRating, token, user);
+      _setUser(r, token, user);
       return right(user);
+    }).mapLeft((e) {
+      signlRBloc.disconnect();
+      return e;
     });
 
     _authResultStreamController.add(res);
@@ -130,7 +133,7 @@ class AuthProvider {
     return registerRes;
   }
 
-  Future<Either<AppError, UserRatingResult>> _userRatingResult(
+  Future<Either<AppError, UserRating>> _userRatingResult(
       String token, String userId) async {
     var registerRes = await api.getUserRating(
       userId,

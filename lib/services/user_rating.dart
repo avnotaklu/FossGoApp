@@ -11,7 +11,7 @@ enum RateableTimeStandard { blitz, rapid, classical, correspondence }
 class CategoryCons {}
 
 class Category {
-  final RateableBoardSize boardSize;
+  final RateableBoardSize? boardSize;
   final RateableTimeStandard timeStandard;
 
   Category({
@@ -21,16 +21,29 @@ class Category {
 
   factory Category.fromString(String repr) {
     final parts = repr.split('-');
-    final boardS = int.parse(parts[0].substring(1));
-    final timeSt = int.parse(parts[1].substring(1));
-    return Category(
-      boardSize: RateableBoardSize.values[boardS],
-      timeStandard: RateableTimeStandard.values[timeSt],
-    );
+
+    if (parts.length == 2) {
+      final timeSt = int.parse(parts[1].substring(1));
+      final boardS = int.parse(parts[0].substring(1));
+
+      return Category(
+        boardSize: RateableBoardSize.values[boardS],
+        timeStandard: RateableTimeStandard.values[timeSt],
+      );
+    } else {
+      final timeSt = int.parse(parts[0].substring(1));
+
+      return Category(
+        timeStandard: RateableTimeStandard.values[timeSt],
+        boardSize: null,
+      );
+    }
   }
 
   String stringRepr() {
-    return 'B${boardSize.index}-S${timeStandard.index}';
+    final b = boardSize == null ? '' : 'B${boardSize!.index}-';
+    final s = 'S${timeStandard.index}';
+    return '$b$s';
   }
 }
 

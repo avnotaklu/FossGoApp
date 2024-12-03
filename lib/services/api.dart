@@ -18,6 +18,7 @@ import 'package:go/services/register_user_result.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/user_authentication_model.dart';
 import 'package:go/services/user_details_dto.dart';
+import 'package:go/services/user_rating.dart';
 import 'package:go/services/user_rating_result.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -113,14 +114,14 @@ class Api {
     return convert(res, (a) => RegisterUserResult.fromJson(a));
   }
 
-  Future<Either<AppError, UserRatingResult>> getUserRating(
+  Future<Either<AppError, UserRating>> getUserRating(
       String userId, String token) async {
     var res = await get(
       Uri.http(basePath, "/User/GetUserRatings", {'userId': userId}),
       token,
     );
 
-    return convert(res, (a) => UserRatingResult.fromJson(a));
+    return convert(res, (a) => UserRating.fromJson(a));
   }
 
   Future<Either<AppError, Game>> createGame(
