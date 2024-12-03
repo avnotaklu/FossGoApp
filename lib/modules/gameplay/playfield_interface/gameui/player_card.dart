@@ -3,6 +3,7 @@ import 'package:barebones_timer/timer_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:go/models/game.dart';
 import 'package:go/services/game_over_message.dart';
+import 'package:go/services/user_rating.dart';
 import 'package:provider/provider.dart';
 
 import 'package:go/constants/constants.dart' as Constants;
@@ -57,18 +58,12 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                       ),
                       Text(
                         player?.displayName ?? "Unknown",
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Constants.defaultTheme.mainTextColor,
                             fontSize: 18),
                       ),
-                      if (ratings != null)
-                        if (player?.rating != null)
-                          Text(
-                            "(${player!.rating!.glicko.rating})",
-                            style: TextStyle(
-                                color: Constants.defaultTheme.mainTextColor,
-                                fontSize: 14),
-                          ),
+                      if (ratings != null) ratingText(ratings),
                     ],
                   ),
                   Row(
@@ -91,7 +86,8 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                           style: TextStyle(
                               color: Constants.defaultTheme.mainTextColor),
                         ),
-                      if (player?.stoneType != null && player?.stoneType == StoneType.white)
+                      if (player?.stoneType != null &&
+                          player?.stoneType == StoneType.white)
                         Text(
                           " + ${getKomi(game, player!.stoneType!)} Komi",
                           style: TextStyle(
@@ -139,6 +135,42 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
     );
   }
 
+  Widget ratingText(PlayerRatingData ratings) {
+    return RichText(
+      text: TextSpan(
+          text: " ( ${ratings.glicko.rating.toStringAsFixed(0)}",
+          style: TextStyle(
+            color: Constants.defaultTheme.mainTextColor,
+            fontSize: 12,
+          ),
+          children: [
+            ...ratingDiffText(widget.game, widget.playerInfo),
+            const TextSpan(
+              text: " )",
+            ),
+          ]),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  List<TextSpan> ratingDiffText(Game game, DisplayablePlayerData? player) {
+    if (player?.stoneType == null) return [];
+    final diff = getRatingDiff(game, player!.stoneType!);
+    if (diff != null) {
+      final sign = diff > 0 ? "+" : "-";
+      return [
+        TextSpan(
+          text: " $sign${diff.abs()}",
+          style: TextStyle(
+            color: diff < 0 ? Colors.red : Colors.green,
+            fontSize: 12,
+          ),
+        )
+      ];
+    }
+    return [];
+  }
+
   int getPrisonersCount(Game game, StoneType stone) {
     return game.prisoners[stone.index];
   }
@@ -178,5 +210,12 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
 
   PlayerTimeSnapshot getPlayerTimeSnapshot(Game game, StoneType player) {
     return game.playerTimeSnapshots[player.index];
+  }
+
+  int? getRatingDiff(Game game, StoneType stone) {
+    if (game.playersRatingsDiff.isNotEmpty) {
+      return game.playersRatingsDiff[stone.index];
+    }
+    return null;
   }
 }

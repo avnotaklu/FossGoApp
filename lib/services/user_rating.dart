@@ -45,6 +45,18 @@ class Category {
     final s = 'S${timeStandard.index}';
     return '$b$s';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Category &&
+        other.boardSize == boardSize &&
+        other.timeStandard == timeStandard;
+  }
+
+  @override
+  int get hashCode => boardSize.hashCode ^ timeStandard.hashCode;
 }
 
 extension UserRatingsExt on UserRating {

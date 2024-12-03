@@ -61,7 +61,7 @@ class ScoreCalculationBloc extends ChangeNotifier {
   }
 
   StreamSubscription listenFromEditDeadStone() {
-    return gameStateBloc.gameInteractor.gameUpdate.listen((message) {
+    return gameStateBloc.gameOracle.gameUpdate.listen((message) {
       var pos = message.deadStonePosition;
       var state = message.deadStoneState;
       if (pos != null && state != null) {

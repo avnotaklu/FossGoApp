@@ -91,6 +91,7 @@ class AuthProvider {
 
   void _setUser(UserRating userRating, String token, AppUser user) {
     _currentUserStreamController.add(user);
+    _currentUserRating = userRating;
     _currentUserRaw = user;
     _token = token;
 

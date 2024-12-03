@@ -113,7 +113,7 @@ abstract class GameStateOracle {
   Stream<GameUpdate> get gameUpdate => gameUpdateC.stream;
 
   DisplayablePlayerData myPlayerData(Game game);
-  DisplayablePlayerData otherPlayerData(Game game);
+  DisplayablePlayerData? otherPlayerData(Game game);
 
   Future<Either<AppError, Game>> resignGame(Game game);
   Future<Either<AppError, Game>> acceptScores(Game game);
@@ -286,7 +286,7 @@ class LiveGameOracle extends GameStateOracle {
   }
 
   @override
-  DisplayablePlayerData otherPlayerData(Game game) {
+  DisplayablePlayerData? otherPlayerData(Game game) {
     var publicInfo = otherPlayerInfo;
     var rating = publicInfo?.rating.getRatingForGame(game);
     StoneType? stone;
@@ -297,8 +297,12 @@ class LiveGameOracle extends GameStateOracle {
       stone = game.stoneSelectionType.type;
     }
 
+    if (publicInfo?.email == null) {
+      return null;
+    }
+
     return DisplayablePlayerData(
-      displayName: publicInfo?.email,
+      displayName: publicInfo!.email,
       stoneType: stone,
       rating: rating,
     );
@@ -424,4 +428,3 @@ class FaceToFaceGameOracle extends GameStateOracle {
     return game.getStoneFromPlayerId(game.getPlayerIdWithTurn()!)!;
   }
 }
-

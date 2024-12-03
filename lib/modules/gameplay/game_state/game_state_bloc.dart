@@ -18,7 +18,7 @@ import 'package:go/services/user_rating.dart';
 import 'package:signalr_netcore/errors.dart';
 
 class DisplayablePlayerData {
-  final String? displayName;
+  final String displayName;
   final StoneType? stoneType;
   final PlayerRatingData? rating;
 
@@ -63,9 +63,9 @@ class GameStateBloc extends ChangeNotifier {
   // Join Data
 
   DisplayablePlayerData get bottomPlayerUserInfo =>
-      gameInteractor.myPlayerData(game);
-  DisplayablePlayerData get topPlayerUserInfo =>
-      gameInteractor.otherPlayerData(game);
+      gameOracle.myPlayerData(game);
+  DisplayablePlayerData? get topPlayerUserInfo =>
+      gameOracle.otherPlayerData(game);
 
   // List<Duration> times;
   final List<TimerController> _controller;
@@ -74,13 +74,13 @@ class GameStateBloc extends ChangeNotifier {
 
   late StageType curStageType;
 
-  final GameStateOracle gameInteractor;
+  final GameStateOracle gameOracle;
   final SystemUtilities systemUtilities;
   late final StreamSubscription<GameUpdate> gameUpdateListener;
 
   GameStateBloc(
     this.game,
-    this.gameInteractor,
+    this.gameOracle,
     this.systemUtilities,
   ) : _controller = [
           TimerController(
@@ -96,15 +96,15 @@ class GameStateBloc extends ChangeNotifier {
         ] {
     updateStateFromGame(game);
 
-    gameUpdateListener = gameInteractor.gameUpdate.listen((event) {
+    gameUpdateListener = gameOracle.gameUpdate.listen((event) {
       updateStateFromGame(event.makeCopyFromOldGame(game));
     });
   }
 
   Future<Either<AppError, Game>> playMove(
       Position? position, StoneLogic stoneLogic) async {
-    bool canPlayMove = gameInteractor.isThisAccountsTurn(game);
-    var updateStone = gameInteractor.thisAccountStone(game);
+    bool canPlayMove = gameOracle.isThisAccountsTurn(game);
+    var updateStone = gameOracle.thisAccountStone(game);
 
     if (position == null && canPlayMove) {
       canPlayMove = true;
@@ -121,7 +121,7 @@ class GameStateBloc extends ChangeNotifier {
       y: position?.y,
     );
 
-    return (await gameInteractor.playMove(game, move)).map((g) {
+    return (await gameOracle.playMove(game, move)).map((g) {
       return updateStateFromGame(g);
     });
   }
@@ -153,19 +153,19 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   Future<Either<AppError, Game>> continueGame() async {
-    return (await gameInteractor.continueGame(game)).map((g) {
+    return (await gameOracle.continueGame(game)).map((g) {
       return updateStateFromGame(g);
     });
   }
 
   Future<Either<AppError, Game>> acceptScores() async {
-    return (await gameInteractor.acceptScores(game)).map((g) {
+    return (await gameOracle.acceptScores(game)).map((g) {
       return updateStateFromGame(g);
     });
   }
 
   Future<Either<AppError, Game>> resignGame() async {
-    return (await gameInteractor.resignGame(game)).map((g) {
+    return (await gameOracle.resignGame(game)).map((g) {
       return updateStateFromGame(g);
     });
   }
@@ -190,7 +190,7 @@ class GameStateBloc extends ChangeNotifier {
 
   Future<Either<AppError, Game>> editDeadStone(
       Position pos, DeadStoneState state) async {
-    return gameInteractor.editDeadStoneCluster(game, pos, state);
+    return gameOracle.editDeadStoneCluster(game, pos, state);
   }
 
   void startPausedTimerOfActivePlayer() {

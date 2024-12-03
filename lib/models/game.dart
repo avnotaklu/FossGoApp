@@ -213,8 +213,8 @@ class Game {
   final DateTime? endTime;
   final StoneSelectionType stoneSelectionType;
   final String? gameCreator;
-  final List<int>? playersRatings;
-  final List<int>? playersRatingsDiff;
+  final List<int> playersRatings;
+  final List<int> playersRatingsDiff;
 
   Game({
     required this.gameId,
