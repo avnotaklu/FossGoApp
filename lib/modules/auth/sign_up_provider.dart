@@ -5,6 +5,7 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/services/public_user_info.dart';
 import 'package:go/services/user_details_dto.dart';
 
 class SignUpProvider {
@@ -14,7 +15,7 @@ class SignUpProvider {
   });
   final api = Api();
 
-  Future<Either<AppError, AppUser>> signUp(
+  Future<Either<AppError, PublicUserInfo>> signUp(
       String email, String password) async {
     // regex for email validation
     final RegExp emailRegex = RegExp(
@@ -33,7 +34,10 @@ class SignUpProvider {
         () => api.passwordSignUp(UserDetailsDto(email, false, password)));
 
     var res = logInRes.flatMap(
-        (r) => TaskEither(() => authBloc.registerUser(r.token, r.user)));
+      (r) => TaskEither(
+        () => authBloc.authenticateNormalUser(r.user, r.token),
+      ),
+    );
 
     return await res.run();
   }

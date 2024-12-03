@@ -151,7 +151,7 @@ void main() {
   });
 
   // User 1
-  when(() => auth.currentUserRaw).thenReturn(
+  when(() => auth.currentUserInfo).thenReturn(
     AppUser(id: "1", email: "1@1.com"),
   );
 
@@ -165,7 +165,7 @@ void main() {
   when(() => utils.currentTime).thenAnswer((inv) => currentTime);
 
   // User 2
-  when(() => auth2.currentUserRaw).thenReturn(
+  when(() => auth2.currentUserInfo).thenReturn(
     AppUser(id: "2", email: "2@2.com"),
   );
 

@@ -261,15 +261,12 @@ class LiveGameOracle extends GameStateOracle {
 
   late final PublicUserInfo? otherPlayerInfo;
 
-  PublicUserInfo get myPlayerUserInfo => PublicUserInfo(
-      id: authBloc.currentUserRaw.id,
-      email: authBloc.currentUserRaw.email,
-      rating: authBloc.currentUserRating);
+  PublicUserInfo get myPlayerUserInfo => authBloc.currentUserInfo;
 
   @override
   DisplayablePlayerData myPlayerData(Game game) {
     var publicInfo = myPlayerUserInfo;
-    var rating = publicInfo.rating.getRatingForGame(game);
+    var rating = publicInfo.rating?.getRatingForGame(game);
     StoneType? stone;
 
     if (game.didStart()) {
@@ -279,7 +276,7 @@ class LiveGameOracle extends GameStateOracle {
     }
 
     return DisplayablePlayerData(
-      displayName: publicInfo.email,
+      displayName: publicInfo.email ?? "Anonymous",
       stoneType: stone,
       rating: rating,
     );
@@ -288,7 +285,7 @@ class LiveGameOracle extends GameStateOracle {
   @override
   DisplayablePlayerData? otherPlayerData(Game game) {
     var publicInfo = otherPlayerInfo;
-    var rating = publicInfo?.rating.getRatingForGame(game);
+    var rating = publicInfo?.rating?.getRatingForGame(game);
     StoneType? stone;
 
     if (game.didStart()) {
@@ -297,12 +294,12 @@ class LiveGameOracle extends GameStateOracle {
       stone = game.stoneSelectionType.type;
     }
 
-    if (publicInfo?.email == null) {
+    if (publicInfo == null) {
       return null;
     }
 
     return DisplayablePlayerData(
-      displayName: publicInfo!.email,
+      displayName: publicInfo.email ?? "Anonymous",
       stoneType: stone,
       rating: rating,
     );
@@ -348,12 +345,12 @@ class LiveGameOracle extends GameStateOracle {
 
   @override
   bool isThisAccountsTurn(Game game) {
-    return game.getPlayerIdWithTurn() == authBloc.currentUserRaw.id;
+    return game.getPlayerIdWithTurn() == authBloc.currentUserInfo.id;
   }
 
   @override
   StoneType thisAccountStone(Game game) {
-    return game.getStoneFromPlayerId(authBloc.currentUserRaw.id)!;
+    return game.getStoneFromPlayerId(authBloc.currentUserInfo.id)!;
   }
 }
 

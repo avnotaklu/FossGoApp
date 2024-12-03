@@ -6,6 +6,8 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
+import 'package:go/services/guest_user.dart';
+import 'package:go/services/public_user_info.dart';
 
 import 'package:go/services/register_player_dto.dart';
 import 'package:go/services/register_user_result.dart';
@@ -33,15 +35,15 @@ class AuthProvider {
       StreamController.broadcast();
   Stream<AppUser> get currentUser => _currentUserStreamController.stream;
 
-  final StreamController<Either<AppError, AppUser>>
+  final StreamController<Either<AppError, PublicUserInfo>>
       _authResultStreamController = StreamController.broadcast();
-  Stream<Either<AppError, AppUser>> get authResult =>
+  Stream<Either<AppError, PublicUserInfo>> get authResult =>
       _authResultStreamController.stream;
 
   AppUser? _currentUserRaw;
-  AppUser get currentUserRaw => _currentUserRaw!;
   UserRating? _currentUserRating;
-  UserRating get currentUserRating => _currentUserRating!;
+  PublicUserInfo? _currentUserInfo;
+  PublicUserInfo get currentUserInfo => _currentUserInfo!;
 
   String? _token;
   String? get token => _token;
@@ -54,15 +56,15 @@ class AuthProvider {
         getUser(value).then((authRes) {
           authRes.fold((e) {
             debugPrint(e.toString());
-          }, (userAuthModel) {
-            registerUser(userAuthModel.token, userAuthModel.user);
+          }, (m) {
+            authenticateNormalUser(m.user, m.token);
           });
         });
       }
     });
   }
 
-  Future<Either<AppError, AppUser>> loginGoogle() async {
+  Future<Either<AppError, PublicUserInfo>> loginGoogle() async {
     try {
       Future<GoogleSignInAccount?> googleUser() async =>
           await googleSignIn.signIn();
@@ -76,7 +78,12 @@ class AuthProvider {
       final result = TaskEither(() => api.googleSignIn(googleAuth));
 
       var res = result.flatMap((r) {
-        return TaskEither(() => registerUser(r.token, r.user));
+        return TaskEither(
+          () => authenticateNormalUser(
+            r.user,
+            r.token,
+          ),
+        );
       });
 
       return await res.run();
@@ -93,6 +100,13 @@ class AuthProvider {
     _currentUserStreamController.add(user);
     _currentUserRating = userRating;
     _currentUserRaw = user;
+
+    _currentUserInfo = PublicUserInfo(
+      email: user.email,
+      id: user.id,
+      rating: userRating,
+    );
+
     _token = token;
 
     storeToken(token);
@@ -101,13 +115,9 @@ class AuthProvider {
     debugPrint("email");
   }
 
-  Future<Either<AppError, AppUser>> registerUser(
-      String token, AppUser user) async {
-    var signalRConnectionId = TaskEither(() => signlRBloc.connectSignalR());
-
-    var registerTas = signalRConnectionId.flatMap((r) {
-      return TaskEither(() => _registerUser(token, r));
-    });
+  Future<Either<AppError, PublicUserInfo>> authenticateNormalUser(
+      AppUser user, String token) async {
+    final registerTas = registerUser(token, user.id);
 
     var userRatingTas = registerTas.flatMap((r) {
       return TaskEither(() => _userRatingResult(token, user.id));
@@ -115,7 +125,7 @@ class AuthProvider {
 
     var res = (await userRatingTas.run()).flatMap((r) {
       _setUser(r, token, user);
-      return right(user);
+      return right(currentUserInfo);
     }).mapLeft((e) {
       signlRBloc.disconnect();
       return e;
@@ -123,6 +133,43 @@ class AuthProvider {
 
     _authResultStreamController.add(res);
     return res;
+  }
+
+  Future<Either<AppError, PublicUserInfo>> loginAsGuest() {
+    var task = TaskEither(() => api.guestLogin());
+
+    return task.flatMap((r) {
+      return TaskEither(() => authenticateGuestUser(r.user, r.token));
+    }).run();
+  }
+
+  Future<Either<AppError, PublicUserInfo>> authenticateGuestUser(
+      GuestUser user, String token) async {
+    final registerTas = registerUser(token, user.id);
+
+    var res = (await registerTas.run()).flatMap((r) {
+      _token = token;
+      _currentUserInfo = PublicUserInfo(email: null, id: user.id, rating: null);
+
+      return right(currentUserInfo);
+    }).mapLeft((e) {
+      signlRBloc.disconnect();
+      return e;
+    });
+
+    _authResultStreamController.add(res);
+    return res;
+  }
+
+  TaskEither<AppError, RegisterUserResult> registerUser(
+      String token, String userId) {
+    var signalRConnectionId = TaskEither(() => signlRBloc.connectSignalR());
+
+    var registerTas = signalRConnectionId.flatMap((r) {
+      return TaskEither(() => _registerUser(token, r));
+    });
+
+    return registerTas;
   }
 
   Future<Either<AppError, RegisterUserResult>> _registerUser(

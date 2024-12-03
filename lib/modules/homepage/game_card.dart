@@ -168,7 +168,7 @@ class MyStoneInfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final myId = context.read<AuthProvider>().currentUserRaw.id;
+    final myId = context.read<AuthProvider>().currentUserInfo.id;
     StoneSelectionType myColor = StoneSelectionType.auto;
     if (!game.didStart()) {
       var otherIsCreator = game.gameCreator == otherPlayerData?.id;

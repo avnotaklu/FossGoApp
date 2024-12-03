@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
@@ -31,9 +30,7 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
       builder: (context, child) => Scaffold(
         drawer: SizedBox(
           width: MediaQuery.sizeOf(context).width * 0.7,
-          child: Center(
-            child: Text(context.read<AuthProvider>().currentUserRaw.email),
-          ),
+          child: Center(),
         ),
         appBar: MyAppBar('Baduk',
             leading: IconButton(

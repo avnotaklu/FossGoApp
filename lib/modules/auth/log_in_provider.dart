@@ -3,6 +3,7 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/services/public_user_info.dart';
 import 'package:go/services/user_details_dto.dart';
 
 class LogInProvider {
@@ -13,7 +14,8 @@ class LogInProvider {
 
   final api = Api();
 
-  Future<Either<AppError, AppUser>> logIn(String email, String password) async {
+  Future<Either<AppError, PublicUserInfo>> logIn(
+      String email, String password) async {
     // regex for email validation
     final RegExp emailRegex = RegExp(
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
@@ -31,7 +33,10 @@ class LogInProvider {
         () => api.passwordLogin(UserDetailsDto(email, false, password)));
 
     var res = logInRes.flatMap(
-        (r) => TaskEither(() => authBloc.registerUser(r.token, r.user)));
+      (r) => TaskEither(
+        () => authBloc.authenticateNormalUser(r.user, r.token),
+      ),
+    );
 
     return await res.run();
   }

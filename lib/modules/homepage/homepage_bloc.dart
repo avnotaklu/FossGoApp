@@ -60,7 +60,7 @@ class HomepageBloc extends ChangeNotifier {
       if (message.type == SignalRMessageTypes.newGame) {
         debugPrint("New game was recieved");
         final newGameMessage = (message.data as NewGameCreatedMessage);
-        if (newGameMessage.game.creatorInfo.id == authBloc.currentUserRaw.id) {
+        if (newGameMessage.game.creatorInfo.id == authBloc.currentUserInfo.id) {
           myGames.add(
               MyGame(game: newGameMessage.game.game, opposingPlayer: null));
         } else {

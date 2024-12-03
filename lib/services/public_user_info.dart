@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:go/services/user_rating.dart';
 
 class PublicUserInfo {
-  final String email;
+  final String? email;
   final String id;
-  final UserRating rating;
+  final UserRating? rating;
 
   PublicUserInfo({
     required this.email,
@@ -16,15 +16,17 @@ class PublicUserInfo {
     return <String, dynamic>{
       'email': email,
       'id': id,
-      'rating': rating.toMap(),
+      'rating': rating?.toMap(),
     };
   }
 
   factory PublicUserInfo.fromMap(Map<String, dynamic> map) {
     return PublicUserInfo(
-      email: map['email'] as String,
+      email: map['email'] as String?,
       id: map['id'] as String,
-      rating: UserRating.fromMap(map['rating'] as Map<String, dynamic>),
+      rating: map['rating'] != null
+          ? UserRating.fromMap(map['rating'] as Map<String, dynamic>)
+          : null,
     );
   }
 

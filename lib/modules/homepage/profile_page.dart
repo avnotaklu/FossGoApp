@@ -22,8 +22,10 @@ class ProfilePage extends StatelessWidget {
                   height: 100,
                 ),
                 Center(
-                  child:
-                      Text(context.read<AuthProvider>().currentUserRaw.email),
+                  child: Text(
+                    context.read<AuthProvider>().currentUserInfo.email ??
+                        "Guest user",
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {

@@ -35,12 +35,16 @@ class _SignInState extends State<SignIn> {
           (route) => route.isFirst,
         );
       }, (r) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/HomePage',
-          (route) => false,
-        );
+        navigateToHome();
       });
     });
+  }
+
+  Future<Object?> navigateToHome() {
+    return Navigator.of(context).pushNamedAndRemoveUntil(
+      '/HomePage',
+      (route) => false,
+    );
   }
 
   @override
@@ -83,21 +87,31 @@ class _SignInState extends State<SignIn> {
             height: 20,
           ),
           ElevatedButton(
-              onPressed: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      var localGame = LocalGameplayServer(9, 9, ultrabullet);
-                      return GameWidget(
-                        game: localGame.getGame(),
-                        gameInteractor: FaceToFaceGameOracle(localGame),
-                      );
-                    },
-                  ),
-                );
-              },
-              child: const Text("Over the board"))
+            onPressed: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    var localGame = LocalGameplayServer(9, 9, ultrabullet);
+                    return GameWidget(
+                      game: localGame.getGame(),
+                      gameInteractor: FaceToFaceGameOracle(localGame),
+                    );
+                  },
+                ),
+              );
+            },
+            child: const Text("Over the board"),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              authBloc.loginAsGuest();
+            },
+            child: const Text("Enter as guest"),
+          ),
         ]),
       ),
     );

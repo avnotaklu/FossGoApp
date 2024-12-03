@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/core/error_handling/app_error.dart';
@@ -10,6 +11,8 @@ import 'package:go/services/available_game.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
+import 'package:go/services/guest_user.dart';
+import 'package:go/services/guest_user_result.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/my_games.dart';
 import 'package:go/services/new_move_result.dart';
@@ -32,6 +35,10 @@ class Api {
   static const String basePath = "192.168.109.71:8080";
   static const String baseUrl = "http://192.168.109.71:8080";
 
+  void log(String m) {
+    debugPrint(m);
+  }
+
   Future<Either<HttpError, http.Response>> get(Uri url, String? token) async {
     try {
       var res = await http.get(
@@ -41,12 +48,17 @@ class Api {
           if (token != null) ...{"Authorization": "Bearer $token"}
         },
       );
+
+      log("Api Call: ${url.toString()} \n\nResponse: ${res.body}");
       return right(res);
     } on SocketException {
+      log("Socket Exception: ${url.toString()}");
       return left(HttpError(message: "No internet connection"));
     } on HttpException {
+      log("Http Exception: ${url.toString()}");
       return left(HttpError(message: "Can't find the server"));
     } on FormatException {
+      log("Format Exception: ${url.toString()}");
       rethrow;
     }
   }
@@ -62,12 +74,17 @@ class Api {
           if (token != null) ...{"Authorization": "Bearer $token"}
         },
       );
+
+      log("Api Call: ${url.toString()} \n\nResponse: ${res.body}");
       return right(res);
     } on SocketException {
+      log("Socket Exception: ${url.toString()}");
       return left(HttpError(message: "No internet connection"));
     } on HttpException {
+      log("Http Exception: ${url.toString()}");
       return left(HttpError(message: "Can't find the server"));
     } on FormatException {
+      log("Format Exception: ${url.toString()}");
       rethrow;
     }
   }
@@ -104,6 +121,16 @@ class Api {
     var res = await get(Uri.parse("$baseUrl/Authentication/GetUser"), token);
 
     return convert(res, (a) => UserAuthenticationModel.fromJson(a));
+  }
+
+  Future<Either<AppError, GuestUserResult>> guestLogin() async {
+    var res = await post(
+      Uri.parse("$baseUrl/Authentication/GuestLogin"),
+      null,
+      null,
+    );
+
+    return convert(res, (a) => GuestUserResult.fromJson(a));
   }
 
   Future<Either<AppError, RegisterUserResult>> registerPlayer(
