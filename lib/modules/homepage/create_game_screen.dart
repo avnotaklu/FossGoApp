@@ -1,33 +1,18 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/services.dart';
 import 'package:go/constants/constants.dart' as Constants;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/foundation/duration.dart';
-import 'package:go/core/utils/string_formatting.dart';
-import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
-import 'package:go/widgets/background_screen_with_dialog.dart';
-import 'package:go/modules/gameplay/stages/before_start_stage.dart';
-import 'package:go/modules/gameplay/stages/game_end_stage.dart';
-import 'package:go/modules/gameplay/stages/gameplay_stage.dart';
-import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
-import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/homepage/create_game_provider.dart';
-import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 
-import 'package:go/models/game.dart';
-import 'package:go/models/position.dart';
 import 'package:go/widgets/buttons.dart';
-import 'package:go/widgets/selection_badge.dart';
 import 'package:provider/provider.dart';
 
 class CreateGameScreen extends StatelessWidget {
@@ -47,7 +32,7 @@ class CreateGameScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               sectionHeading("Color"),
-              Container(
+              SizedBox(
                 height: MediaQuery.sizeOf(context).height * 0.05,
                 child: Row(
                   // mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -68,7 +53,7 @@ class CreateGameScreen extends StatelessWidget {
                 ),
               ),
               sectionHeading("Size"),
-              Container(
+              SizedBox(
                 height: MediaQuery.sizeOf(context).height * 0.05,
                 child: Row(
                     mainAxisSize: MainAxisSize.max,
@@ -93,7 +78,7 @@ class CreateGameScreen extends StatelessWidget {
                     }).toList()),
               ),
               sectionHeading("Time Format"),
-              Container(
+              SizedBox(
                 height: MediaQuery.sizeOf(context).height * 0.08,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
@@ -121,7 +106,7 @@ class CreateGameScreen extends StatelessWidget {
                 ),
               ),
               sectionHeading("Time Control"),
-              Container(
+              SizedBox(
                 height: MediaQuery.sizeOf(context).height * 0.08,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,

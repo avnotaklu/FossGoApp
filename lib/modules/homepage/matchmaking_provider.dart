@@ -2,13 +2,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go/constants/constants.dart';
-import 'package:go/models/time_control.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/services/find_match_dto.dart';
-import 'package:go/services/find_match_result.dart';
 import 'package:go/constants/constants.dart' as constants;
 
 // enum BoardSize {

@@ -1,7 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:go/modules/gameplay/middleware/board_utility/cluster.dart';
 import 'package:go/models/position.dart';
-import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 
 class Stone {
   final Position position;

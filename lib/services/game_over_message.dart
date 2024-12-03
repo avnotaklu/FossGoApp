@@ -22,6 +22,7 @@ class GameOverMessage extends SignalRMessageType {
 
   GameOverMessage(this.method, this.game);
 
+  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'method': method.index,
@@ -36,6 +37,7 @@ class GameOverMessage extends SignalRMessageType {
     );
   }
 
+  @override
   String toJson() => json.encode(toMap());
 
   factory GameOverMessage.fromJson(String source) =>

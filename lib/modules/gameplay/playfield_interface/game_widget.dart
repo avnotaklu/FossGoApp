@@ -1,38 +1,21 @@
-import 'dart:async';
-import 'dart:collection';
-import 'dart:math';
 
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
-import 'package:go/core/utils/string_formatting.dart';
 import 'package:go/core/utils/system_utilities.dart';
-import 'package:go/modules/homepage/create_game_screen.dart';
-import 'package:go/widgets/background_screen_with_dialog.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
-import 'package:go/modules/gameplay/stages/before_start_stage.dart';
-import 'package:go/modules/gameplay/stages/gameplay_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
-import 'package:go/models/stone_representation.dart';
 import 'package:go/models/time_control.dart';
-import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
 import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
-import 'package:go/modules/auth/signalr_bloc.dart';
-import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 
 import 'package:go/models/game.dart';
-import 'package:go/services/join_message.dart';
-import 'package:go/services/signal_r_message.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
-import 'package:go/models/position.dart';
 import 'package:go/widgets/my_app_bar.dart';
-import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
 import 'dart:core';
 
@@ -92,7 +75,7 @@ class GameWidget extends StatelessWidget {
           return Scaffold(
             appBar: MyAppBar(
               gameTitle(context.read<GameStateBloc>().game.timeControl),
-              leading: Icon(Icons.menu),
+              leading: const Icon(Icons.menu),
             ),
             backgroundColor: Colors.green,
             body: Consumer<GameStateBloc>(
@@ -154,7 +137,7 @@ class GameWidget extends StatelessWidget {
 class WrapperGame extends StatefulWidget {
   final Game game;
 
-  WrapperGame(this.game);
+  const WrapperGame(this.game, {super.key});
 
   @override
   State<WrapperGame> createState() => _WrapperGameState();

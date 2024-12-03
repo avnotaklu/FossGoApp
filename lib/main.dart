@@ -1,31 +1,19 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:go/firebase_options.dart';
-import 'package:go/modules/homepage/create_game_screen.dart';
-import 'package:go/modules/homepage/create_game_provider.dart';
 import 'package:go/modules/homepage/homepage_bloc.dart';
-import 'package:go/modules/auth/sign_up_provider.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
-import 'package:go/services/app_user.dart';
 import 'package:go/modules/homepage/home_page.dart';
 import 'package:go/modules/auth/log_in_screen.dart';
 import 'package:go/modules/auth/sign_up_screen.dart';
 // import 'package:/share/share.dart';
 import 'constants/constants.dart' as Constants;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/modules/gameplay/playfield_interface/board.dart';
-import 'package:go/modules/homepage/custom_games_page.dart';
 import 'package:go/modules/auth/sign_in_screen.dart';
-import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
-import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_database/firebase_database.dart';
-import 'package:ntp/ntp.dart';
 
-import 'modules/gameplay/playfield_interface/game_widget.dart';
 
 
 void main() async {
@@ -33,10 +21,12 @@ void main() async {
   // await Firebase.initializeApp(
   //   options: DefaultFirebaseOptions.currentPlatform,
   // );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -50,7 +40,7 @@ class MyApp extends StatelessWidget {
           home: DefaultTextStyle(
             style: TextStyle(
                 color: Constants.defaultTheme.mainTextColor, fontSize: 15),
-            child: SignIn(),
+            child: const SignIn(),
           ),
           theme: ThemeData(
             // Define the default brightness and colors.
@@ -80,11 +70,11 @@ class MyApp extends StatelessWidget {
                   ),
                   // ChangeNotifierProvider(create: (context) => signalR),
                 ],
-                builder: (context, child) => HomePage(),
+                builder: (context, child) => const HomePage(),
               );
             },
-            '/SignUp': (BuildContext context) => SignUpScreen(),
-            '/LogIn': (BuildContext context) => LogInScreen(),
+            '/SignUp': (BuildContext context) => const SignUpScreen(),
+            '/LogIn': (BuildContext context) => const LogInScreen(),
             // '/CreateGame': (BuildContext context) => MultiProvider(
             //       providers: [
             //         ChangeNotifierProvider(

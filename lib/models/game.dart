@@ -7,14 +7,9 @@ import 'package:go/constants/constants.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
-import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
-import 'package:go/models/stone_representation.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
-import 'package:go/modules/homepage/create_game_provider.dart';
-import 'package:go/services/available_game.dart';
 import 'package:go/services/game_over_message.dart';
-import 'package:signalr_netcore/errors.dart';
 
 extension StoneTypeExtension on StoneType {
   String get color => switch (this) {

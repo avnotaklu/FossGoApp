@@ -1,43 +1,30 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
-import 'dart:math';
 
-import 'package:barebones_timer/timer_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/modules/gameplay/middleware/time_calculator.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
-import 'package:ntp/ntp.dart';
 import 'package:signalr_netcore/errors.dart';
-import 'package:signalr_netcore/signalr_client.dart';
-import 'package:timer_count_down/timer_controller.dart';
 
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
-import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
-import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
-import 'package:go/modules/gameplay/stages/stage.dart';
-import 'package:go/modules/gameplay/middleware/board_utility/cluster.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
-import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/app_user.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
-import 'package:go/services/join_message.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/user_rating.dart';
-import 'package:go/modules/gameplay/playfield_interface/gameui/game_timer.dart';
 
 
 // HACK: `GameUpdate` object is a hack as signalR messages don't always give the full game state
@@ -272,10 +259,11 @@ class LiveGameInteractor extends GameInteractor {
   late final PublicUserInfo? otherPlayerInfo;
 
   PublicUserInfo get myPlayerUserInfo => PublicUserInfo(
-      id: authBloc.currentUserRaw!.id,
-      email: authBloc.currentUserRaw!.email,
+      id: authBloc.currentUserRaw.id,
+      email: authBloc.currentUserRaw.email,
       rating: authBloc.currentUserRating);
 
+  @override
   DisplayablePlayerData myPlayerData(Game game) {
     var publicInfo = myPlayerUserInfo;
     var rating = publicInfo.rating.getRatingForGame(game);
@@ -294,6 +282,7 @@ class LiveGameInteractor extends GameInteractor {
     );
   }
 
+  @override
   DisplayablePlayerData otherPlayerData(Game game) {
     var publicInfo = otherPlayerInfo;
     var rating = publicInfo?.rating.getRatingForGame(game);

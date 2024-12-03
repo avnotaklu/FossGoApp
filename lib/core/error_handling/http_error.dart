@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:go/core/error_handling/base_error.dart';
 
 class HttpError extends BaseError {

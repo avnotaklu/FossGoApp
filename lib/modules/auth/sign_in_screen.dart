@@ -6,8 +6,6 @@ import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
-import 'package:go/modules/homepage/custom_games_page.dart';
-import 'package:go/main.dart';
 
 import 'package:go/modules/auth/error_screen.dart';
 import 'package:provider/provider.dart';
@@ -68,8 +66,8 @@ class _SignInState extends State<SignIn> {
                   '/SignUp',
                 );
               },
-              child: Text("Sign Up")),
-          SizedBox(
+              child: const Text("Sign Up")),
+          const SizedBox(
             height: 20,
           ),
           ElevatedButton(
@@ -78,8 +76,8 @@ class _SignInState extends State<SignIn> {
                   '/LogIn',
                 );
               },
-              child: Text("Log In")),
-          SizedBox(
+              child: const Text("Log In")),
+          const SizedBox(
             height: 20,
           ),
           ElevatedButton(

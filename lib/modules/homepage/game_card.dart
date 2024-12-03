@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
-import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
-import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
-import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/public_user_info.dart';
-import 'package:go/services/signal_r_message.dart';
 import 'package:provider/provider.dart';
 
 class GameCard extends StatelessWidget {
@@ -203,7 +199,7 @@ class MyStoneInfoWidget extends StatelessWidget {
                 fontWeight: FontWeight.normal),
           ),
         ),
-        Container(
+        SizedBox(
           height: 20,
           width: 20,
           child: StoneSelectionWidget(

@@ -169,6 +169,7 @@ class EditDeadStoneMessage extends SignalRMessageType {
     required this.game,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'position': position.toMap(),
@@ -185,6 +186,7 @@ class EditDeadStoneMessage extends SignalRMessageType {
     );
   }
 
+  @override
   String toJson() => json.encode(toMap());
 
   factory EditDeadStoneMessage.fromJson(String source) =>

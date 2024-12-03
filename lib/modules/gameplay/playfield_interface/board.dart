@@ -1,11 +1,6 @@
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
-import 'package:go/modules/gameplay/middleware/score_calculation.dart';
-import 'package:go/modules/gameplay/middleware/stone_logic.dart';
-import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/game.dart';
-import 'package:go/models/stone_representation.dart';
-import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'stone_widget.dart';
 import '../../../models/position.dart';
 
@@ -15,7 +10,7 @@ class Board extends StatefulWidget {
   late int rows, cols;
   Map<Position?, StoneWidget?> playgroundMap = {};
 
-  Board(this.rows, this.cols, Map<Position, StoneType> stonePos) {
+  Board(this.rows, this.cols, Map<Position, StoneType> stonePos, {super.key}) {
     for (var i = 0; i < rows; i++) {
       for (var j = 0; j < cols; j++) {
         // playgroundMap[Position(i, j)] = Player(Colors.black);
@@ -103,7 +98,7 @@ class GridInfo {
 
 class BorderGrid extends StatelessWidget {
   GridInfo info;
-  BorderGrid(this.info);
+  BorderGrid(this.info, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -163,12 +158,12 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
                       heightFactor: 0.3,
                       widthFactor: 0.3,
                       child: Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                             color: Colors.black, shape: BoxShape.circle),
                       ),
                     ),
                   )
-                : SizedBox.shrink(),
+                : const SizedBox.shrink(),
             Cell(Position(((index) ~/ widget.info.cols),
                 ((index) % widget.info.rows).toInt())),
           ],

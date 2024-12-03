@@ -1,10 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go/modules/auth/log_in_provider.dart';
-import 'package:go/modules/auth/sign_up_provider.dart';
-import 'package:go/modules/auth/signalr_bloc.dart';
-import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +19,7 @@ class _LogInScreenState extends State<LogInScreen> {
     return Provider<LogInProvider>(
       create: (context) => LogInProvider(authBloc: context.read()),
       builder:(context, child) => Scaffold(
-        appBar: MyAppBar("Log In"),
+        appBar: const MyAppBar("Log In"),
         body: Container(
           child: Center(
             child: Padding(
@@ -40,7 +35,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   TextField(
@@ -50,7 +45,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   ElevatedButton(

@@ -1,26 +1,12 @@
-import 'dart:async';
 
 import 'package:barebones_timer/timer_controller.dart';
 import 'package:barebones_timer/timer_display.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
-import 'package:go/core/utils/string_formatting.dart';
-import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/models/game.dart';
-import 'package:go/models/game_move.dart';
 import 'package:go/models/time_control.dart';
-import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
-import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/core/utils/core_utils.dart';
-import 'package:go/models/position.dart';
 
-import 'package:ntp/ntp.dart';
-import 'package:provider/provider.dart';
-import 'package:timer_count_down/timer_controller.dart';
-import 'package:timer_count_down/timer_count_down.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
 class GameTimer extends StatefulWidget {

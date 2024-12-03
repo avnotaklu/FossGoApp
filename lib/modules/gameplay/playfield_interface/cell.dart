@@ -1,13 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart' as constants;
 
-import 'package:flutter/services.dart';
-import 'package:go/modules/homepage/create_game_screen.dart';
-import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
-import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:provider/provider.dart';
 import 'stone_widget.dart';
 import '../../../models/position.dart';
@@ -16,7 +11,7 @@ class Cell extends StatefulWidget {
   Position position;
   // Map<Position?,Stone?> playgroundMap;
   // final VoidCallback cellChanged;
-  Cell(this.position);
+  Cell(this.position, {super.key});
 
   @override
   State<Cell> createState() => _CellState();
@@ -57,7 +52,7 @@ class _CellState extends State<Cell> {
           stage.drawCell(
               widget.position,
               StoneWidget(
-                stone == null ? null : constants.playerColors[stone!.player],
+                stone == null ? null : constants.playerColors[stone.player],
                 widget.position,
               ),
               context),

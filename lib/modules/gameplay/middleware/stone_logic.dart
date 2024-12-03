@@ -1,18 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:flutter/material.dart';
 
-import 'package:go/constants/constants.dart' as Constants;
-import 'package:go/modules/gameplay/middleware/score_calculation.dart';
-import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/cluster.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
-import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
-import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
-import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
-import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 
 
 class StoneLogic {

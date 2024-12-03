@@ -1,10 +1,6 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
-import 'package:go/core/foundation/duration.dart';
-import 'package:go/modules/homepage/create_game_screen.dart';
-import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/gameplay/game_state/live_game_interactor.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
@@ -33,7 +29,7 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
     return ChangeNotifierProvider(
       create: (context) => MatchmakingProvider(context.read<SignalRProvider>()),
       builder: (context, child) => Scaffold(
-        drawer: Container(
+        drawer: SizedBox(
           width: MediaQuery.sizeOf(context).width * 0.7,
           child: Center(
             child: Text(context.read<AuthProvider>().currentUserRaw.email),
@@ -48,7 +44,7 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                   Scaffold.of(context).openDrawer();
                 }
               },
-              icon: Icon(Icons.menu),
+              icon: const Icon(Icons.menu),
             )),
         body: Consumer<MatchmakingProvider>(
           builder: (context, provider, child) => Padding(
@@ -78,13 +74,13 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                   mainAxisSize: MainAxisSize.max,
                   children: provider.allTimeControls
                       .map(
-                        (timeControl) => Container(
+                        (timeControl) => SizedBox(
                           height: MediaQuery.sizeOf(context).width * 0.15,
                           child: timeSelector(timeControl, provider),
                         ),
                       )
                       .toList()),
-              Spacer(),
+              const Spacer(),
               Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,

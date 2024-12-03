@@ -1,20 +1,16 @@
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/error_handling/http_error.dart';
 import 'package:go/core/foundation/either.dart';
 import 'package:go/models/game.dart';
-import 'package:go/models/game_move.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
 import 'package:go/services/move_position.dart';
-import 'package:go/services/join_message.dart';
 import 'package:go/services/my_games.dart';
 import 'package:go/services/new_move_result.dart';
 import 'package:go/services/register_player_dto.dart';

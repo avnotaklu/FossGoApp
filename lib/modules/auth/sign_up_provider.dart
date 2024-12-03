@@ -1,12 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:fpdart/fpdart.dart';
 
-import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/app_user.dart';
 import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/services/user_authentication_model.dart';
 import 'package:go/services/user_details_dto.dart';
 
 class SignUpProvider {

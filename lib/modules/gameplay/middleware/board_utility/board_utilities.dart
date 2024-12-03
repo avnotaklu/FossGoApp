@@ -3,7 +3,6 @@ import 'package:go/modules/gameplay/middleware/board_utility/cluster.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
-import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 
 typedef HighLevelBoardRepresentation = Map<Position, StoneType>;
 

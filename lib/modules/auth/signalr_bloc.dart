@@ -6,12 +6,8 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/error_handling/signal_r_error.dart';
 import 'package:go/services/api.dart';
 
-import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/find_match_dto.dart';
-import 'package:signalr_netcore/default_reconnect_policy.dart';
-import 'package:signalr_netcore/hub_connection_builder.dart';
-import 'package:signalr_netcore/json_hub_protocol.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
 class SignalRProvider extends ChangeNotifier {

@@ -19,7 +19,7 @@ class TimeCalculator {
     PlayerTimeSnapshot nonTurnPlayerSnap() => newTimes[1 - curTurn];
 
     int? byoYomiMS = timeControl.byoYomiTime?.byoYomiSeconds != null
-        ? timeControl.byoYomiTime!.byoYomiSeconds! * 1000
+        ? timeControl.byoYomiTime!.byoYomiSeconds * 1000
         : null;
 
     int activePlayerIdx = newTimes.indexWhere((snap) => snap.timeActive);

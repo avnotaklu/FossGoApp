@@ -1,21 +1,15 @@
 import 'dart:async';
 import 'package:go/constants/constants.dart' as constants;
 
-import 'package:firebase_database/ui/utils/stream_subscriber_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
-import 'package:go/modules/gameplay/stages/game_end_stage.dart';
-import 'package:go/modules/gameplay/stages/gameplay_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
-import 'package:go/modules/gameplay/middleware/board_utility/cluster.dart';
 
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
-import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
@@ -44,7 +38,7 @@ class ScoreCalculationStage extends Stage {
 
   @override
   List<Widget> buttons() {
-    return [Accept(), Resign()];
+    return [const Accept(), const Resign()];
   }
 
   @override

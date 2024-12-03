@@ -1,19 +1,12 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
-import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
-import 'package:go/models/game_move.dart';
 import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/services/move_position.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
-import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
 
 // class GameplayStage extends Stage<GameplayStage> {
@@ -37,7 +30,7 @@ class GameplayStage extends Stage {
 
   @override
   List<Widget> buttons() {
-    return [Pass(), Resign()];
+    return [const Pass(), const Resign()];
   }
 
   @override

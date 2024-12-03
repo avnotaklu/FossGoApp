@@ -1,7 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go/services/app_user.dart';
 
 class RegisterUserResult {

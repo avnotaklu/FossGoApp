@@ -9,7 +9,6 @@ import 'package:go/services/api.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/services/time_control_dto.dart';
-import 'package:provider/provider.dart';
 
 class CreateGameProvider extends ChangeNotifier {
   // final SignalRProvider signalRBloc;

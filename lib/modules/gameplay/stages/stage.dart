@@ -5,7 +5,6 @@ import 'package:go/modules/gameplay/stages/gameplay_stage.dart';
 import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 
 enum StageType { BeforeStart, Gameplay, GameEnd, ScoreCalculation }

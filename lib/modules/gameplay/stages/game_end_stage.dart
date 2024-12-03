@@ -1,7 +1,5 @@
-import 'package:firebase_database/ui/utils/stream_subscriber_mixin.dart';
 import 'package:go/constants/constants.dart' as constants;
 import 'package:flutter/material.dart';
-import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
@@ -30,7 +28,7 @@ class GameEndStage extends Stage {
   GameEndStage get stage => this;
   @override
   List<Widget> buttons() {
-    return [Pass(), Resign()];
+    return [const Pass(), const Resign()];
   }
 
   @override

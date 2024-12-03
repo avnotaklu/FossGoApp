@@ -1,26 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:barebones_timer/timer_controller.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go/core/foundation/duration.dart';
 import 'package:go/models/game.dart';
-import 'package:go/models/time_control.dart';
 import 'package:go/services/game_over_message.dart';
-import 'package:go/services/public_user_info.dart';
-import 'package:go/services/user_rating.dart';
 import 'package:provider/provider.dart';
 
 import 'package:go/constants/constants.dart' as Constants;
-import 'package:go/modules/homepage/create_game_screen.dart';
-import 'package:go/modules/gameplay/middleware/score_calculation.dart';
-import 'package:go/modules/gameplay/middleware/stone_logic.dart';
-import 'package:go/modules/gameplay/stages/game_end_stage.dart';
-import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/services/signal_r_message.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_timer.dart';
-import 'package:go/core/utils/core_utils.dart';
 
 
 class PlayerDataUi extends StatefulWidget {
@@ -51,7 +38,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                 children: [
                   Row(
                     children: [
-                      Container(
+                      SizedBox(
                         width: size.width * 0.09,
                         child: player == null
                             ? const Center(

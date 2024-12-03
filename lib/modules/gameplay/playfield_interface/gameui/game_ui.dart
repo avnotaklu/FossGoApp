@@ -1,19 +1,14 @@
 import 'dart:core';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go/constants/constants.dart';
-import 'package:go/modules/homepage/create_game_screen.dart';
-import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/stages/game_end_stage.dart';
-import 'package:go/modules/gameplay/stages/gameplay_stage.dart';
 import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/player_card.dart';
-import 'package:ntp/ntp.dart';
 import 'package:provider/provider.dart';
 
 class GameUi extends StatefulWidget {
@@ -42,7 +37,7 @@ class _GameUiState extends State<GameUi> {
               flex: 6,
               child: Column(
                 children: [
-                  Spacer(
+                  const Spacer(
                     flex: 4,
                   ),
 
@@ -82,7 +77,7 @@ class _GameUiState extends State<GameUi> {
                           }.call()} won by ${getWinningMethod(context)}",
                           style: TextStyle(color: defaultTheme.mainTextColor),
                         )
-                      : Spacer(
+                      : const Spacer(
                           flex: 2,
                         ),
                   Expanded(
@@ -99,18 +94,18 @@ class _GameUiState extends State<GameUi> {
                               flex: 3,
                               child:
                                   context.read<Stage>() is ScoreCalculationStage
-                                      ? Accept()
-                                      : Pass(),
+                                      ? const Accept()
+                                      : const Pass(),
                             ),
-                            VerticalDivider(
+                            const VerticalDivider(
                               width: 2,
                             ),
                             Expanded(
                               flex: 3,
                               child:
                                   context.read<Stage>() is ScoreCalculationStage
-                                      ? ContinueGame()
-                                      : Resign(),
+                                      ? const ContinueGame()
+                                      : const Resign(),
                             )
                             // GameData.of(context)!.cur_stage.buttons()[1],
                           ],
@@ -139,7 +134,7 @@ class _GameUiState extends State<GameUi> {
 }
 
 class BottomButton extends StatelessWidget {
-  const BottomButton(this.action, this.text, {this.isDisabled = false});
+  const BottomButton(this.action, this.text, {super.key, this.isDisabled = false});
   final bool isDisabled;
   final VoidCallback action;
   final String text;
@@ -156,14 +151,14 @@ class BottomButton extends StatelessWidget {
         // Colors.transparent,
         //splashColor: Colors.blue,
         onTap: isDisabled ? null : action,
-        child: Container(
+        child: SizedBox(
           //height: double.infinity,
           // height: 100,
           width: 100,
           child: Center(
             child: Text(
               text,
-              style: TextStyle(color: Colors.white, fontSize: 14),
+              style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
           ),
         ),
@@ -185,7 +180,7 @@ class BottomButton extends StatelessWidget {
 }
 
 class Pass extends StatelessWidget {
-  const Pass({Key? key}) : super(key: key);
+  const Pass({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +195,7 @@ class Pass extends StatelessWidget {
 }
 
 class Accept extends StatelessWidget {
-  const Accept({Key? key}) : super(key: key);
+  const Accept({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -221,7 +216,7 @@ class ContinueGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomButton(() async {
-      final res = await context.read<GameStateBloc>()!.continueGame();
+      final res = await context.read<GameStateBloc>().continueGame();
       res.fold((e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -241,7 +236,7 @@ class ContinueGame extends StatelessWidget {
 }
 
 class Resign extends StatelessWidget {
-  const Resign({Key? key}) : super(key: key);
+  const Resign({super.key});
 
   @override
   Widget build(BuildContext context) {

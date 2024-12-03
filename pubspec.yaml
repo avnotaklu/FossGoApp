@@ -65,6 +65,13 @@ dependencies:
   test: ^1.25.7
   mocktail: ^1.0.4
 
+  cloud_firestore_web: any
+  firebase_auth_web: any
+  firebase_core_web: any
+  firebase_database_web: any
+  google_sign_in_web: any
+  flutter_web_plugins: any
+  http: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

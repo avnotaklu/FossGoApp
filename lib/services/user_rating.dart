@@ -1,9 +1,6 @@
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:go/constants/constants.dart';
-import 'package:go/core/foundation/either.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/time_control.dart';
 
