@@ -7,7 +7,7 @@ import 'package:go/services/available_game.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/public_user_info.dart';
-import 'package:go/ui/homepage/find_match_result.dart';
+import 'package:go/services/find_match_result.dart';
 
 class SignalRMessage {
   final String type;

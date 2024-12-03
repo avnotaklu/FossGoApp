@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
-import 'package:go/playfield/board.dart';
+import 'package:go/modules/gameplay/playfield_interface/board.dart';
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/services/user_rating.dart';
 

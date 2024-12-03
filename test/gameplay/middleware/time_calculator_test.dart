@@ -1,4 +1,4 @@
-import 'package:go/gameplay/middleware/time_calculator.dart';
+import 'package:go/modules/gameplay/middleware/time_calculator.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/time_control.dart';
 import 'package:test/test.dart';

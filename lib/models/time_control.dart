@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/string_formatting.dart';
-import 'package:go/gameplay/create/create_game_screen.dart';
+import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/models/game.dart';
 import 'package:go/services/user_rating.dart';
 

@@ -1,32 +1,32 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:go/firebase_options.dart';
-import 'package:go/gameplay/create/create_game_screen.dart';
-import 'package:go/providers/create_game_provider.dart';
-import 'package:go/providers/homepage_bloc.dart';
-import 'package:go/providers/sign_up_provider.dart';
-import 'package:go/providers/signalr_bloc.dart';
+import 'package:go/modules/homepage/create_game_screen.dart';
+import 'package:go/modules/homepage/create_game_provider.dart';
+import 'package:go/modules/homepage/homepage_bloc.dart';
+import 'package:go/modules/auth/sign_up_provider.dart';
+import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/app_user.dart';
-import 'package:go/ui/homepage/home_page.dart';
-import 'package:go/views/log_in_screen.dart';
-import 'package:go/views/sign_up_screen.dart';
+import 'package:go/modules/homepage/home_page.dart';
+import 'package:go/modules/auth/log_in_screen.dart';
+import 'package:go/modules/auth/sign_up_screen.dart';
 // import 'package:/share/share.dart';
 import 'constants/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:go/services/auth_provider.dart';
-import 'package:go/playfield/board.dart';
-import 'package:go/ui/homepage/custom_games_page.dart';
-import 'package:go/services/sign_in_screen.dart';
-import 'package:go/playfield/stone_widget.dart';
+import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/modules/gameplay/playfield_interface/board.dart';
+import 'package:go/modules/homepage/custom_games_page.dart';
+import 'package:go/modules/auth/sign_in_screen.dart';
+import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:ntp/ntp.dart';
 
-import 'playfield/game_widget.dart';
-import 'models/game_match.dart';
+import 'modules/gameplay/playfield_interface/game_widget.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

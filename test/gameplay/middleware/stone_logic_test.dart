@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go/gameplay/middleware/stone_logic.dart';
+import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
-import 'package:go/models/stone.dart';
-import 'package:go/playfield/board_utilities.dart';
+import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
+import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 
 void main() {
   List<List<int>> _5x5BasicBoard() {

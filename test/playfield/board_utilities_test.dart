@@ -4,7 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
-import 'package:go/playfield/board_utilities.dart';
+import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 
 void main() {
   group("Board Utilities", () {
