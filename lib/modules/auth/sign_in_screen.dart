@@ -87,7 +87,7 @@ class _SignInState extends State<SignIn> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      var localGame = LocalGameplayServer(9, 9, blitz);
+                      var localGame = LocalGameplayServer(9, 9, ultrabullet);
                       return GameWidget(
                         game: localGame.getGame(),
                         gameInteractor: FaceToFaceGameOracle(localGame),

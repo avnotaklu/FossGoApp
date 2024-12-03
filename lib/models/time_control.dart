@@ -27,6 +27,13 @@ enum TimeStandard {
   const TimeStandard(this.standardName);
 }
 
+final TimeControl ultrabullet = TimeControl(
+  mainTimeSeconds: 10,
+  incrementSeconds: 0,
+  byoYomiTime: null,
+  timeStandard: TimeStandard.blitz,
+);
+
 final TimeControl blitz = TimeControl(
     mainTimeSeconds: 300,
     incrementSeconds: 0,

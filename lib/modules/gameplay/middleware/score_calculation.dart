@@ -28,13 +28,6 @@ class ScoreCalculationBloc extends ChangeNotifier {
   final GameStateBloc gameStateBloc;
   final GameBoardBloc gameBoardBloc;
 
-  // GETTERS
-  List<int> scores(context) {
-    if (_territoryScores.isNotEmpty) return _territoryScores;
-    calculateScore();
-    return _territoryScores;
-  }
-
   late final StreamSubscription editStoneSubscription;
 
   ScoreCalculationBloc({

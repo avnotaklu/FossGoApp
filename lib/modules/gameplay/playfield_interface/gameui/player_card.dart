@@ -9,7 +9,6 @@ import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_timer.dart';
 
-
 class PlayerDataUi extends StatefulWidget {
   final DisplayablePlayerData? playerInfo;
   final Game game;
@@ -77,13 +76,22 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                       Container(
                         width: size.width * 0.09,
                       ),
+
+                      if (player?.stoneType != null)
+                        if (getFinalScore(game, player!.stoneType!) != null)
+                          Text(
+                            " + ${getFinalScore(game, player!.stoneType!)} Points",
+                            style: TextStyle(
+                                color: Constants.defaultTheme.mainTextColor),
+                          ),
+
                       if (player?.stoneType != null)
                         Text(
                           " + ${getPrisonersCount(game, player!.stoneType!)} Prisoners",
                           style: TextStyle(
                               color: Constants.defaultTheme.mainTextColor),
                         ),
-                      if (player?.stoneType != null)
+                      if (player?.stoneType != null && player?.stoneType == StoneType.white)
                         Text(
                           " + ${getKomi(game, player!.stoneType!)} Komi",
                           style: TextStyle(
@@ -141,6 +149,14 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
     } else {
       return 0;
     }
+  }
+
+  int? getFinalScore(Game game, StoneType stone) {
+    if (game.gameOverMethod == GameOverMethod.Score) {
+      return game.finalTerritoryScores[stone.index] +
+          game.prisoners[stone.index];
+    }
+    return null;
   }
 
   Widget gameOverScore(Game game, StoneType stone) {

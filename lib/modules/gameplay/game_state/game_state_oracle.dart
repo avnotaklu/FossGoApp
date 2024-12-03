@@ -358,7 +358,9 @@ class LiveGameOracle extends GameStateOracle {
 class FaceToFaceGameOracle extends GameStateOracle {
   final LocalGameplayServer gp;
 
-  FaceToFaceGameOracle(this.gp);
+  FaceToFaceGameOracle(this.gp) {
+    gameUpdateC.addStream(gp.gameUpdate);
+  }
 
   String get myPlayerId => "bottom";
   String get otherPlayerId => "top";
@@ -429,6 +431,10 @@ class LocalGameplayServer {
 
   SystemUtilities systemUtilities;
   DateTime get now => systemUtilities.currentTime;
+  late Timer _timer;
+
+  final StreamController<GameUpdate> gameUpdateC = StreamController.broadcast();
+  Stream<GameUpdate> get gameUpdate => gameUpdateC.stream;
 
   int _rows;
   int _columns;
@@ -463,6 +469,11 @@ class LocalGameplayServer {
       : systemUtilities = systemUtils,
         timeCalculator = TimeCalculator() {
     initializeFields();
+    _timer = Timer(
+        Duration(
+          milliseconds: _playerTimeSnapshots[turnPlayer].mainTimeMilliseconds,
+        ),
+        _timeoutTimer);
   }
 
   void initializeFields() {
@@ -574,8 +585,38 @@ class LocalGameplayServer {
 
     _playerTimeSnapshots = times;
 
-    // TODO: Send an event after this
+    var turnPlayerMS = _playerTimeSnapshots[turnPlayer].mainTimeMilliseconds;
+    if (turnPlayerMS != 0) {
+      _timer = Timer(Duration(milliseconds: turnPlayerMS), _timeoutTimer);
+    }
+
+    gameUpdateC.add(
+      GameUpdate(
+        game: getGame(),
+        curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
+        playerWithTurn: StoneType.values[turnPlayer],
+      ),
+    );
+
     log("Reset clock to ${_playerTimeSnapshots[turnPlayer].mainTimeMilliseconds / 1000} seconds");
+  }
+
+  void _timeoutTimer() {
+    _setTimes(now);
+
+    var turnPlayerMS = _playerTimeSnapshots[turnPlayer].mainTimeMilliseconds;
+
+    if (turnPlayerMS == 0) {
+      _endGame(GameOverMethod.Timeout, StoneType.values[turnPlayer].other);
+
+      gameUpdateC.add(
+        GameUpdate(
+          game: getGame(),
+          curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
+          playerWithTurn: StoneType.values[turnPlayer],
+        ),
+      );
+    }
   }
 
   Either<AppError, Game> resignGame(StoneType playerStone) {
