@@ -33,6 +33,12 @@ enum GameState {
   ended
 }
 
+enum GameType {
+  anonymous,
+  casual,
+  rated,
+}
+
 class GameFieldNames {
   // Game
   static const String ID = "gameId";
@@ -57,6 +63,7 @@ class GameFieldNames {
   static const String GameCreator = "gameCreator";
   static const String PlayersRatings = "playersRatings";
   static const String PlayersRatingsDiff = "playersRatingsDiff";
+  static const String GameType = "gameType";
 
   // control Control
   static const String MainTimeSeconds =
@@ -215,6 +222,7 @@ class Game {
   final String? gameCreator;
   final List<int> playersRatings;
   final List<int> playersRatingsDiff;
+  final GameType gameType;
 
   Game({
     required this.gameId,
@@ -239,6 +247,7 @@ class Game {
     required this.playerTimeSnapshots,
     required this.playersRatings,
     required this.playersRatingsDiff,
+    required this.gameType,
   });
 
   Map<String, dynamic> toMap() {
@@ -275,6 +284,7 @@ class Game {
           playerTimeSnapshots.map((e) => e.toMap()).toList(),
       GameFieldNames.PlayersRatings: playersRatings,
       GameFieldNames.PlayersRatingsDiff: playersRatingsDiff,
+      GameFieldNames.GameType: gameType.index,
     };
   }
 
@@ -342,6 +352,7 @@ class Game {
           List<int>.from(map[GameFieldNames.PlayersRatings] as List),
       playersRatingsDiff:
           List<int>.from(map[GameFieldNames.PlayersRatingsDiff] as List),
+      gameType: GameType.values[map[GameFieldNames.GameType] as int],
     );
   }
 
@@ -373,6 +384,7 @@ class Game {
     List<PlayerTimeSnapshot>? playerTimeSnapshots,
     List<int>? playersRatings,
     List<int>? playersRatingsDiff,
+    GameType? gameType,
   }) {
     return Game(
       gameId: gameId ?? this.gameId,
@@ -397,6 +409,7 @@ class Game {
       playerTimeSnapshots: playerTimeSnapshots ?? this.playerTimeSnapshots,
       playersRatings: playersRatings ?? this.playersRatings,
       playersRatingsDiff: playersRatingsDiff ?? this.playersRatingsDiff,
+      gameType: gameType ?? this.gameType,
     );
   }
 }

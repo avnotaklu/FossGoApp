@@ -48,7 +48,7 @@ class HomepageBloc extends ChangeNotifier {
   Future<void> getMyGames(String token) async {
     var game = await api.getMyGames(token);
     game.fold((e) {
-      debugPrint("Couldn't get available games");
+      debugPrint("Couldn't get my games");
     }, (games) {
       myGames.addAll(games.games);
       notifyListeners();

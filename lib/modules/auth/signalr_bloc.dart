@@ -18,7 +18,7 @@ class SignalRProvider extends ChangeNotifier {
   // final Either<SignalRError, String> connectionCompleter =
   // Completer();
   // late final AuthProvider authBloc;
-  late final HubConnection hubConnection;
+  late HubConnection hubConnection;
   late final Timer _timeoutTimer;
   @override
   void dispose() {
@@ -28,25 +28,34 @@ class SignalRProvider extends ChangeNotifier {
 
 // Creates the connection by using the HubConnectionBuilder.
   SignalRProvider()
-      : connectionId = Either.left(SignalRError(
-          message: "Connection not started",
-          connectionState: RegisterationConnectionState.Disconnected,
-        )) {
-    hubConnection = HubConnectionBuilder()
-        .withUrl(serverUrl)
-        // .withHubProtocol(JsonHubProtocol())
-        .build();
-    hubConnection.onclose(({Exception? error}) {
-      debugPrint(error.toString());
-    });
-    listenMessages();
-  }
+      : connectionId = Either.left(
+          SignalRError(
+            message: "Connection not started",
+            connectionState: RegisterationConnectionState.Disconnected,
+          ),
+        );
 
-  Future<Either<AppError, String>> connectSignalR() async {
+  Future<Either<AppError, String>> connectSignalR(String token) async {
     try {
+      hubConnection = HubConnectionBuilder()
+          .withUrl(
+            serverUrl,
+            options: HttpConnectionOptions(
+              accessTokenFactory: () async => token,
+            ),
+          )
+          // .withHubProtocol(JsonHubProtocol())
+          .build();
+      hubConnection.onclose(({Exception? error}) {
+        debugPrint(error.toString());
+      });
+
       await hubConnection.start();
       final conId = hubConnection.connectionId!;
       connectionId = (Either.right(conId));
+
+      listenMessages();
+
       return right(conId);
     } catch (e) {
       return left(AppError(message: e.toString()));

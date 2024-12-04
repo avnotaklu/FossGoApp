@@ -96,16 +96,13 @@ class AuthProvider {
     }
   }
 
-  void _setUser(UserRating userRating, String token, AppUser user) {
+  void _setUser(UserRating userRating, String token, AppUser user,
+      PublicUserInfo currentUser) {
     _currentUserStreamController.add(user);
     _currentUserRating = userRating;
     _currentUserRaw = user;
 
-    _currentUserInfo = PublicUserInfo(
-      email: user.email,
-      id: user.id,
-      rating: userRating,
-    );
+    _currentUserInfo = currentUser;
 
     _token = token;
 
@@ -120,11 +117,12 @@ class AuthProvider {
     final registerTas = registerUser(token, user.id);
 
     var userRatingTas = registerTas.flatMap((r) {
-      return TaskEither(() => _userRatingResult(token, user.id));
+      return TaskEither(() => _userRatingResult(token, user.id))
+          .map((a) => (r, a));
     });
 
     var res = (await userRatingTas.run()).flatMap((r) {
-      _setUser(r, token, user);
+      _setUser(r.$2, token, user, r.$1.currentUser);
       return right(currentUserInfo);
     }).mapLeft((e) {
       signlRBloc.disconnect();
@@ -149,7 +147,7 @@ class AuthProvider {
 
     var res = (await registerTas.run()).flatMap((r) {
       _token = token;
-      _currentUserInfo = PublicUserInfo(email: null, id: user.id, rating: null);
+      _currentUserInfo = r.currentUser;
 
       return right(currentUserInfo);
     }).mapLeft((e) {
@@ -163,7 +161,8 @@ class AuthProvider {
 
   TaskEither<AppError, RegisterUserResult> registerUser(
       String token, String userId) {
-    var signalRConnectionId = TaskEither(() => signlRBloc.connectSignalR());
+    var signalRConnectionId =
+        TaskEither(() => signlRBloc.connectSignalR(token));
 
     var registerTas = signalRConnectionId.flatMap((r) {
       return TaskEither(() => _registerUser(token, r));

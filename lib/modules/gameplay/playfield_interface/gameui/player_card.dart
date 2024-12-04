@@ -208,7 +208,8 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
     return context.read<GameStateBloc>().playerTurn == player.index;
   }
 
-  PlayerTimeSnapshot getPlayerTimeSnapshot(Game game, StoneType player) {
+  PlayerTimeSnapshot? getPlayerTimeSnapshot(Game game, StoneType player) {
+    if (game.playerTimeSnapshots.length <= player.index) return null;
     return game.playerTimeSnapshots[player.index];
   }
 

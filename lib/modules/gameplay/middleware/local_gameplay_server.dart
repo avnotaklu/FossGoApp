@@ -116,6 +116,7 @@ class LocalGameplayServer {
       stoneSelectionType: StoneSelectionType.auto,
       playersRatings: [],
       playersRatingsDiff: [],
+      gameType: GameType.anonymous
     );
   }
 

@@ -2,25 +2,30 @@
 import 'dart:convert';
 
 import 'package:go/services/app_user.dart';
+import 'package:go/services/public_user_info.dart';
 
 class RegisterUserResult {
-  final List<AppUser> otherActivePlayers;
-
-  RegisterUserResult({required this.otherActivePlayers});
+  // final List<AppUser> otherActivePlayers;
+  final PublicUserInfo currentUser;
+  RegisterUserResult({
+    required this.currentUser,
+  });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'otherActivePlayers': otherActivePlayers.map((x) => x.toMap()).toList(),
+      'currentUser': currentUser.toMap(),
     };
   }
 
   factory RegisterUserResult.fromMap(Map<String, dynamic> map) {
     return RegisterUserResult(
-      otherActivePlayers: List<AppUser>.from((map['otherActivePlayers'] as List).map<AppUser>((x) => AppUser.fromMap(x as Map<String,dynamic>),),),
+      currentUser:
+          PublicUserInfo.fromMap(map['currentUser'] as Map<String, dynamic>),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory RegisterUserResult.fromJson(String source) => RegisterUserResult.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory RegisterUserResult.fromJson(String source) =>
+      RegisterUserResult.fromMap(json.decode(source) as Map<String, dynamic>);
 }

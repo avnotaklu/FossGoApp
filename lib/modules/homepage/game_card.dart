@@ -39,7 +39,7 @@ class GameCard extends StatelessWidget {
       Navigator.pushReplacement(context,
           MaterialPageRoute<void>(builder: (BuildContext context) {
         return GameWidget(
-            game: game,
+            game: joinMessage?.game ?? game,
             gameInteractor: LiveGameOracle(
               api: Api(),
               authBloc: context.read<AuthProvider>(),
@@ -231,7 +231,7 @@ class OppositionInfoWidget extends StatelessWidget {
             fontWeight: FontWeight.normal),
         children: [
           TextSpan(
-            text: opposition.email,
+            text: opposition.email ?? "Anonymous",
             style: TextStyle(
                 color: defaultTheme.secondaryTextColor,
                 fontSize: 14,

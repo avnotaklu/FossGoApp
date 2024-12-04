@@ -77,6 +77,7 @@ extension GameUpdateExt on GameUpdate {
       playersRatings: this.game?.playersRatings ?? game.playersRatings,
       playersRatingsDiff:
           this.game?.playersRatingsDiff ?? game.playersRatingsDiff,
+      gameType: GameType.anonymous,
     );
 
     var tmpTimes = [...newGame.playerTimeSnapshots];
@@ -141,7 +142,9 @@ class LiveGameOracle extends GameStateOracle {
 
   void setupStreams() {
     var gameMessageStream = signalRbloc.gameMessageStream;
-    listenForGameJoin = gameMessageStream.asyncExpand((message) async* {
+    var userMessageStream = signalRbloc.userMessagesStream;
+
+    listenForGameJoin = userMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.gameJoin) {
         yield message.data as GameJoinMessage;
       }
@@ -206,6 +209,8 @@ class LiveGameOracle extends GameStateOracle {
 
   StreamSubscription listenFromGameJoin() {
     return listenForGameJoin.listen((message) {
+      debugPrint(
+          "Signal R said, ::${SignalRMessageTypes.gameJoin}::\n\t\t${message.toMap()}");
       otherPlayerInfo = message.otherPlayerData;
       gameUpdateC.add(message.game.toGameUpdate());
     });
@@ -259,7 +264,7 @@ class LiveGameOracle extends GameStateOracle {
 
   // TODO: listenForGameJoin + update otherPlayerInfo there
 
-  late final PublicUserInfo? otherPlayerInfo;
+  PublicUserInfo? otherPlayerInfo;
 
   PublicUserInfo get myPlayerUserInfo => authBloc.currentUserInfo;
 

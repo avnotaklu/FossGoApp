@@ -192,7 +192,7 @@ void main() {
 
   final joinMessage = GameJoinMessage(
     // The time server says the user joined at
-    time: currentTime,
+    joinTime: currentTime,
     otherPlayerData: player2(),
     game: sGame,
   );
