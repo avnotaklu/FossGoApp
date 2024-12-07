@@ -114,7 +114,7 @@ class LocalGameplayServer {
       playerTimeSnapshots: _playerTimeSnapshots,
       gameCreator: null,
       stoneSelectionType: StoneSelectionType.auto,
-      playersRatings: [],
+      playersRatingsAfter: [],
       playersRatingsDiff: [],
       gameType: GameType.anonymous
     );

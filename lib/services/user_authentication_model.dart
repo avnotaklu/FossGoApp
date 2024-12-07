@@ -2,10 +2,10 @@
 import 'dart:convert';
 
 
-import 'package:go/services/app_user.dart';
+import 'package:go/services/user_account.dart';
 
 class UserAuthenticationModel {
-  final AppUser user;
+  final UserAccount user;
   final String token;
 
   UserAuthenticationModel(this.user, this.token);
@@ -19,7 +19,7 @@ class UserAuthenticationModel {
 
   factory UserAuthenticationModel.fromMap(Map<String, dynamic> map) {
     return UserAuthenticationModel(
-      AppUser.fromMap(map['user'] as Map<String,dynamic>),
+      UserAccount.fromMap(map['user'] as Map<String,dynamic>),
       map['token'] as String,
     );
   }

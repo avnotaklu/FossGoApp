@@ -5,7 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/app_user.dart';
+import 'package:go/services/user_account.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/game_join_dto.dart';
@@ -13,7 +13,7 @@ import 'package:go/services/my_games.dart';
 import 'package:go/services/signal_r_message.dart';
 
 class HomepageBloc extends ChangeNotifier {
-  List<AppUser> otherActivePlayers = [];
+  List<UserAccount> otherActivePlayers = [];
   List<AvailableGame> availableGames = [];
   List<MyGame> myGames = [];
 

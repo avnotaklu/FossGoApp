@@ -11,14 +11,14 @@ class LogInScreen extends StatefulWidget {
 }
 
 class _LogInScreenState extends State<LogInScreen> {
-  final emailController = TextEditingController();
+  final emailOrUsernameController = TextEditingController();
   final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Provider<LogInProvider>(
       create: (context) => LogInProvider(authBloc: context.read()),
-      builder:(context, child) => Scaffold(
+      builder: (context, child) => Scaffold(
         appBar: const MyAppBar("Log In"),
         body: Container(
           child: Center(
@@ -29,9 +29,9 @@ class _LogInScreenState extends State<LogInScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextField(
-                    controller: emailController,
+                    controller: emailOrUsernameController,
                     decoration: const InputDecoration(
-                      hintText: 'Email',
+                      hintText: 'Email/Username',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -52,17 +52,19 @@ class _LogInScreenState extends State<LogInScreen> {
                       onPressed: () async {
                         var userResponse =
                             await context.read<LogInProvider>().logIn(
-                                  emailController.text,
-                                  passwordController.text,
+                                  emailOrUsernameController.text.trim(),
+                                  passwordController.text.trim(),
                                 );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(userResponse.fold(
-                              (e) => e.message,
-                              (v) => "Successfully logged in",
-                            )),
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(userResponse.fold(
+                                (e) => e.message,
+                                (v) => "Successfully logged in",
+                              )),
+                            ),
+                          );
+                        }
                       },
                       child: const Text("Log In"))
                 ],

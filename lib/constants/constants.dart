@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/services/user_rating.dart';
+import 'package:go/models/variant_type.dart';
 
 class BoardSizeData {
   final int rows;
@@ -31,22 +33,6 @@ class BoardSizeData {
 const String title = "Go";
 // const List<String> boardsizes = ["9x9", "13x13", "19x19"];
 // const List<(int rows, int cols)> boardsizes = [(9, 9), (13, 13), (19, 19)];
-
-extension BoardSizeDataExt on BoardSize {
-  RateableBoardSize? get rateable => switch (this) {
-        BoardSize.nine => RateableBoardSize.nine,
-        BoardSize.thirteen => RateableBoardSize.thirteen,
-        BoardSize.nineteen => RateableBoardSize.nineteen,
-        BoardSize.other => null
-      };
-}
-
-enum BoardSize {
-  nine,
-  thirteen,
-  nineteen,
-  other,
-}
 
 const List<BoardSizeData> boardSizes = [
   BoardSizeData(9, 9),
@@ -226,4 +212,46 @@ class VisualTheme {
       required this.mainHighlightColor,
       required this.disabledColor,
       required this.enabledColor});
+}
+
+// extension GetValidator on String? Function(String) {
+//   Validator<String, String> validator() {
+//     Either<String?, String> validateFunc(String v) {
+//       var res = this.call(v);
+//       if (res != null) {
+//         return left(res);
+//       } else {
+//         return right(v);
+//       }
+//     }
+
+//     return SimpleValidator(validateFunc);
+//   }
+// }
+
+class Validations {
+
+  static String? validateEmail(String email) {
+    final RegExp emailRegex = RegExp(
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
+    return !emailRegex.hasMatch(email) ? "Email is not valid" : null;
+  }
+
+  static String? validateUsernameCharacters(String username) {
+    final RegExp usernameRegex = RegExp(r'^[a-zA-Z0-9_]+$');
+    return !usernameRegex.hasMatch(username)
+        ? "Please enter letters, numbers or underscores only for username"
+        : null;
+  }
+
+  static String? validateUsernameFirst(String username) {
+    final RegExp usernameRegex = RegExp(r'^[a-zA-Z].*$');
+    return !usernameRegex.hasMatch(username)
+        ? "Username must start with a letter"
+        : null;
+  }
+
+  static bool validatePassword(String password) {
+    return password.length >= 6;
+  }
 }

@@ -4,28 +4,8 @@ import 'dart:convert';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/models/game.dart';
 import 'package:go/services/user_rating.dart';
+import 'package:go/models/variant_type.dart';
 
-extension TimeStandardExt on TimeStandard {
-  RateableTimeStandard? get rateable => switch (this) {
-        TimeStandard.blitz => RateableTimeStandard.blitz,
-        TimeStandard.rapid => RateableTimeStandard.rapid,
-        TimeStandard.classical => RateableTimeStandard.classical,
-        TimeStandard.correspondence => RateableTimeStandard.correspondence,
-        TimeStandard.other => null,
-      };
-}
-
-enum TimeStandard {
-  blitz("Blitz"),
-  rapid("Rapid"),
-  classical("Classical"),
-  correspondence("Correspondence"),
-  other("Other");
-
-  final String standardName;
-
-  const TimeStandard(this.standardName);
-}
 
 final TimeControl ultrabullet = TimeControl(
   mainTimeSeconds: 10,

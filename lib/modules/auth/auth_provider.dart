@@ -5,7 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/app_user.dart';
+import 'package:go/services/user_account.dart';
 import 'package:go/services/guest_user.dart';
 import 'package:go/services/public_user_info.dart';
 
@@ -31,16 +31,16 @@ class AuthProvider {
       clientId:
           "983500952462-p1upu5nu2bis5565bj6nbqu3iqsp5209.apps.googleusercontent.com");
 
-  final StreamController<AppUser> _currentUserStreamController =
+  final StreamController<UserAccount> _currentUserStreamController =
       StreamController.broadcast();
-  Stream<AppUser> get currentUser => _currentUserStreamController.stream;
+  Stream<UserAccount> get currentUser => _currentUserStreamController.stream;
 
   final StreamController<Either<AppError, PublicUserInfo>>
       _authResultStreamController = StreamController.broadcast();
   Stream<Either<AppError, PublicUserInfo>> get authResult =>
       _authResultStreamController.stream;
 
-  AppUser? _currentUserRaw;
+  UserAccount? _currentUserRaw;
   UserRating? _currentUserRating;
   PublicUserInfo? _currentUserInfo;
   PublicUserInfo get currentUserInfo => _currentUserInfo!;
@@ -96,7 +96,7 @@ class AuthProvider {
     }
   }
 
-  void _setUser(UserRating userRating, String token, AppUser user,
+  void _setUser(UserRating userRating, String token, UserAccount user,
       PublicUserInfo currentUser) {
     _currentUserStreamController.add(user);
     _currentUserRating = userRating;
@@ -113,7 +113,7 @@ class AuthProvider {
   }
 
   Future<Either<AppError, PublicUserInfo>> authenticateNormalUser(
-      AppUser user, String token) async {
+      UserAccount user, String token) async {
     final registerTas = registerUser(token, user.id);
 
     var userRatingTas = registerTas.flatMap((r) {
@@ -193,7 +193,7 @@ class AuthProvider {
     sharedPrefs.setString('token', token);
   }
 
-  void storeUser(AppUser user) {
+  void storeUser(UserAccount user) {
     sharedPrefs.setString('user', user.toJson());
   }
 

@@ -7,6 +7,7 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/error_handling/http_error.dart';
 import 'package:go/core/foundation/either.dart';
 import 'package:go/models/game.dart';
+import 'package:go/modules/auth/sign_in_dto.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_creation_dto.dart';
@@ -92,6 +93,8 @@ class Api {
   Future<Either<AppError, UserAuthenticationModel>> googleSignIn(
       GoogleSignInAuthentication userCreds) async {
     var idToken = userCreds.idToken!;
+
+    // FIXME: server is taking a body json with token
     var res =
         await get(Uri.parse("$baseUrl/Authentication/GoogleSignIn"), idToken);
     return convert(res, (a) => UserAuthenticationModel.fromJson(a));
@@ -109,7 +112,7 @@ class Api {
   }
 
   Future<Either<AppError, UserAuthenticationModel>> passwordLogin(
-      UserDetailsDto details) async {
+      SignInDto details) async {
     var res = await post(Uri.parse("$baseUrl/Authentication/PasswordLogIn"),
         details.toJson(), null);
 

@@ -3,81 +3,27 @@ import 'dart:convert';
 import 'package:go/constants/constants.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/time_control.dart';
+import 'package:go/models/variant_type.dart';
 
 enum RateableBoardSize { nine, thirteen, nineteen }
 
 enum RateableTimeStandard { blitz, rapid, classical, correspondence }
 
-class CategoryCons {}
-
-class Category {
-  final RateableBoardSize? boardSize;
-  final RateableTimeStandard timeStandard;
-
-  Category({
-    required this.boardSize,
-    required this.timeStandard,
-  });
-
-  factory Category.fromString(String repr) {
-    final parts = repr.split('-');
-
-    if (parts.length == 2) {
-      final timeSt = int.parse(parts[1].substring(1));
-      final boardS = int.parse(parts[0].substring(1));
-
-      return Category(
-        boardSize: RateableBoardSize.values[boardS],
-        timeStandard: RateableTimeStandard.values[timeSt],
-      );
-    } else {
-      final timeSt = int.parse(parts[0].substring(1));
-
-      return Category(
-        timeStandard: RateableTimeStandard.values[timeSt],
-        boardSize: null,
-      );
-    }
-  }
-
-  String stringRepr() {
-    final b = boardSize == null ? '' : 'B${boardSize!.index}-';
-    final s = 'S${timeStandard.index}';
-    return '$b$s';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is Category &&
-        other.boardSize == boardSize &&
-        other.timeStandard == timeStandard;
-  }
-
-  @override
-  int get hashCode => boardSize.hashCode ^ timeStandard.hashCode;
-}
-
 extension UserRatingsExt on UserRating {
   PlayerRatingData? getRatingForGame(Game game) {
-    var rB = game.boardSizeData.boardSize.rateable;
-    if (rB == null) {
-      return null;
-    }
-    var rT = game.timeStandard.rateable;
-    if (rT == null) {
+    var v = game.getTopLevelVariant();
+    if (!v.ratingAllowed) {
       return null;
     }
 
-    return ratings[Category(boardSize: rB, timeStandard: rT)];
+    return ratings[v];
   }
 }
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class UserRating {
   final String userId;
-  final Map<Category, PlayerRatingData> ratings;
+  final Map<VariantType, PlayerRatingData> ratings;
   UserRating({
     required this.userId,
     required this.ratings,
@@ -87,7 +33,7 @@ class UserRating {
     return <String, dynamic>{
       'userId': userId,
       'ratings': ratings
-          .map((key, value) => MapEntry(key.stringRepr(), value.toMap())),
+          .map((key, value) => MapEntry(key.toKey, value.toMap())),
     };
   }
 
@@ -96,7 +42,7 @@ class UserRating {
       userId: map['userId'] as String,
       ratings: Map<String, Map<String, dynamic>>.from((map['ratings'])).map(
         (key, value) => MapEntry(
-          Category.fromString(key),
+          VariantType.fromKey(key),
           PlayerRatingData.fromMap(value),
         ),
       ),

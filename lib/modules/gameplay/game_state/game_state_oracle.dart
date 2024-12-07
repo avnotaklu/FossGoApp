@@ -74,7 +74,7 @@ extension GameUpdateExt on GameUpdate {
       gameCreator: this.game?.gameCreator ?? game.gameCreator,
       playerTimeSnapshots:
           this.game?.playerTimeSnapshots ?? game.playerTimeSnapshots,
-      playersRatings: this.game?.playersRatings ?? game.playersRatings,
+      playersRatingsAfter: this.game?.playersRatingsAfter ?? game.playersRatingsAfter,
       playersRatingsDiff:
           this.game?.playersRatingsDiff ?? game.playersRatingsDiff,
       gameType: GameType.anonymous,

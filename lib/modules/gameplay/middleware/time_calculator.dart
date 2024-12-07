@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/time_control.dart';
 
@@ -23,6 +24,10 @@ class TimeCalculator {
         : null;
 
     int activePlayerIdx = newTimes.indexWhere((snap) => snap.timeActive);
+    if(activePlayerIdx == -1) {
+      debugPrint("No active player");
+      return newTimes;
+    }
     var activePlayerSnap = newTimes[activePlayerIdx];
 
     int activePlayerTimeLeft = activePlayerSnap.mainTimeMilliseconds -

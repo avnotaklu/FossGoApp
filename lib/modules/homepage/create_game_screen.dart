@@ -3,6 +3,7 @@ import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/foundation/duration.dart';
+import 'package:go/models/variant_type.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
@@ -110,7 +111,7 @@ class CreateGameScreen extends StatelessWidget {
                 height: MediaQuery.sizeOf(context).height * 0.08,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
-                  children: TimeStandard.values.take(4).map((item) {
+                  children: TimeStandard.values.map((item) {
                     return Expanded(
                       child: GestureDetector(
                         onTap: () {

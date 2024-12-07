@@ -5,11 +5,13 @@ import 'package:fpdart/fpdart.dart';
 
 import 'package:go/constants/constants.dart';
 import 'package:go/models/game_move.dart';
+import 'package:go/models/minimal_rating.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/services/game_over_message.dart';
+import 'package:go/models/variant_type.dart';
 
 extension StoneTypeExtension on StoneType {
   String get color => switch (this) {
@@ -197,6 +199,40 @@ extension GameExts on Game {
       prisoners: b.prisoners,
     );
   }
+
+  BoardSize getBoardSize() {
+    if (rows == 9 && columns == 9) {
+      return BoardSize.nine;
+    } else if (rows == 13 && columns == 13) {
+      return BoardSize.thirteen;
+    } else if (rows == 19 && columns == 19) {
+      return BoardSize.nineteen;
+    } else {
+      return BoardSize.other;
+    }
+  }
+
+  // Variant data
+
+  VariantType getTopLevelVariant() {
+    return VariantType(getBoardSize(), timeControl.timeStandard);
+  }
+
+  VariantType getBoardVariant() {
+    return VariantType(getBoardSize(), null);
+  }
+
+  VariantType getTimeStandardVariant() {
+    return VariantType(null, timeControl.timeStandard);
+  }
+
+  List<VariantType> getRelevantVariants() {
+    return [
+      getTopLevelVariant(),
+      getBoardVariant(),
+      getTimeStandardVariant(),
+    ];
+  }
 }
 
 class Game {
@@ -220,7 +256,7 @@ class Game {
   final DateTime? endTime;
   final StoneSelectionType stoneSelectionType;
   final String? gameCreator;
-  final List<int> playersRatings;
+  final List<MinimalRating> playersRatingsAfter;
   final List<int> playersRatingsDiff;
   final GameType gameType;
 
@@ -245,7 +281,7 @@ class Game {
     required this.stoneSelectionType,
     required this.gameCreator,
     required this.playerTimeSnapshots,
-    required this.playersRatings,
+    required this.playersRatingsAfter,
     required this.playersRatingsDiff,
     required this.gameType,
   });
@@ -282,7 +318,7 @@ class Game {
       GameFieldNames.GameCreator: gameCreator,
       GameFieldNames.PlayerTimeSnapshots:
           playerTimeSnapshots.map((e) => e.toMap()).toList(),
-      GameFieldNames.PlayersRatings: playersRatings,
+      GameFieldNames.PlayersRatings: playersRatingsAfter,
       GameFieldNames.PlayersRatingsDiff: playersRatingsDiff,
       GameFieldNames.GameType: gameType.index,
     };
@@ -348,8 +384,11 @@ class Game {
           (e) => PlayerTimeSnapshot.fromMap(e as Map<String, dynamic>),
         ),
       ),
-      playersRatings:
-          List<int>.from(map[GameFieldNames.PlayersRatings] as List),
+      playersRatingsAfter: List<MinimalRating>.from(
+        (map[GameFieldNames.PlayersRatings] as List).map(
+          (a) => MinimalRating.fromString(a),
+        ),
+      ),
       playersRatingsDiff:
           List<int>.from(map[GameFieldNames.PlayersRatingsDiff] as List),
       gameType: GameType.values[map[GameFieldNames.GameType] as int],
@@ -382,7 +421,7 @@ class Game {
     StoneSelectionType? stoneSelectionType,
     String? gameCreator,
     List<PlayerTimeSnapshot>? playerTimeSnapshots,
-    List<int>? playersRatings,
+    List<MinimalRating>? playersRatingsAfter,
     List<int>? playersRatingsDiff,
     GameType? gameType,
   }) {
@@ -407,7 +446,7 @@ class Game {
       stoneSelectionType: stoneSelectionType ?? this.stoneSelectionType,
       gameCreator: gameCreator ?? this.gameCreator,
       playerTimeSnapshots: playerTimeSnapshots ?? this.playerTimeSnapshots,
-      playersRatings: playersRatings ?? this.playersRatings,
+      playersRatingsAfter: playersRatingsAfter ?? this.playersRatingsAfter,
       playersRatingsDiff: playersRatingsDiff ?? this.playersRatingsDiff,
       gameType: gameType ?? this.gameType,
     );

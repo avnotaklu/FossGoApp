@@ -18,7 +18,7 @@ import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/app_user.dart';
+import 'package:go/services/user_account.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/new_move_result.dart';
@@ -152,7 +152,7 @@ void main() {
 
   // User 1
   when(() => auth.currentUserInfo).thenReturn(
-    AppUser(id: "1", email: "1@1.com"),
+    UserAccount(id: "1", email: "1@1.com", googleSignIn: true, creationDate: _1980Jan1_1_30PM.copyWith(year: 1977), lastSeen: _1980Jan1_1_30PM),
   );
 
   when(() => auth.token).thenReturn(
@@ -166,7 +166,7 @@ void main() {
 
   // User 2
   when(() => auth2.currentUserInfo).thenReturn(
-    AppUser(id: "2", email: "2@2.com"),
+    UserAccount(id: "2", email: "2@2.com"),
   );
 
   when(() => auth2.token).thenReturn(
@@ -213,6 +213,7 @@ void main() {
   //   joiningData: joinMessage,
   // );
 
+  var 
   final i2 = FaceToFaceGameOracle(sGame, utils2);
   bloc2 = GameStateBloc(sGame, i2, utils2);
 
@@ -294,12 +295,12 @@ void main() {
 
 PublicUserInfo player1() {
   return PublicUserInfo(
-      email: "1@1.com", id: "1", rating: UserRating(userId: "1", ratings: {}));
+      email: "1@1.com", id: "1", rating: UserRating(userId: "1", ratings: {}), playerType: PlayerType.normal);
 }
 
 PublicUserInfo player2() {
   return PublicUserInfo(
-      email: "2@2.com", id: "2", rating: UserRating(userId: "2", ratings: {}));
+      email: "2@2.com", id: "2", rating: UserRating(userId: "2", ratings: {}), playerType: PlayerType.normal);
 }
 
 List<List<List<int>> Function()> getBoardForMoveCount() {
@@ -358,6 +359,7 @@ Game gameConstructor(
   var boardState = BoardStateUtilities(rows, cols);
   Position? koPosition;
   return Game(
+    gameType: GameType.rated,
     gameId: "Test",
     rows: rows,
     columns: cols,
@@ -385,7 +387,7 @@ Game gameConstructor(
     ],
     gameCreator: "1",
     stoneSelectionType: StoneSelectionType.black,
-    playersRatings: [],
+    playersRatingsAfter: [],
     playersRatingsDiff: [],
   );
 }
