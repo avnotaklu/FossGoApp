@@ -22,6 +22,16 @@ extension StoneTypeExtension on StoneType {
         StoneType.black => StoneType.white,
         StoneType.white => StoneType.black,
       };
+  
+  GameResult get resultForIWon => switch (this) {
+        StoneType.black => GameResult.blackWon,
+        StoneType.white => GameResult.whiteWon,
+      };
+  
+  GameResult get resultForOtherWon => switch (this) {
+        StoneType.black => GameResult.whiteWon,
+        StoneType.white => GameResult.blackWon,
+      };
 }
 
 enum StoneType { black, white }
@@ -57,13 +67,13 @@ class GameFieldNames {
   static const String KoPositionInLastMove = "koPositionInLastMove";
   static const String GameState = "gameState";
   static const String DeadStones = "deadStones";
-  static const String WinnerId = "winnerId";
+  static const String Result = "result";
   static const String FinalTerritoryScores = "finalTerritoryScores";
   static const String Komi = "komi";
   static const String GameOverMethod = "gameOverMethod";
   static const String StoneSelectionType = "stoneSelectionType";
   static const String GameCreator = "gameCreator";
-  static const String PlayersRatings = "playersRatings";
+  static const String PlayersRatingsAfter = "playersRatingsAfter";
   static const String PlayersRatingsDiff = "playersRatingsDiff";
   static const String GameType = "gameType";
 
@@ -134,6 +144,26 @@ class GameFieldNames {
 //   static const String X = "x";
 //   static const String Y = "y";
 // }
+
+extension GameResultExt on GameResult {
+  StoneType? etWinnerStone() {
+    return switch (this) {
+      GameResult.blackWon => StoneType.black,
+      GameResult.whiteWon => StoneType.white,
+      GameResult.draw => null,
+    };
+  }
+
+  StoneType? getLoserStone() {
+    return etWinnerStone()?.other;
+  }
+}
+
+enum GameResult {
+  blackWon,
+  whiteWon,
+  draw,
+}
 
 extension GameExts on Game {
   List<String> get playerIdsSorted => players
@@ -249,7 +279,7 @@ class Game {
   final Position? koPositionInLastMove;
   final GameState gameState;
   final List<Position> deadStones;
-  final String? winnerId;
+  final GameResult? result;
   final double komi;
   final GameOverMethod? gameOverMethod;
   final List<int> finalTerritoryScores;
@@ -273,7 +303,7 @@ class Game {
     required this.koPositionInLastMove,
     required this.gameState,
     required this.deadStones,
-    required this.winnerId,
+    required this.result,
     required this.komi,
     required this.finalTerritoryScores,
     required this.gameOverMethod,
@@ -309,7 +339,7 @@ class Game {
       GameFieldNames.KoPositionInLastMove: koPositionInLastMove?.toString(),
       GameFieldNames.GameState: gameState.index,
       GameFieldNames.DeadStones: deadStones.map((e) => e.toString()).toList(),
-      GameFieldNames.WinnerId: winnerId,
+      GameFieldNames.Result: result?.index,
       GameFieldNames.Komi: komi,
       GameFieldNames.FinalTerritoryScores: finalTerritoryScores,
       GameFieldNames.GameOverMethod: gameOverMethod?.index,
@@ -318,7 +348,8 @@ class Game {
       GameFieldNames.GameCreator: gameCreator,
       GameFieldNames.PlayerTimeSnapshots:
           playerTimeSnapshots.map((e) => e.toMap()).toList(),
-      GameFieldNames.PlayersRatings: playersRatingsAfter,
+      GameFieldNames.PlayersRatingsAfter:
+          playersRatingsAfter.map((e) => e.stringify()).toList(),
       GameFieldNames.PlayersRatingsDiff: playersRatingsDiff,
       GameFieldNames.GameType: gameType.index,
     };
@@ -365,7 +396,9 @@ class Game {
           (e) => Position.fromString(e as String),
         ),
       ),
-      winnerId: map[GameFieldNames.WinnerId] as String?,
+      result: (map[GameFieldNames.Result]) == null
+          ? null
+          : GameResult.values[(map[GameFieldNames.Result] as int)],
       komi: map[GameFieldNames.Komi] as double,
       finalTerritoryScores:
           List<int>.from(map[GameFieldNames.FinalTerritoryScores] as List),
@@ -385,7 +418,7 @@ class Game {
         ),
       ),
       playersRatingsAfter: List<MinimalRating>.from(
-        (map[GameFieldNames.PlayersRatings] as List).map(
+        (map[GameFieldNames.PlayersRatingsAfter] as List).map(
           (a) => MinimalRating.fromString(a),
         ),
       ),
@@ -415,7 +448,7 @@ class Game {
     List<Position>? deadStones,
     double? komi,
     List<int>? finalTerritoryScores,
-    String? winnerId,
+    GameResult? result,
     GameOverMethod? gameOverMethod,
     DateTime? endTime,
     StoneSelectionType? stoneSelectionType,
@@ -438,7 +471,7 @@ class Game {
       koPositionInLastMove: koPositionInLastMove ?? this.koPositionInLastMove,
       gameState: gameState ?? this.gameState,
       deadStones: deadStones ?? this.deadStones,
-      winnerId: winnerId ?? this.winnerId,
+      result: result ?? this.result,
       komi: komi ?? this.komi,
       finalTerritoryScores: finalTerritoryScores ?? this.finalTerritoryScores,
       gameOverMethod: gameOverMethod ?? this.gameOverMethod,

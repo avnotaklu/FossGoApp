@@ -44,10 +44,19 @@ class SignalRProvider extends ChangeNotifier {
               accessTokenFactory: () async => token,
             ),
           )
+          .withAutomaticReconnect()
           // .withHubProtocol(JsonHubProtocol())
           .build();
       hubConnection.onclose(({Exception? error}) {
-        debugPrint(error.toString());
+        debugPrint("Connection closed: ${error.toString()}");
+      });
+
+      hubConnection.onreconnecting(({Exception? error}) {
+        debugPrint("Connection reconnecting: ${error.toString()}");
+      });
+
+      hubConnection.onreconnected(({String? connectionId}) {
+        debugPrint("Connection reconnected with Id: $connectionId");
       });
 
       await hubConnection.start();
@@ -107,13 +116,20 @@ class SignalRProvider extends ChangeNotifier {
 
   // Hub methods
   Future<void> findMatch(FindMatchDto dto) async {
-    var res = await hubConnection
-        .invoke('FindMatch', args: [dto.toMap()]).catchError((e) {
+    // var res = await hubConnection
+    //     .invoke('FindMatch', args: [dto.toMap()]).catchError((e) {
+    //   var err = "Error in findMatch: $e";
+    //   debugPrint(err);
+    //   return err;
+    // });
+    // debugPrint(res.toString());
+
+    await hubConnection
+        .send('FindMatch', args: [dto.toMap()]).catchError((e) {
       var err = "Error in findMatch: $e";
       debugPrint(err);
-      return err;
     });
-    debugPrint(res.toString());
+    // debugPrint(res.toString());
   }
 
   // Utils

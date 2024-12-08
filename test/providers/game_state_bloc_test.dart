@@ -24,7 +24,7 @@ import 'package:go/services/move_position.dart';
 import 'package:go/services/new_move_result.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
-import 'package:go/services/user_rating.dart';
+import 'package:go/services/player_rating.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -152,8 +152,9 @@ void main() {
 
   // User 1
   when(() => auth.currentUserInfo).thenReturn(
-    UserAccount(id: "1", email: "1@1.com", googleSignIn: true, creationDate: _1980Jan1_1_30PM.copyWith(year: 1977), lastSeen: _1980Jan1_1_30PM),
+    PublicUserInfo(username: "1@1.com", playerType: PlayerType.normal, id: "1", rating: null /* shouldn't matter */ )
   );
+
 
   when(() => auth.token).thenReturn(
     "token1",
@@ -166,7 +167,7 @@ void main() {
 
   // User 2
   when(() => auth2.currentUserInfo).thenReturn(
-    UserAccount(id: "2", email: "2@2.com"),
+    PublicUserInfo(username: "2@2.com", playerType: PlayerType.normal, id: "2", rating: null /* shouldn't matter */ )
   );
 
   when(() => auth2.token).thenReturn(
@@ -295,12 +296,12 @@ void main() {
 
 PublicUserInfo player1() {
   return PublicUserInfo(
-      email: "1@1.com", id: "1", rating: UserRating(userId: "1", ratings: {}), playerType: PlayerType.normal);
+      username: "1@1.com", id: "1", rating: PlayerRating(playerId: "1", ratings: {}), playerType: PlayerType.normal);
 }
 
 PublicUserInfo player2() {
   return PublicUserInfo(
-      email: "2@2.com", id: "2", rating: UserRating(userId: "2", ratings: {}), playerType: PlayerType.normal);
+      username: "2@2.com", id: "2", rating: PlayerRating(playerId: "2", ratings: {}), playerType: PlayerType.normal);
 }
 
 List<List<List<int>> Function()> getBoardForMoveCount() {

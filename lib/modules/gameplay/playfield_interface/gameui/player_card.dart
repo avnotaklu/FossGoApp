@@ -3,7 +3,7 @@ import 'package:barebones_timer/timer_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:go/models/game.dart';
 import 'package:go/services/game_over_message.dart';
-import 'package:go/services/user_rating.dart';
+import 'package:go/services/player_rating.dart';
 import 'package:provider/provider.dart';
 
 import 'package:go/constants/constants.dart' as Constants;

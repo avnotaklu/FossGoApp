@@ -13,7 +13,7 @@ import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/move_position.dart';
-import 'package:go/services/user_rating.dart';
+import 'package:go/services/player_rating.dart';
 
 import 'package:signalr_netcore/errors.dart';
 
@@ -37,10 +37,8 @@ class GameStateBloc extends ChangeNotifier {
 
   int get gametime => game.timeControl.mainTimeSeconds;
 
-  StoneType? get getWinnerStone => game.players[game.winnerId];
-  StoneType? get getLoserStone => game.players[game.winnerId] == null
-      ? null
-      : StoneType.values[1 - game.players[game.winnerId]!.index];
+  StoneType? get getWinnerStone => game.result?.etWinnerStone();
+  StoneType? get getLoserStone => game.result?.getLoserStone();
 
   GameOverMethod? get getGameOverMethod => game.gameOverMethod;
 

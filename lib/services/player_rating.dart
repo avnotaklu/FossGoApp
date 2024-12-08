@@ -9,7 +9,7 @@ enum RateableBoardSize { nine, thirteen, nineteen }
 
 enum RateableTimeStandard { blitz, rapid, classical, correspondence }
 
-extension UserRatingsExt on UserRating {
+extension UserRatingsExt on PlayerRating {
   PlayerRatingData? getRatingForGame(Game game) {
     var v = game.getTopLevelVariant();
     if (!v.ratingAllowed) {
@@ -21,25 +21,25 @@ extension UserRatingsExt on UserRating {
 }
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-class UserRating {
-  final String userId;
+class PlayerRating {
+  final String playerId;
   final Map<VariantType, PlayerRatingData> ratings;
-  UserRating({
-    required this.userId,
+  PlayerRating({
+    required this.playerId,
     required this.ratings,
   });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'userId': userId,
+      'playerId': playerId,
       'ratings': ratings
           .map((key, value) => MapEntry(key.toKey, value.toMap())),
     };
   }
 
-  factory UserRating.fromMap(Map<String, dynamic> map) {
-    return UserRating(
-      userId: map['userId'] as String,
+  factory PlayerRating.fromMap(Map<String, dynamic> map) {
+    return PlayerRating(
+      playerId: map['playerId'] as String,
       ratings: Map<String, Map<String, dynamic>>.from((map['ratings'])).map(
         (key, value) => MapEntry(
           VariantType.fromKey(key),
@@ -51,8 +51,8 @@ class UserRating {
 
   String toJson() => json.encode(toMap());
 
-  factory UserRating.fromJson(String source) =>
-      UserRating.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory PlayerRating.fromJson(String source) =>
+      PlayerRating.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class PlayerRatingData {

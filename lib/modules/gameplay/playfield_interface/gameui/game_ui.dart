@@ -68,7 +68,7 @@ class _GameUiState extends State<GameUi> {
                     ),
                   ),
                   context.read<Stage>() is GameEndStage &&
-                          gameStateBloc.game.winnerId != null
+                          gameStateBloc.game.result != null
                       ? Text(
                           "${() {
                             return gameStateBloc.getWinnerStone!.index == 0

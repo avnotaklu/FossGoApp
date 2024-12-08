@@ -3,7 +3,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/services/time_control_dto.dart';
-import 'package:go/services/user_rating.dart';
+import 'package:go/services/player_rating.dart';
 import 'package:go/models/variant_type.dart';
 
 class BoardSizeData {
@@ -213,21 +213,6 @@ class VisualTheme {
       required this.disabledColor,
       required this.enabledColor});
 }
-
-// extension GetValidator on String? Function(String) {
-//   Validator<String, String> validator() {
-//     Either<String?, String> validateFunc(String v) {
-//       var res = this.call(v);
-//       if (res != null) {
-//         return left(res);
-//       } else {
-//         return right(v);
-//       }
-//     }
-
-//     return SimpleValidator(validateFunc);
-//   }
-// }
 
 class Validations {
 

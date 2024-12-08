@@ -1,16 +1,16 @@
 import 'dart:convert';
-import 'package:go/services/user_rating.dart';
+import 'package:go/services/player_rating.dart';
 
 enum PlayerType { normal, guest }
 
 class PublicUserInfo {
-  final String? email;
+  final String? username;
   final PlayerType playerType;
   final String id;
-  final UserRating? rating;
+  final PlayerRating? rating;
 
   PublicUserInfo({
-    required this.email,
+    required this.username,
     required this.playerType,
     required this.id,
     required this.rating,
@@ -18,7 +18,7 @@ class PublicUserInfo {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'email': email,
+      'username': username,
       'id': id,
       'rating': rating?.toMap(),
       'playerType': playerType.index,
@@ -27,10 +27,10 @@ class PublicUserInfo {
 
   factory PublicUserInfo.fromMap(Map<String, dynamic> map) {
     return PublicUserInfo(
-      email: map['email'] as String?,
+      username: map['username'] as String?,
       id: map['id'] as String,
       rating: map['rating'] != null
-          ? UserRating.fromMap(map['rating'] as Map<String, dynamic>)
+          ? PlayerRating.fromMap(map['rating'] as Map<String, dynamic>)
           : null,
       playerType: PlayerType.values[map['playerType'] as int],
     );

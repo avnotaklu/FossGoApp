@@ -231,7 +231,7 @@ class OppositionInfoWidget extends StatelessWidget {
             fontWeight: FontWeight.normal),
         children: [
           TextSpan(
-            text: opposition.email ?? "Anonymous",
+            text: opposition.username ?? "Anonymous",
             style: TextStyle(
                 color: defaultTheme.secondaryTextColor,
                 fontSize: 14,

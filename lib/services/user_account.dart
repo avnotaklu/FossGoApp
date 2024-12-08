@@ -1,18 +1,5 @@
 import 'dart:convert';
 
-class UserFieldNames {
-  static const String email = 'em';
-  static const String passwordHash = 'ph';
-  static const String googleSignIn = 'gs';
-  static const String userName = 'un';
-  static const String fullName = 'fn';
-  static const String bio = 'bio';
-  static const String avatar = 'av';
-  static const String creationDate = 'cd';
-  static const String lastSeen = 'ls';
-  static const String nationality = 'nat';
-}
-
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class UserAccount {
   final String id;
@@ -68,9 +55,8 @@ class UserAccount {
       fullName: map['fullName'] != null ? map['fullName'] as String : null,
       bio: map['bio'] != null ? map['bio'] as String : null,
       avatar: map['avatar'] != null ? map['avatar'] as String : null,
-      creationDate:
-          DateTime.fromMillisecondsSinceEpoch(map['creationDate'] as int),
-      lastSeen: DateTime.fromMillisecondsSinceEpoch(map['lastSeen'] as int),
+      creationDate: DateTime.parse(map['creationDate'] as String),
+      lastSeen: DateTime.parse(map['lastSeen'] as String),
       nationality:
           map['nationality'] != null ? map['nationality'] as String : null,
     );

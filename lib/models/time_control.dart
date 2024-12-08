@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/models/game.dart';
-import 'package:go/services/user_rating.dart';
+import 'package:go/services/player_rating.dart';
 import 'package:go/models/variant_type.dart';
 
 

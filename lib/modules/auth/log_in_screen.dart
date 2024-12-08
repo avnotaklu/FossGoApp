@@ -72,62 +72,6 @@ class _LogInScreenState extends State<LogInScreen> {
             ),
           ),
         ),
-        // child: Container(
-        //   child: Center(
-        //     child: Padding(
-        //       padding: const EdgeInsets.all(20.0),
-        //       child: Column(
-        //         mainAxisAlignment: MainAxisAlignment.center,
-        //         crossAxisAlignment: CrossAxisAlignment.center,
-        //         children: [
-        //           TextField(
-        //             controller: emailController,
-        //             decoration: const InputDecoration(
-        //               hintText: 'Email',
-        //               border: OutlineInputBorder(),
-        //             ),
-        //           ),
-        //           SizedBox(
-        //             height: 20,
-        //           ),
-        //           TextField(
-        //             controller: passwordController,
-        //             decoration: const InputDecoration(
-        //               hintText: 'Password',
-        //               border: OutlineInputBorder(),
-        //             ),
-        //           ),
-        //           SizedBox(
-        //             height: 20,
-        //           ),
-        //           ElevatedButton(
-        //               onPressed: () async {
-        //                 var userResponse =
-        //                     await context.read<LogInProvider>().logIn(
-        //                           emailController.text,
-        //                           passwordController.text,
-        //                         );
-        //                 userResponse.fold((e) {
-        //                   ScaffoldMessenger.of(context).showSnackBar(
-        //                     SnackBar(
-        //                       content: Text(e.message),
-        //                     ),
-        //                   );
-        //                 }, (v) {
-        //                   ScaffoldMessenger.of(context).showSnackBar(
-        //                     SnackBar(
-        //                       content: Text("Successfully signed up"),
-        //                     ),
-        //                   );
-        //                   context.read<AuthBloc>().setUser(v.user, v.token);
-        //                 });
-        //               },
-        //               child: const Text("Log In"))
-        //         ],
-        //       ),
-        //     ),
-        //   ),
-        // ),
       ),
     );
   }

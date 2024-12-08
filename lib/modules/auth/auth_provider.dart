@@ -12,7 +12,7 @@ import 'package:go/services/public_user_info.dart';
 import 'package:go/services/register_player_dto.dart';
 import 'package:go/services/register_user_result.dart';
 import 'package:go/services/user_authentication_model.dart';
-import 'package:go/services/user_rating.dart';
+import 'package:go/services/player_rating.dart';
 import 'package:go/services/user_rating_result.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,7 +41,7 @@ class AuthProvider {
       _authResultStreamController.stream;
 
   UserAccount? _currentUserRaw;
-  UserRating? _currentUserRating;
+  PlayerRating? _currentUserRating;
   PublicUserInfo? _currentUserInfo;
   PublicUserInfo get currentUserInfo => _currentUserInfo!;
 
@@ -96,7 +96,7 @@ class AuthProvider {
     }
   }
 
-  void _setUser(UserRating userRating, String token, UserAccount user,
+  void _setUser(PlayerRating userRating, String token, UserAccount user,
       PublicUserInfo currentUser) {
     _currentUserStreamController.add(user);
     _currentUserRating = userRating;
@@ -180,7 +180,7 @@ class AuthProvider {
     return registerRes;
   }
 
-  Future<Either<AppError, UserRating>> _userRatingResult(
+  Future<Either<AppError, PlayerRating>> _userRatingResult(
       String token, String userId) async {
     var registerRes = await api.getUserRating(
       userId,

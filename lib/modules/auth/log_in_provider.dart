@@ -28,7 +28,8 @@ class LogInProvider {
   }
 
   OrValidator<String?, String, String> emailOrUsernameValidator() {
-    return OrValidator(usernameValidator(), emailValidator());
+    return OrValidator(usernameValidator(), emailValidator(),
+        (usernameE, emailE) => "Invalid username or email");
   }
 
   Future<Either<AppError, PublicUserInfo>> logIn(

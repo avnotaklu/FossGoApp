@@ -23,7 +23,7 @@ class ProfilePage extends StatelessWidget {
                 ),
                 Center(
                   child: Text(
-                    context.read<AuthProvider>().currentUserInfo.email ??
+                    context.read<AuthProvider>().currentUserInfo.username ??
                         "Guest user",
                   ),
                 ),

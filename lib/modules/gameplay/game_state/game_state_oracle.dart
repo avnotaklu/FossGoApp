@@ -26,7 +26,7 @@ import 'package:go/services/game_over_message.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
-import 'package:go/services/user_rating.dart';
+import 'package:go/services/player_rating.dart';
 
 // HACK: `GameUpdate` object is a hack as signalR messages don't always give the full game state
 extension GameExt on Game {
@@ -63,7 +63,7 @@ extension GameUpdateExt on GameUpdate {
           this.game?.koPositionInLastMove ?? game.koPositionInLastMove,
       gameState: this.game?.gameState ?? game.gameState,
       deadStones: this.game?.deadStones ?? game.deadStones,
-      winnerId: this.game?.winnerId ?? game.winnerId,
+      result: this.game?.result ?? game.result,
       komi: this.game?.komi ?? game.komi,
       finalTerritoryScores:
           this.game?.finalTerritoryScores ?? game.finalTerritoryScores,
@@ -281,7 +281,7 @@ class LiveGameOracle extends GameStateOracle {
     }
 
     return DisplayablePlayerData(
-      displayName: publicInfo.email ?? "Anonymous",
+      displayName: publicInfo.username ?? "Anonymous",
       stoneType: stone,
       rating: rating,
     );
@@ -304,7 +304,7 @@ class LiveGameOracle extends GameStateOracle {
     }
 
     return DisplayablePlayerData(
-      displayName: publicInfo.email ?? "Anonymous",
+      displayName: publicInfo.username ?? "Anonymous",
       stoneType: stone,
       rating: rating,
     );

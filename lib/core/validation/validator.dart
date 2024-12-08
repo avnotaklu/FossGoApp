@@ -61,15 +61,19 @@ class OrValidator<T, O, R> extends Validator<T, Either<O, R>> {
   final Validator<T, O> _validator1;
   final Validator<T, R> _validator2;
 
-  OrValidator(this._validator1, this._validator2)
+  OrValidator(this._validator1, this._validator2,
+      String Function(String, String) errorFormatter)
       : super((T value) {
           var res = _validator1
               .validate(value)
-              .mapLeft((e1) => _validator2
-                  .validate(value)
-                  .map((v1) => right<O, R>(v1))
-                  .mapLeft((e2) => e1)
-                  .swap())
+              .mapLeft(
+                (e1) => _validator2
+                    .validate(value) // Validate the second guy
+                    .map((v1) => right<O, R>(v1))
+                    .mapLeft((e2) =>
+                        errorFormatter(e1, e2)) // Get the formatted error
+                    .swap(), // swap cuz we can only ignore left side
+              )
               .map((v1) => left<O, R>(v1))
               .swap()
               .flatMap(identity);

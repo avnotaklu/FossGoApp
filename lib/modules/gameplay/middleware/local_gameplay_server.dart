@@ -49,7 +49,7 @@ class LocalGameplayServer {
       .map((e) => e.key)
       .toList();
 
-  String? _winnerId;
+  GameResult? _result;
   late double _komi;
   GameOverMethod? _gameOverMethod;
   late List<int> _finalTerritoryScores;
@@ -85,7 +85,7 @@ class LocalGameplayServer {
     _koPositionInLastMove = null;
     _gameState = GameState.playing;
     _stoneStates = {};
-    _winnerId = null;
+    _result = null;
     _komi = 6.5;
     _gameOverMethod = null;
     _finalTerritoryScores = [];
@@ -106,7 +106,7 @@ class LocalGameplayServer {
       koPositionInLastMove: _koPositionInLastMove,
       gameState: _gameState,
       deadStones: deadStones,
-      winnerId: _winnerId,
+      result: _result,
       komi: _komi,
       finalTerritoryScores: _finalTerritoryScores,
       endTime: _endTime,
@@ -293,7 +293,7 @@ class LocalGameplayServer {
       _playerTimeSnapshots[1].copyWith(timeActive: false),
     ];
     _finalTerritoryScores = scores;
-    _winnerId = _players.keys.firstWhere((k) => _players[k] == winner);
+    _result = winner?.resultForIWon;
     _gameOverMethod = method;
     _endTime = now;
   }

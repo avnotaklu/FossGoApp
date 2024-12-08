@@ -22,7 +22,7 @@ import 'package:go/services/register_user_result.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/user_authentication_model.dart';
 import 'package:go/services/user_details_dto.dart';
-import 'package:go/services/user_rating.dart';
+import 'package:go/services/player_rating.dart';
 import 'package:go/services/user_rating_result.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -33,8 +33,8 @@ import 'package:http/http.dart' as http;
 // }
 
 class Api {
-  static const String basePath = "192.168.109.71:8080";
-  static const String baseUrl = "http://192.168.109.71:8080";
+  static const String basePath = "192.168.170.71:8080";
+  static const String baseUrl = "http://$basePath";
 
   void log(String m) {
     debugPrint(m);
@@ -42,6 +42,8 @@ class Api {
 
   Future<Either<HttpError, http.Response>> get(Uri url, String? token) async {
     try {
+      log("Api Call: ${url.toString()}");
+      log("Request: Get");
       var res = await http.get(
         url,
         headers: {
@@ -50,7 +52,7 @@ class Api {
         },
       );
 
-      log("Api Call: ${url.toString()} \n\nResponse: ${res.body}");
+      log("Response: ${res.body}");
       return right(res);
     } on SocketException {
       log("Socket Exception: ${url.toString()}");
@@ -67,6 +69,8 @@ class Api {
   Future<Either<HttpError, http.Response>> post(
       Uri url, String? body, String? token) async {
     try {
+      log("Api Call: ${url.toString()}");
+      log("Request: Post => $body");
       var res = await http.post(
         url,
         body: body,
@@ -76,7 +80,7 @@ class Api {
         },
       );
 
-      log("Api Call: ${url.toString()} \n\nResponse: ${res.body}");
+      log("Response: ${res.body}");
       return right(res);
     } on SocketException {
       log("Socket Exception: ${url.toString()}");
@@ -144,14 +148,14 @@ class Api {
     return convert(res, (a) => RegisterUserResult.fromJson(a));
   }
 
-  Future<Either<AppError, UserRating>> getUserRating(
+  Future<Either<AppError, PlayerRating>> getUserRating(
       String userId, String token) async {
     var res = await get(
       Uri.http(basePath, "/User/GetUserRatings", {'userId': userId}),
       token,
     );
 
-    return convert(res, (a) => UserRating.fromJson(a));
+    return convert(res, (a) => PlayerRating.fromJson(a));
   }
 
   Future<Either<AppError, Game>> createGame(

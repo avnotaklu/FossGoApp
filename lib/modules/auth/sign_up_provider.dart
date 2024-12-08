@@ -25,8 +25,6 @@ class SignUpProvider {
 
   Future<Either<AppError, PublicUserInfo>> signUp(
       String username, String password) async {
-    // regex for email validation
-
     var usernameRes = usernameValidator().validate(username);
 
     if (usernameRes.isLeft()) {
