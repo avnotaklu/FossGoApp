@@ -48,37 +48,38 @@ class MyApp extends StatelessWidget {
   }
 
   Widget initialPage() => const SignIn();
-  
+
   Widget responsiveWidgetSetup(BuildContext context, Widget? child) =>
-      ResponsiveBreakpoints.builder(
-        child: child!,
-        breakpoints: [
-          const Breakpoint(start: 0, end: 450, name: MOBILE),
-          const Breakpoint(start: 451, end: 800, name: TABLET),
-          const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-          const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-        ],
+      SafeArea(
+        child: ResponsiveBreakpoints.builder(
+          child: child!,
+          breakpoints: [
+            const Breakpoint(start: 0, end: 450, name: MOBILE),
+            const Breakpoint(start: 451, end: 800, name: TABLET),
+            const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+            const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+          ],
+        ),
       );
 
   ThemeData themeData() {
-    return ThemeData(
-      // Define the default brightness and colors.
-      brightness: Brightness.dark,
-      primaryColor: Colors.red[800],
-      // textTheme: TextTheme(
-      //   button: TextStyle(color: Constants.defaultTheme.mainTextColor, fontSize: 15),
-      // ),
-      textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          foregroundColor: WidgetStateProperty.all<Color>(
-              Constants.defaultTheme.mainTextColor),
-        ),
-      ),
+    return Constants.lightTheme;
+    // return ThemeData(
+    //   // Define the default brightness and colors.
+    //   brightness: Brightness.dark,
+    //   primaryColor: Colors.red[800],
 
-      buttonTheme: ButtonThemeData(
-        buttonColor: Constants.defaultTheme.mainHighlightColor,
-      ),
-    );
+    //   textButtonTheme: TextButtonThemeData(
+    //     style: ButtonStyle(
+    //       foregroundColor: WidgetStateProperty.all<Color>(
+    //           Constants.defaultTheme.mainTextColor),
+    //     ),
+    //   ),
+
+    //   buttonTheme: ButtonThemeData(
+    //     buttonColor: Constants.defaultTheme.mainHighlightColor,
+    //   ),
+    // );
   }
 
   Map<String, WidgetBuilder> get routeConstructor {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
@@ -28,51 +29,43 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
     return ChangeNotifierProvider(
       create: (context) => MatchmakingProvider(context.read<SignalRProvider>()),
       builder: (context, child) => Scaffold(
-        drawer: SizedBox(
-          width: MediaQuery.sizeOf(context).width * 0.7,
-          child: Center(),
-        ),
-        appBar: MyAppBar('Baduk',
-            leading: IconButton(
-              onPressed: () {
-                if (Scaffold.of(context).isDrawerOpen) {
-                  Scaffold.of(context).closeDrawer();
-                } else {
-                  Scaffold.of(context).openDrawer();
-                }
-              },
-              icon: const Icon(Icons.menu),
-            )),
+        // backgroundColor: defaultTheme.color5,
         body: Consumer<MatchmakingProvider>(
           builder: (context, provider, child) => Padding(
             padding: const EdgeInsets.all(20.0),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
-                'Board Size',
-                style: headingTextStyle(),
-              ),
+              Text('Board Size', style: headlineStyle(context)),
               SizedBox(
                   height: MediaQuery.sizeOf(context).width * 0.15,
                   child: Row(
                       mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: provider.allBoardSizes
                           .map(
                             (size) => Expanded(
-                              child: boardSizeSelector(size, provider),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: boardSizeSelector(
+                                  size,
+                                  provider,
+                                ),
+                              ),
                             ),
                           )
                           .toList())),
               Text(
                 'Time Controls',
-                style: headingTextStyle(),
+                style: headlineStyle(context),
               ),
               Column(
                   mainAxisSize: MainAxisSize.max,
                   children: provider.allTimeControls
                       .map(
-                        (timeControl) => SizedBox(
+                        (timeControl) => Container(
                           height: MediaQuery.sizeOf(context).width * 0.15,
+                          padding: EdgeInsets.symmetric(vertical: 6.0),
                           child: timeSelector(timeControl, provider),
                         ),
                       )
@@ -82,32 +75,32 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      provider.findMatch();
+                  PrimaryButton(
+                      text: "Play",
+                      onPressed: () {
+                        provider.findMatch();
 
-                      context
-                          .read<MatchmakingProvider>()
-                          .onMatchmakingUpdated
-                          .stream
-                          .listen((event) {
-                        if (context.mounted) {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return GameWidget(
-                                game: event.game,
-                                gameInteractor: LiveGameOracle(
-                                  api: Api(),
-                                  authBloc: context.read<AuthProvider>(),
-                                  signalRbloc: context.read<SignalRProvider>(),
-                                  joiningData: event,
-                                ));
-                          }));
-                        }
-                      });
-                    },
-                    child: Text("Find", style: headingTextStyle()),
-                  ),
+                        context
+                            .read<MatchmakingProvider>()
+                            .onMatchmakingUpdated
+                            .stream
+                            .listen((event) {
+                          if (context.mounted) {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return GameWidget(
+                                  game: event.game,
+                                  gameInteractor: LiveGameOracle(
+                                    api: Api(),
+                                    authBloc: context.read<AuthProvider>(),
+                                    signalRbloc:
+                                        context.read<SignalRProvider>(),
+                                    joiningData: event,
+                                  ));
+                            }));
+                          }
+                        });
+                      }),
                 ],
               )
             ]),
@@ -121,22 +114,29 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
       MatchableBoardSizes size, MatchmakingProvider provider) {
     var selected = provider.selectedBoardSizes.contains(size);
     return GestureDetector(
-      onTap: () {
-        provider.modifyBoardSize(size, !selected);
-      },
-      child: Card(
-        color: defaultTheme.mainHighlightColor,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 25.0, top: 5.0),
-          child: SelectionBadge(
-            selected: selected,
-            child: Center(
-              child: Text(size.boardName, style: pointTextStyle()),
-            ),
-          ),
-        ),
-      ),
-    );
+        onTap: () {
+          provider.modifyBoardSize(size, !selected);
+        },
+        child: SelectionBadge(
+          selected: selected,
+          label: size.boardName,
+        )
+        // Card(
+        //   color: cardColor,
+        //   shape: RoundedRectangleBorder(
+        //     borderRadius: BorderRadius.circular(5),
+        //   ),
+        //   child: Padding(
+        //     padding: const EdgeInsets.only(right: 25.0, top: 5.0),
+        //     child: SelectionBadge(
+        //       selected: selected,
+        //       child: Center(
+        //         child: Text(size.boardName, style: pointTextStyle()),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        );
   }
 
   Widget timeSelector(
@@ -146,23 +146,53 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
       onTap: () {
         provider.modifyTimeControl(timeControl, !selected);
       },
-      child: Card(
-        color: defaultTheme.mainHighlightColor,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 25.0, top: 5.0),
-          child: SelectionBadge(
-            selected: selected,
-            child: Center(
-                child: Text(timeControl.repr(), style: pointTextStyle())),
-          ),
-        ),
+      child: SelectionBadge(
+        selected: selected,
+        label: timeControl.repr(),
       ),
     );
   }
 
-  TextStyle headingTextStyle() =>
-      const TextStyle(fontSize: 20, fontWeight: FontWeight.w500);
+  Color get cardColor => defaultTheme.disabledColor;
 
-  TextStyle pointTextStyle() =>
-      const TextStyle(fontSize: 18, fontWeight: FontWeight.w400);
+  TextStyle? headlineStyle(BuildContext context) {
+    return context.textTheme.headlineSmall;
+  }
+}
+
+class PrimaryButton extends StatelessWidget {
+  final void Function() onPressed;
+  final String text;
+
+  const PrimaryButton({
+    super.key,
+    required this.onPressed,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ButtonStyle(
+        // elevation: WidgetStateProperty.all(100),
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+        ),
+        textStyle: WidgetStateProperty.all(
+          const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+          ),
+        ),
+        side: WidgetStateProperty.all(
+          BorderSide(
+            color: Colors.white,
+            width: 2,
+          ),
+        ),
+      ),
+      onPressed: onPressed,
+      child: Text(text),
+    );
+  }
 }

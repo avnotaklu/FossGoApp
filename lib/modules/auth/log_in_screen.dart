@@ -19,7 +19,10 @@ class _LogInScreenState extends State<LogInScreen> {
     return Provider<LogInProvider>(
       create: (context) => LogInProvider(authBloc: context.read()),
       builder: (context, child) => Scaffold(
-        appBar: const MyAppBar("Log In"),
+        appBar: const MyAppBar(
+          "Log In",
+          showBackButton: true,
+        ),
         body: Container(
           child: Center(
             child: Padding(

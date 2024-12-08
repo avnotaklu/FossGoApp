@@ -24,7 +24,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       builder: (context, child) {
         final signUpPro = context.read<SignUpProvider>();
         return Scaffold(
-          appBar: const MyAppBar("Sign Up"),
+          appBar: const MyAppBar("Sign Up", showBackButton: true,),
           body: Form(
             key: key,
             child: Center(

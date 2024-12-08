@@ -1,10 +1,12 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+
 import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
-import 'package:go/services/time_control_dto.dart';
-import 'package:go/services/player_rating.dart';
 import 'package:go/models/variant_type.dart';
+import 'package:go/services/player_rating.dart';
+import 'package:go/services/time_control_dto.dart';
 
 class BoardSizeData {
   final int rows;
@@ -188,34 +190,161 @@ const Map<String, List<Position>> boardCircleDecoration = {
 //   }
 // }
 
+ThemeData get lightTheme {
+  var tc = Colors.grey.shade800;
+  return ThemeData.light().copyWith(
+    cardColor: defaultTheme.lightCardColor,
+    indicatorColor: defaultTheme.enabledColor,
+    disabledColor: defaultTheme.disabledColor,
+    shadowColor: defaultTheme.lightShadow,
+
+    textTheme: TextTheme(
+      // headlineLarge: headingL(),
+      headlineSmall: headingS(tc),
+      // titleLarge: headingL(),
+      bodyLarge: bodyL(tc),
+      // bodySmall: headingL(),
+      // labelLarge: headingL(),
+    ),
+  );
+}
+
+TextStyle headingS(Color col) {
+  return TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.w400,
+    color: col,
+  );
+}
+
+TextStyle titleL(Color col) {
+  return TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w400,
+    color: col,
+  );
+}
+
+TextStyle bodyL(Color col) {
+  return TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w400,
+    color: col,
+  );
+}
+
+ThemeData get darkTheme {
+  return ThemeData.dark().copyWith(
+    cardColor: defaultTheme.darkCardColor,
+    indicatorColor: defaultTheme.enabledColor,
+    disabledColor: defaultTheme.disabledColor,
+    // shadow color is default
+
+    textTheme: TextTheme(
+      // headlineLarge: headingL(),
+      headlineSmall: headingS(defaultTheme.mainDarkTextColor),
+      // titleLarge: headingL(),
+      bodyLarge: bodyL(Colors.white),
+      // bodySmall: headingL(),
+      // labelLarge: headingL(),
+    ),
+  );
+}
+
 VisualTheme defaultTheme = VisualTheme(
   backgroundColor: Colors.grey.shade800,
-  mainTextColor: Colors.white60,
-  secondaryTextColor: Colors.white,
   mainHighlightColor: Colors.blueGrey,
-  disabledColor: Colors.grey.shade400,
-  enabledColor: Colors.amber,
+  // disabledColor: Colors.grey.shade400,
+  // enabledColor: Colors.amber,
+
+// #003049, #d62828, #f77f00, #fcbf49, #eae2b7
+  // color1: const Color(0xFF003049),
+  // color2: const Color(0xFFd62828),
+  // color3: const Color(0xFFf77f00),
+  // color4: const Color(0xFFfcbf49),
+  // color5: const Color(0xFFeae2b7),
+
+// #D3CAE2 #E6C17A, #F6EDE3, #404041
+  // color1: const Color(0xFFD3CAE2),
+  // color2: const Color(0xFFE6C17A),
+  // color3: const Color(0xFFF6EDE3),
+  // color4: const Color(0xFF404041),
+  // color5: const Color(0xFFf77f00),
+
+// #cfdbd5, #e8eddf, #f5cb5c, #242423, #333533
+  // color1: const Color(0xFFcfdbd5),
+  // color2: const Color(0xFFe8eddf),
+  // color3: const Color(0xFFf5cb5c),
+  // color4: const Color(0xFF242423),
+  // color5: const Color(0xFF333533),
+
+  // #eae8ff, #adacb5, #f5cb5c, #2d3142, #071013
+
+  color1: const Color(0xFFeae8ff),
+  color2: const Color(0xFFadacb5),
+  color3: const Color(0xFFf5cb5c),
+  color4: const Color(0xFF2d3142),
+  color5: const Color(0xFF071013),
+
+  // #dce1e9, #fef7ff, #f5cf66, #0a0212, #141414
+
+  // color1: const Color(0xFFFCF8F5),
+  // color2: const Color(0xFFfef7ff),
+  // color3: const Color(0xFFf5cf66),
+  // color4: const Color(0xFF0A0A0A),
+  // color5: const Color(0xFF141414),
 );
 
 class VisualTheme {
   final Color backgroundColor;
-  final Color mainTextColor;
-  final Color secondaryTextColor;
   final Color mainHighlightColor;
-  final Color disabledColor;
-  final Color enabledColor;
 
-  const VisualTheme(
-      {required this.backgroundColor,
-      required this.mainTextColor,
-      required this.secondaryTextColor,
-      required this.mainHighlightColor,
-      required this.disabledColor,
-      required this.enabledColor});
+  // Color get disabledColor => color2;
+  // Color get enabledColor => color3;
+
+  // Color get darkCardColor => color5;
+  // Color get lightCardColor => color2;
+
+  Color get disabledColor => color1;
+  Color get enabledColor => color3;
+
+  // Color get darkCardColor => color4;
+  Color get darkCardColor => Color(0xFF1C1C22);
+  // Color get darkCardColor => Color(0xFF363636);
+  Color get lightCardColor => color1;
+
+  Color get mainTextColor => color5;
+  Color get secondaryTextColor => color5;
+
+  Color get mainDarkTextColor => color5;
+  Color get secDarkTextColor => color5;
+
+  Color get mainLightTextColor => color5;
+  Color get secLightTextColor => color5;
+
+  // Color get darkShadow => Colors.grey.shade600.withOpacity(0.2);
+  Color get lightShadow => Colors.blueGrey.shade100;
+
+  final Color color1;
+  final Color color2;
+  final Color color3;
+  final Color color4;
+  final Color color5;
+
+  VisualTheme({
+    required this.backgroundColor,
+    required this.mainHighlightColor,
+    // required this.disabledColor,
+    // required this.enabledColor,
+    required this.color1,
+    required this.color2,
+    required this.color3,
+    required this.color4,
+    required this.color5,
+  });
 }
 
 class Validations {
-
   static String? validateEmail(String email) {
     final RegExp emailRegex = RegExp(
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
@@ -240,3 +369,7 @@ class Validations {
     return password.length >= 6;
   }
 }
+
+
+// Some theme ideas
+// 
