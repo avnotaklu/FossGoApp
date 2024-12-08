@@ -60,7 +60,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                         player?.displayName ?? "Unknown",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            color: Constants.defaultTheme.mainTextColor,
+                            color: Constants.defaultTheme.mainDarkTextColor,
                             fontSize: 18),
                       ),
                       if (ratings != null) ratingText(ratings),
@@ -77,21 +77,21 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                           Text(
                             " + ${getFinalScore(game, player!.stoneType!)} Points",
                             style: TextStyle(
-                                color: Constants.defaultTheme.mainTextColor),
+                                color: Constants.defaultTheme.mainDarkTextColor),
                           ),
 
                       if (player?.stoneType != null)
                         Text(
                           " + ${getPrisonersCount(game, player!.stoneType!)} Prisoners",
                           style: TextStyle(
-                              color: Constants.defaultTheme.mainTextColor),
+                              color: Constants.defaultTheme.mainDarkTextColor),
                         ),
                       if (player?.stoneType != null &&
                           player?.stoneType == StoneType.white)
                         Text(
                           " + ${getKomi(game, player!.stoneType!)} Komi",
                           style: TextStyle(
-                              color: Constants.defaultTheme.mainTextColor),
+                              color: Constants.defaultTheme.mainDarkTextColor),
                         ),
                       // : const Spacer(
                       //     flex: 2,
@@ -140,7 +140,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
       text: TextSpan(
           text: " ( ${ratings.glicko.rating.toStringAsFixed(0)}",
           style: TextStyle(
-            color: Constants.defaultTheme.mainTextColor,
+            color: Constants.defaultTheme.mainDarkTextColor,
             fontSize: 12,
           ),
           children: [
@@ -195,7 +195,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
     return game.gameOverMethod == GameOverMethod.Score
         ? Text(
             " = ${game.finalTerritoryScores[stone.index] + game.prisoners[stone.index] + (stone.index * game.komi)}",
-            style: TextStyle(color: Constants.defaultTheme.mainTextColor),
+            style: TextStyle(color: Constants.defaultTheme.mainDarkTextColor),
           )
         : const SizedBox.shrink();
   }

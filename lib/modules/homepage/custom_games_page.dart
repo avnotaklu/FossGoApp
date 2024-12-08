@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 
 import 'package:go/modules/homepage/create_game_provider.dart';
+import 'package:go/modules/homepage/home_page.dart';
 import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/homepage/game_card.dart';
+import 'package:go/modules/homepage/matchmaking_page.dart';
 import 'package:go/widgets/buttons.dart';
 import 'package:provider/provider.dart';
 
@@ -37,63 +40,63 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
             }
 
             return Scaffold(
-              body: Column(
-                children: [
-                  const SizedBox(
-                    height: 100,
-                  ),
-                  Container(
-                    child: Center(
-                      child: Column(
-                        children: [
-                          BadukButton(
-                              onPressed: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) => MultiProvider(
-                                            providers: [
-                                              ChangeNotifierProvider.value(
-                                                value: signalRBloc,
-                                              ),
-                                              ChangeNotifierProvider(
-                                                create: (context) =>
-                                                    CreateGameProvider(
-                                                        signalRBloc)
-                                                      ..init(),
-                                              )
-                                            ],
-                                            builder: (context, child) {
-                                              return const CreateGameScreen();
-                                            }));
-                              },
-                              child: const Text("create game")),
-                        ],
-                      ),
+              body: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Available Games',
+                      style: context.textTheme.titleLarge,
                     ),
-                  ),
-                  const SizedBox(height: 50),
-                  const Text("Games", style: TextStyle(fontSize: 30)),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount:
-                            context.read<HomepageBloc>().availableGames.length,
-                        itemBuilder: (context, index) {
-                          final game = context
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: context
                               .read<HomepageBloc>()
-                              .availableGames[index];
-                          return GameCard(
-                            game: game.game,
-                            otherPlayerData: game.creatorInfo,
-                          );
-                        },
+                              .availableGames
+                              .length,
+                          itemBuilder: (context, index) {
+                            final game = context
+                                .read<HomepageBloc>()
+                                .availableGames[index];
+                            return GameCard(
+                              game: game.game,
+                              otherPlayerData: game.creatorInfo,
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  )
-                ],
+                    Center(
+                      child: PrimaryButton(
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) => MultiProvider(
+                                      providers: [
+                                        ChangeNotifierProvider.value(
+                                          value: signalRBloc,
+                                        ),
+                                        ChangeNotifierProvider(
+                                          create: (context) =>
+                                              CreateGameProvider(signalRBloc)
+                                                ..init(),
+                                        )
+                                      ],
+                                      builder: (context, child) {
+                                        return const CreateGameScreen();
+                                      }));
+                        },
+                        text: "Create New",
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

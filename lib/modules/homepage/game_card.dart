@@ -107,14 +107,14 @@ class TimeControlInfoWidget extends StatelessWidget {
       text: TextSpan(
         text: "Time -  ",
         style: TextStyle(
-            color: defaultTheme.secondaryTextColor,
+            color: defaultTheme.mainLightTextColor,
             fontSize: 18,
             fontWeight: FontWeight.normal),
         children: [
           TextSpan(
             text: game.timeControl.repr(),
             style: TextStyle(
-                color: defaultTheme.secondaryTextColor,
+                color: defaultTheme.mainLightTextColor,
                 fontSize: 14,
                 fontWeight: FontWeight.normal),
           ),
@@ -139,14 +139,14 @@ class BoardSizeInfoWidget extends StatelessWidget {
       text: TextSpan(
         text: "Board -  ",
         style: TextStyle(
-            color: defaultTheme.secondaryTextColor,
+            color: defaultTheme.mainLightTextColor,
             fontSize: 18,
             fontWeight: FontWeight.normal),
         children: [
           TextSpan(
             text: "${game.rows}x${game.columns}",
             style: TextStyle(
-                color: defaultTheme.secondaryTextColor,
+                color: defaultTheme.mainLightTextColor,
                 fontSize: 14,
                 fontWeight: FontWeight.normal),
           ),
@@ -194,7 +194,7 @@ class MyStoneInfoWidget extends StatelessWidget {
           text: TextSpan(
             text: "Your Stone  ",
             style: TextStyle(
-                color: defaultTheme.secondaryTextColor,
+                color: defaultTheme.mainLightTextColor,
                 fontSize: 18,
                 fontWeight: FontWeight.normal),
           ),
@@ -226,14 +226,14 @@ class OppositionInfoWidget extends StatelessWidget {
       text: TextSpan(
         text: "VS  ",
         style: TextStyle(
-            color: defaultTheme.secondaryTextColor,
+            color: defaultTheme.mainLightTextColor,
             fontSize: 18,
             fontWeight: FontWeight.normal),
         children: [
           TextSpan(
             text: opposition.username ?? "Anonymous",
             style: TextStyle(
-                color: defaultTheme.secondaryTextColor,
+                color: defaultTheme.mainLightTextColor,
                 fontSize: 14,
                 fontWeight: FontWeight.normal),
           ),

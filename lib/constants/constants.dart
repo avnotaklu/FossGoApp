@@ -191,27 +191,56 @@ const Map<String, List<Position>> boardCircleDecoration = {
 // }
 
 ThemeData get lightTheme {
-  var tc = Colors.grey.shade800;
+  var tc = defaultTheme.mainLightTextColor;
   return ThemeData.light().copyWith(
     cardColor: defaultTheme.lightCardColor,
     indicatorColor: defaultTheme.enabledColor,
-    disabledColor: defaultTheme.disabledColor,
+    disabledColor: defaultTheme.darkCardColor,
     shadowColor: defaultTheme.lightShadow,
+    // elevatedButtonTheme: ElevatedButtonThemeData(
+    //   style: ButtonStyle(
+    //     backgroundColor:
+    //         WidgetStateProperty.all<Color>(defaultTheme.focusColor),
+    //   ),
+    // ),
+    textTheme: buildTextTheme(tc),
+  );
+}
 
-    textTheme: TextTheme(
-      // headlineLarge: headingL(),
-      headlineSmall: headingS(tc),
-      // titleLarge: headingL(),
-      bodyLarge: bodyL(tc),
-      // bodySmall: headingL(),
-      // labelLarge: headingL(),
-    ),
+ThemeData get darkTheme {
+  var tc = defaultTheme.mainDarkTextColor;
+
+  return ThemeData.dark().copyWith(
+    cardColor: defaultTheme.darkCardColor,
+    indicatorColor: defaultTheme.enabledColor,
+    disabledColor: defaultTheme.lightCardColor,
+
+    // elevatedButtonTheme: ElevatedButtonThemeData(
+    //   style: ButtonStyle(
+    //     backgroundColor:
+    //         WidgetStateProperty.all<Color>(defaultTheme.focusColor),
+    //   ),
+    // ),
+    // shadow color is default
+
+    textTheme: buildTextTheme(tc),
+  );
+}
+
+TextTheme buildTextTheme(Color tc) {
+  return TextTheme(
+    headlineSmall: headingS(tc),
+    titleLarge: titleL(tc),
+    bodyLarge: bodyL(tc),
+    bodySmall: bodyS(tc),
+    labelLarge: lableL(tc),
+    labelSmall: lableS(tc),
   );
 }
 
 TextStyle headingS(Color col) {
   return TextStyle(
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: FontWeight.w400,
     color: col,
   );
@@ -233,21 +262,27 @@ TextStyle bodyL(Color col) {
   );
 }
 
-ThemeData get darkTheme {
-  return ThemeData.dark().copyWith(
-    cardColor: defaultTheme.darkCardColor,
-    indicatorColor: defaultTheme.enabledColor,
-    disabledColor: defaultTheme.disabledColor,
-    // shadow color is default
+TextStyle bodyS(Color col) {
+  return TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    color: col,
+  );
+}
 
-    textTheme: TextTheme(
-      // headlineLarge: headingL(),
-      headlineSmall: headingS(defaultTheme.mainDarkTextColor),
-      // titleLarge: headingL(),
-      bodyLarge: bodyL(Colors.white),
-      // bodySmall: headingL(),
-      // labelLarge: headingL(),
-    ),
+TextStyle lableL(Color col) {
+  return TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    color: col,
+  );
+}
+
+TextStyle lableS(Color col) {
+  return TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    color: col,
   );
 }
 
@@ -304,6 +339,7 @@ class VisualTheme {
 
   // Color get darkCardColor => color5;
   // Color get lightCardColor => color2;
+  Color get focusColor => color3;
 
   Color get disabledColor => color1;
   Color get enabledColor => color3;
@@ -313,14 +349,20 @@ class VisualTheme {
   // Color get darkCardColor => Color(0xFF363636);
   Color get lightCardColor => color1;
 
-  Color get mainTextColor => color5;
-  Color get secondaryTextColor => color5;
+  // Color get mainTextColor => color5;
+  // Color get secondaryTextColor => color5;
 
-  Color get mainDarkTextColor => color5;
-  Color get secDarkTextColor => color5;
+  Color get mainDarkTextColor => Colors.white;
+  Color get mainLightTextColor => Colors.grey.shade800;
 
-  Color get mainLightTextColor => color5;
-  Color get secLightTextColor => color5;
+  Color invertedTextColor(BuildContext context) {
+    return MediaQuery.of(context).platformBrightness == Brightness.dark
+        ? mainLightTextColor
+        : mainDarkTextColor;
+  }
+
+  // Color get secDarkTextColor => color5;
+  // Color get secLightTextColor => color5;
 
   // Color get darkShadow => Colors.grey.shade600.withOpacity(0.2);
   Color get lightShadow => Colors.blueGrey.shade100;

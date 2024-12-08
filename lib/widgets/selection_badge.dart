@@ -10,12 +10,15 @@ class SelectionBadge extends StatelessWidget {
   final bool selected;
   final Widget? child;
 
+  final void Function(bool selected) onTap;
+
   final String label;
   const SelectionBadge({
     super.key,
     required this.selected,
-    this.child,
+    required this.onTap,
     required this.label,
+    this.child,
   });
 
   @override
@@ -26,18 +29,17 @@ class SelectionBadge extends StatelessWidget {
         backgroundColor: Colors.transparent,
         isLabelVisible: selected,
         offset: Offset(0, 0),
-        largeSize: 25,
-        smallSize: 25,
+        largeSize: 20,
+        smallSize: 20,
         padding: const EdgeInsets.all(0),
         alignment: Alignment.topRight,
         child: Container(
-          height: context.height * 0.5,
+          height: context.height * 0.05,
           decoration: BoxDecoration(
             color: context.theme.cardColor,
             boxShadow: [
               BoxShadow(
                 color: context.theme.shadowColor,
-                // blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -45,15 +47,22 @@ class SelectionBadge extends StatelessWidget {
               Radius.circular(4),
             ),
           ),
-          child: Center(
-            child: Text(label, style: pointTextStyle(context)),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              splashFactory: InkSplash.splashFactory,
+              onTap: () => onTap(selected),
+              child: Center(
+                child: Text(label, style: pointTextStyle(context)),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  TextStyle? pointTextStyle(BuildContext con) => con.textTheme.bodyLarge;
+  TextStyle? pointTextStyle(BuildContext con) => con.textTheme.bodySmall;
 
   Widget get dot => Container(
         decoration: BoxDecoration(

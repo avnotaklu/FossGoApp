@@ -3,7 +3,9 @@ import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/foundation/duration.dart';
+import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/variant_type.dart';
+import 'package:go/modules/homepage/custom_games_page.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
@@ -23,6 +25,7 @@ class CreateGameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: context.theme.cardColor,
       child: Consumer<CreateGameProvider>(builder: (context, cgp, child) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.9,
@@ -32,7 +35,7 @@ class CreateGameScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              sectionHeading("Color"),
+              sectionHeading(context, "Color"),
               SizedBox(
                 height: MediaQuery.sizeOf(context).height * 0.05,
                 child: Row(
@@ -53,82 +56,52 @@ class CreateGameScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              sectionHeading("Size"),
+              sectionHeading(context, "Size"),
               SizedBox(
                 height: MediaQuery.sizeOf(context).height * 0.05,
                 child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: Constants.boardSizes.map((item) {
                       return Expanded(
-                        child: GestureDetector(
+                        child: SelectionCard(
                           onTap: () => cgp.changeBoardSize(item),
-                          child: Card(
-                            color: cgp.boardSize == item
-                                ? defaultTheme.enabledColor
-                                : defaultTheme.disabledColor,
-                            child: Center(
-                              child: Text(
-                                item.toString(),
-                                style: TextStyle(
-                                    color: defaultTheme.secondaryTextColor),
-                              ),
-                            ),
-                          ),
+                          selected: cgp.boardSize == item,
+                          label: item.toString(),
                         ),
                       );
                     }).toList()),
               ),
-              sectionHeading("Time Format"),
+              sectionHeading(context, "Time Format"),
               SizedBox(
                 height: MediaQuery.sizeOf(context).height * 0.08,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: Constants.TimeFormat.values.map((item) {
                     return Expanded(
-                      child: GestureDetector(
+                      child: SelectionCard(
                         onTap: () {
                           cgp.changeTimeFormat(item);
                         },
-                        child: Card(
-                          color: cgp.timeFormat == item
-                              ? defaultTheme.enabledColor
-                              : defaultTheme.disabledColor,
-                          child: Center(
-                            child: Text(
-                              item.formatName,
-                              style: TextStyle(
-                                  color: defaultTheme.secondaryTextColor),
-                            ),
-                          ),
-                        ),
+                        selected: cgp.timeFormat == item,
+                        label: item.formatName,
                       ),
                     );
                   }).toList(),
                 ),
               ),
-              sectionHeading("Time Control"),
+              sectionHeading(context, "Time Control"),
               SizedBox(
                 height: MediaQuery.sizeOf(context).height * 0.08,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: TimeStandard.values.map((item) {
                     return Expanded(
-                      child: GestureDetector(
+                      child: SelectionCard(
                         onTap: () {
                           cgp.changeTimeStandard(item);
                         },
-                        child: Card(
-                          color: cgp.timeStandard == item
-                              ? defaultTheme.enabledColor
-                              : defaultTheme.disabledColor,
-                          child: Center(
-                            child: Text(
-                              item.name,
-                              style: TextStyle(
-                                  color: defaultTheme.secondaryTextColor),
-                            ),
-                          ),
-                        ),
+                        selected: cgp.timeStandard == item,
+                        label: item.name,
                       ),
                     );
                   }).toList(),
@@ -248,10 +221,17 @@ class CreateGameScreen extends StatelessWidget {
           //   selected: mStoneType == type,
           // child:
 
-          Card(
-        color: cgp.mStoneType == type
-            ? defaultTheme.enabledColor
-            : Colors.transparent,
+          Container(
+        decoration: BoxDecoration(
+          color: cgp.mStoneType == type
+              ? context.theme.indicatorColor
+              : context.theme.cardColor,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: context.theme.disabledColor,
+            width: 1,
+          ),
+        ),
         child: Center(
           child: SizedBox(
             height: 30,
@@ -265,13 +245,10 @@ class CreateGameScreen extends StatelessWidget {
     );
   }
 
-  Widget sectionHeading(String heading) {
+  Widget sectionHeading(BuildContext context, String heading) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Text(
-        heading,
-        style: const TextStyle(color: Colors.white70, fontSize: 22),
-      ),
+      child: Text(heading, style: context.textTheme.titleLarge),
     );
   }
 
@@ -349,6 +326,43 @@ class CreateGameScreen extends StatelessWidget {
           label: Text(
             label,
             style: const TextStyle(fontSize: 14),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SelectionCard extends StatelessWidget {
+  // final CreateGameProvider cgp;
+  final void Function() onTap;
+  final bool selected;
+  final String label;
+
+  const SelectionCard({
+    required this.onTap,
+    required this.selected,
+    required this.label,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        color:
+            // cgp.boardSize == item
+            selected
+                ? context.theme.indicatorColor
+                : context.theme.disabledColor,
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: context.textTheme.labelSmall?.copyWith(
+              color: context.theme.cardColor,
+            ),
           ),
         ),
       ),

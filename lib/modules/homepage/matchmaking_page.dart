@@ -35,7 +35,7 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
             padding: const EdgeInsets.all(20.0),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Board Size', style: headlineStyle(context)),
+              Text('Board Size', style: titleLargeStyle(context)),
               SizedBox(
                   height: MediaQuery.sizeOf(context).width * 0.15,
                   child: Row(
@@ -57,7 +57,7 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                           .toList())),
               Text(
                 'Time Controls',
-                style: headlineStyle(context),
+                style: titleLargeStyle(context),
               ),
               Column(
                   mainAxisSize: MainAxisSize.max,
@@ -113,50 +113,44 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
   Widget boardSizeSelector(
       MatchableBoardSizes size, MatchmakingProvider provider) {
     var selected = provider.selectedBoardSizes.contains(size);
-    return GestureDetector(
-        onTap: () {
-          provider.modifyBoardSize(size, !selected);
-        },
-        child: SelectionBadge(
-          selected: selected,
-          label: size.boardName,
-        )
-        // Card(
-        //   color: cardColor,
-        //   shape: RoundedRectangleBorder(
-        //     borderRadius: BorderRadius.circular(5),
-        //   ),
-        //   child: Padding(
-        //     padding: const EdgeInsets.only(right: 25.0, top: 5.0),
-        //     child: SelectionBadge(
-        //       selected: selected,
-        //       child: Center(
-        //         child: Text(size.boardName, style: pointTextStyle()),
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        );
+    return SelectionBadge(
+      onTap: (v) {
+        provider.modifyBoardSize(size, !selected);
+      },
+      selected: selected,
+      label: size.boardName,
+      // Card(
+      //   color: cardColor,
+      //   shape: RoundedRectangleBorder(
+      //     borderRadius: BorderRadius.circular(5),
+      //   ),
+      //   child: Padding(
+      //     padding: const EdgeInsets.only(right: 25.0, top: 5.0),
+      //     child: SelectionBadge(
+      //       selected: selected,
+      //       child: Center(
+      //         child: Text(size.boardName, style: pointTextStyle()),
+      //       ),
+      //     ),
+      //   ),
+      // ),
+    );
   }
 
   Widget timeSelector(
       TimeControlDto timeControl, MatchmakingProvider provider) {
     var selected = provider.selectedTimeControls.contains(timeControl);
-    return GestureDetector(
-      onTap: () {
-        provider.modifyTimeControl(timeControl, !selected);
-      },
-      child: SelectionBadge(
-        selected: selected,
-        label: timeControl.repr(),
-      ),
+    return SelectionBadge(
+      selected: selected,
+      label: timeControl.repr(),
+      onTap: (v) => provider.modifyTimeControl(timeControl, !selected),
     );
   }
 
   Color get cardColor => defaultTheme.disabledColor;
 
-  TextStyle? headlineStyle(BuildContext context) {
-    return context.textTheme.headlineSmall;
+  TextStyle? titleLargeStyle(BuildContext context) {
+    return context.textTheme.titleLarge;
   }
 }
 

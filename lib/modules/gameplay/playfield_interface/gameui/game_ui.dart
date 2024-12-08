@@ -75,7 +75,9 @@ class _GameUiState extends State<GameUi> {
                                 ? 'Black'
                                 : 'White';
                           }.call()} won by ${getWinningMethod(context)}",
-                          style: TextStyle(color: defaultTheme.mainTextColor),
+                          style: TextStyle(
+                            color: defaultTheme.mainDarkTextColor,
+                          ),
                         )
                       : const Spacer(
                           flex: 2,
@@ -134,7 +136,8 @@ class _GameUiState extends State<GameUi> {
 }
 
 class BottomButton extends StatelessWidget {
-  const BottomButton(this.action, this.text, {super.key, this.isDisabled = false});
+  const BottomButton(this.action, this.text,
+      {super.key, this.isDisabled = false});
   final bool isDisabled;
   final VoidCallback action;
   final String text;
