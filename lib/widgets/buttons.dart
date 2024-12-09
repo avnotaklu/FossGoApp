@@ -7,11 +7,10 @@ class BadukButton extends StatelessWidget {
   const BadukButton({super.key, required this.onPressed, required this.child});
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return FilledButton(
         onPressed: onPressed,
         child: Text(
           child.data!,
-        )
-        );
+        ));
   }
 }

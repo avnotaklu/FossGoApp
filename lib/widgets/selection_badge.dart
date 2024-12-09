@@ -34,7 +34,7 @@ class SelectionBadge extends StatelessWidget {
         padding: const EdgeInsets.all(0),
         alignment: Alignment.topRight,
         child: Card(
-          color: context.theme.cardColor,
+          // color: context.theme.cardColor,
           // height: context.height * 0.05,
           // decoration: BoxDecoration(
           //   color: context.theme.cardColor,

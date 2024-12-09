@@ -190,7 +190,7 @@ const Map<String, List<Position>> boardCircleDecoration = {
 //   }
 // }
 
-ThemeData get lightTheme {
+ThemeData get oldLightTheme {
   var tc = defaultTheme.mainLightTextColor;
   return ThemeData.light().copyWith(
     cardColor: defaultTheme.lightCardColor,
@@ -210,47 +210,141 @@ ThemeData get lightTheme {
   );
 }
 
-ThemeData get darkTheme {
+ThemeData buildTheme({
+  required Color tc,
+  required Color tci,
+  required Color bg,
+  required Color card,
+  required Color cardi,
+  required Color shadow,
+  required Color dialog,
+  required Color highlight,
+  required Brightness b,
+}) {
+  return ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme(
+      brightness: b,
+
+      primary: card,
+      onPrimary: cardi,
+
+      secondary: highlight,
+      onSecondary: tc,
+
+      tertiary: cardi,
+      onTertiary: card,
+
+      surfaceContainerHigh: dialog,
+      surfaceContainer: dialog,
+      surfaceContainerLow: card,
+
+      onSurfaceVariant: cardi,
+      surfaceContainerHighest: highlight,
+      surfaceVariant: cardi, // REVIEW: M3 Spec defines it, so i'm using it
+
+      error: Colors.red,
+      onError: Colors.white,
+
+      surface: bg,
+
+      onSurface: tc,
+      onInverseSurface: tci,
+    ),
+    cardTheme: null,
+    textTheme: buildTextTheme(tc),
+  );
+}
+
+final Color magnolia = Color(0xffF8F1F6);
+final Color lavender = Color(0xFFeae8ff);
+
+ThemeData get darkTheme => buildTheme(
+      tc: defaultTheme.mainDarkTextColor,
+      tci: defaultTheme.mainLightTextColor,
+      bg: Color(0xff111118),
+      card: defaultTheme.darkCardColor,
+      cardi: defaultTheme.lightCardColor,
+      shadow: defaultTheme.darkShadow,
+      dialog: defaultTheme.darkDialogColor,
+      highlight: defaultTheme.mainHighlightColor,
+      b: Brightness.dark,
+    );
+
+ThemeData get lightTheme => buildTheme(
+      tc: defaultTheme.mainLightTextColor,
+      tci: defaultTheme.mainDarkTextColor,
+      bg: Colors.white,
+      card: defaultTheme.lightCardColor,
+      cardi: defaultTheme.darkCardColor,
+      shadow: defaultTheme.lightShadow,
+      dialog: defaultTheme.lightDialogColor,
+      highlight: defaultTheme.mainHighlightColor,
+      b: Brightness.light,
+    );
+
+ThemeData get oldDarkTheme {
   var tc = defaultTheme.mainDarkTextColor;
   // var s = ColorScheme.fromSeed(seedColor: Color(0xff9C27B0));
   // dark();
   var bg = Color(0xff111118);
+  // var bg = Color(0xff141414);
 
-  return ThemeData.dark().copyWith(
+  return ThemeData(
+    useMaterial3: true,
     // colorScheme: ColorScheme.highContrastDark(),
 
-    // colorScheme: ColorScheme(
+    colorScheme: ColorScheme(
+      brightness: Brightness.dark,
 
-    //   brightness: Brightness.dark,
-    //   primary: defaultTheme.darkCardColor,
-    //   onPrimary: defaultTheme.lightCardColor,
-    //   // : onPrimary,
-    //   // secondary: defaultTheme.focusColor,
-    //   // onSecondary: onSecondary,
+      primary: defaultTheme.darkCardColor,
+      onPrimary: defaultTheme.lightCardColor,
 
-    //   secondary: defaultTheme.darkCardColor,
-    //   onSecondary: defaultTheme.lightCardColor,
+      // : onPrimary,
+      // secondary: defaultTheme.focusColor,
+      // onSecondary: onSecondary,
 
-    //   tertiary: defaultTheme.darkCardColor,
-    //   onTertiary: defaultTheme.lightCardColor,
+      secondary: defaultTheme.mainHighlightColor,
+      onSecondary: tc,
 
-    //   error: Colors.red,
-    //   onError: Colors.white,
+      tertiary: defaultTheme.lightCardColor,
+      onTertiary: defaultTheme.darkCardColor,
 
-    //   surface: bg,
+      // sele
 
-    //   onSurface: defaultTheme.mainDarkTextColor,
-    // ),
+      surfaceContainerHigh: defaultTheme.darkDialogColor,
+      surfaceContainer: defaultTheme.darkDialogColor,
+      surfaceContainerLow: defaultTheme.darkCardColor,
 
-    // scaffoldBackgroundColor: defaultTheme.darkBackground,
+      // onPrimaryContainer: defaultTheme.darkCardColor,
+      // onSecondaryContainer: defaultTheme.darkCardColor,
+      // onTertiaryContainer: defaultTheme.darkCardColor,
+
+      onSurfaceVariant: defaultTheme.lightCardColor,
+      // onSurfaceVariant:,
+      surfaceContainerHighest: defaultTheme.mainHighlightColor,
+      surfaceVariant: defaultTheme
+          .lightCardColor, // REVIEW: M3 Spec defines it, so i'm using it
+
+      error: Colors.red,
+      onError: Colors.white,
+
+      surface: bg,
+
+      onSurface: defaultTheme.mainDarkTextColor,
+      onInverseSurface: defaultTheme.mainLightTextColor,
+    ),
+
     // canvasColor: defaultTheme.darkBackground,
 
-    cardColor: defaultTheme.darkCardColor,
-    indicatorColor: defaultTheme.enabledColor,
-    disabledColor: defaultTheme.lightCardColor,
-    hintColor: defaultTheme.lightCardColor,
-    shadowColor: defaultTheme.darkShadow,
-    dialogBackgroundColor: defaultTheme.darkDialogColor,
+    // cardColor: defaultTheme.darkCardColor,
+    // indicatorColor: defaultTheme.enabledColor,
+    // disabledColor: defaultTheme.lightCardColor,
+    // hintColor: defaultTheme.lightCardColor,
+    // shadowColor: defaultTheme.darkShadow,
+    // dialogBackgroundColor: defaultTheme.darkDialogColor,
+
+    cardTheme: null,
 
     // cardColor: s.secondaryContainer,
     // indicatorColor: s.primary,
@@ -324,7 +418,7 @@ TextStyle lableL(Color col) {
 
 TextStyle lableS(Color col) {
   return TextStyle(
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: FontWeight.w400,
     color: col,
   );
@@ -358,7 +452,9 @@ VisualTheme defaultTheme = VisualTheme(
 
   // #eae8ff, #adacb5, #f5cb5c, #2d3142, #071013
 
+  // magnolia =>
   color1: const Color(0xFFeae8ff),
+  // color1: magnolia,
   color2: const Color(0xFFDAD6FF),
   // color2: const Color(0xFFEDEBFF),
 
@@ -376,8 +472,8 @@ VisualTheme defaultTheme = VisualTheme(
 
   // color5: Color(0xFF2E2E38), // color4: Color(0xFF282739),
 
-  // color5: Color(0xFF424261),
-  color5: Color(0xFF1C1C22),
+  color5: Color(0xFF424261),
+  // color5: Color(0xFF1C1C22),
   color4: Color(0xFF282739),
   // #
 );
@@ -473,6 +569,5 @@ class Validations {
   }
 }
 
-
 // Some theme ideas
-// 
+//

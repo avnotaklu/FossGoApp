@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/foundation/string.dart';
+import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/homepage/custom_games_page.dart';
@@ -17,6 +19,7 @@ import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 
 import 'package:go/widgets/buttons.dart';
+import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
 
 class CreateGameScreen extends StatelessWidget {
@@ -26,10 +29,9 @@ class CreateGameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: context.theme.dialogBackgroundColor,
       child: Consumer<CreateGameProvider>(builder: (context, cgp, child) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.9,
+          height: MediaQuery.of(context).size.height * 0.7,
           width: MediaQuery.of(context).size.width * 0.8,
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -72,63 +74,100 @@ class CreateGameScreen extends StatelessWidget {
                       );
                     }).toList()),
               ),
-              sectionHeading(context, "Time Format"),
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.08,
+              // sectionHeading(context, "Time Format"),
+              // SizedBox(
+              //   height: MediaQuery.sizeOf(context).height * 0.08,
+              //   child: Row(
+              //     mainAxisSize: MainAxisSize.max,
+              //     children: Constants.TimeFormat.values.map((item) {
+              //       return Expanded(
+              //         child: SelectionCard(
+              //           onTap: () {
+              //             cgp.changeTimeFormat(item);
+              //           },
+              //           selected: cgp.timeFormat == item,
+              //           label: item.formatName,
+              //         ),
+              //       );
+              //     }).toList(),
+              //   ),
+              // ),
+
+              const SizedBox(
+                height: 10,
+              ),
+
+              Container(
+                height: context.height * 0.08,
                 child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: Constants.TimeFormat.values.map((item) {
-                    return Expanded(
-                      child: SelectionCard(
-                        onTap: () {
-                          cgp.changeTimeFormat(item);
-                        },
-                        selected: cgp.timeFormat == item,
-                        label: item.formatName,
-                      ),
-                    );
-                  }).toList(),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    sectionHeading(context, "Time Format"),
+                    flatDialog(
+                      context,
+                      Constants.TimeFormat.values,
+                      cgp.timeFormat,
+                      cgp.changeTimeFormat,
+                      (t) => t.formatName,
+                    )
+                  ],
                 ),
               ),
-              sectionHeading(context, "Time Control"),
-              Column(
-                children: [
-                  SizedBox(
-                    height: MediaQuery.sizeOf(context).height * 0.08,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: TimeStandard.values.take(2).map((item) {
-                        return Expanded(
-                          child: SelectionCard(
-                            onTap: () {
-                              cgp.changeTimeStandard(item);
-                            },
-                            selected: cgp.timeStandard == item,
-                            label: item.name.capitalize(),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  SizedBox(
-                    height: MediaQuery.sizeOf(context).height * 0.08,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: TimeStandard.values.skip(2).map((item) {
-                        return Expanded(
-                          child: SelectionCard(
-                            onTap: () {
-                              cgp.changeTimeStandard(item);
-                            },
-                            selected: cgp.timeStandard == item,
-                            label: item.name.capitalize(),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  )
-                ],
+
+              Container(
+                height: context.height * 0.08,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    sectionHeading(context, "Time Control"),
+                    flatDialog(
+                      context,
+                      TimeStandard.values,
+                      cgp.timeStandard,
+                      cgp.changeTimeStandard,
+                      (t) => t.standardName,
+                    )
+                  ],
+                ),
               ),
+              // Column(
+              //   children: [
+              //     SizedBox(
+              //       height: MediaQuery.sizeOf(context).height * 0.08,
+              //       child: Row(
+              //         mainAxisSize: MainAxisSize.max,
+              //         children: TimeStandard.values.take(2).map((item) {
+              //           return Expanded(
+              //             child: SelectionCard(
+              //               onTap: () {
+              //                 cgp.changeTimeStandard(item);
+              //               },
+              //               selected: cgp.timeStandard == item,
+              //               label: item.name.capitalize(),
+              //             ),
+              //           );
+              //         }).toList(),
+              //       ),
+              //     ),
+              //     SizedBox(
+              //       height: MediaQuery.sizeOf(context).height * 0.08,
+              //       child: Row(
+              //         mainAxisSize: MainAxisSize.max,
+              //         children: TimeStandard.values.skip(2).map((item) {
+              //           return Expanded(
+              //             child: SelectionCard(
+              //               onTap: () {
+              //                 cgp.changeTimeStandard(item);
+              //               },
+              //               selected: cgp.timeStandard == item,
+              //               label: item.name.capitalize(),
+              //             ),
+              //           );
+              //         }).toList(),
+              //       ),
+              //     )
+              //   ],
+              // ),
               const SizedBox(
                 height: 10,
               ),
@@ -197,10 +236,6 @@ class CreateGameScreen extends StatelessWidget {
               const Spacer(),
               BadukButton(
                 onPressed: () async {
-                  final signalRProvider = context.read<SignalRProvider>();
-                  final signalRBloc =
-                      ChangeNotifierProvider.value(value: signalRProvider);
-                  final authBloc = context.read<AuthProvider>();
                   final token = context.read<AuthProvider>().token;
                   final res = await context
                       .read<CreateGameProvider>()
@@ -248,8 +283,8 @@ class CreateGameScreen extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: cgp.mStoneType == type
-              ? context.theme.indicatorColor
-              : context.theme.cardColor,
+              ? context.theme.colorScheme.surfaceContainerHighest
+              : context.theme.colorScheme.surfaceContainerLow,
           shape: BoxShape.circle,
           border: Border.all(
             style: BorderStyle.none,
@@ -273,59 +308,58 @@ class CreateGameScreen extends StatelessWidget {
   Widget sectionHeading(BuildContext context, String heading) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Text(heading, style: context.textTheme.titleLarge),
+      child: Text(heading, style: context.textTheme.labelLarge),
+    );
+  }
+
+  Widget flatDialog<T>(BuildContext context, List<T> altTimes, T selectedTime,
+      void Function(T) onTap, String Function(T) formatter) {
+    return SizedBox(
+      width: context.width * 0.4,
+      child: MyDialog<T>(
+        items: altTimes,
+        selectedItem: selectedTime,
+        itemBuilder: (entry) {
+          return DropdownMenuItem(
+            value: entry,
+            child: Container(
+              child: Text(
+                formatter(entry),
+                style: context.textTheme.labelSmall,
+              ),
+            ),
+          );
+        },
+        label: null,
+        onChanged: (value) {
+          if (value == null) return;
+          onTap(value);
+        },
+      ),
     );
   }
 
   Widget timeSelectionDropdown(BuildContext context, List<Duration> altTimes,
       Duration selectedTime, void Function(Duration) onTap, String label) {
-    return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(10),
-      ),
-
-      // dropdown below..
-      child: InputDecorator(
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          label: Text(
-            label,
-            style: const TextStyle(fontSize: 14),
-          ),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton(
-            dropdownColor: context.theme.cardColor,
-            value: selectedTime,
-            items: altTimes.map((entry) {
-              return DropdownMenuItem(
-                value: entry,
-                child: Container(
-                  child: Text(
-                    entry.durationRepr(),
-                    style: context.textTheme.labelSmall,
-                  ),
-                ),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value == null) return;
-              onTap(value);
-            },
-            isExpanded: true,
-            icon: Icon(
-              Icons.arrow_drop_down,
-              color: context.theme.hintColor,
+    return MyDialog<Duration>(
+      items: altTimes,
+      selectedItem: selectedTime,
+      itemBuilder: (entry) {
+        return DropdownMenuItem(
+          value: entry,
+          child: Container(
+            child: Text(
+              entry.durationRepr(),
+              style: context.textTheme.labelSmall,
             ),
-
-            iconSize: 32,
-            // underline: SizedBox(),
           ),
-        ),
-      ),
+        );
+      },
+      label: label,
+      onChanged: (value) {
+        if (value == null) return;
+        onTap(value);
+      },
     );
   }
 
@@ -335,7 +369,7 @@ class CreateGameScreen extends StatelessWidget {
       height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: context.theme.cardColor,
+        color: context.theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(10),
       ),
 
@@ -358,6 +392,75 @@ class CreateGameScreen extends StatelessWidget {
   }
 }
 
+class MyDialog<T> extends StatelessWidget {
+  final String? label;
+  final List<T> items;
+  final T selectedItem;
+  final DropdownMenuItem<T> Function(T) itemBuilder;
+  final void Function(T?) onChanged;
+
+  const MyDialog({
+    super.key,
+    required this.label,
+    required this.items,
+    required this.selectedItem,
+    required this.itemBuilder,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    container(Widget child, double height) => Container(
+          height: height,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+          decoration: BoxDecoration(
+            color: context.theme.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: child,
+        );
+
+    // dropdown below..
+    final dropdown = Container(
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          // dropdownColor: context.theme.cardColor,
+          value: selectedItem,
+          items: items.map(
+            (entry) {
+              return itemBuilder(entry);
+            },
+          ).toList(),
+          onChanged: onChanged,
+          isExpanded: true,
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: context.theme.hintColor,
+          ),
+
+          iconSize: 24,
+          // underline: SizedBox(),
+        ),
+      ),
+    );
+
+    if (label == null) return container(dropdown, 30);
+
+    return container(
+        InputDecorator(
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            label: Text(
+              label!,
+              style: context.textTheme.labelSmall,
+            ),
+          ),
+          child: dropdown,
+        ),
+        50);
+  }
+}
+
 class SelectionCard extends StatelessWidget {
   // final CreateGameProvider cgp;
   final void Function() onTap;
@@ -375,22 +478,14 @@ class SelectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Card(
-        color:
-            // cgp.boardSize == item
-            selected
-                ? context.theme.indicatorColor
-                : context.theme.disabledColor,
-        child: Center(
+      child: StatefulCard(
+        state:
+            selected ? StatefulCardState.enabled : StatefulCardState.disabled,
+        builder: (context) => Center(
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: selected
-                ? context.textTheme.labelSmall
-                : context.textTheme.labelSmall?.copyWith(
-                    color: context.theme
-                        .cardColor, // HACK: card color is always a contrasting color to disabled color
-                  ),
+            style: context.textTheme.labelSmall,
           ),
         ),
       ),

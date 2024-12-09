@@ -66,7 +66,7 @@ class _SignInState extends State<SignIn> {
               );
             },
           ),
-          ElevatedButton(
+          FilledButton(
               onPressed: () {
                 Navigator.of(context).pushNamed(
                   '/SignUp',
@@ -76,7 +76,7 @@ class _SignInState extends State<SignIn> {
           const SizedBox(
             height: 20,
           ),
-          ElevatedButton(
+          FilledButton(
               onPressed: () {
                 Navigator.of(context).pushNamed(
                   '/LogIn',
@@ -86,7 +86,7 @@ class _SignInState extends State<SignIn> {
           const SizedBox(
             height: 20,
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () async {
               Navigator.push(
                 context,
@@ -106,7 +106,7 @@ class _SignInState extends State<SignIn> {
           const SizedBox(
             height: 20,
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () {
               authBloc.loginAsGuest();
             },

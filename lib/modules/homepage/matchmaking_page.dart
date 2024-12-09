@@ -29,6 +29,8 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
     return ChangeNotifierProvider(
       create: (context) => MatchmakingProvider(context.read<SignalRProvider>()),
       builder: (context, child) => Scaffold(
+        // backgroundColor: Color(0xff111118),
+        // backgroundColor: Colors.red,
         body: Consumer<MatchmakingProvider>(
           builder: (context, provider, child) => Padding(
             padding: const EdgeInsets.all(20.0),
@@ -167,15 +169,15 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return FilledButton(
+      
+      
       style: ButtonStyle(
         // elevation: WidgetStateProperty.all(100),
         padding: WidgetStateProperty.all(
           const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
         ),
-        textStyle: WidgetStateProperty.all(
-          context.textTheme.bodyLarge
-        ),
+        textStyle: WidgetStateProperty.all(context.textTheme.bodyLarge),
         // side: WidgetStateProperty.all(
         //   BorderSide(
         //     // color: Colors.white,
