@@ -32,14 +32,25 @@ class LogInProvider {
         (usernameE, emailE) => "Invalid username or email");
   }
 
+  Validator<String?, String> passwordValidator() {
+    return RequiredValidator()
+        .add(Validator.getValidator(Validations.validatePassword));
+  }
+
   Future<Either<AppError, PublicUserInfo>> logIn(
     String authName,
     String password,
   ) async {
     var emailOrUsernameRes = emailOrUsernameValidator().validate(authName);
-    return emailOrUsernameRes.fold(
-        (l) async => Either.left(AppError(message: l)), (authNameValid) async {
-      var (username, email) = authNameValid.toRecord();
+    var passwordRes = passwordValidator().validate(password);
+    return emailOrUsernameRes
+        .map(
+          (authRes) => passwordRes.map((res) => (authRes.toRecord(), res)),
+        )
+        .flatMap(identity)
+        .fold((l) async => Either.left(AppError(message: l)),
+            (authValid) async {
+      var ((username, email), password) = authValid;
 
       if (Validations.validatePassword(password) == false) {
         return Either.left(

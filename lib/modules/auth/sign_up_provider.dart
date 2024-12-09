@@ -23,6 +23,11 @@ class SignUpProvider {
         .add(Validator.getValidator(Validations.validateUsernameCharacters));
   }
 
+  Validator<String?, String> passwordValidator() {
+    return RequiredValidator()
+        .add(Validator.getValidator(Validations.validatePassword));
+  }
+
   Future<Either<AppError, PublicUserInfo>> signUp(
       String username, String password) async {
     var usernameRes = usernameValidator().validate(username);
@@ -32,9 +37,10 @@ class SignUpProvider {
           AppError(message: usernameRes.getLeft().toNullable()!));
     }
 
-    if (!Validations.validatePassword(password)) {
+    var passwordRes = passwordValidator().validate(password);
+    if (passwordRes.isLeft()) {
       return Either.left(
-          AppError(message: "Password must be at least 6 characters"));
+          AppError(message: passwordRes.getLeft().toNullable()!));
     }
 
     var logInRes = TaskEither(

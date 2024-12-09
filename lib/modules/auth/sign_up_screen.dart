@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/utils/my_responsive_framework/extensions.dart';
+import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/auth/sign_up_provider.dart';
 import 'package:go/widgets/my_app_bar.dart';
+import 'package:go/widgets/my_text_form_field.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -15,7 +18,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final userNameController = TextEditingController();
   final passwordController = TextEditingController();
-  final key = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +27,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       builder: (context, child) {
         final signUpPro = context.read<SignUpProvider>();
         return Scaffold(
-          appBar: const MyAppBar("Sign Up", showBackButton: true,),
+          appBar: const MyAppBar(
+            "Baduk",
+            showBackButton: true,
+          ),
           body: Form(
-            key: key,
+            key: formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -34,29 +41,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    TextFormField(
+                    Text(
+                      "Create Your\n Account",
+                      textAlign: TextAlign.center,
+                      style: context.textTheme.headlineLarge,
+                    ),
+                    SizedBox(height: context.height * 0.1),
+                    MyTextFormField(
+                      hintText: "Username",
                       controller: userNameController,
                       validator: (v) =>
                           signUpPro.usernameValidator().flutterFieldValidate(v),
-                      decoration: const InputDecoration(
-                        hintText: 'Username',
-                        border: OutlineInputBorder(),
-                      ),
                     ),
                     const SizedBox(
                       height: 20,
                     ),
-                    TextField(
-                      controller: passwordController,
-                      decoration: const InputDecoration(
-                        hintText: 'Password',
-                        border: OutlineInputBorder(),
-                      ),
+                    MyTextFormField(
+                      hintText: "Password",
+                      controller: userNameController,
+                      validator: (v) =>
+                          signUpPro.passwordValidator().flutterFieldValidate(v),
                     ),
                     const SizedBox(
                       height: 20,
                     ),
-                    ElevatedButton(
+                    FilledButton(
                         onPressed: () async {
                           var userResponse = await signUpPro.signUp(
                             userNameController.text,

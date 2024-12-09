@@ -76,6 +76,27 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                       )
                       .toList()),
               const Spacer(),
+
+              // TODO: adjust this somewhere, preferably on the first page, user sees, which is this
+              // const Text("My Games", style: TextStyle(fontSize: 30)),
+              // const SizedBox(height: 20),
+              // Expanded(
+              //   child: Padding(
+              //     padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              //     child: ListView.builder(
+              //       shrinkWrap: true,
+              //       itemCount: context.read<HomepageBloc>().myGames.length,
+              //       itemBuilder: (context, index) {
+              //         final game =
+              //             context.read<HomepageBloc>().myGames[index];
+              //         return GameCard(
+              //           game: game.game,
+              //           otherPlayerData: game.opposingPlayer,
+              //         );
+              //       },
+              //     ),
+              //   ),
+
               Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -170,8 +191,6 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilledButton(
-      
-      
       style: ButtonStyle(
         // elevation: WidgetStateProperty.all(100),
         padding: WidgetStateProperty.all(

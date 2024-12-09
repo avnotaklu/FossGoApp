@@ -218,6 +218,7 @@ ThemeData buildTheme({
   required Color cardi,
   required Color shadow,
   required Color dialog,
+  required Color dialogi,
   required Color highlight,
   required Brightness b,
 }) {
@@ -235,9 +236,9 @@ ThemeData buildTheme({
       tertiary: cardi,
       onTertiary: card,
 
-      surfaceContainerHigh: dialog,
-      surfaceContainer: dialog,
-      surfaceContainerLow: card,
+      surfaceContainerHigh: dialog, // Users: Dialog
+      surfaceContainer: dialog, // Users: Navigation bar
+      surfaceContainerLow: card, // Users: Card, Button
 
       onSurfaceVariant: cardi,
       surfaceContainerHighest: highlight,
@@ -245,6 +246,8 @@ ThemeData buildTheme({
 
       error: Colors.red,
       onError: Colors.white,
+
+      outlineVariant: dialogi,
 
       surface: bg,
 
@@ -267,6 +270,7 @@ ThemeData get darkTheme => buildTheme(
       cardi: defaultTheme.lightCardColor,
       shadow: defaultTheme.darkShadow,
       dialog: defaultTheme.darkDialogColor,
+      dialogi: defaultTheme.lightDialogColor,
       highlight: defaultTheme.mainHighlightColor,
       b: Brightness.dark,
     );
@@ -279,6 +283,7 @@ ThemeData get lightTheme => buildTheme(
       cardi: defaultTheme.darkCardColor,
       shadow: defaultTheme.lightShadow,
       dialog: defaultTheme.lightDialogColor,
+      dialogi: defaultTheme.darkDialogColor,
       highlight: defaultTheme.mainHighlightColor,
       b: Brightness.light,
     );
@@ -509,7 +514,7 @@ class VisualTheme {
   // Color get mainTextColor => color5;
   // Color get secondaryTextColor => color5;
 
-  Color get mainDarkTextColor => Colors.white;
+  Color get mainDarkTextColor => Colors.white.withOpacity(0.9);
   Color get mainLightTextColor => Colors.grey.shade800;
 
   Color invertedTextColor(BuildContext context) {
@@ -564,8 +569,10 @@ class Validations {
         : null;
   }
 
-  static bool validatePassword(String password) {
-    return password.length >= 6;
+  static String? validatePassword(String password) {
+    return password.length < 6
+        ? "Password must be larger than 6 characters"
+        : null;
   }
 }
 

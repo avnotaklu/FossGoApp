@@ -14,6 +14,7 @@ import 'package:go/services/register_user_result.dart';
 import 'package:go/services/user_authentication_model.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/user_rating_result.dart';
+import 'package:go/services/user_stats.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,7 +42,12 @@ class AuthProvider {
       _authResultStreamController.stream;
 
   UserAccount? _currentUserRaw;
+  UserAccount? get currentUserAccount => _currentUserRaw;
+
   PlayerRating? _currentUserRating;
+  UserStat? _currentUserStat;
+  UserStat? get currentUserStat => _currentUserStat;
+
   PublicUserInfo? _currentUserInfo;
   PublicUserInfo get currentUserInfo => _currentUserInfo!;
 
@@ -96,8 +102,8 @@ class AuthProvider {
     }
   }
 
-  void _setUser(PlayerRating userRating, String token, UserAccount user,
-      PublicUserInfo currentUser) {
+  void _setUser(PlayerRating userRating, UserStat userStat, String token,
+      UserAccount user, PublicUserInfo currentUser) {
     _currentUserStreamController.add(user);
     _currentUserRating = userRating;
     _currentUserRaw = user;
@@ -121,8 +127,13 @@ class AuthProvider {
           .map((a) => (r, a));
     });
 
-    var res = (await userRatingTas.run()).flatMap((r) {
-      _setUser(r.$2, token, user, r.$1.currentUser);
+    var userStatTas = userRatingTas.flatMap((r) {
+      return TaskEither(() => _userStatResult(token, user.id))
+          .map((a) => (r.$1, r.$2, a));
+    });
+
+    var res = (await userStatTas.run()).flatMap((r) {
+      _setUser(r.$2, r.$3, token, user, r.$1.currentUser);
       return right(currentUserInfo);
     }).mapLeft((e) {
       signlRBloc.disconnect();
@@ -183,6 +194,15 @@ class AuthProvider {
   Future<Either<AppError, PlayerRating>> _userRatingResult(
       String token, String userId) async {
     var registerRes = await api.getUserRating(
+      userId,
+      token,
+    );
+    return registerRes;
+  }
+
+  Future<Either<AppError, UserStat>> _userStatResult(
+      String token, String userId) async {
+    var registerRes = await api.getUserStats(
       userId,
       token,
     );

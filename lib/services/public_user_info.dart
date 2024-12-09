@@ -3,6 +3,10 @@ import 'package:go/services/player_rating.dart';
 
 enum PlayerType { normal, guest }
 
+extension PublicUserInfoFieldsExt on PublicUserInfo {
+  String get usernameOrGuest => username ?? 'Guest';
+}
+
 class PublicUserInfo {
   final String? username;
   final PlayerType playerType;

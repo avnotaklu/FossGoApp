@@ -24,6 +24,7 @@ import 'package:go/services/user_authentication_model.dart';
 import 'package:go/services/user_details_dto.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/user_rating_result.dart';
+import 'package:go/services/user_stats.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
@@ -158,6 +159,18 @@ class Api {
 
     return convert(res, (a) => PlayerRating.fromJson(a));
   }
+
+
+  Future<Either<AppError, UserStat>> getUserStats(
+      String userId, String token) async {
+    var res = await get(
+      Uri.http(basePath, "/User/GetUserStats", {'userId': userId}),
+      token,
+    );
+
+    return convert(res, (a) => UserStat.fromJson(a));
+  }
+
 
   Future<Either<AppError, Game>> createGame(
       GameCreationDto data, String token) async {

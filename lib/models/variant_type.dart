@@ -21,6 +21,13 @@ extension BoardSizeDataExt on BoardSize {
   }
 
   String get toKey => 'B${this.index}';
+
+  String get toDisplayString => switch (this) {
+        BoardSize.nine => '9x9',
+        BoardSize.thirteen => '13x13',
+        BoardSize.nineteen => '19x19',
+        BoardSize.other => 'Other',
+      };
 }
 
 enum BoardSize {
@@ -113,4 +120,16 @@ class VariantType {
 
   @override
   String toString() => 'BoardSize: $boardSize, TimeStandard: $timeStandard';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is VariantType &&
+        other.boardSize == boardSize &&
+        other.timeStandard == timeStandard;
+  }
+
+  @override
+  int get hashCode => boardSize.hashCode ^ timeStandard.hashCode;
 }

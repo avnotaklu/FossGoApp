@@ -19,6 +19,7 @@ import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 
 import 'package:go/widgets/buttons.dart';
+import 'package:go/widgets/my_text_form_field.dart';
 import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
 
@@ -316,7 +317,7 @@ class CreateGameScreen extends StatelessWidget {
       void Function(T) onTap, String Function(T) formatter) {
     return SizedBox(
       width: context.width * 0.4,
-      child: MyDialog<T>(
+      child: MyDropDown<T>(
         items: altTimes,
         selectedItem: selectedTime,
         itemBuilder: (entry) {
@@ -341,7 +342,7 @@ class CreateGameScreen extends StatelessWidget {
 
   Widget timeSelectionDropdown(BuildContext context, List<Duration> altTimes,
       Duration selectedTime, void Function(Duration) onTap, String label) {
-    return MyDialog<Duration>(
+    return MyDropDown<Duration>(
       items: altTimes,
       selectedItem: selectedTime,
       itemBuilder: (entry) {
@@ -365,41 +366,25 @@ class CreateGameScreen extends StatelessWidget {
 
   Widget timeSelectionTextField(
       BuildContext context, String label, TextEditingController controller) {
-    return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: context.theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(10),
-      ),
-
-      // dropdown below..
-      child: TextField(
-        controller: controller,
-        keyboardType: const TextInputType.numberWithOptions(),
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        decoration: InputDecoration(
-          border: const UnderlineInputBorder(),
-          label: Text(
-            label,
-            style: context.textTheme.bodyLarge,
-          ),
-        ),
-      ),
+    return MyTextField(
+      controller: controller,
+      hintText: "Byo-Yomis",
+      textInputType: const TextInputType.numberWithOptions(),
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+      ],
     );
   }
 }
 
-class MyDialog<T> extends StatelessWidget {
+class MyDropDown<T> extends StatelessWidget {
   final String? label;
   final List<T> items;
   final T selectedItem;
   final DropdownMenuItem<T> Function(T) itemBuilder;
   final void Function(T?) onChanged;
 
-  const MyDialog({
+  const MyDropDown({
     super.key,
     required this.label,
     required this.items,
