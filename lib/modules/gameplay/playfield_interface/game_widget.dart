@@ -156,7 +156,6 @@ class _WrapperGameState extends State<WrapperGame> {
     return Container(
       //color: Colors.black,
       decoration: BoxDecoration(
-        color: Constants.defaultTheme.backgroundColor,
         //image: DecorationImage(image: AssetImage(Constants.assets['table']!), fit: BoxFit.fitHeight, repeat: ImageRepeat.repeatY),
       ),
       child: GameUi(

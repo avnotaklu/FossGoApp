@@ -29,7 +29,6 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
     return ChangeNotifierProvider(
       create: (context) => MatchmakingProvider(context.read<SignalRProvider>()),
       builder: (context, child) => Scaffold(
-        // backgroundColor: defaultTheme.color5,
         body: Consumer<MatchmakingProvider>(
           builder: (context, provider, child) => Padding(
             padding: const EdgeInsets.all(20.0),
@@ -59,13 +58,17 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                 'Time Controls',
                 style: titleLargeStyle(context),
               ),
+              SizedBox(height: 6.0),
               Column(
                   mainAxisSize: MainAxisSize.max,
                   children: provider.allTimeControls
                       .map(
                         (timeControl) => Container(
                           height: MediaQuery.sizeOf(context).width * 0.15,
-                          padding: EdgeInsets.symmetric(vertical: 6.0),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 6.0,
+                            horizontal: 8.0,
+                          ),
                           child: timeSelector(timeControl, provider),
                         ),
                       )
@@ -147,8 +150,6 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
     );
   }
 
-  Color get cardColor => defaultTheme.disabledColor;
-
   TextStyle? titleLargeStyle(BuildContext context) {
     return context.textTheme.titleLarge;
   }
@@ -173,17 +174,15 @@ class PrimaryButton extends StatelessWidget {
           const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
         ),
         textStyle: WidgetStateProperty.all(
-          const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-          ),
+          context.textTheme.bodyLarge
         ),
-        side: WidgetStateProperty.all(
-          BorderSide(
-            color: Colors.white,
-            width: 2,
-          ),
-        ),
+        // side: WidgetStateProperty.all(
+        //   BorderSide(
+        //     // color: Colors.white,
+        //     color: context.theme.shadowColor,
+        //     width: 1,
+        //   ),
+        // ),
       ),
       onPressed: onPressed,
       child: Text(text),

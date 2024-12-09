@@ -33,21 +33,23 @@ class SelectionBadge extends StatelessWidget {
         smallSize: 20,
         padding: const EdgeInsets.all(0),
         alignment: Alignment.topRight,
-        child: Container(
-          height: context.height * 0.05,
-          decoration: BoxDecoration(
-            color: context.theme.cardColor,
-            boxShadow: [
-              BoxShadow(
-                color: context.theme.shadowColor,
-                offset: const Offset(0, 2),
-              ),
-            ],
-            borderRadius: BorderRadius.all(
-              Radius.circular(4),
-            ),
-          ),
-          child: Material(
+        child: Card(
+          color: context.theme.cardColor,
+          // height: context.height * 0.05,
+          // decoration: BoxDecoration(
+          //   color: context.theme.cardColor,
+          //   boxShadow: [
+          //     BoxShadow(
+          //       color: context.theme.shadowColor,
+          //       offset: const Offset(0, 2),
+          //     ),
+          //   ],
+          //   borderRadius: BorderRadius.all(
+          //     Radius.circular(4),
+          //   ),
+          // ),
+          child: Container(
+            height: context.height * 0.05,
             color: Colors.transparent,
             child: InkWell(
               splashFactory: InkSplash.splashFactory,

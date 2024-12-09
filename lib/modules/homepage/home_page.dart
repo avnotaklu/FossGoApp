@@ -52,27 +52,27 @@ class _HomePageState extends State<HomePage> {
             currentPageIndex = index;
           });
         },
-        indicatorColor: context.theme.indicatorColor,
+        // indicatorColor: context.theme.indicatorColor,
         selectedIndex: currentPageIndex,
         destinations: <Widget>[
           NavigationDestination(
             icon: Icon(
               Icons.join_full_rounded,
-              color: context.theme.disabledColor,
+              // color: context.theme.disabledColor,
             ),
             label: 'Match',
           ),
           NavigationDestination(
             icon: Icon(
               Icons.games,
-              color: context.theme.disabledColor,
+              // color: context.theme.disabledColor,
             ),
             label: 'Custom',
           ),
           NavigationDestination(
             icon: Icon(
               Icons.person,
-              color: context.theme.disabledColor,
+              // color: context.theme.disabledColor,
             ),
             label: 'Profile',
           ),

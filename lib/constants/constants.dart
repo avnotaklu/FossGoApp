@@ -196,7 +196,10 @@ ThemeData get lightTheme {
     cardColor: defaultTheme.lightCardColor,
     indicatorColor: defaultTheme.enabledColor,
     disabledColor: defaultTheme.darkCardColor,
+    hintColor: defaultTheme.darkCardColor,
     shadowColor: defaultTheme.lightShadow,
+    dialogBackgroundColor: defaultTheme.lightDialogColor,
+
     // elevatedButtonTheme: ElevatedButtonThemeData(
     //   style: ButtonStyle(
     //     backgroundColor:
@@ -209,11 +212,52 @@ ThemeData get lightTheme {
 
 ThemeData get darkTheme {
   var tc = defaultTheme.mainDarkTextColor;
+  // var s = ColorScheme.fromSeed(seedColor: Color(0xff9C27B0));
+  // dark();
+  var bg = Color(0xff111118);
 
   return ThemeData.dark().copyWith(
+    // colorScheme: ColorScheme.highContrastDark(),
+
+    // colorScheme: ColorScheme(
+
+    //   brightness: Brightness.dark,
+    //   primary: defaultTheme.darkCardColor,
+    //   onPrimary: defaultTheme.lightCardColor,
+    //   // : onPrimary,
+    //   // secondary: defaultTheme.focusColor,
+    //   // onSecondary: onSecondary,
+
+    //   secondary: defaultTheme.darkCardColor,
+    //   onSecondary: defaultTheme.lightCardColor,
+
+    //   tertiary: defaultTheme.darkCardColor,
+    //   onTertiary: defaultTheme.lightCardColor,
+
+    //   error: Colors.red,
+    //   onError: Colors.white,
+
+    //   surface: bg,
+
+    //   onSurface: defaultTheme.mainDarkTextColor,
+    // ),
+
+    // scaffoldBackgroundColor: defaultTheme.darkBackground,
+    // canvasColor: defaultTheme.darkBackground,
+
     cardColor: defaultTheme.darkCardColor,
     indicatorColor: defaultTheme.enabledColor,
     disabledColor: defaultTheme.lightCardColor,
+    hintColor: defaultTheme.lightCardColor,
+    shadowColor: defaultTheme.darkShadow,
+    dialogBackgroundColor: defaultTheme.darkDialogColor,
+
+    // cardColor: s.secondaryContainer,
+    // indicatorColor: s.primary,
+    // disabledColor: s.inverseSurface,
+    // hintColor: s.primary,
+    // shadowColor: s.shadow,
+    // dialogBackgroundColor: s.primaryContainer,
 
     // elevatedButtonTheme: ElevatedButtonThemeData(
     //   style: ButtonStyle(
@@ -287,8 +331,7 @@ TextStyle lableS(Color col) {
 }
 
 VisualTheme defaultTheme = VisualTheme(
-  backgroundColor: Colors.grey.shade800,
-  mainHighlightColor: Colors.blueGrey,
+  // backgroundColor: Colors.grey.shade800,
   // disabledColor: Colors.grey.shade400,
   // enabledColor: Colors.amber,
 
@@ -316,10 +359,12 @@ VisualTheme defaultTheme = VisualTheme(
   // #eae8ff, #adacb5, #f5cb5c, #2d3142, #071013
 
   color1: const Color(0xFFeae8ff),
-  color2: const Color(0xFFadacb5),
+  color2: const Color(0xFFDAD6FF),
+  // color2: const Color(0xFFEDEBFF),
+
   color3: const Color(0xFFf5cb5c),
-  color4: const Color(0xFF2d3142),
-  color5: const Color(0xFF071013),
+  // color4: const Color(0xFF2d3142),
+  // color5: const Color(0xFF071013),
 
   // #dce1e9, #fef7ff, #f5cf66, #0a0212, #141414
 
@@ -328,26 +373,42 @@ VisualTheme defaultTheme = VisualTheme(
   // color3: const Color(0xFFf5cf66),
   // color4: const Color(0xFF0A0A0A),
   // color5: const Color(0xFF141414),
+
+  // color5: Color(0xFF2E2E38), // color4: Color(0xFF282739),
+
+  // color5: Color(0xFF424261),
+  color5: Color(0xFF1C1C22),
+  color4: Color(0xFF282739),
+  // #
 );
 
 class VisualTheme {
-  final Color backgroundColor;
-  final Color mainHighlightColor;
+  // final Color backgroundColor;
+  Color get mainHighlightColor => color3;
 
   // Color get disabledColor => color2;
   // Color get enabledColor => color3;
 
   // Color get darkCardColor => color5;
   // Color get lightCardColor => color2;
+
+  Color get darkBackground => Color(0xff111118);
+
+  Color get seedColor => color2;
   Color get focusColor => color3;
 
   Color get disabledColor => color1;
   Color get enabledColor => color3;
 
-  // Color get darkCardColor => color4;
-  Color get darkCardColor => Color(0xFF1C1C22);
+  Color get darkCardColor => color5;
+  // Color get darkCardColor => Color(0xFF1C1C22);
   // Color get darkCardColor => Color(0xFF363636);
   Color get lightCardColor => color1;
+
+  Color get darkDialogColor => color4;
+  // Color get darkCardColor => Color(0xFF1C1C22);
+  // Color get darkCardColor => Color(0xFF363636);
+  Color get lightDialogColor => color2;
 
   // Color get mainTextColor => color5;
   // Color get secondaryTextColor => color5;
@@ -364,8 +425,10 @@ class VisualTheme {
   // Color get secDarkTextColor => color5;
   // Color get secLightTextColor => color5;
 
-  // Color get darkShadow => Colors.grey.shade600.withOpacity(0.2);
+  Color get darkShadow => Colors.grey.shade300.withOpacity(0.3);
+  // Color get darkShadow => Colors.blueGrey.shade100;
   Color get lightShadow => Colors.blueGrey.shade100;
+  // Color get lightShadow => Colors.blueGrey.shade100;
 
   final Color color1;
   final Color color2;
@@ -374,8 +437,6 @@ class VisualTheme {
   final Color color5;
 
   VisualTheme({
-    required this.backgroundColor,
-    required this.mainHighlightColor,
     // required this.disabledColor,
     // required this.enabledColor,
     required this.color1,

@@ -62,8 +62,10 @@ class MyApp extends StatelessWidget {
         ),
       );
 
-  ThemeData themeData() {
+  ThemeData? themeData() {
     return Constants.lightTheme;
+    // return ThemeData.dark();
+    // return null;
     // return ThemeData(
     //   // Define the default brightness and colors.
     //   brightness: Brightness.dark,

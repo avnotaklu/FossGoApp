@@ -3,6 +3,7 @@ import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/foundation/duration.dart';
+import 'package:go/core/foundation/string.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/homepage/custom_games_page.dart';
@@ -25,7 +26,7 @@ class CreateGameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: context.theme.cardColor,
+      backgroundColor: context.theme.dialogBackgroundColor,
       child: Consumer<CreateGameProvider>(builder: (context, cgp, child) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.9,
@@ -90,22 +91,43 @@ class CreateGameScreen extends StatelessWidget {
                 ),
               ),
               sectionHeading(context, "Time Control"),
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.08,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: TimeStandard.values.map((item) {
-                    return Expanded(
-                      child: SelectionCard(
-                        onTap: () {
-                          cgp.changeTimeStandard(item);
-                        },
-                        selected: cgp.timeStandard == item,
-                        label: item.name,
-                      ),
-                    );
-                  }).toList(),
-                ),
+              Column(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.08,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: TimeStandard.values.take(2).map((item) {
+                        return Expanded(
+                          child: SelectionCard(
+                            onTap: () {
+                              cgp.changeTimeStandard(item);
+                            },
+                            selected: cgp.timeStandard == item,
+                            label: item.name.capitalize(),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.08,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: TimeStandard.values.skip(2).map((item) {
+                        return Expanded(
+                          child: SelectionCard(
+                            onTap: () {
+                              cgp.changeTimeStandard(item);
+                            },
+                            selected: cgp.timeStandard == item,
+                            label: item.name.capitalize(),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  )
+                ],
               ),
               const SizedBox(
                 height: 10,
@@ -118,6 +140,7 @@ class CreateGameScreen extends StatelessWidget {
                       Expanded(
                         flex: 3,
                         child: timeSelectionDropdown(
+                          context,
                           Constants.timeStandardMainTimeAlt[cgp.timeStandard]!,
                           cgp.mainTimeSeconds,
                           cgp.changeMainTimeSeconds,
@@ -129,6 +152,7 @@ class CreateGameScreen extends StatelessWidget {
                         Expanded(
                           flex: 3,
                           child: timeSelectionDropdown(
+                            context,
                             Constants
                                 .timeStandardIncrementAlt[cgp.timeStandard]!,
                             cgp.incrementSeconds,
@@ -148,13 +172,18 @@ class CreateGameScreen extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                            flex: 3,
-                            child: timeSelectionTextField(
-                                "Byo-Yomis", cgp.byoYomiCountController)),
+                          flex: 3,
+                          child: timeSelectionTextField(
+                            context,
+                            "Byo-Yomis",
+                            cgp.byoYomiCountController,
+                          ),
+                        ),
                         const Spacer(),
                         Expanded(
                           flex: 3,
                           child: timeSelectionDropdown(
+                              context,
                               Constants.timeStandardByoYomiTimeAlt[
                                   cgp.timeStandard]!,
                               cgp.byoYomiSeconds,
@@ -216,20 +245,16 @@ class CreateGameScreen extends StatelessWidget {
       onTap: () {
         cgp.changeStoneType(type);
       },
-      child:
-          // SelectionBadge(
-          //   selected: mStoneType == type,
-          // child:
-
-          Container(
+      child: Container(
         decoration: BoxDecoration(
           color: cgp.mStoneType == type
               ? context.theme.indicatorColor
               : context.theme.cardColor,
           shape: BoxShape.circle,
           border: Border.all(
+            style: BorderStyle.none,
             color: context.theme.disabledColor,
-            width: 1,
+            width: 2,
           ),
         ),
         child: Center(
@@ -252,13 +277,13 @@ class CreateGameScreen extends StatelessWidget {
     );
   }
 
-  Widget timeSelectionDropdown(List<Duration> altTimes, Duration selectedTime,
-      void Function(Duration) onTap, String label) {
+  Widget timeSelectionDropdown(BuildContext context, List<Duration> altTimes,
+      Duration selectedTime, void Function(Duration) onTap, String label) {
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
 
@@ -273,7 +298,7 @@ class CreateGameScreen extends StatelessWidget {
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton(
-            dropdownColor: Colors.white,
+            dropdownColor: context.theme.cardColor,
             value: selectedTime,
             items: altTimes.map((entry) {
               return DropdownMenuItem(
@@ -281,7 +306,7 @@ class CreateGameScreen extends StatelessWidget {
                 child: Container(
                   child: Text(
                     entry.durationRepr(),
-                    style: TextStyle(color: defaultTheme.mainHighlightColor),
+                    style: context.textTheme.labelSmall,
                   ),
                 ),
               );
@@ -291,9 +316,9 @@ class CreateGameScreen extends StatelessWidget {
               onTap(value);
             },
             isExpanded: true,
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_drop_down,
-              color: Colors.black,
+              color: context.theme.hintColor,
             ),
 
             iconSize: 32,
@@ -305,12 +330,12 @@ class CreateGameScreen extends StatelessWidget {
   }
 
   Widget timeSelectionTextField(
-      String label, TextEditingController controller) {
+      BuildContext context, String label, TextEditingController controller) {
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
 
@@ -325,7 +350,7 @@ class CreateGameScreen extends StatelessWidget {
           border: const UnderlineInputBorder(),
           label: Text(
             label,
-            style: const TextStyle(fontSize: 14),
+            style: context.textTheme.bodyLarge,
           ),
         ),
       ),
@@ -360,9 +385,12 @@ class SelectionCard extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: context.textTheme.labelSmall?.copyWith(
-              color: context.theme.cardColor,
-            ),
+            style: selected
+                ? context.textTheme.labelSmall
+                : context.textTheme.labelSmall?.copyWith(
+                    color: context.theme
+                        .cardColor, // HACK: card color is always a contrasting color to disabled color
+                  ),
           ),
         ),
       ),
