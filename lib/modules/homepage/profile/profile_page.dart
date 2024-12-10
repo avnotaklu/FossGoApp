@@ -11,7 +11,8 @@ import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/auth/sign_in_screen.dart';
 import 'package:go/modules/homepage/game_card.dart';
 import 'package:go/modules/homepage/matchmaking_page.dart';
-import 'package:go/modules/homepage/profile_page_provider.dart';
+import 'package:go/modules/homepage/profile/edit_profile.dart';
+import 'package:go/modules/homepage/profile/profile_page_provider.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/widgets/stateful_card.dart';
@@ -190,7 +191,13 @@ class ProfilePage extends StatelessWidget {
                               ListTile(
                                 // tileColor: ,
                                 onTap: () {
-                                  debugPrint("hello");
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const EditProfilePage(),
+                                    ),
+                                  );
                                 },
                                 minTileHeight: 50,
                                 title: Text("Edit Profile"),

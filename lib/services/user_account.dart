@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:go/core/utils/intl/formatters.dart';
+
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class UserAccount {
   final String id;
@@ -9,7 +11,6 @@ class UserAccount {
   final String userName;
   final String? fullName;
   final String? bio;
-  final String? avatar;
   final DateTime creationDate;
   final DateTime lastSeen;
   final String? nationality;
@@ -22,7 +23,6 @@ class UserAccount {
     required this.userName,
     this.fullName,
     this.bio,
-    this.avatar,
     required this.creationDate,
     required this.lastSeen,
     this.nationality,
@@ -37,9 +37,8 @@ class UserAccount {
       'userName': userName,
       'fullName': fullName,
       'bio': bio,
-      'avatar': avatar,
-      'creationDate': creationDate.millisecondsSinceEpoch,
-      'lastSeen': lastSeen.millisecondsSinceEpoch,
+      'creationDate': creationDate.toServerString(),
+      'lastSeen': lastSeen.toServerString(),
       'nationality': nationality,
     };
   }
@@ -54,7 +53,6 @@ class UserAccount {
       userName: map['userName'] as String,
       fullName: map['fullName'] != null ? map['fullName'] as String : null,
       bio: map['bio'] != null ? map['bio'] as String : null,
-      avatar: map['avatar'] != null ? map['avatar'] as String : null,
       creationDate: DateTime.parse(map['creationDate'] as String),
       lastSeen: DateTime.parse(map['lastSeen'] as String),
       nationality:

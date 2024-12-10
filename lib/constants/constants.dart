@@ -574,7 +574,22 @@ class Validations {
         ? "Password must be larger than 6 characters"
         : null;
   }
-}
 
-// Some theme ideas
-//
+  static String? validateFullName(String fullName) {
+    final RegExp fullNameRegex = RegExp(
+      r"^[\p{Letter}\p{Mark} .'-]+$",
+      unicode: true,
+    );
+    // final RegExp fullNameRegex = RegExp(r"\p{Letter}");
+
+    return !fullNameRegex.hasMatch(fullName)
+        ? "Please enter a valid name"
+        : null;
+  }
+
+  static String? validateBio(String bio) {
+    return bio.length > 100 || bio.length < 10
+        ? "Please enter a valid bio"
+        : null;
+  }
+}

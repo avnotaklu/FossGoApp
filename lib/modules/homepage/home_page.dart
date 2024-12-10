@@ -5,7 +5,7 @@ import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/homepage/custom_games_page.dart';
 import 'package:go/modules/homepage/matchmaking_page.dart';
-import 'package:go/modules/homepage/profile_page.dart';
+import 'package:go/modules/homepage/profile/profile_page.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/my_app_drawer.dart';
 import 'package:provider/provider.dart';

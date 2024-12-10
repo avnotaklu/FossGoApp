@@ -5,10 +5,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/error_handling/http_error.dart';
-import 'package:go/core/foundation/either.dart';
+import 'package:go/core/foundation/fpdart.dart';
 import 'package:go/models/game.dart';
 import 'package:go/modules/auth/sign_in_dto.dart';
 import 'package:go/services/available_game.dart';
+import 'package:go/services/bad_request_error.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
@@ -20,6 +21,8 @@ import 'package:go/services/new_move_result.dart';
 import 'package:go/services/register_player_dto.dart';
 import 'package:go/services/register_user_result.dart';
 import 'package:go/services/signal_r_message.dart';
+import 'package:go/services/update_profile_dto.dart';
+import 'package:go/services/update_profile_result.dart';
 import 'package:go/services/user_authentication_model.dart';
 import 'package:go/services/user_details_dto.dart';
 import 'package:go/services/player_rating.dart';
@@ -125,6 +128,17 @@ class Api {
     return convert(res, (a) => UserAuthenticationModel.fromJson(a));
   }
 
+  Future<Either<AppError, UpdateProfileResult>> updateProfile(
+      UpdateProfileDto data, String uid, String token) async {
+    var res = await post(
+      Uri.http(basePath, "/User/UpdateUserProfile", {'userId': uid}),
+      data.toJson(),
+      token,
+    );
+
+    return convert(res, (a) => UpdateProfileResult.fromJson(a));
+  }
+
   Future<Either<AppError, UserAuthenticationModel>> getUser(
       String token) async {
     var res = await get(Uri.parse("$baseUrl/Authentication/GetUser"), token);
@@ -160,7 +174,6 @@ class Api {
     return convert(res, (a) => PlayerRating.fromJson(a));
   }
 
-
   Future<Either<AppError, UserStat>> getUserStats(
       String userId, String token) async {
     var res = await get(
@@ -170,7 +183,6 @@ class Api {
 
     return convert(res, (a) => UserStat.fromJson(a));
   }
-
 
   Future<Either<AppError, Game>> createGame(
       GameCreationDto data, String token) async {
@@ -244,10 +256,16 @@ class Api {
   }
 
   static ApiError getErrorFromResponse(http.Response res) {
+    var badRequest = tryParseJ(
+      res.body,
+      (d) => BadRequestError.fromMap(d),
+    );
+
     return ApiError(
-        message: res.body,
-        statusCode: res.statusCode,
-        reasonPhrase: res.reasonPhrase);
+      message: badRequest.toNullable()?.title ?? res.body,
+      statusCode: res.statusCode,
+      reasonPhrase: res.reasonPhrase,
+    );
   }
 
   static Either<AppError, T> convert<T>(

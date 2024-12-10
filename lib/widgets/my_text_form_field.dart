@@ -8,21 +8,28 @@ class MyTextFormField extends StatelessWidget {
       {super.key,
       required this.controller,
       required this.validator,
-      required this.hintText});
+      required this.hintText,
+      this.enabled = true,
+      this.onTap});
 
   final TextEditingController controller;
   final String? Function(String?) validator;
   final String hintText;
+  final bool enabled;
+  final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      enabled: enabled,
+      onTap: onTap,
       validator: validator,
       textInputAction: TextInputAction.done,
       cursorColor: context.theme.colorScheme.tertiary,
       decoration: InputDecoration(
         hintText: hintText,
+        hintStyle: context.textTheme.titleMedium,
         border: InputBorder.none,
         filled: true,
         fillColor: context.theme.colorScheme.primary,

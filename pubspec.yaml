@@ -76,6 +76,7 @@ dependencies:
   google_sign_in_web: any
   http: any
   intl: ^0.20.1
+  country_picker: ^2.0.27
 dev_dependencies:
   flutter_test:
     sdk: flutter

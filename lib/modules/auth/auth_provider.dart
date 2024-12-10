@@ -107,6 +107,7 @@ class AuthProvider {
     _currentUserStreamController.add(user);
     _currentUserRating = userRating;
     _currentUserRaw = user;
+    _currentUserStat = userStat;
 
     _currentUserInfo = currentUser;
 
@@ -215,6 +216,16 @@ class AuthProvider {
 
   void storeUser(UserAccount user) {
     sharedPrefs.setString('user', user.toJson());
+  }
+
+  void updateUserAccount(UserAccount user) {
+    _setUser(
+      _currentUserRating!,
+      _currentUserStat!,
+      token!,
+      user,
+      _currentUserInfo!,
+    );
   }
 
   Future<String?> getToken() {

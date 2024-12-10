@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 
-class Validator<T, R> {
+abstract class Validator<T, R> {
   final Either<String, R> Function(T) _validate;
   Validator(Either<String, R> Function(T) validator) : _validate = validator;
 
@@ -42,8 +42,24 @@ class NonRequiredValidator extends Validator<String?, String?> {
   @override
   NonRequiredValidator()
       : super((String? value) {
+          if (value == null) return right(null);
+          if (value.isEmpty) return right(null);
+
           return right(value);
         });
+
+  @override
+  Validator<String?, X> add<X>(Validator<String?, X> v) {
+    return SimpleValidator((String? value) {
+      final res = _validate(value);
+      return res.flatMap(
+        (a) => a == null
+            ? right(null
+                as X /* FIXME: Type bomb, this is the result of not having reflection, always ensure X is nullable when using with NonRequiredValidator */)
+            : v.validate(a),
+      );
+    });
+  }
 }
 
 class RequiredValidator extends Validator<String?, String> {
