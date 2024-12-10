@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:go/services/player_rating.dart';
+
 class MinimalRating {
   final int rating;
   final bool provisional;
@@ -9,6 +11,13 @@ class MinimalRating {
 
   String stringify() {
     return provisional ? '$rating?' : rating.toString();
+  }
+
+  static MinimalRating? fromRatingData(PlayerRatingData data) {
+    return MinimalRating(
+      data.glicko.rating.toInt(),
+      data.glicko.deviation > 110,
+    );
   }
 
   static MinimalRating? fromString(String? rating) {
