@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:go/constants/constants.dart';
 import 'package:go/models/game.dart';
+import 'package:go/models/minimal_rating.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/models/variant_type.dart';
 
@@ -32,8 +33,8 @@ class PlayerRating {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'playerId': playerId,
-      'ratings': ratings
-          .map((key, value) => MapEntry(key.toKey, value.toMap())),
+      'ratings':
+          ratings.map((key, value) => MapEntry(key.toKey, value.toMap())),
     };
   }
 
@@ -94,6 +95,10 @@ class PlayerRatingData {
 
   factory PlayerRatingData.fromJson(String source) =>
       PlayerRatingData.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
+extension GlickoRatingExt on GlickoRating {
+  MinimalRating get minimal => MinimalRating.fromRatingData(this);
 }
 
 class GlickoRating {

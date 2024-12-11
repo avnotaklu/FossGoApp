@@ -80,6 +80,7 @@ class VariantType {
   VariantType.b(this.boardSize) : timeStandard = null;
   VariantType.t(this.timeStandard) : boardSize = null;
 
+
   bool get ratingAllowed {
     if (timeStandard == null) return false;
     if (boardSize == null) return timeStandard!.ratingAllowed;

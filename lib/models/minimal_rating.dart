@@ -13,10 +13,10 @@ class MinimalRating {
     return provisional ? '$rating?' : rating.toString();
   }
 
-  static MinimalRating? fromRatingData(PlayerRatingData data) {
+  static MinimalRating fromRatingData(GlickoRating data) {
     return MinimalRating(
-      data.glicko.rating.toInt(),
-      data.glicko.deviation > 110,
+      data.rating.toInt(),
+      data.deviation > 110,
     );
   }
 

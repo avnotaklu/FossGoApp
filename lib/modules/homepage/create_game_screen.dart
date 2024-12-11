@@ -437,7 +437,7 @@ class MyDropDown<T> extends StatelessWidget {
             border: InputBorder.none,
             label: Text(
               label!,
-              style: context.textTheme.labelSmall,
+              style: context.textTheme.labelLarge,
             ),
           ),
           child: dropdown,

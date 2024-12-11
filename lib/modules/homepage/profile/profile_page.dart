@@ -13,8 +13,10 @@ import 'package:go/modules/homepage/game_card.dart';
 import 'package:go/modules/homepage/matchmaking_page.dart';
 import 'package:go/modules/homepage/profile/edit_profile.dart';
 import 'package:go/modules/homepage/profile/profile_page_provider.dart';
+import 'package:go/modules/homepage/profile/stats_page.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/public_user_info.dart';
+import 'package:go/widgets/section_divider.dart';
 import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
 
@@ -429,8 +431,7 @@ class StatInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = playerRating.ratings[variant];
     final title = variant.title;
-    final minimalRating =
-        data != null ? MinimalRating.fromRatingData(data) : null;
+    final minimalRating = data?.glicko.minimal;
 
     final rating = minimalRating?.stringify() ?? "?";
     final games = data?.nb.toString() ?? "?";
@@ -440,7 +441,13 @@ class StatInfo extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () {
-          debugPrint("hello");
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => StatsPage(
+                defaultVariant: variant,
+              ),
+            ),
+          );
         },
         splashFactory: InkSplash.splashFactory,
         child: LayoutBuilder(
@@ -492,22 +499,6 @@ class StatInfo extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class SectionDivider extends StatelessWidget {
-  const SectionDivider({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Divider(
-        color: context.theme.colorScheme.outlineVariant,
       ),
     );
   }
