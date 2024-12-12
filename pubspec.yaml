@@ -51,14 +51,20 @@ dependencies:
   ntp: ^2.0.0
  #  firebase_core:  any
     # ^1.8.0
-  firebase_core: ^2.13.1
+  # firebase_core: ^2.13.1
   # firebase_database: any
     # ^8.0.1
-  firebase_database: ^10.2.2
+  # firebase_database: ^10.2.2
   # cloud_firestore: any
     #^2.5.3
-  cloud_firestore: ^4.8.0
-  firebase_auth: ^4.6.2
+  # cloud_firestore: ^4.8.0
+  # firebase_auth: ^4.6.2
+  # firebase_auth_web: any
+  # firebase_core_web: any
+  # firebase_database_web: any
+
+
+
   google_sign_in: ^6.2.1
   provider: ^6.0.1
   flutter_signin_button: ^2.0.0
@@ -70,13 +76,16 @@ dependencies:
   responsive_framework: ^1.5.1
 
   cloud_firestore_web: any
-  firebase_auth_web: any
-  firebase_core_web: any
-  firebase_database_web: any
   google_sign_in_web: any
   http: any
   intl: ^0.20.1
   country_picker: ^2.0.27
+  hive: ^2.2.3
+  isar_flutter_libs: ^4.0.0-dev.13
+  path_provider: ^2.1.0
+
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

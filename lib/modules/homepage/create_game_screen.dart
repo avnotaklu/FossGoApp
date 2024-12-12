@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
@@ -9,12 +8,14 @@ import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/homepage/custom_games_page.dart';
+import 'package:go/modules/homepage/profile/live_game_widget.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/homepage/create_game_provider.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
+import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 
@@ -249,18 +250,14 @@ class CreateGameScreen extends StatelessWidget {
                       ),
                     );
                   }, (game) {
-                    // final gameStatebloc = context.read<GameStateBloc>();
+                    final statRepo = context.read<IStatsRepository>();
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) => GameWidget(
-                            game: game,
-                            gameInteractor: LiveGameOracle(
-                              api: Api(),
-                              authBloc: context.read<AuthProvider>(),
-                              signalRbloc: context.read<SignalRProvider>(),
-                              joiningData: null,
-                            ),
+                          builder: (BuildContext context) => LiveGameWidget(
+                            game,
+                            null,
+                            statRepo
                           ),
                         ));
                   });

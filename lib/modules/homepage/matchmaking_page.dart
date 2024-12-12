@@ -4,6 +4,8 @@ import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
+import 'package:go/modules/homepage/profile/live_game_widget.dart';
+import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/time_control_dto.dart';
@@ -12,6 +14,7 @@ import 'package:go/modules/homepage/matchmaking_provider.dart';
 import 'package:go/widgets/selection_badge.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:test/test.dart';
 
 class MatchmakingPage extends StatefulWidget {
   const MatchmakingPage({super.key});
@@ -112,17 +115,11 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                             .stream
                             .listen((event) {
                           if (context.mounted) {
+                            final statRepo = context.read<IStatsRepository>();
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context) {
-                              return GameWidget(
-                                  game: event.game,
-                                  gameInteractor: LiveGameOracle(
-                                    api: Api(),
-                                    authBloc: context.read<AuthProvider>(),
-                                    signalRbloc:
-                                        context.read<SignalRProvider>(),
-                                    joiningData: event,
-                                  ));
+                              return LiveGameWidget(
+                                  event.game, event, statRepo);
                             }));
                           }
                         });

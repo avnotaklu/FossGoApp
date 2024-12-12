@@ -5,6 +5,8 @@ import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/homepage/home_page.dart';
 import 'package:go/modules/auth/log_in_screen.dart';
 import 'package:go/modules/auth/sign_up_screen.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 // import 'package:/share/share.dart';
 import 'constants/constants.dart' as Constants;
@@ -20,6 +22,10 @@ void main() async {
   // await Firebase.initializeApp(
   //   options: DefaultFirebaseOptions.currentPlatform,
   // );
+  final dir = await getApplicationDocumentsDirectory();
+  Hive.init(dir.path);
+  (await Hive.openBox<String>('stats')).clear();
+
   runApp(const MyApp());
 }
 
@@ -49,8 +55,7 @@ class MyApp extends StatelessWidget {
 
   Widget initialPage() => const SignIn();
 
-  Widget responsiveWidgetSetup(BuildContext context, Widget? child) =>
-      SafeArea(
+  Widget responsiveWidgetSetup(BuildContext context, Widget? child) => SafeArea(
         child: ResponsiveBreakpoints.builder(
           child: child!,
           breakpoints: [

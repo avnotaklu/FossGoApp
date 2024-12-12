@@ -8,6 +8,7 @@ import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/find_match_result.dart';
+import 'package:go/services/stat_update_message.dart';
 
 class SignalRMessage {
   final String type;
@@ -73,6 +74,8 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
       return GameTimerUpdateMessage.fromMap(map);
     case SignalRMessageTypes.matchFound:
       return FindMatchResult.fromMap(map);
+    case SignalRMessageTypes.statUpdate:
+      return StatUpdateMessage.fromMap(map);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     case SignalRMessageTypes.acceptedScores:
@@ -100,6 +103,8 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
       return GameTimerUpdateMessage.fromJson(json);
     case SignalRMessageTypes.matchFound:
       return FindMatchResult.fromJson(json);
+    case SignalRMessageTypes.statUpdate:
+      return StatUpdateMessage.fromJson(json);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     case SignalRMessageTypes.acceptedScores:
@@ -119,7 +124,8 @@ class SignalRMessageTypes {
   static const String acceptedScores = "AcceptedScores";
   static const String gameOver = "GameOver";
   static const String gameTimerUpdate = "GameTimerUpdate";
-  static const String matchFound = "MatchFound";
+  static const String matchFound = "MatchFound"; 
+  static const String statUpdate = "StatUpdate";
 }
 
 abstract class SignalRMessageType {

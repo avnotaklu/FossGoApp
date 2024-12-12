@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/constants/constants.dart';
@@ -15,18 +14,21 @@ class EditProfileProvider extends ChangeNotifier {
 
   EditProfileProvider({required this.auth, required this.api});
 
-  UserAccount get user => auth.currentUserAccount!;
+  Either<AppError, UserAccount> get user =>
+      auth.currentUserAccount!.asUserAccount;
 
   void setup(
       void Function(
               {String? fName, String? email, String? bio, String? nationality})
           s) {
-    s.call(
-      fName: user.fullName,
-      email: user.email,
-      bio: user.bio,
-      nationality: user.nationality,
-    );
+    user.fold((l) {}, (user) {
+      s.call(
+        fName: user.fullName,
+        email: user.email,
+        bio: user.bio,
+        nationality: user.nationality,
+      );
+    });
   }
 
   Validator<String?, String?> fullNameValidator() {
@@ -52,7 +54,7 @@ class EditProfileProvider extends ChangeNotifier {
         bio: bio,
         nationality: nationality,
       ),
-      auth.currentUserInfo.id,
+      auth.myId,
       auth.token!,
     );
 

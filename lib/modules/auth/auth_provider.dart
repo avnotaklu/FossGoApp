@@ -36,20 +36,24 @@ class AuthProvider {
       StreamController.broadcast();
   Stream<UserAccount> get currentUser => _currentUserStreamController.stream;
 
-  final StreamController<Either<AppError, PublicUserInfo>>
+  final StreamController<Either<AppError, AbstractUserAccount>>
       _authResultStreamController = StreamController.broadcast();
-  Stream<Either<AppError, PublicUserInfo>> get authResult =>
+  Stream<Either<AppError, AbstractUserAccount>> get authResult =>
       _authResultStreamController.stream;
 
-  UserAccount? _currentUserRaw;
-  UserAccount? get currentUserAccount => _currentUserRaw;
+  AbstractUserAccount? _currentUserRaw;
+  AbstractUserAccount get currentUserAccount => _currentUserRaw!;
 
-  PlayerRating? _currentUserRating;
-  UserStat? _currentUserStat;
-  UserStat? get currentUserStat => _currentUserStat;
+  String get myId => _currentUserRaw!.myId;
+  PlayerType get myType => _currentUserRaw!.myType;
+  PlayerType get myUsername => _currentUserRaw!.myType;
 
-  PublicUserInfo? _currentUserInfo;
-  PublicUserInfo get currentUserInfo => _currentUserInfo!;
+  // PlayerRating? _currentUserRating;
+  // UserStat? _currentUserStat;
+  // UserStat? get currentUserStat => _currentUserStat;
+
+  // PublicUserInfo? _currentUserInfo;
+  // PublicUserInfo get currentUserInfo => _currentUserInfo!;
 
   String? _token;
   String? get token => _token;
@@ -70,7 +74,7 @@ class AuthProvider {
     });
   }
 
-  Future<Either<AppError, PublicUserInfo>> loginGoogle() async {
+  Future<Either<AppError, UserAccount>> loginGoogle() async {
     try {
       Future<GoogleSignInAccount?> googleUser() async =>
           await googleSignIn.signIn();
@@ -102,14 +106,9 @@ class AuthProvider {
     }
   }
 
-  void _setUser(PlayerRating userRating, UserStat userStat, String token,
-      UserAccount user, PublicUserInfo currentUser) {
+  void _setUser(String token, UserAccount user) {
     _currentUserStreamController.add(user);
-    _currentUserRating = userRating;
     _currentUserRaw = user;
-    _currentUserStat = userStat;
-
-    _currentUserInfo = currentUser;
 
     _token = token;
 
@@ -119,23 +118,13 @@ class AuthProvider {
     debugPrint("email");
   }
 
-  Future<Either<AppError, PublicUserInfo>> authenticateNormalUser(
+  Future<Either<AppError, UserAccount>> authenticateNormalUser(
       UserAccount user, String token) async {
     final registerTas = registerUser(token, user.id);
 
-    var userRatingTas = registerTas.flatMap((r) {
-      return TaskEither(() => _userRatingResult(token, user.id))
-          .map((a) => (r, a));
-    });
-
-    var userStatTas = userRatingTas.flatMap((r) {
-      return TaskEither(() => _userStatResult(token, user.id))
-          .map((a) => (r.$1, r.$2, a));
-    });
-
-    var res = (await userStatTas.run()).flatMap((r) {
-      _setUser(r.$2, r.$3, token, user, r.$1.currentUser);
-      return right(currentUserInfo);
+    var res = (await registerTas.run()).flatMap((r) {
+      _setUser(token, user);
+      return right(user);
     }).mapLeft((e) {
       signlRBloc.disconnect();
       return e;
@@ -145,7 +134,7 @@ class AuthProvider {
     return res;
   }
 
-  Future<Either<AppError, PublicUserInfo>> loginAsGuest() {
+  Future<Either<AppError, GuestUser>> loginAsGuest() {
     var task = TaskEither(() => api.guestLogin());
 
     return task.flatMap((r) {
@@ -153,15 +142,15 @@ class AuthProvider {
     }).run();
   }
 
-  Future<Either<AppError, PublicUserInfo>> authenticateGuestUser(
+  Future<Either<AppError, GuestUser>> authenticateGuestUser(
       GuestUser user, String token) async {
     final registerTas = registerUser(token, user.id);
 
     var res = (await registerTas.run()).flatMap((r) {
       _token = token;
-      _currentUserInfo = r.currentUser;
+      _currentUserRaw = user;
 
-      return right(currentUserInfo);
+      return right(user);
     }).mapLeft((e) {
       signlRBloc.disconnect();
       return e;
@@ -220,11 +209,8 @@ class AuthProvider {
 
   void updateUserAccount(UserAccount user) {
     _setUser(
-      _currentUserRating!,
-      _currentUserStat!,
       token!,
       user,
-      _currentUserInfo!,
     );
   }
 
@@ -246,3 +232,4 @@ class AuthProvider {
     _token = null;
   }
 }
+

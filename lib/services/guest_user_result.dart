@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:go/services/guest_user.dart';
+import 'package:go/services/user_account.dart';
 
 class GuestUserResult {
   final GuestUser user;

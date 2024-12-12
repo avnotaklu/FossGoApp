@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:go/core/utils/intl/formatters.dart';
 import 'package:go/models/variant_type.dart';
 
 class UserStat {
@@ -14,7 +15,7 @@ class UserStat {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'userId': userId,
-      'stats': stats,
+      'stats': stats.map((k, v) => MapEntry(k.toKey, v.toMap())),
     };
   }
 
@@ -65,10 +66,12 @@ class UserStatForVariant {
 
   factory UserStatForVariant.fromMap(Map<String, dynamic> map) {
     return UserStatForVariant(
-      highestRating:
-          map['highestRating'] != null ? (map['highestRating'] as num).toDouble() : null,
-      lowestRating:
-          map['lowestRating'] != null ? (map['lowestRating'] as num).toDouble() : null,
+      highestRating: map['highestRating'] != null
+          ? (map['highestRating'] as num).toDouble()
+          : null,
+      lowestRating: map['lowestRating'] != null
+          ? (map['lowestRating'] as num).toDouble()
+          : null,
       resultStreakData: map['resultStreakData'] != null
           ? ResultStreakData.fromMap(
               map['resultStreakData'] as Map<String, dynamic>)
@@ -173,10 +176,10 @@ class Streak {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'streakLength': streakLength,
-      'streakFrom': streakFrom.millisecondsSinceEpoch,
+      'streakFrom': streakFrom.toServerString(),
       'startingGameId': startingGameId,
       'endingGameId': endingGameId,
-      'streakTo': streakTo.millisecondsSinceEpoch,
+      'streakTo': streakTo.toServerString(),
     };
   }
 
@@ -252,7 +255,7 @@ class GameResultStat {
     return <String, dynamic>{
       'opponentRating': opponentRating,
       'opponentId': opponentId,
-      'resultAt': resultAt.millisecondsSinceEpoch,
+      'resultAt': resultAt.toServerString(),
       'gameId': gameId,
     };
   }

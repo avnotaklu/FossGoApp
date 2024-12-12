@@ -62,7 +62,7 @@ android {
             resolutionStrategy { force 'androidx.core:core-ktx:1.6.0' }
         }
         applicationId "com.example.go"
-            minSdkVersion 21 
+            minSdkVersion 23
             targetSdkVersion 34
             buildToolsVersion "30.0.0"
             versionCode flutterVersionCode.toInteger()

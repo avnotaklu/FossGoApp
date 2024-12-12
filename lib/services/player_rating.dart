@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:go/constants/constants.dart';
+import 'package:go/core/utils/intl/formatters.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/minimal_rating.dart';
 import 'package:go/models/time_control.dart';
@@ -74,7 +75,7 @@ class PlayerRatingData {
       'glicko': glicko.toMap(),
       'nb': nb,
       'recent': recent,
-      'latest': latest?.millisecondsSinceEpoch,
+      'latest': latest?.toServerString(),
     };
   }
 

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/modules/homepage/profile/live_game_widget.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
+import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/public_user_info.dart';
@@ -36,16 +38,10 @@ class GameCard extends StatelessWidget {
         ),
       );
     }, (joinMessage) {
+                    final statRepo = context.read<IStatsRepository>();
       Navigator.pushReplacement(context,
           MaterialPageRoute<void>(builder: (BuildContext context) {
-        return GameWidget(
-            game: joinMessage?.game ?? game,
-            gameInteractor: LiveGameOracle(
-              api: Api(),
-              authBloc: context.read<AuthProvider>(),
-              signalRbloc: context.read<SignalRProvider>(),
-              joiningData: joinMessage,
-            ));
+        return LiveGameWidget(game, joinMessage,statRepo);
       }));
     });
   }
@@ -167,7 +163,7 @@ class MyStoneInfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final myId = context.read<AuthProvider>().currentUserInfo.id;
+    final myId = context.read<AuthProvider>().myId;
     StoneSelectionType myColor = StoneSelectionType.auto;
     if (!game.didStart()) {
       var otherIsCreator = game.gameCreator == otherPlayerData?.id;

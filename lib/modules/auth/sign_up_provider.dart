@@ -28,7 +28,7 @@ class SignUpProvider {
         .add(Validator.getValidator(Validations.validatePassword));
   }
 
-  Future<Either<AppError, PublicUserInfo>> signUp(
+  Future<Either<AppError, AbstractUserAccount>> signUp(
       String username, String password) async {
     var usernameRes = usernameValidator().validate(username);
 

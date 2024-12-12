@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
+import 'package:go/modules/auth/sign_up_provider.dart';
+import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/homepage/custom_games_page.dart';
 import 'package:go/modules/homepage/matchmaking_page.dart';
 import 'package:go/modules/homepage/profile/profile_page.dart';
+import 'package:go/modules/stats/stats_repository.dart';
+import 'package:go/services/api.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/my_app_drawer.dart';
 import 'package:provider/provider.dart';
@@ -32,57 +36,66 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: key,
-      drawer: const MyAppDrawer(),
-      appBar: MyAppBar('Baduk',
-          leading: IconButton(
-            onPressed: () {
-              if (key.currentState!.isDrawerOpen) {
-                key.currentState!.closeDrawer();
-              } else {
-                key.currentState!.openDrawer();
-              }
-            },
-            icon: const Icon(Icons.menu),
-          )),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
-        // indicatorColor: context.theme.indicatorColor,
-        selectedIndex: currentPageIndex,
-        destinations: <Widget>[
-          NavigationDestination(
-            icon: Icon(
-              Icons.join_full_rounded,
-              // color: context.theme.disabledColor,
-            ),
-            label: 'Match',
-          ),
-          NavigationDestination(
-            icon: Icon(
-              Icons.games,
-              // color: context.theme.disabledColor,
-            ),
-            label: 'Custom',
-          ),
-          NavigationDestination(
-            icon: Icon(
-              Icons.person,
-              // color: context.theme.disabledColor,
-            ),
-            label: 'Profile',
-          ),
-        ],
+    return Provider<IStatsRepository>(
+      create: (BuildContext context) => StatsRepository(
+        Api(),
+        context.read<AuthProvider>(),
+        context.read<SignalRProvider>(),
       ),
-      body: <Widget>[
-        const MatchmakingPage(),
-        const CustomGamesPage(),
-        const ProfilePage()
-      ][currentPageIndex],
+      builder: (context, child) {
+        return Scaffold(
+          key: key,
+          drawer: const MyAppDrawer(),
+          appBar: MyAppBar('Baduk',
+              leading: IconButton(
+                onPressed: () {
+                  if (key.currentState!.isDrawerOpen) {
+                    key.currentState!.closeDrawer();
+                  } else {
+                    key.currentState!.openDrawer();
+                  }
+                },
+                icon: const Icon(Icons.menu),
+              )),
+          bottomNavigationBar: NavigationBar(
+            onDestinationSelected: (int index) {
+              setState(() {
+                currentPageIndex = index;
+              });
+            },
+            // indicatorColor: context.theme.indicatorColor,
+            selectedIndex: currentPageIndex,
+            destinations: <Widget>[
+              NavigationDestination(
+                icon: Icon(
+                  Icons.join_full_rounded,
+                  // color: context.theme.disabledColor,
+                ),
+                label: 'Match',
+              ),
+              NavigationDestination(
+                icon: Icon(
+                  Icons.games,
+                  // color: context.theme.disabledColor,
+                ),
+                label: 'Custom',
+              ),
+              NavigationDestination(
+                icon: Icon(
+                  Icons.person,
+                  // color: context.theme.disabledColor,
+                ),
+                label: 'Profile',
+              ),
+            ],
+          ),
+          body: <Widget>[
+            const MatchmakingPage(),
+            const CustomGamesPage(),
+            const ProfilePage()
+          ][currentPageIndex],
+        );
+      },
     );
   }
 }

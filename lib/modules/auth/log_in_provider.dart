@@ -7,6 +7,7 @@ import 'package:go/modules/auth/sign_in_dto.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/public_user_info.dart';
+import 'package:go/services/user_account.dart';
 
 class LogInProvider {
   final AuthProvider authBloc;
@@ -37,7 +38,7 @@ class LogInProvider {
         .add(Validator.getValidator(Validations.validatePassword));
   }
 
-  Future<Either<AppError, PublicUserInfo>> logIn(
+  Future<Either<AppError, AbstractUserAccount>> logIn(
     String authName,
     String password,
   ) async {

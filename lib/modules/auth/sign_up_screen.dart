@@ -58,7 +58,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     MyTextFormField(
                       hintText: "Password",
-                      controller: userNameController,
+                      controller: passwordController,
                       validator: (v) =>
                           signUpPro.passwordValidator().flutterFieldValidate(v),
                     ),

@@ -8,6 +8,8 @@ import 'package:go/modules/gameplay/middleware/score_calculator.dart';
 import 'package:go/modules/gameplay/middleware/time_calculator.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
+import 'package:go/modules/stats/stats_repository.dart';
+import 'package:go/services/user_account.dart';
 import 'package:signalr_netcore/errors.dart';
 
 import 'package:go/core/error_handling/app_error.dart';
@@ -131,6 +133,8 @@ class LiveGameOracle extends GameStateOracle {
   final Api api;
   final AuthProvider authBloc;
   final SignalRProvider signalRbloc;
+  final PlayerRating? ratings;
+
   late final List<StreamSubscription> subscriptions;
   late final Stream<GameJoinMessage> listenForGameJoin;
   late final Stream<EditDeadStoneMessage> listenForEditDeadStone;
@@ -190,6 +194,7 @@ class LiveGameOracle extends GameStateOracle {
     required this.api,
     required this.authBloc,
     required this.signalRbloc,
+    required this.ratings,
     GameJoinMessage? joiningData,
   }) {
     if (joiningData != null) {
@@ -266,11 +271,11 @@ class LiveGameOracle extends GameStateOracle {
 
   PublicUserInfo? otherPlayerInfo;
 
-  PublicUserInfo get myPlayerUserInfo => authBloc.currentUserInfo;
+  AbstractUserAccount get myPlayerUserInfo => authBloc.currentUserAccount;
 
   @override
   DisplayablePlayerData myPlayerData(Game game) {
-    var publicInfo = myPlayerUserInfo;
+    var publicInfo = myPlayerUserInfo.getPublicUserInfo(ratings);
     var rating = publicInfo.rating?.getRatingForGame(game);
     StoneType? stone;
 
@@ -350,12 +355,12 @@ class LiveGameOracle extends GameStateOracle {
 
   @override
   bool isThisAccountsTurn(Game game) {
-    return game.getPlayerIdWithTurn() == authBloc.currentUserInfo.id;
+    return game.getPlayerIdWithTurn() == authBloc.myId;
   }
 
   @override
   StoneType thisAccountStone(Game game) {
-    return game.getStoneFromPlayerId(authBloc.currentUserInfo.id)!;
+    return game.getStoneFromPlayerId(authBloc.myId)!;
   }
 }
 

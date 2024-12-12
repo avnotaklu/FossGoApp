@@ -1,9 +1,77 @@
 import 'dart:convert';
-
+import 'package:fpdart/fpdart.dart';
+import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/utils/intl/formatters.dart';
+import 'package:go/services/player_rating.dart';
+import 'package:go/services/public_user_info.dart';
+
+extension AbstractUserAccountExt on AbstractUserAccount {
+  String get myId => switch (this) {
+        GuestUser(id: var id) => id,
+        UserAccount(id: var id) => id,
+      };
+
+  PlayerType get myType => switch (this) {
+        GuestUser() => PlayerType.guest,
+        UserAccount() => PlayerType.normal,
+      };
+
+  String get myUsername => switch (this) {
+        GuestUser() => 'Guest',
+        UserAccount(userName: var un) => un,
+      };
+
+  Either<AppError, UserAccount> get asUserAccount {
+    return this is UserAccount
+        ? right(this as UserAccount)
+        : left(AppError(message: 'Not a user account'));
+  }
+
+  PublicUserInfo getPublicUserInfo(PlayerRating? ratings) {
+    return switch (this) {
+      GuestUser(id: var id) => PublicUserInfo(
+          id: id,
+          username: 'Guest',
+          rating: null,
+          playerType: myType,
+        ),
+      UserAccount(id: var id, userName: var un) => PublicUserInfo(
+          username: un,
+          playerType: myType,
+          id: id,
+          rating: ratings,
+        )
+    };
+  }
+}
+
+sealed class AbstractUserAccount {}
+
+class GuestUser implements AbstractUserAccount {
+  final String id;
+
+  GuestUser(this.id);
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+    };
+  }
+
+  factory GuestUser.fromMap(Map<String, dynamic> map) {
+    return GuestUser(
+      map['id'] as String,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory GuestUser.fromJson(String source) =>
+      GuestUser.fromMap(json.decode(source) as Map<String, dynamic>);
+}
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-class UserAccount {
+class UserAccount implements AbstractUserAccount {
   final String id;
   final String? email;
   final String? passwordHash;
@@ -29,6 +97,8 @@ class UserAccount {
   });
 
   Map<String, dynamic> toMap() {
+    // = (() => null).call().
+
     return <String, dynamic>{
       'id': id,
       'email': email,

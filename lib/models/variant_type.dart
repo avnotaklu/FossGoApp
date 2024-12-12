@@ -20,7 +20,7 @@ extension BoardSizeDataExt on BoardSize {
     return true;
   }
 
-  String get toKey => 'B${this.index}';
+  String get toKey => '${this.index}';
 
   String get toDisplayString => switch (this) {
         BoardSize.nine => '9x9',
@@ -57,7 +57,7 @@ extension TimeStandardExt on TimeStandard {
     return true;
   }
 
-  String get toKey => 'S${this.index}';
+  String get toKey => '${this.index}';
 }
 
 enum TimeStandard {
@@ -79,7 +79,6 @@ class VariantType {
 
   VariantType.b(this.boardSize) : timeStandard = null;
   VariantType.t(this.timeStandard) : boardSize = null;
-
 
   bool get ratingAllowed {
     if (timeStandard == null) return false;
@@ -112,11 +111,11 @@ class VariantType {
     TimeStandard? timeStandard;
 
     if (parts[0].isNotEmpty) {
-      boardSize = BoardSize.values[int.parse(parts[0].substring(1))];
+      boardSize = BoardSize.values[int.parse(parts[0])];
     }
 
     if (parts.length > 1 && parts[1].isNotEmpty) {
-      timeStandard = TimeStandard.values[int.parse(parts[1].substring(1))];
+      timeStandard = TimeStandard.values[int.parse(parts[1])];
     }
 
     return VariantType(boardSize, timeStandard);

@@ -107,26 +107,38 @@ class StatsPageProvider extends ChangeNotifier {
 
   final AuthProvider authPro;
 
-  UserStatForVariant get stats =>
-      authPro.currentUserStat!.stats[_filteredVariant.variantType]!;
+  UserStatForVariant get _statsForVariant =>
+      _stats.stats[_filteredVariant.variantType]!;
 
-  PlayerRatingData? get _rating =>
-      authPro.currentUserInfo.rating?.ratings[_filteredVariant.variantType]!;
+  PlayerRatingData? get _ratingForVariant =>
+      _rating.ratings[_filteredVariant.variantType]!;
 
-  StatsPageProvider(this.authPro, VariantType? filteredVariant)
+  final UserStat _stats;
+  final PlayerRating _rating;
+
+  StatsPageProvider(
+      this.authPro, VariantType? filteredVariant, this._stats, this._rating)
       : assert(filteredVariant?.boardSize != BoardSize.other),
         _filteredVariant = filteredVariant?.statView ??
             FilterableVariantType(
                 FilteredBoardSize.all, FilteredTimeStandard.all);
 
-  Either<String, PlayerRatingData> unavailabiltyReasonOrRating() {
-    if (_filteredVariant.boardSize != FilteredBoardSize.all &&
-        _filteredVariant.timeStandard == FilteredTimeStandard.all) {
-      return left("not available without specific time control");
-    }
-
-    return right(_rating!);
+  PlayerRatingData getRating() {
+    return _ratingForVariant!;
   }
+
+  GameStatCounts getCounts() {
+    return _statsForVariant.statCounts;
+  }
+
+  // Either<String, PlayerRatingData> unavailabiltyReasonOrRating() {
+  //   if (_filteredVariant.boardSize != FilteredBoardSize.all &&
+  //       _filteredVariant.timeStandard == FilteredTimeStandard.all) {
+  //     return left("not available without specific time control");
+  //   }
+
+  //   return right(_ratingForVariant!);
+  // }
 
   Either<String, ResultStreakData> unavailabiltyReasonOrStreakData() {
     if (_filteredVariant.boardSize == FilteredBoardSize.all) {
@@ -135,8 +147,18 @@ class StatsPageProvider extends ChangeNotifier {
     if (_filteredVariant.timeStandard == FilteredTimeStandard.all) {
       return left("select a specific time control");
     }
-    return right(stats.resultStreakData!);
+    return right(_statsForVariant.resultStreakData!);
   }
+
+  // Either<String, ResultStreakData> unavailabiltyReasonOrStreakData() {
+  //   if (_filteredVariant.boardSize == FilteredBoardSize.all) {
+  //     return left("select a specific board size");
+  //   }
+  //   if (_filteredVariant.timeStandard == FilteredTimeStandard.all) {
+  //     return left("select a specific time control");
+  //   }
+  //   return right(_stats.resultStreakData!);
+  // }
 
   void changeVariant(FilteredBoardSize? b, FilteredTimeStandard? t) {
     _filteredVariant = _filteredVariant.modify(b, t);
