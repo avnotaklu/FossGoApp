@@ -2,6 +2,7 @@
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
+import 'package:go/core/foundation/string.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
@@ -53,12 +54,13 @@ class _GameWidgetState extends State<GameWidget> {
     return Duration(seconds: time.incrementSeconds!).smallRepr();
   }
 
-  String gameTitle(TimeControl time) {
-    final mTime = mainTime(time);
-    final iTime = incrementTime(time);
-    final bTime = byoYomiTime(time);
+  String gameTitle(Game game) {
+    // final mTime = mainTime(time);
+    // final iTime = incrementTime(time);
+    // final bTime = byoYomiTime(time);
 
-    return "$mTime${iTime ?? ""}${bTime ?? ""}";
+    // return "$mTime${iTime ?? ""}${bTime ?? ""}";
+    return "${game.timeControl.timeStandard.standardName} + ${game.gameType.name.capitalize()}";
   }
 
   StageType getStageType() => switch (widget.game.gameState) {
@@ -80,9 +82,10 @@ class _GameWidgetState extends State<GameWidget> {
             ),
         builder: (context, child) {
           return Scaffold(
+            key: key,
             drawer: const MyAppDrawer(),
             appBar: MyAppBar(
-              gameTitle(context.read<GameStateBloc>().game.timeControl),
+              gameTitle(context.read<GameStateBloc>().game),
               leading: IconButton(
                 onPressed: () {
                   if (key.currentState!.isDrawerOpen) {

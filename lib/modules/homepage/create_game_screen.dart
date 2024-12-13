@@ -24,6 +24,26 @@ import 'package:go/widgets/my_text_form_field.dart';
 import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
 
+void showCreateCustomGameDialog(BuildContext context) {
+  final signalRBloc = context.read<SignalRProvider>();
+  final statsRepo = context.read<IStatsRepository>();
+  showDialog(
+      context: context,
+      builder: (context) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(
+                  value: signalRBloc,
+                ),
+                Provider.value(value: statsRepo),
+                ChangeNotifierProvider(
+                  create: (context) => CreateGameProvider(signalRBloc)..init(),
+                ),
+              ],
+              builder: (context, child) {
+                return const CreateGameScreen();
+              }));
+}
+
 class CreateGameScreen extends StatelessWidget {
   const CreateGameScreen({super.key});
 
@@ -105,7 +125,7 @@ class CreateGameScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     sectionHeading(context, "Time Format"),
-                    flatDialog(
+                    flatDropdown(
                       context,
                       Constants.TimeFormat.values,
                       cgp.timeFormat,
@@ -122,7 +142,7 @@ class CreateGameScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     sectionHeading(context, "Time Control"),
-                    flatDialog(
+                    flatDropdown(
                       context,
                       TimeStandard.values,
                       cgp.timeStandard,
@@ -244,6 +264,7 @@ class CreateGameScreen extends StatelessWidget {
                       .createGame(token!);
 
                   res.fold((e) {
+                    Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(e.message),
@@ -254,11 +275,8 @@ class CreateGameScreen extends StatelessWidget {
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) => LiveGameWidget(
-                            game,
-                            null,
-                            statRepo
-                          ),
+                          builder: (BuildContext context) =>
+                              LiveGameWidget(game, null, statRepo),
                         ));
                   });
                 },
@@ -310,7 +328,7 @@ class CreateGameScreen extends StatelessWidget {
     );
   }
 
-  Widget flatDialog<T>(BuildContext context, List<T> altTimes, T selectedTime,
+  Widget flatDropdown<T>(BuildContext context, List<T> altTimes, T selectedTime,
       void Function(T) onTap, String Function(T) formatter) {
     return SizedBox(
       width: context.width * 0.4,

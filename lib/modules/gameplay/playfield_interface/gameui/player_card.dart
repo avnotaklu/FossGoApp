@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:barebones_timer/timer_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/player_rating.dart';
@@ -59,9 +60,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                       Text(
                         player?.displayName ?? "Unknown",
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Constants.defaultTheme.mainDarkTextColor,
-                            fontSize: 18),
+                        style: context.textTheme.bodyLarge,
                       ),
                       if (ratings != null) ratingText(ratings),
                     ],
@@ -76,22 +75,19 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                         if (getFinalScore(game, player!.stoneType!) != null)
                           Text(
                             " + ${getFinalScore(game, player!.stoneType!)} Points",
-                            style: TextStyle(
-                                color: Constants.defaultTheme.mainDarkTextColor),
+                            style: context.textTheme.labelLarge,
                           ),
 
                       if (player?.stoneType != null)
                         Text(
                           " + ${getPrisonersCount(game, player!.stoneType!)} Prisoners",
-                          style: TextStyle(
-                              color: Constants.defaultTheme.mainDarkTextColor),
+                          style: context.textTheme.labelLarge,
                         ),
                       if (player?.stoneType != null &&
                           player?.stoneType == StoneType.white)
                         Text(
                           " + ${getKomi(game, player!.stoneType!)} Komi",
-                          style: TextStyle(
-                              color: Constants.defaultTheme.mainDarkTextColor),
+                          style: context.textTheme.labelLarge,
                         ),
                       // : const Spacer(
                       //     flex: 2,
@@ -139,10 +135,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
     return RichText(
       text: TextSpan(
           text: " ( ${ratings.glicko.rating.toStringAsFixed(0)}",
-          style: TextStyle(
-            color: Constants.defaultTheme.mainDarkTextColor,
-            fontSize: 12,
-          ),
+          style: context.textTheme.labelLarge,
           children: [
             ...ratingDiffText(widget.game, widget.playerInfo),
             const TextSpan(
@@ -195,7 +188,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
     return game.gameOverMethod == GameOverMethod.Score
         ? Text(
             " = ${game.finalTerritoryScores[stone.index] + game.prisoners[stone.index] + (stone.index * game.komi)}",
-            style: TextStyle(color: Constants.defaultTheme.mainDarkTextColor),
+            style: context.textTheme.labelLarge,
           )
         : const SizedBox.shrink();
   }

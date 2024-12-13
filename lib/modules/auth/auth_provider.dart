@@ -46,7 +46,7 @@ class AuthProvider {
 
   String get myId => _currentUserRaw!.myId;
   PlayerType get myType => _currentUserRaw!.myType;
-  PlayerType get myUsername => _currentUserRaw!.myType;
+  String get myUsername => _currentUserRaw!.myUsername;
 
   // PlayerRating? _currentUserRating;
   // UserStat? _currentUserStat;

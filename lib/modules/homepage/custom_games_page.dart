@@ -75,22 +75,7 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                     Center(
                       child: PrimaryButton(
                         onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) => MultiProvider(
-                                      providers: [
-                                        ChangeNotifierProvider.value(
-                                          value: signalRBloc,
-                                        ),
-                                        ChangeNotifierProvider(
-                                          create: (context) =>
-                                              CreateGameProvider(signalRBloc)
-                                                ..init(),
-                                        )
-                                      ],
-                                      builder: (context, child) {
-                                        return const CreateGameScreen();
-                                      }));
+                          showCreateCustomGameDialog(context);
                         },
                         text: "Create New",
                       ),
@@ -104,4 +89,6 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
       },
     );
   }
+
+  
 }

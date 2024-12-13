@@ -98,23 +98,12 @@ class MyApp extends StatelessWidget {
               create: (context) => HomepageBloc(
                   signalRProvider: context.read(), authBloc: context.read()),
             ),
-            // ChangeNotifierProvider(create: (context) => signalR),
           ],
           builder: (context, child) => const HomePage(),
         );
       },
       '/SignUp': (BuildContext context) => const SignUpScreen(),
       '/LogIn': (BuildContext context) => const LogInScreen(),
-      // '/CreateGame': (BuildContext context) => MultiProvider(
-      //       providers: [
-      //         ChangeNotifierProvider(
-      //             create: (context) => context.read<SignalRProvider>()),
-      //         Provider(
-      //           create: (context) => CreateGameProvider(),
-      //         ),
-      //       ],
-      //       builder: (context, child) => CreateGameScreen(),
-      //     ),
     };
   }
 }

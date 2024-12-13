@@ -415,7 +415,8 @@ class StatsPage extends StatelessWidget {
                                                       else
                                                         Container(
                                                           height: 500,
-                                                          width: double.infinity,
+                                                          width:
+                                                              double.infinity,
                                                           child: ListView
                                                               .separated(
                                                             physics:
@@ -481,7 +482,7 @@ class GameResultWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(
-        "Player 2" + " (${result.opponentRating})",
+        "${result.opponentName} (${result.opponentRating})",
         style: context.textTheme.bodySmall,
       ),
       subtitle: Text(

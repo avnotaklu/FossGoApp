@@ -2,6 +2,7 @@ import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/gameplay/stages/game_end_stage.dart';
 import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
@@ -75,9 +76,7 @@ class _GameUiState extends State<GameUi> {
                                 ? 'Black'
                                 : 'White';
                           }.call()} won by ${getWinningMethod(context)}",
-                          style: TextStyle(
-                            color: defaultTheme.mainDarkTextColor,
-                          ),
+                          style: context.textTheme.labelLarge,
                         )
                       : const Spacer(
                           flex: 2,
@@ -85,7 +84,6 @@ class _GameUiState extends State<GameUi> {
                   Expanded(
                     flex: 2,
                     child: Container(
-                      color: Colors.blue,
                       child: IntrinsicHeight(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -147,9 +145,9 @@ class BottomButton extends StatelessWidget {
     return Material(
       child: InkWell(
         splashFactory: InkRipple.splashFactory,
-        focusColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        highlightColor: Colors.blue.shade700,
+        // focusColor: Colors.transparent,
+        // hoverColor: Colors.transparent,
+        // highlightColor: Colors.blue.shade700,
 
         // Colors.transparent,
         //splashColor: Colors.blue,
@@ -161,7 +159,7 @@ class BottomButton extends StatelessWidget {
           child: Center(
             child: Text(
               text,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: context.textTheme.labelLarge,
             ),
           ),
         ),
@@ -187,10 +185,6 @@ class Pass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return ElevatedButton(
-    //   style: ButtonStyle(
-    //     foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-    //   ),
     return BottomButton(() {
       context.read<Stage>().onClickCell(null, context);
     }, "Pass");
