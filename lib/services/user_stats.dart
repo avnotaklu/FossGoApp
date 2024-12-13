@@ -37,6 +37,19 @@ class UserStat {
       UserStat.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
+extension GameResultStats on List<GameResultStat> {
+  List<GameResultStat> inplaceSortByHighestRating() {
+    return List<GameResultStat>.from(this)
+      ..sort((a, b) => b.opponentRating.compareTo(a.opponentRating));
+  }
+
+  List<GameResultStat> truncated() {
+    return length > 5 ? sublist(0, 5) : this;
+  }
+
+  int get max => 5;
+}
+
 class UserStatForVariant {
   final double? highestRating;
   final double? lowestRating;
@@ -241,12 +254,12 @@ class GameStatCounts {
 
 class GameResultStat {
   final int opponentRating;
-  final String opponentId;
+  final String opponentName;
   final DateTime resultAt;
   final String gameId;
   GameResultStat({
     required this.opponentRating,
-    required this.opponentId,
+    required this.opponentName,
     required this.resultAt,
     required this.gameId,
   });
@@ -254,7 +267,7 @@ class GameResultStat {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'opponentRating': opponentRating,
-      'opponentId': opponentId,
+      'opponentName': opponentName,
       'resultAt': resultAt.toServerString(),
       'gameId': gameId,
     };
@@ -263,7 +276,7 @@ class GameResultStat {
   factory GameResultStat.fromMap(Map<String, dynamic> map) {
     return GameResultStat(
       opponentRating: map['opponentRating'] as int,
-      opponentId: map['opponentId'] as String,
+      opponentName: map['opponentName'] as String,
       resultAt: DateTime.parse(map['resultAt'] as String),
       gameId: map['gameId'] as String,
     );

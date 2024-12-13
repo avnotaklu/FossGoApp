@@ -100,7 +100,7 @@ class _GameTimerState extends State<GameTimer> {
                 ),
               ),
               Text(
-                " x ${(Duration(seconds: timeControl.byoYomiTime!.byoYomiSeconds)).durationRepr()}",
+                " x ${(Duration(seconds: timeControl.byoYomiTime!.byoYomiSeconds)).smallRepr()}",
                 style: TextStyle(
                   fontSize: 20,
                   color: color,

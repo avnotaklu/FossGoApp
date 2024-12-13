@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/player_rating.dart';
@@ -107,8 +108,8 @@ class StatsPageProvider extends ChangeNotifier {
 
   final AuthProvider authPro;
 
-  UserStatForVariant get _statsForVariant =>
-      _stats.stats[_filteredVariant.variantType]!;
+  UserStatForVariant? get _statsForVariant =>
+      _stats.stats[_filteredVariant.variantType];
 
   PlayerRatingData? get _ratingForVariant =>
       _rating.ratings[_filteredVariant.variantType]!;
@@ -116,8 +117,7 @@ class StatsPageProvider extends ChangeNotifier {
   final UserStat _stats;
   final PlayerRating _rating;
 
-  StatsPageProvider(
-      this.authPro, VariantType? filteredVariant, this._stats, this._rating)
+  StatsPageProvider(this.authPro, VariantType? filteredVariant, this._stats, this._rating)
       : assert(filteredVariant?.boardSize != BoardSize.other),
         _filteredVariant = filteredVariant?.statView ??
             FilterableVariantType(
@@ -127,27 +127,57 @@ class StatsPageProvider extends ChangeNotifier {
     return _ratingForVariant!;
   }
 
-  GameStatCounts getCounts() {
-    return _statsForVariant.statCounts;
+  Either<AppError, UserStatForVariant> getStats() {
+    return _statsForVariant == null
+        ? left(AppError(message: "Data not available"))
+        : right(_statsForVariant!);
+  }
+
+  Either<AppError, GameStatCounts> getCounts(UserStatForVariant data) {
+    return right(_statsForVariant!.statCounts);
+    // ? left(AppError(message: "Stat not available"))
+    // : right(_statsForVariant!.statCounts);
+  }
+
+  Duration timePlayed(UserStatForVariant data) {
+    return Duration(seconds: data.playTimeSeconds.toInt());
+  }
+
+  double? highestRating(UserStatForVariant data) {
+    return data.highestRating;
+  }
+
+  double? lowestRating(UserStatForVariant data) {
+    return data.lowestRating;
+  }
+
+  List<GameResultStat>? getGreatestWins(UserStatForVariant data) {
+    return data.greatestWins;
   }
 
   // Either<String, PlayerRatingData> unavailabiltyReasonOrRating() {
   //   if (_filteredVariant.boardSize != FilteredBoardSize.all &&
   //       _filteredVariant.timeStandard == FilteredTimeStandard.all) {
   //     return left("not available without specific time control");
-  //   }
+  //   }wwwaaaaaaaa
+   
 
   //   return right(_ratingForVariant!);
   // }
 
-  Either<String, ResultStreakData> unavailabiltyReasonOrStreakData() {
+  Either<AppError, ResultStreakData> unavailabiltyReasonOrStreakData(
+      UserStatForVariant data) {
+    // return left(AppError(message: "Testing the error"));
     if (_filteredVariant.boardSize == FilteredBoardSize.all) {
-      return left("select a specific board size");
+      return left(AppError(message: "select a specific board size"));
     }
     if (_filteredVariant.timeStandard == FilteredTimeStandard.all) {
-      return left("select a specific time control");
+      return left(AppError(message: "select a specific time control"));
     }
-    return right(_statsForVariant.resultStreakData!);
+    if (_statsForVariant == null) {
+      return left(AppError(message: "Data not available"));
+    }
+    return right(_statsForVariant!.resultStreakData!);
   }
 
   // Either<String, ResultStreakData> unavailabiltyReasonOrStreakData() {

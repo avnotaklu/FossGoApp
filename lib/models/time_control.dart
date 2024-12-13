@@ -86,11 +86,11 @@ class TimeControl {
 
   String repr() {
     var repr = "";
-    final mainTimeString = Duration(seconds: mainTimeSeconds).durationRepr();
+    final mainTimeString = Duration(seconds: mainTimeSeconds).smallRepr();
     repr += mainTimeString;
     if (incrementSeconds != null) {
       final incrementTimeString =
-          Duration(seconds: incrementSeconds!).durationRepr();
+          Duration(seconds: incrementSeconds!).smallRepr();
       repr += " + $incrementTimeString";
     }
 

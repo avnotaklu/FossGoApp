@@ -24,7 +24,7 @@ void main() async {
   // );
   final dir = await getApplicationDocumentsDirectory();
   Hive.init(dir.path);
-  (await Hive.openBox<String>('stats')).clear();
+  (await Hive.openBox<String>('stats'));
 
   runApp(const MyApp());
 }

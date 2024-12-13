@@ -62,10 +62,10 @@ class StatsRepository extends IStatsRepository {
     }
   }
 
-  PlayerRating padRatingWithDefaults(PlayerRating rating) {
-    rateableVariants().forEach((v) {
+  PlayerRating _padRatingWithDefaults(PlayerRating rating) {
+    _rateableVariants().forEach((v) {
       if (rating.ratings[v] == null) {
-        rating.ratings[v] = defaultRatingData();
+        rating.ratings[v] = _defaultRatingData();
       }
     });
 
@@ -73,13 +73,94 @@ class StatsRepository extends IStatsRepository {
     return res;
   }
 
-  PlayerRating fillCumulativeVariants(PlayerRating rating) {
+  UserStat _fillCombinedStats(UserStat stat) {
+    final allBoards = BoardSize.values.where((a) => a.statAllowed);
+    final allTimes = TimeStandard.values.where((a) => a.statAllowed);
+
+    for (var board in allBoards) {
+      var boardVariant = VariantType(board, null);
+      var s = _statForCombinedVariant(
+        board,
+        allTimes.toList(),
+        (a) => VariantType(a, null),
+        (a, b) => VariantType(a, b),
+        stat,
+      );
+
+      if(s != null) {
+        stat.stats[boardVariant] = s;
+      }
+    }
+
+    for (var time in allTimes) {
+      var timeVariant = VariantType(null, time);
+      var s  = _statForCombinedVariant(
+        time,
+        allBoards.toList(),
+        (a) => VariantType(null, a),
+        (a, b) => VariantType(b, a),
+        stat,
+      );
+
+      if(s != null) {
+        stat.stats[timeVariant] = s;
+      }
+    }
+
+    var overall = VariantType(null, null);
+    var s = _statForCombinedVariant<BoardSize?, TimeStandard>(
+      null,
+      allTimes.toList(),
+      (a) => VariantType(null, null),
+      (a, b) => VariantType(a, b),
+      stat,
+    );
+
+    if(s != null) {
+      stat.stats[overall] = s;
+    }
+
+    return stat;
+  }
+
+  UserStatForVariant? _statForCombinedVariant<A, B>(
+      A master,
+      List<B> subs,
+      VariantType Function(A) masterCons,
+      VariantType Function(A, B) subCons,
+      UserStat stat) {
+    var validStats = subs
+        .map((sub) => stat.stats[subCons(master, sub)])
+        .where((a) => a != null)
+        .map((a) => a!)
+        .toList();
+
+    if (validStats.isEmpty) return null;
+
+    var masterStat = UserStatForVariant(
+      highestRating: validStats
+          .map((a) => a.highestRating)
+          .reduce((a, b) => (a ?? 0) > (b ?? 0) ? a : b),
+      lowestRating: validStats.map((a) => a.lowestRating).reduce(
+          (a, b) => (a ?? double.infinity) < (b ?? double.infinity) ? a : b),
+      playTimeSeconds:
+          validStats.map((a) => a.playTimeSeconds).reduce((a, b) => a + b),
+      statCounts: validStats.map((a) => a.statCounts).reduce((a, b) => a + b),
+      greatestWins: validStats
+          .map((a) => a.greatestWins)
+          .reduce((a, b) => (a ?? []).combine(b ?? [])),
+    );
+
+    return masterStat;
+  }
+
+  PlayerRating _fillCumulativeVariants(PlayerRating rating) {
     final allBoards = BoardSize.values.where((a) => a.ratingAllowed);
     final allTimes = TimeStandard.values.where((a) => a.ratingAllowed);
 
     for (var board in allBoards) {
       var boardVariant = VariantType(board, null);
-      rating.ratings[boardVariant] = ratingForCumulativeVariant(
+      rating.ratings[boardVariant] = _ratingForCumulativeVariant(
         board,
         allTimes.toList(),
         (a) => VariantType(a, null),
@@ -90,7 +171,7 @@ class StatsRepository extends IStatsRepository {
 
     for (var time in allTimes) {
       var timeVariant = VariantType(null, time);
-      rating.ratings[timeVariant] = ratingForCumulativeVariant(
+      rating.ratings[timeVariant] = _ratingForCumulativeVariant(
         time,
         allBoards.toList(),
         (a) => VariantType(null, a),
@@ -101,7 +182,7 @@ class StatsRepository extends IStatsRepository {
 
     var overall = VariantType(null, null);
     rating.ratings[overall] =
-        ratingForCumulativeVariant<BoardSize?, TimeStandard>(
+        _ratingForCumulativeVariant<BoardSize?, TimeStandard>(
       null,
       allTimes.toList(),
       (a) => VariantType(null, null),
@@ -112,7 +193,7 @@ class StatsRepository extends IStatsRepository {
     return rating;
   }
 
-  PlayerRatingData ratingForCumulativeVariant<A, B>(
+  PlayerRatingData _ratingForCumulativeVariant<A, B>(
       A master,
       List<B> subs,
       VariantType Function(A) masterCons,
@@ -169,13 +250,13 @@ class StatsRepository extends IStatsRepository {
             recent: [],
             latest: latestStyle!.latest,
           )
-        : defaultRatingData();
+        : _defaultRatingData();
 
     // Returning a new PlayerRatingsData instance with the updated Standard
     return cumulatedRatings;
   }
 
-  List<VariantType> rateableVariants() {
+  List<VariantType> _rateableVariants() {
     return BoardSize.values
         .where((a) => a.ratingAllowed)
         .flatMap<VariantType>((board) => TimeStandard.values
@@ -184,7 +265,7 @@ class StatsRepository extends IStatsRepository {
         .toList();
   }
 
-  PlayerRatingData defaultRatingData() {
+  PlayerRatingData _defaultRatingData() {
     return PlayerRatingData(
       glicko: GlickoRating(
         rating: 1500,
@@ -205,7 +286,7 @@ class StatsRepository extends IStatsRepository {
 
       oldStat.stats[variant] = stat;
       oldRating.ratings[variant] = rating;
-      var cumulated = fillCumulativeVariants(oldRating);
+      var cumulated = _fillCumulativeVariants(oldRating);
 
       _saveRatings((oldStat, cumulated));
     });
@@ -220,10 +301,12 @@ class StatsRepository extends IStatsRepository {
 
     final res = await stats
         .flatMap((s) => ratings.map((r) {
-              final padded = padRatingWithDefaults(r);
-              final cumulated = fillCumulativeVariants(padded);
+              final padded = _padRatingWithDefaults(r);
+              final cumulated = _fillCumulativeVariants(padded);
 
-              return (s, cumulated);
+              final combined = _fillCombinedStats(s);
+
+              return (combined, cumulated);
             }))
         .run();
 
@@ -283,4 +366,24 @@ class HiveUserStats {
 
   factory HiveUserStats.fromJson(String source) =>
       HiveUserStats.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
+extension GameStatCountsCombined on GameStatCounts {
+  GameStatCounts operator +(GameStatCounts other) {
+    return GameStatCounts(
+      total: total + other.total,
+      wins: wins + other.wins,
+      losses: losses + other.losses,
+      disconnects: disconnects + other.disconnects,
+      draws: draws + other.draws,
+    );
+  }
+}
+
+extension GameResultStatCombined on List<GameResultStat> {
+  List<GameResultStat> combine(List<GameResultStat> other) {
+    var newL = [...this, ...other];
+    newL.inplaceSortByHighestRating;
+    return newL.truncated();
+  }
 }

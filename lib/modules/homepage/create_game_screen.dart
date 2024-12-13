@@ -347,7 +347,7 @@ class CreateGameScreen extends StatelessWidget {
           value: entry,
           child: Container(
             child: Text(
-              entry.durationRepr(),
+              entry.smallRepr(),
               style: context.textTheme.labelSmall,
             ),
           ),
