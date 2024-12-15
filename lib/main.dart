@@ -69,24 +69,6 @@ class MyApp extends StatelessWidget {
 
   ThemeData? themeData() {
     return Constants.lightTheme;
-    // return ThemeData.light();
-    // return null;
-    // return ThemeData(
-    //   // Define the default brightness and colors.
-    //   brightness: Brightness.dark,
-    //   primaryColor: Colors.red[800],
-
-    //   textButtonTheme: TextButtonThemeData(
-    //     style: ButtonStyle(
-    //       foregroundColor: WidgetStateProperty.all<Color>(
-    //           Constants.defaultTheme.mainTextColor),
-    //     ),
-    //   ),
-
-    //   buttonTheme: ButtonThemeData(
-    //     buttonColor: Constants.defaultTheme.mainHighlightColor,
-    //   ),
-    // );
   }
 
   Map<String, WidgetBuilder> get routeConstructor {

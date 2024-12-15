@@ -21,10 +21,10 @@ extension DurationExtension on Duration {
     var minutes = inMinutes % 60;
     var seconds = inSeconds % 60;
 
-    var daysS = days > 0 ? "${days} days" : "";
-    var hoursS = hours > 0 ? "${hours} hours" : "";
-    var minutesS = minutes > 0 ? "${minutes} mins" : "";
-    var secondsS = seconds > 0 ? "${seconds} secs" : "";
+    var daysS = days > 0 ? "${days} Days" : "";
+    var hoursS = hours > 0 ? "${hours} Hours" : "";
+    var minutesS = minutes > 0 ? "${minutes} Mins" : "";
+    var secondsS = seconds > 0 ? "${seconds} Secs" : "";
 
     var parts =
         [daysS, hoursS, minutesS, secondsS].where((a) => a.isNotEmpty).toList();
