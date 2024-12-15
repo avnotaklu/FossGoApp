@@ -11,6 +11,7 @@ import 'package:go/modules/auth/sign_in_dto.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/bad_request_error.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
+import 'package:go/services/game_and_opponent.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
 import 'package:go/services/guest_user.dart';
@@ -182,6 +183,16 @@ class Api {
     );
 
     return convert(res, (a) => UserStat.fromJson(a));
+  }
+
+  Future<Either<AppError, GameAndOpponent>> getGameAndOpponent(
+      String gameId, String token) async {
+    var res = await get(
+      Uri.parse("$baseUrl/Game/$gameId/GameAndOpponent"),
+      token,
+    );
+
+    return convert(res, (a) => GameAndOpponent.fromJson(a));
   }
 
   Future<Either<AppError, Game>> createGame(

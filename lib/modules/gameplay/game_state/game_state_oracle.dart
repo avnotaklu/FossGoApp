@@ -9,6 +9,7 @@ import 'package:go/modules/gameplay/middleware/time_calculator.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 import 'package:go/modules/stats/stats_repository.dart';
+import 'package:go/services/game_and_opponent.dart';
 import 'package:go/services/user_account.dart';
 import 'package:signalr_netcore/errors.dart';
 
@@ -195,10 +196,10 @@ class LiveGameOracle extends GameStateOracle {
     required this.authBloc,
     required this.signalRbloc,
     required this.ratings,
-    GameJoinMessage? joiningData,
+    GameAndOpponent? joiningData,
   }) {
     if (joiningData != null) {
-      otherPlayerInfo = joiningData.otherPlayerData;
+      otherPlayerInfo = joiningData.opponent;
     }
     setupStreams();
 

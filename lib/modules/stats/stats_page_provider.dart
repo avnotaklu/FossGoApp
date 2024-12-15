@@ -3,6 +3,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/services/api.dart';
+import 'package:go/services/game_and_opponent.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/user_stats.dart';
 
@@ -107,6 +109,7 @@ class StatsPageProvider extends ChangeNotifier {
   FilteredTimeStandard get timeStandard => _filteredVariant.timeStandard;
 
   final AuthProvider authPro;
+  final Api api;
 
   UserStatForVariant? get _statsForVariant =>
       _stats.stats[_filteredVariant.variantType];
@@ -117,7 +120,8 @@ class StatsPageProvider extends ChangeNotifier {
   final UserStat _stats;
   final PlayerRating _rating;
 
-  StatsPageProvider(this.authPro, VariantType? filteredVariant, this._stats, this._rating)
+  StatsPageProvider(this.authPro, this.api, VariantType? filteredVariant,
+      this._stats, this._rating)
       : assert(filteredVariant?.boardSize != BoardSize.other),
         _filteredVariant = filteredVariant?.statView ??
             FilterableVariantType(
@@ -160,7 +164,6 @@ class StatsPageProvider extends ChangeNotifier {
   //       _filteredVariant.timeStandard == FilteredTimeStandard.all) {
   //     return left("not available without specific time control");
   //   }wwwaaaaaaaa
-   
 
   //   return right(_ratingForVariant!);
   // }
@@ -193,5 +196,10 @@ class StatsPageProvider extends ChangeNotifier {
   void changeVariant(FilteredBoardSize? b, FilteredTimeStandard? t) {
     _filteredVariant = _filteredVariant.modify(b, t);
     notifyListeners();
+  }
+
+  Future<Either<AppError, GameAndOpponent>> loadGame(String gameId) {
+    final t = authPro.token!;
+    return api.getGameAndOpponent(gameId, t);
   }
 }

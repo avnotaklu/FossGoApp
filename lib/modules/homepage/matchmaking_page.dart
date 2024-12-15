@@ -4,10 +4,11 @@ import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
-import 'package:go/modules/homepage/profile/live_game_widget.dart';
+import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/services/find_match_dto.dart';
 import 'package:go/modules/homepage/matchmaking_provider.dart';
@@ -119,7 +120,7 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context) {
                               return LiveGameWidget(
-                                  event.game, event, statRepo);
+                                  event.game, event.getGameAndOpponent(), statRepo);
                             }));
                           }
                         });

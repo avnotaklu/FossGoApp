@@ -8,7 +8,7 @@ import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/homepage/custom_games_page.dart';
-import 'package:go/modules/homepage/profile/live_game_widget.dart';
+import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';

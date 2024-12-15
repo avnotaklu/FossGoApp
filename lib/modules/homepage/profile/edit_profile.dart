@@ -9,6 +9,7 @@ import 'package:go/modules/homepage/matchmaking_page.dart';
 import 'package:go/modules/homepage/profile/edit_profile_provider.dart';
 import 'package:go/services/api.dart';
 import 'package:go/widgets/app_error_snackbar.dart';
+import 'package:go/widgets/basic_alert.dart';
 import 'package:go/widgets/my_text_form_field.dart';
 import 'package:provider/provider.dart';
 
@@ -77,17 +78,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text("Email Services not available"),
-                              content: Text("Planning to do later"),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text("OK"),
-                                )
-                              ],
+                            return const BasicDialog(
+                              title: "Email Services not available",
+                              content: "Planning to do later",
                             );
                           },
                         );

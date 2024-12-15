@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
-import 'package:go/modules/homepage/profile/live_game_widget.dart';
+import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
@@ -11,6 +11,7 @@ import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/public_user_info.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:provider/provider.dart';
 
 class GameCard extends StatelessWidget {
@@ -37,11 +38,11 @@ class GameCard extends StatelessWidget {
           content: Text(e.message),
         ),
       );
-    }, (joinMessage) {
+    }, (GameJoinMessage? joinMessage) {
                     final statRepo = context.read<IStatsRepository>();
       Navigator.pushReplacement(context,
           MaterialPageRoute<void>(builder: (BuildContext context) {
-        return LiveGameWidget(game, joinMessage,statRepo);
+        return LiveGameWidget(game, joinMessage?.getGameAndOpponent(),statRepo);
       }));
     });
   }

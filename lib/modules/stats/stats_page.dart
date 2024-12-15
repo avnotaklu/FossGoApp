@@ -8,11 +8,14 @@ import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/core/utils/theme_helpers/text_theme_helper.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/stats/stats_page_provider.dart';
 import 'package:go/modules/stats/stats_repository.dart';
+import 'package:go/services/api.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/user_stats.dart';
+import 'package:go/widgets/basic_alert.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:provider/provider.dart';
 
@@ -47,7 +50,7 @@ class StatsPage extends StatelessWidget {
                 return ChangeNotifierProvider(
                   create: (context) => StatsPageProvider(
                     context.read<AuthProvider>(),
-                    // defaultVariant,
+                    Api(),
                     VariantType(BoardSize.nine, TimeStandard.blitz),
                     data.$1,
                     data.$2,
@@ -66,58 +69,53 @@ class StatsPage extends StatelessWidget {
                                 SliverPersistentHeader(
                                   pinned: true,
                                   delegate: PersistentHeader(
-                                      widget: Container(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Text(
-                                          "Stats for",
-                                          style:
-                                              context.textTheme.headlineSmall,
-                                        ),
-                                        Container(
-                                          width: 90,
-                                          child: MyDropDown(
-                                            // label: "Time",
-                                            label: null,
-                                            items: FilteredBoardSize.values,
-                                            selectedItem: pro.boardSize,
-                                            itemBuilder: (v) =>
-                                                DropdownMenuItem(
-                                              child: Text(
-                                                v.stringRepr,
-                                                style: context
-                                                    .textTheme.labelLarge,
-                                              ),
-                                              value: v,
+                                      widget: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Text(
+                                        "Stats for",
+                                        style: context.textTheme.headlineSmall,
+                                      ),
+                                      SizedBox(
+                                        width: 90,
+                                        child: MyDropDown(
+                                          // label: "Time",
+                                          label: null,
+                                          items: FilteredBoardSize.values,
+                                          selectedItem: pro.boardSize,
+                                          itemBuilder: (v) => DropdownMenuItem(
+                                            value: v,
+                                            child: Text(
+                                              v.stringRepr,
+                                              style:
+                                                  context.textTheme.labelLarge,
                                             ),
-                                            onChanged: (v) =>
-                                                pro.changeVariant(v, null),
                                           ),
+                                          onChanged: (v) =>
+                                              pro.changeVariant(v, null),
                                         ),
-                                        Container(
-                                          width: 150,
-                                          child: MyDropDown(
-                                            // label: "Size",
-                                            label: null,
-                                            items: FilteredTimeStandard.values,
-                                            selectedItem: pro.timeStandard,
-                                            itemBuilder: (v) =>
-                                                DropdownMenuItem(
-                                              child: Text(
-                                                v.stringRepr,
-                                                style: context
-                                                    .textTheme.labelLarge,
-                                              ),
-                                              value: v,
+                                      ),
+                                      SizedBox(
+                                        width: 150,
+                                        child: MyDropDown(
+                                          // label: "Size",
+                                          label: null,
+                                          items: FilteredTimeStandard.values,
+                                          selectedItem: pro.timeStandard,
+                                          itemBuilder: (v) => DropdownMenuItem(
+                                            value: v,
+                                            child: Text(
+                                              v.stringRepr,
+                                              style:
+                                                  context.textTheme.labelLarge,
                                             ),
-                                            onChanged: (v) =>
-                                                pro.changeVariant(null, v),
                                           ),
+                                          onChanged: (v) =>
+                                              pro.changeVariant(null, v),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   )),
                                 ),
                                 SliverToBoxAdapter(
@@ -125,7 +123,7 @@ class StatsPage extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      SizedBox(height: 20),
+                                      const SizedBox(height: 20),
                                       Container(
                                         padding: EdgeInsets.symmetric(
                                             horizontal: 24),
@@ -165,7 +163,7 @@ class StatsPage extends StatelessWidget {
                                               height: 20,
                                             ),
                                             pro.getStats().fold(
-                                                  (l) => Container(
+                                                  (l) => SizedBox(
                                                     height:
                                                         context.height * 0.5,
                                                     width: context.width * 0.5,
@@ -340,7 +338,7 @@ class StatsPage extends StatelessWidget {
                                                                           fontStyle:
                                                                               FontStyle.italic),
                                                                 ),
-                                                                Container(
+                                                                SizedBox(
                                                                   width: 140,
                                                                   child:
                                                                       Divider(
@@ -369,7 +367,7 @@ class StatsPage extends StatelessWidget {
                                                                           fontStyle:
                                                                               FontStyle.italic),
                                                                 ),
-                                                                Container(
+                                                                SizedBox(
                                                                   width: 140,
                                                                   child:
                                                                       Divider(
@@ -413,7 +411,7 @@ class StatsPage extends StatelessWidget {
                                                           ),
                                                         )
                                                       else
-                                                        Container(
+                                                        SizedBox(
                                                           height: 500,
                                                           width:
                                                               double.infinity,
@@ -480,6 +478,7 @@ class GameResultWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pro = context.read<StatsPageProvider>();
     return ListTile(
       title: Text(
         "${result.opponentName} (${result.opponentRating})",
@@ -490,7 +489,27 @@ class GameResultWidget extends StatelessWidget {
         style: context.textTheme.labelLarge,
       ),
       contentPadding: EdgeInsets.all(0),
-      onTap: () {},
+      onTap: () async {
+        final statsRepo = context.read<IStatsRepository>();
+
+        final res = await pro.loadGame(result.gameId);
+
+        return res.fold(
+          (l) {
+            showDialog(
+                context: context,
+                builder: (context) {
+                  return BasicDialog(
+                      title: "Game did not load", content: l.message);
+                });
+          },
+          (r) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return LiveGameWidget(r.game, r, statsRepo);
+            }));
+          },
+        );
+      },
       trailing: Icon(
         Icons.keyboard_arrow_right,
         weight: 1,
@@ -592,7 +611,7 @@ class InfoText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: maxWidth,
       child: Column(
         children: [
@@ -621,7 +640,7 @@ class PersistentHeader extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: 56.0,
       child: Card(

@@ -5,6 +5,7 @@ import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
+import 'package:go/services/game_and_opponent.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/find_match_result.dart';
@@ -124,7 +125,7 @@ class SignalRMessageTypes {
   static const String acceptedScores = "AcceptedScores";
   static const String gameOver = "GameOver";
   static const String gameTimerUpdate = "GameTimerUpdate";
-  static const String matchFound = "MatchFound"; 
+  static const String matchFound = "MatchFound";
   static const String statUpdate = "StatUpdate";
 }
 
@@ -272,6 +273,17 @@ class NewGameCreatedMessage extends SignalRMessageType {
   factory NewGameCreatedMessage.fromJson(String source) =>
       NewGameCreatedMessage.fromMap(
           json.decode(source) as Map<String, dynamic>);
+}
+
+extension GameJoinMessageExt on GameJoinMessage {
+  GameAndOpponent? getGameAndOpponent() {
+    return otherPlayerData == null
+        ? null
+        : GameAndOpponent(
+            game: game,
+            opponent: otherPlayerData!,
+          );
+  }
 }
 
 class GameJoinMessage extends SignalRMessageType {
