@@ -1,0 +1,37 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
+
+import 'package:go/services/game_and_opponent.dart';
+
+extension GamesHistoryExt on GamesHistoryBatch {
+  int get maxLength => 12;
+  int get length => games.length;
+}
+
+class GamesHistoryBatch {
+  final List<GameAndOpponent> games;
+  GamesHistoryBatch({
+    required this.games,
+  });
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'games': games.map((x) => x.toMap()).toList(),
+    };
+  }
+
+  factory GamesHistoryBatch.fromMap(Map<String, dynamic> map) {
+    return GamesHistoryBatch(
+      games: List<GameAndOpponent>.from(
+        (map['games'] as List).map<GameAndOpponent>(
+          (x) => GameAndOpponent.fromMap(x as Map<String, dynamic>),
+        ),
+      ),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory GamesHistoryBatch.fromJson(String source) =>
+      GamesHistoryBatch.fromMap(json.decode(source) as Map<String, dynamic>);
+}

@@ -43,27 +43,7 @@ dependencies:
     git:
       url: git@github.com:avnotaklu/barebones_timer.git
       ref: master
-  timer_count_down:
-    # git:
-    #   url: git@github.com:avnotaklu/simple_count_down.git
-    #   ref: master
-    path: /home/ssp/dart/packages/simple_count_down
   ntp: ^2.0.0
- #  firebase_core:  any
-    # ^1.8.0
-  # firebase_core: ^2.13.1
-  # firebase_database: any
-    # ^8.0.1
-  # firebase_database: ^10.2.2
-  # cloud_firestore: any
-    #^2.5.3
-  # cloud_firestore: ^4.8.0
-  # firebase_auth: ^4.6.2
-  # firebase_auth_web: any
-  # firebase_core_web: any
-  # firebase_database_web: any
-
-
 
   google_sign_in: ^6.2.1
   provider: ^6.0.1
@@ -74,12 +54,13 @@ dependencies:
   test: ^1.25.7
   mocktail: ^1.0.4
   responsive_framework: ^1.5.1
-
-  cloud_firestore_web: any
   google_sign_in_web: any
   http: any
   intl: ^0.20.1
   country_picker: ^2.0.27
+  paginated_list: ^1.2.3
+
+  # For hive
   hive: ^2.2.3
   isar_flutter_libs: ^4.0.0-dev.13
   path_provider: ^2.1.0
