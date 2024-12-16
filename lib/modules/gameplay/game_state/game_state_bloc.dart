@@ -37,7 +37,7 @@ class GameStateBloc extends ChangeNotifier {
 
   int get gametime => game.timeControl.mainTimeSeconds;
 
-  StoneType? get getWinnerStone => game.result?.etWinnerStone();
+  StoneType? get getWinnerStone => game.result?.getWinnerStone();
   StoneType? get getLoserStone => game.result?.getLoserStone();
 
   GameOverMethod? get getGameOverMethod => game.gameOverMethod;
@@ -46,12 +46,6 @@ class GameStateBloc extends ChangeNotifier {
         game.finalTerritoryScores[0].toDouble() + game.prisoners[0],
         game.finalTerritoryScores[1].toDouble() + game.prisoners[1] + game.komi,
       ];
-
-  String getPlayerIdFromStoneType(StoneType stone) {
-    return game.players.entries
-        .firstWhere((element) => element.value == stone)
-        .key;
-  }
 
   Map<StoneType, bool> acceptedBy = {
     StoneType.black: false,
@@ -139,15 +133,6 @@ class GameStateBloc extends ChangeNotifier {
         systemUtilities.currentTime.difference(
           game.playerTimeSnapshots[playerTurn].snapshotTimestamp,
         ));
-  }
-
-  String getPlayerIdFromTurn(int turn) {
-    for (var e in game.players.entries) {
-      if (e.value.index == turn) {
-        return e.key;
-      }
-    }
-    throw NotImplementedException();
   }
 
   Future<Either<AppError, Game>> continueGame() async {

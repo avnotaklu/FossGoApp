@@ -22,12 +22,12 @@ extension StoneTypeExtension on StoneType {
         StoneType.black => StoneType.white,
         StoneType.white => StoneType.black,
       };
-  
+
   GameResult get resultForIWon => switch (this) {
         StoneType.black => GameResult.blackWon,
         StoneType.white => GameResult.whiteWon,
       };
-  
+
   GameResult get resultForOtherWon => switch (this) {
         StoneType.black => GameResult.whiteWon,
         StoneType.white => GameResult.blackWon,
@@ -146,7 +146,7 @@ class GameFieldNames {
 // }
 
 extension GameResultExt on GameResult {
-  StoneType? etWinnerStone() {
+  StoneType? getWinnerStone() {
     return switch (this) {
       GameResult.blackWon => StoneType.black,
       GameResult.whiteWon => StoneType.white,
@@ -155,7 +155,7 @@ extension GameResultExt on GameResult {
   }
 
   StoneType? getLoserStone() {
-    return etWinnerStone()?.other;
+    return getWinnerStone()?.other;
   }
 }
 
@@ -166,30 +166,23 @@ enum GameResult {
 }
 
 extension GameExts on Game {
-  List<String> get playerIdsSorted => players
-      .toSortedList(
-        Order.from(
-          (a, b) => players[a]!.index.compareTo(players[b]!.index),
-        ),
-      )
-      .map((e) => e.key)
-      .toList();
-
   String? getPlayerIdWithTurn() {
     if (startTime == null) return null;
 
-    final turn = moves.length;
-    for (var item in players.entries) {
-      if (item.value.index == (turn % 2)) {
-        return item.key;
-      }
+    final turn = moves.length % 2;
+
+    if (players.length < 2) {
+      throw StateError(
+          "This path shouldn't be reachable, as there always exists one user with supposed next turn");
     }
-    throw StateError(
-        "This path shouldn't be reachable, as there always exists one user with supposed next turn");
+
+    return players[turn];
   }
 
   StoneType? getStoneFromPlayerId(String id) {
-    return players[id];
+    var idx = players.indexOf(id);
+    if (idx == -1) return null;
+    return StoneType.values[idx];
   }
 
   StoneType? getOtherStoneFromPlayerId(String id) {
@@ -200,12 +193,10 @@ extension GameExts on Game {
 
   String? getPlayerIdFromStoneType(StoneType stone) {
     if (startTime == null) return null;
-    for (var item in players.entries) {
-      if (item.value == stone) {
-        return item.key;
-      }
+    if (players.length < 2) {
+      throw StateError("Player: {stone} has not yet joined the game");
     }
-    throw StateError("Player: {stone} has not yet joined the game");
+    return players[stone.index];
   }
 
   String? getOtherPlayerIdFromPlayerId(String id) {
@@ -274,7 +265,7 @@ class Game {
   final Map<Position, StoneType> playgroundMap;
   final List<GameMove> moves;
   final List<PlayerTimeSnapshot> playerTimeSnapshots;
-  final Map<String, StoneType> players;
+  final List<String> players;
   final DateTime? startTime;
   final Position? koPositionInLastMove;
   final GameState gameState;
@@ -328,12 +319,7 @@ class Game {
         ),
       ),
       GameFieldNames.Moves: moves.map((x) => x.toMap()).toList(),
-      GameFieldNames.Players: players.map<String, int>(
-        (key, value) => MapEntry(
-          key,
-          value.index,
-        ),
-      ),
+      GameFieldNames.Players: players,
       GameFieldNames.Prisoners: prisoners,
       GameFieldNames.StartTime: startTime?.toIso8601String(),
       GameFieldNames.KoPositionInLastMove: koPositionInLastMove?.toString(),
@@ -374,13 +360,8 @@ class Game {
           (x) => GameMove.fromMap(x as Map<String, dynamic>),
         ),
       ),
-      players: Map<String, StoneType>.from(
-        Map<String, int>.from(map[GameFieldNames.Players]).map(
-          (key, value) => MapEntry(
-            key,
-            StoneType.values[value],
-          ),
-        ),
+      players: List<String>.from(
+        map[GameFieldNames.Players] as List,
       ),
       prisoners: List<int>.from((map[GameFieldNames.Prisoners])),
       startTime: map[GameFieldNames.StartTime] == null
@@ -441,7 +422,7 @@ class Game {
     List<int>? prisoners,
     Map<Position, StoneType>? playgroundMap,
     List<GameMove>? moves,
-    Map<String, StoneType>? players,
+    List<String>? players,
     DateTime? startTime,
     Position? koPositionInLastMove,
     GameState? gameState,

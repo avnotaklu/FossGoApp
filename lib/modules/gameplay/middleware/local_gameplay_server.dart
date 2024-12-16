@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -38,7 +37,7 @@ class LocalGameplayServer {
   late Map<Position, StoneType> _playgroundMap;
   late List<GameMove> _moves;
   late List<PlayerTimeSnapshot> _playerTimeSnapshots;
-  late Map<String, StoneType> _players;
+  late List<String> _players;
   late DateTime _startTime;
   Position? _koPositionInLastMove;
   late GameState _gameState;
@@ -81,7 +80,7 @@ class LocalGameplayServer {
       _timeControl.getStartingSnapshot(_startTime, true),
       _timeControl.getStartingSnapshot(_startTime, false),
     ];
-    _players = {"bottom": StoneType.black, "top": StoneType.white};
+    _players = ["bottom", "top"];
     _koPositionInLastMove = null;
     _gameState = GameState.playing;
     _stoneStates = {};
@@ -94,30 +93,29 @@ class LocalGameplayServer {
 
   Game getGame() {
     return Game(
-      gameId: "LocalGame",
-      rows: _rows,
-      columns: _columns,
-      timeControl: _timeControl,
-      playgroundMap: _playgroundMap,
-      moves: _moves,
-      players: _players,
-      prisoners: _prisoners,
-      startTime: _startTime,
-      koPositionInLastMove: _koPositionInLastMove,
-      gameState: _gameState,
-      deadStones: deadStones,
-      result: _result,
-      komi: _komi,
-      finalTerritoryScores: _finalTerritoryScores,
-      endTime: _endTime,
-      gameOverMethod: _gameOverMethod,
-      playerTimeSnapshots: _playerTimeSnapshots,
-      gameCreator: null,
-      stoneSelectionType: StoneSelectionType.auto,
-      playersRatingsAfter: [],
-      playersRatingsDiff: [],
-      gameType: GameType.anonymous
-    );
+        gameId: "LocalGame",
+        rows: _rows,
+        columns: _columns,
+        timeControl: _timeControl,
+        playgroundMap: _playgroundMap,
+        moves: _moves,
+        players: _players,
+        prisoners: _prisoners,
+        startTime: _startTime,
+        koPositionInLastMove: _koPositionInLastMove,
+        gameState: _gameState,
+        deadStones: deadStones,
+        result: _result,
+        komi: _komi,
+        finalTerritoryScores: _finalTerritoryScores,
+        endTime: _endTime,
+        gameOverMethod: _gameOverMethod,
+        playerTimeSnapshots: _playerTimeSnapshots,
+        gameCreator: null,
+        stoneSelectionType: StoneSelectionType.auto,
+        playersRatingsAfter: [],
+        playersRatingsDiff: [],
+        gameType: GameType.anonymous);
   }
 
   log(String m) {

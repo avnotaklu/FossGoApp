@@ -45,15 +45,13 @@ class MyApp extends StatelessWidget {
         builder: (context, child) => MaterialApp(
           builder: (context, child) => responsiveWidgetSetup(context, child),
           debugShowCheckedModeBanner: false,
-          home: initialPage(),
+          initialRoute: "/",
           theme: themeData(),
           routes: routeConstructor,
         ),
       ),
     );
   }
-
-  Widget initialPage() => const SignIn();
 
   Widget responsiveWidgetSetup(BuildContext context, Widget? child) => SafeArea(
         child: ResponsiveBreakpoints.builder(
@@ -73,6 +71,9 @@ class MyApp extends StatelessWidget {
 
   Map<String, WidgetBuilder> get routeConstructor {
     return <String, WidgetBuilder>{
+      '/': (BuildContext context) {
+        return const SignIn();
+      },
       '/HomePage': (BuildContext context) {
         return MultiProvider(
           providers: [

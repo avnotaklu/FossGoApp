@@ -35,7 +35,11 @@ class _SignInState extends State<SignIn> {
           (route) => route.isFirst,
         );
       }, (r) {
-        navigateToHome();
+        if (r != null) {
+          navigateToHome();
+        } else {
+          Navigator.popUntil(context, ModalRoute.withName('/'));
+        }
       });
     });
   }

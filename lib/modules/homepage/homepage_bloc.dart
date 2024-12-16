@@ -29,7 +29,7 @@ class HomepageBloc extends ChangeNotifier {
 
   final AuthProvider authBloc;
 
-  Future<Either<AppError, GameJoinMessage?>> joinGame(
+  Future<Either<AppError, GameJoinMessage>> joinGame(
       String gameId, String token) async {
     var game = await api.joinGame(GameJoinDto(gameId: gameId), token);
     return game;

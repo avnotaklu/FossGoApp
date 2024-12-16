@@ -36,9 +36,9 @@ class AuthProvider {
       StreamController.broadcast();
   Stream<UserAccount> get currentUser => _currentUserStreamController.stream;
 
-  final StreamController<Either<AppError, AbstractUserAccount>>
+  final StreamController<Either<AppError, AbstractUserAccount?>>
       _authResultStreamController = StreamController.broadcast();
-  Stream<Either<AppError, AbstractUserAccount>> get authResult =>
+  Stream<Either<AppError, AbstractUserAccount?>> get authResult =>
       _authResultStreamController.stream;
 
   AbstractUserAccount? _currentUserRaw;
@@ -228,8 +228,8 @@ class AuthProvider {
     await sharedPrefs.remove('user');
     await sharedPrefs.remove('token');
     await signlRBloc.disconnect();
+    _authResultStreamController.add(right(null));
     _currentUserRaw = null;
     _token = null;
   }
 }
-

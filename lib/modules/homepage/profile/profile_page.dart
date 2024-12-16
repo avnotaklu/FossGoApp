@@ -334,7 +334,9 @@ class ProfilePage extends StatelessWidget {
                             height: 20,
                           ),
                           PrimaryButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              await authProvider.logout();
+                            },
                             text: "Logout",
                           ),
                         ],

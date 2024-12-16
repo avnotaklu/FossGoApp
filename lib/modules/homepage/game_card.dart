@@ -38,11 +38,11 @@ class GameCard extends StatelessWidget {
           content: Text(e.message),
         ),
       );
-    }, (GameJoinMessage? joinMessage) {
+    }, (GameJoinMessage joinMessage) {
                     final statRepo = context.read<IStatsRepository>();
       Navigator.pushReplacement(context,
           MaterialPageRoute<void>(builder: (BuildContext context) {
-        return LiveGameWidget(game, joinMessage?.getGameAndOpponent(),statRepo);
+        return LiveGameWidget(joinMessage.game, joinMessage.getGameAndOpponent(),statRepo);
       }));
     });
   }
