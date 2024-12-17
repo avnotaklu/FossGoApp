@@ -36,7 +36,9 @@ class MatchmakingProvider extends ChangeNotifier {
 
   List<MatchableBoardSizes> allBoardSizes = [...MatchableBoardSizes.values];
 
-  List<TimeControlDto> selectedTimeControls = [];
+  List<TimeControlDto> selectedTimeControls = [
+    constants.timeControlsForMatch[0]
+  ];
 
   List<TimeControlDto> allTimeControls = [...constants.timeControlsForMatch];
 

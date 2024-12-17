@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/foundation/set.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
+import 'package:go/modules/homepage/game_card.dart';
+import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
@@ -41,69 +44,141 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('Board Size', style: titleLargeStyle(context)),
-              SizedBox(
-                  height: MediaQuery.sizeOf(context).width * 0.15,
-                  child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: provider.allBoardSizes
-                          .map(
-                            (size) => Expanded(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: boardSizeSelector(
-                                  size,
-                                  provider,
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList())),
+              SizedBox(height: 6.0),
+              Container(
+                width: double.infinity,
+                child: SegmentedButton(
+                  multiSelectionEnabled: true,
+                  segments: provider.allBoardSizes
+                      .map(
+                        (e) => ButtonSegment(
+                          value: e,
+                          icon: Icon(Icons.close),
+                          label: Text(e.boardName),
+                        ),
+                      )
+                      .toList(),
+                  onSelectionChanged: (p0) {
+                    final newElem = p0
+                        .symmetricDifference(
+                            provider.selectedBoardSizes.toSet())
+                        .first;
+                    provider.modifyBoardSize(newElem,
+                        !provider.selectedBoardSizes.contains(newElem));
+                  },
+                  selected: provider.selectedBoardSizes.toSet(),
+                ),
+              ),
+
+              // SizedBox(
+              //     height: MediaQuery.sizeOf(context).width * 0.15,
+              //     child: Row(
+              //         mainAxisSize: MainAxisSize.max,
+              //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              //         children: provider.allBoardSizes
+              //             .map(
+              //               (size) => Expanded(
+              //                 child: Padding(
+              //                   padding:
+              //                       const EdgeInsets.symmetric(horizontal: 8.0),
+              //                   child: boardSizeSelector(
+              //                     size,
+              //                     provider,
+              //                   ),
+              //                 ),
+              //               ),
+              //             )
+              //             .toList())),
+              SizedBox(height: 10),
               Text(
                 'Time Controls',
                 style: titleLargeStyle(context),
               ),
               SizedBox(height: 6.0),
-              Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: provider.allTimeControls
+
+              Container(
+                width: double.infinity,
+                child: SegmentedButton(
+                  multiSelectionEnabled: true,
+                  segments: provider.allTimeControls.indexed
+                      .where((rec) => rec.$1 % 2 == 0)
+                      .map((rec) => rec.$2)
                       .map(
-                        (timeControl) => Container(
-                          height: MediaQuery.sizeOf(context).width * 0.15,
-                          padding: EdgeInsets.symmetric(
-                            vertical: 6.0,
-                            horizontal: 8.0,
+                        (e) => ButtonSegment(
+                          value: e,
+                          icon: Icon(Icons.close),
+                          label: Text(
+                            e.repr(),
+                            textAlign: TextAlign.center,
                           ),
-                          child: timeSelector(timeControl, provider),
                         ),
                       )
-                      .toList()),
-              const Spacer(),
+                      .toList(),
+                  onSelectionChanged: (p0) {
+                    final newElem = p0
+                        .symmetricDifference(
+                            provider.selectedTimeControls.toSet())
+                        .first;
+                    provider.modifyTimeControl(newElem,
+                        !provider.selectedTimeControls.contains(newElem));
+                  },
+                  selected: provider.selectedTimeControls.toSet(),
+                ),
+              ),
+              SizedBox(height: 10),
 
-              // TODO: adjust this somewhere, preferably on the first page, user sees, which is this
-              // const Text("My Games", style: TextStyle(fontSize: 30)),
-              // const SizedBox(height: 20),
-              // Expanded(
-              //   child: Padding(
-              //     padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              //     child: ListView.builder(
-              //       shrinkWrap: true,
-              //       itemCount: context.read<HomepageBloc>().myGames.length,
-              //       itemBuilder: (context, index) {
-              //         final game =
-              //             context.read<HomepageBloc>().myGames[index];
-              //         return GameCard(
-              //           game: game.game,
-              //           otherPlayerData: game.opposingPlayer,
-              //         );
-              //       },
-              //     ),
-              //   ),
+              Container(
+                width: double.infinity,
+                child: SegmentedButton(
+                  multiSelectionEnabled: true,
+                  segments: provider.allTimeControls.indexed
+                      .where((rec) => rec.$1 % 2 == 1)
+                      .map((rec) => rec.$2)
+                      .map(
+                        (e) => ButtonSegment(
+                          
+                          value: e,
+                          icon: Icon(Icons.close),
+                          label: Text(
+                            e.repr(),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onSelectionChanged: (p0) {
+                    final newElem = p0
+                        .symmetricDifference(
+                            provider.selectedTimeControls.toSet())
+                        .first;
+                    provider.modifyTimeControl(newElem,
+                        !provider.selectedTimeControls.contains(newElem));
+                  },
+                  selected: provider.selectedTimeControls.toSet(),
+                ),
+              ),
 
+              // Column(
+              //     mainAxisSize: MainAxisSize.max,
+              //     children: provider.allTimeControls
+              //         .map(
+              //           (timeControl) => Container(
+              //             height: MediaQuery.sizeOf(context).width * 0.15,
+              //             padding: EdgeInsets.symmetric(
+              //               vertical: 6.0,
+              //               horizontal: 8.0,
+              //             ),
+              //             child: timeSelector(timeControl, provider),
+              //           ),
+              //         )
+              //         .toList()),
+
+              SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   PrimaryButton(
                       text: "Play",
@@ -119,14 +194,35 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                             final statRepo = context.read<IStatsRepository>();
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context) {
-                              return LiveGameWidget(
-                                  event.game, event.getGameAndOpponent(), statRepo);
+                              return LiveGameWidget(event.game,
+                                  event.getGameAndOpponent(), statRepo);
                             }));
                           }
                         });
                       }),
                 ],
-              )
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Text("Ongoing games", style: context.textTheme.headlineSmall),
+              const SizedBox(height: 20),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: context.read<HomepageBloc>().myGames.length,
+                    itemBuilder: (context, index) {
+                      final game = context.read<HomepageBloc>().myGames[index];
+                      return GameCard(
+                        game: game.game,
+                        otherPlayerData: game.opposingPlayer,
+                      );
+                    },
+                  ),
+                ),
+              ),
             ]),
           ),
         ),

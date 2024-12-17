@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 
 import 'package:go/core/error_handling/app_error.dart';
+import 'package:go/models/game.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/user_account.dart';
@@ -14,7 +15,10 @@ import 'package:go/services/signal_r_message.dart';
 
 class HomepageBloc extends ChangeNotifier {
   List<UserAccount> otherActivePlayers = [];
-  List<AvailableGame> availableGames = [];
+  List<AvailableGame> _availableGames = [];
+  List<AvailableGame> get availableGames => _availableGames
+      .where((a) => a.game.didStart() && !a.game.didEnd())
+      .toList();
   List<MyGame> myGames = [];
 
   var api = Api();
@@ -40,7 +44,7 @@ class HomepageBloc extends ChangeNotifier {
     game.fold((e) {
       debugPrint("Couldn't get available games");
     }, (games) {
-      availableGames.addAll(games.games);
+      _availableGames.addAll(games.games);
       notifyListeners();
     });
   }
@@ -64,7 +68,7 @@ class HomepageBloc extends ChangeNotifier {
           myGames.add(
               MyGame(game: newGameMessage.game.game, opposingPlayer: null));
         } else {
-          availableGames.add(newGameMessage.game);
+          _availableGames.add(newGameMessage.game);
         }
         notifyListeners();
       }

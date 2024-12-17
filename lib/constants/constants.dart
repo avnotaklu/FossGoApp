@@ -233,6 +233,9 @@ ThemeData buildTheme({
       secondary: highlight,
       onSecondary: tc,
 
+      secondaryContainer: highlight,
+      onSecondaryContainer: Colors.black,
+
       tertiary: cardi,
       onTertiary: card,
 
