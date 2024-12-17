@@ -3,6 +3,7 @@ import 'package:barebones_timer/timer_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
+import 'package:go/models/minimal_rating.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:provider/provider.dart';
@@ -62,7 +63,8 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                         textAlign: TextAlign.center,
                         style: context.textTheme.bodyLarge,
                       ),
-                      if (ratings != null) ratingText(ratings),
+                      if (widget.playerInfo?.rating != null)
+                        ratingText(widget.playerInfo!.rating!),
                     ],
                   ),
                   Row(
@@ -131,13 +133,14 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
     );
   }
 
-  Widget ratingText(PlayerRatingData ratings) {
+  Widget ratingText(MinimalRating rating) {
     return RichText(
       text: TextSpan(
-          text: " ( ${ratings.glicko.rating.toStringAsFixed(0)}",
+          text: " ( ${rating.stringify()}",
           style: context.textTheme.labelLarge,
           children: [
-            ...ratingDiffText(widget.game, widget.playerInfo),
+            if (widget.playerInfo != null)
+              ...ratingDiffText(widget.playerInfo!),
             const TextSpan(
               text: " )",
             ),
@@ -146,9 +149,8 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
     );
   }
 
-  List<TextSpan> ratingDiffText(Game game, DisplayablePlayerData? player) {
-    if (player?.stoneType == null) return [];
-    final diff = getRatingDiff(game, player!.stoneType!);
+  List<TextSpan> ratingDiffText(DisplayablePlayerData player) {
+    final diff = player.ratingDiffOnEnd;
     if (diff != null) {
       final sign = diff > 0 ? "+" : "-";
       return [

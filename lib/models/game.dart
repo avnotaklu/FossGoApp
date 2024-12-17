@@ -32,7 +32,7 @@ extension StoneTypeExtension on StoneType {
         StoneType.black => GameResult.whiteWon,
         StoneType.white => GameResult.blackWon,
       };
-  
+
   T? getValueFromPlayerList<T>(List<T> list) {
     return list.getValueByStone(this);
   }
@@ -226,6 +226,18 @@ extension GameExts on Game {
 
   bool didStart() {
     return gameState != GameState.waitingForStart;
+  }
+
+  bool didEnd() {
+    return gameState == GameState.ended;
+  }
+
+  List<MinimalRating> ratingsBefore() {
+    if (!didEnd()) return [];
+    return playersRatingsAfter
+        .zip(playersRatingsDiff)
+        .map((rec) => MinimalRating(rec.$1.rating - rec.$2, rec.$1.provisional))
+        .toList();
   }
 
   Game buildWithNewBoardState(BoardState b) {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/utils/system_utilities.dart';
+import 'package:go/models/minimal_rating.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/game.dart';
@@ -20,12 +21,14 @@ import 'package:signalr_netcore/errors.dart';
 class DisplayablePlayerData {
   final String displayName;
   final StoneType? stoneType;
-  final PlayerRatingData? rating;
+  final MinimalRating? rating;
+  final int? ratingDiffOnEnd;
 
   DisplayablePlayerData({
     required this.displayName,
     required this.stoneType,
     required this.rating,
+    required this.ratingDiffOnEnd
   });
 }
 

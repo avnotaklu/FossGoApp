@@ -77,7 +77,8 @@ extension GameUpdateExt on GameUpdate {
       gameCreator: this.game?.gameCreator ?? game.gameCreator,
       playerTimeSnapshots:
           this.game?.playerTimeSnapshots ?? game.playerTimeSnapshots,
-      playersRatingsAfter: this.game?.playersRatingsAfter ?? game.playersRatingsAfter,
+      playersRatingsAfter:
+          this.game?.playersRatingsAfter ?? game.playersRatingsAfter,
       playersRatingsDiff:
           this.game?.playersRatingsDiff ?? game.playersRatingsDiff,
       gameType: GameType.anonymous,
@@ -289,10 +290,13 @@ class LiveGameOracle extends GameStateOracle {
     }
 
     return DisplayablePlayerData(
-      displayName: publicInfo.username ?? "Anonymous",
-      stoneType: stone,
-      rating: rating,
-    );
+        displayName: publicInfo.username ?? "Anonymous",
+        stoneType: stone,
+        rating: game.didEnd()
+            ? stone?.getValueFromPlayerList(game.ratingsBefore())
+            : rating?.glicko.minimal,
+        ratingDiffOnEnd:
+            stone?.getValueFromPlayerList(game.playersRatingsDiff));
   }
 
   @override
@@ -312,10 +316,13 @@ class LiveGameOracle extends GameStateOracle {
     }
 
     return DisplayablePlayerData(
-      displayName: publicInfo.username ?? "Anonymous",
-      stoneType: stone,
-      rating: rating,
-    );
+        displayName: publicInfo.username ?? "Anonymous",
+        stoneType: stone,
+        rating: game.didEnd()
+            ? stone?.getValueFromPlayerList(game.ratingsBefore())
+            : rating?.glicko.minimal,
+        ratingDiffOnEnd:
+            stone?.getValueFromPlayerList(game.playersRatingsDiff));
   }
 
   @override
@@ -385,10 +392,10 @@ class FaceToFaceGameOracle extends GameStateOracle {
     StoneType stone = game.getStoneFromPlayerId(myPlayerId)!;
 
     return DisplayablePlayerData(
-      displayName: stone.color,
-      stoneType: stone,
-      rating: null, // No rating for face to face games
-    );
+        displayName: stone.color,
+        stoneType: stone,
+        rating: null, // No rating for face to face games
+        ratingDiffOnEnd: null);
   }
 
   @override
@@ -396,10 +403,10 @@ class FaceToFaceGameOracle extends GameStateOracle {
     StoneType stone = game.getStoneFromPlayerId(otherPlayerId)!;
 
     return DisplayablePlayerData(
-      displayName: stone.color,
-      stoneType: stone,
-      rating: null, // No rating for face to face games
-    );
+        displayName: stone.color,
+        stoneType: stone,
+        rating: null, // No rating for face to face games
+        ratingDiffOnEnd: null);
   }
 
   @override
