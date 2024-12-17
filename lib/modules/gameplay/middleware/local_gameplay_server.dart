@@ -145,7 +145,12 @@ class LocalGameplayServer {
 
       var moveTime = now;
 
-      _moves.add(GameMove(time: moveTime, x: move.x, y: move.y));
+      _moves.add(
+        GameMove(
+            secondsAfterStart: _startTime.difference(moveTime).inSeconds,
+            x: move.x,
+            y: move.y),
+      );
 
       _setTimes(moveTime);
 

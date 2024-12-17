@@ -94,7 +94,7 @@ class GameFieldNames {
   static const String TimeActive = "timeActive";
 
   // move Move
-  static const String Time = "time";
+  static const String SecondsAfterStart = "secondsAfterStart";
   static const String X = "x";
   static const String Y = "y";
 }

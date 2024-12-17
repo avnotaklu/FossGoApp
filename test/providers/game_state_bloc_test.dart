@@ -118,7 +118,7 @@ void main() {
     var token = inv.positionalArguments[1] as String;
 
     var newMove = GameMove(
-      time: (token == 'token1') ? currentTime : currentTime2,
+      secondsAfterStart: (token == 'token1') ? currentTime : currentTime2,
       x: (inv.positionalArguments[0] as MovePosition).x,
       y: (inv.positionalArguments[0] as MovePosition).y,
       // y: 0,

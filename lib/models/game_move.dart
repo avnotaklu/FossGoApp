@@ -4,11 +4,11 @@ import 'package:go/models/game.dart';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class GameMove {
-  final DateTime time;
+  final int secondsAfterStart;
   final int? x;
   final int? y;
   GameMove({
-    required this.time,
+    required this.secondsAfterStart,
     required this.x,
     required this.y,
   });
@@ -19,7 +19,7 @@ class GameMove {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      GameFieldNames.Time: time.toIso8601String(),
+      GameFieldNames.SecondsAfterStart: secondsAfterStart,
       GameFieldNames.X: x,
       GameFieldNames.Y: y,
     };
@@ -27,7 +27,7 @@ class GameMove {
 
   factory GameMove.fromMap(Map<String, dynamic> map) {
     return GameMove(
-      time: DateTime.parse(map[GameFieldNames.Time] as String),
+      secondsAfterStart: map[GameFieldNames.SecondsAfterStart] as int,
       x: map[GameFieldNames.X] as int?,
       y: map[GameFieldNames.Y] as int?,
     );
