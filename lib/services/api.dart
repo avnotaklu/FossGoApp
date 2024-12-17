@@ -20,6 +20,7 @@ import 'package:go/services/guest_user_result.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/my_games.dart';
 import 'package:go/services/new_move_result.dart';
+import 'package:go/services/public_user_info.dart';
 import 'package:go/services/register_player_dto.dart';
 import 'package:go/services/register_user_result.dart';
 import 'package:go/services/signal_r_message.dart';
@@ -196,11 +197,22 @@ class Api {
     return convert(res, (a) => GameAndOpponent.fromJson(a));
   }
 
+  Future<Either<AppError, PublicUserInfo>> getOpponent(
+      String opponentId, String token) async {
+    var res = await get(
+      Uri.parse("$baseUrl/Player/Opponent/$opponentId"),
+      token,
+    );
+
+    return convert(res, (a) => PublicUserInfo.fromJson(a));
+  }
+
+
   Future<Either<AppError, GamesHistoryBatch>> getGamesHistory(
-      String token) async {
+      String token, int page) async {
 
     var res = await get(
-      Uri.parse("$baseUrl/Player/GamesHistory"),
+      Uri.parse("$baseUrl/Player/MyGameHistory/$page"),
       token,
     );
 

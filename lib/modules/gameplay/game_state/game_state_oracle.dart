@@ -81,6 +81,8 @@ extension GameUpdateExt on GameUpdate {
       playersRatingsDiff:
           this.game?.playersRatingsDiff ?? game.playersRatingsDiff,
       gameType: GameType.anonymous,
+      creationTime: this.game?.creationTime ?? game.creationTime,
+      usernames: this.game?.usernames ?? game.usernames,
     );
 
     var tmpTimes = [...newGame.playerTimeSnapshots];

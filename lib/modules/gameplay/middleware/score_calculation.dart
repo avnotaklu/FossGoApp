@@ -28,15 +28,12 @@ class ScoreCalculationBloc extends ChangeNotifier {
   final GameStateBloc gameStateBloc;
   final GameBoardBloc gameBoardBloc;
 
-  late final StreamSubscription editStoneSubscription;
-
   ScoreCalculationBloc({
     required this.api,
     required this.authBloc,
     required this.gameStateBloc,
     required this.gameBoardBloc,
   }) {
-    // editStoneSubscription = listenFromEditDeadStone();
     setupScore();
   }
 
@@ -98,7 +95,6 @@ class ScoreCalculationBloc extends ChangeNotifier {
   @override
   void dispose() {
     super.dispose();
-    editStoneSubscription.cancel();
   }
 
   onGameEnd(GameStateBloc gameState, removedCluster) {

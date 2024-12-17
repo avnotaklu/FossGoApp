@@ -5,6 +5,7 @@ import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/minimal_rating.dart';
 import 'package:go/models/variant_type.dart';
+import 'package:go/modules/games_history/games_history_page.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/auth/auth_provider.dart';
@@ -234,7 +235,15 @@ class ProfilePage extends StatelessWidget {
                                 ListTile(
                                   // tileColor: ,
                                   onTap: () {
-                                    debugPrint("hello");
+                                    var statsRepo =
+                                        context.read<IStatsRepository>();
+                                    Navigator.push(context, MaterialPageRoute(
+                                      builder: (context) {
+                                        return GamesHistoryPage(
+                                          statsRepo: statsRepo,
+                                        );
+                                      },
+                                    ));
                                   },
                                   minTileHeight: 50,
                                   title: Text("Games"),

@@ -25,5 +25,10 @@ Option<T> tryParse<T>(
 }
 
 Option<T> tryParseJ<T>(String data, T Function(Map<String, dynamic>) parser) {
-  return tryParse(json.decode(data) as Map<String, dynamic>, parser);
+  try {
+    var jsonV = json.decode(data) as Map<String, dynamic>;
+    return tryParse(jsonV, parser);
+  } catch (e) {
+    return none();
+  }
 }

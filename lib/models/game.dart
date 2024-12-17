@@ -32,6 +32,10 @@ extension StoneTypeExtension on StoneType {
         StoneType.black => GameResult.whiteWon,
         StoneType.white => GameResult.blackWon,
       };
+  
+  T? getValueFromPlayerList<T>(List<T> list) {
+    return list.getValueByStone(this);
+  }
 }
 
 enum StoneType { black, white }
@@ -76,6 +80,8 @@ class GameFieldNames {
   static const String PlayersRatingsAfter = "playersRatingsAfter";
   static const String PlayersRatingsDiff = "playersRatingsDiff";
   static const String GameType = "gameType";
+  static const String Usernames = "usernames";
+  static const String CreationTime = "creationTime";
 
   // control Control
   static const String MainTimeSeconds =
@@ -163,6 +169,16 @@ enum GameResult {
   blackWon,
   whiteWon,
   draw,
+}
+
+extension PlayerListExt<T> on List<T> {
+  T? getValueByStone(StoneType stone) {
+    return stone.index < length ? this[stone.index] : null;
+  }
+
+  T? getOtherValue(StoneType stone) {
+    return getValueByStone(stone.other);
+  }
 }
 
 extension GameExts on Game {
@@ -280,6 +296,8 @@ class Game {
   final List<MinimalRating> playersRatingsAfter;
   final List<int> playersRatingsDiff;
   final GameType gameType;
+  final List<String> usernames;
+  final DateTime creationTime;
 
   Game({
     required this.gameId,
@@ -305,6 +323,8 @@ class Game {
     required this.playersRatingsAfter,
     required this.playersRatingsDiff,
     required this.gameType,
+    required this.usernames,
+    required this.creationTime,
   });
 
   Map<String, dynamic> toMap() {
@@ -338,6 +358,8 @@ class Game {
           playersRatingsAfter.map((e) => e.stringify()).toList(),
       GameFieldNames.PlayersRatingsDiff: playersRatingsDiff,
       GameFieldNames.GameType: gameType.index,
+      GameFieldNames.Usernames: usernames,
+      GameFieldNames.CreationTime: creationTime.toIso8601String(),
     };
   }
 
@@ -406,6 +428,8 @@ class Game {
       playersRatingsDiff:
           List<int>.from(map[GameFieldNames.PlayersRatingsDiff] as List),
       gameType: GameType.values[map[GameFieldNames.GameType] as int],
+      usernames: List<String>.from(map[GameFieldNames.Usernames] as List),
+      creationTime: DateTime.parse(map[GameFieldNames.CreationTime] as String),
     );
   }
 
@@ -438,6 +462,8 @@ class Game {
     List<MinimalRating>? playersRatingsAfter,
     List<int>? playersRatingsDiff,
     GameType? gameType,
+    List<String>? usernames,
+    DateTime? creationTime,
   }) {
     return Game(
       gameId: gameId ?? this.gameId,
@@ -463,6 +489,8 @@ class Game {
       playersRatingsAfter: playersRatingsAfter ?? this.playersRatingsAfter,
       playersRatingsDiff: playersRatingsDiff ?? this.playersRatingsDiff,
       gameType: gameType ?? this.gameType,
+      usernames: usernames ?? this.usernames,
+      creationTime: creationTime ?? this.creationTime,
     );
   }
 }

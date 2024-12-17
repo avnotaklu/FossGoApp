@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:go/models/game.dart';
 import 'package:go/services/game_and_opponent.dart';
 
 extension GamesHistoryExt on GamesHistoryBatch {
@@ -9,7 +10,7 @@ extension GamesHistoryExt on GamesHistoryBatch {
 }
 
 class GamesHistoryBatch {
-  final List<GameAndOpponent> games;
+  final List<Game> games;
   GamesHistoryBatch({
     required this.games,
   });
@@ -22,9 +23,9 @@ class GamesHistoryBatch {
 
   factory GamesHistoryBatch.fromMap(Map<String, dynamic> map) {
     return GamesHistoryBatch(
-      games: List<GameAndOpponent>.from(
-        (map['games'] as List).map<GameAndOpponent>(
-          (x) => GameAndOpponent.fromMap(x as Map<String, dynamic>),
+      games: List<Game>.from(
+        (map['games'] as List).map<Game>(
+          (x) => Game.fromMap(x as Map<String, dynamic>),
         ),
       ),
     );
