@@ -18,7 +18,7 @@ class SignalRProvider extends ChangeNotifier {
   // final Either<SignalRError, String> connectionCompleter =
   // Completer();
   // late final AuthProvider authBloc;
-  late HubConnection hubConnection;
+  HubConnection? hubConnection;
   late final Timer _timeoutTimer;
   @override
   void dispose() {
@@ -47,20 +47,20 @@ class SignalRProvider extends ChangeNotifier {
           .withAutomaticReconnect()
           // .withHubProtocol(JsonHubProtocol())
           .build();
-      hubConnection.onclose(({Exception? error}) {
+      hubConnection!.onclose(({Exception? error}) {
         debugPrint("Connection closed: ${error.toString()}");
       });
 
-      hubConnection.onreconnecting(({Exception? error}) {
+      hubConnection!.onreconnecting(({Exception? error}) {
         debugPrint("Connection reconnecting: ${error.toString()}");
       });
 
-      hubConnection.onreconnected(({String? connectionId}) {
+      hubConnection!.onreconnected(({String? connectionId}) {
         debugPrint("Connection reconnected with Id: $connectionId");
       });
 
-      await hubConnection.start();
-      final conId = hubConnection.connectionId!;
+      await hubConnection!.start();
+      final conId = hubConnection!.connectionId!;
       connectionId = (Either.right(conId));
 
       listenMessages();
@@ -83,7 +83,7 @@ class SignalRProvider extends ChangeNotifier {
       StreamController<SignalRMessage>.broadcast();
 
   void listenMessages() {
-    hubConnection.on('gameUpdate', (SignalRMessageListRaw? messagesRaw) {
+    hubConnection!.on('gameUpdate', (SignalRMessageListRaw? messagesRaw) {
       assert(messagesRaw != null, "Message can't be null");
 
       if (messagesRaw!.length != 1) {
@@ -98,7 +98,7 @@ class SignalRProvider extends ChangeNotifier {
       _gameMessageController.add(message);
     });
 
-    hubConnection.on('userUpdate', (SignalRMessageListRaw? messagesRaw) {
+    hubConnection!.on('userUpdate', (SignalRMessageListRaw? messagesRaw) {
       assert(messagesRaw != null, "Message can't be null");
 
       if (messagesRaw!.length != 1) {
@@ -115,7 +115,7 @@ class SignalRProvider extends ChangeNotifier {
   }
 
   // Hub methods
-  Future<void> findMatch(FindMatchDto dto) async {
+  Future<Either<AppError, Null>> findMatch(FindMatchDto dto) async {
     // var res = await hubConnection
     //     .invoke('FindMatch', args: [dto.toMap()]).catchError((e) {
     //   var err = "Error in findMatch: $e";
@@ -124,21 +124,27 @@ class SignalRProvider extends ChangeNotifier {
     // });
     // debugPrint(res.toString());
 
-    await hubConnection
-        .send('FindMatch', args: [dto.toMap()]).catchError((e) {
+    if (hubConnection == null ||
+        hubConnection!.state != HubConnectionState.Connected) {
+      return left(AppError(message: "Player Not connected"));
+    }
+
+    await hubConnection!.send('FindMatch', args: [dto.toMap()]).catchError((e) {
       var err = "Error in findMatch: $e";
       debugPrint(err);
     });
+
+    return right(null);
     // debugPrint(res.toString());
   }
 
   // Utils
   void silenceMessages() {
-    hubConnection.off('gameUpdate');
+    hubConnection?.off('gameUpdate');
   }
 
   Future<void> disconnect() async {
-    await hubConnection.stop();
+    await hubConnection?.stop();
     silenceMessages();
   }
 }

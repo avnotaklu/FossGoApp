@@ -18,14 +18,14 @@ class SignUpProvider {
   final api = Api();
 
   Validator<String?, String> usernameValidator() {
-    return RequiredValidator()
-        .add(Validator.getValidator(Validations.validateUsernameFirst))
-        .add(Validator.getValidator(Validations.validateUsernameCharacters));
+    return RequiredValidator(
+        Validator.getValidator(Validations.validateUsernameFirst).add(
+            Validator.getValidator(Validations.validateUsernameCharacters)));
   }
 
   Validator<String?, String> passwordValidator() {
-    return RequiredValidator()
-        .add(Validator.getValidator(Validations.validatePassword));
+    return RequiredValidator(
+        Validator.getValidator(Validations.validatePassword));
   }
 
   Future<Either<AppError, AbstractUserAccount>> signUp(

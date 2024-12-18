@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/auth/log_in_provider.dart';
+import 'package:go/utils/auth_navigation.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/my_text_form_field.dart';
 import 'package:provider/provider.dart';
@@ -64,15 +65,16 @@ class _LogInScreenState extends State<LogInScreen> {
                     ),
                     FilledButton(
                         onPressed: () async {
-                          var userResponse =
+                          var response =
                               await context.read<LogInProvider>().logIn(
                                     emailOrUsernameController.text.trim(),
                                     passwordController.text.trim(),
                                   );
                           if (context.mounted) {
+                            authNavigation(context, response);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(userResponse.fold(
+                                content: Text(response.fold(
                                   (e) => e.message,
                                   (v) => "Successfully logged in",
                                 )),

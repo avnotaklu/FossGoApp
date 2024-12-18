@@ -19,6 +19,7 @@ import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/user_account.dart';
+import 'package:go/utils/auth_navigation.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
@@ -345,6 +346,9 @@ class ProfilePage extends StatelessWidget {
                           PrimaryButton(
                             onPressed: () async {
                               await authProvider.logout();
+                              if (context.mounted) {
+                                authNavigation(context, right(null));
+                              }
                             },
                             text: "Logout",
                           ),
@@ -376,9 +380,9 @@ class StatsByBoardSizeWidget extends StatelessWidget {
       var bR = rating.ratings[VariantType.b(b)];
 
       if (aR?.latest == null) return -1;
-      if (bR?.latest == null) return 1;
+      if (bR?.latest == null) return -1;
 
-      return aR!.latest!.compareTo(bR!.latest!);
+      return bR!.latest!.compareTo(aR!.latest!);
     });
 
     return Container(

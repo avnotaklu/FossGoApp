@@ -42,13 +42,28 @@ class MyApp extends StatelessWidget {
               create: (context) =>
                   AuthProvider(context.read<SignalRProvider>())),
         ],
-        builder: (context, child) => MaterialApp(
-          builder: (context, child) => responsiveWidgetSetup(context, child),
-          debugShowCheckedModeBanner: false,
-          initialRoute: "/",
-          theme: themeData(),
-          routes: routeConstructor,
-        ),
+        builder: (context, child) {
+          return FutureBuilder(
+              future: context.read<AuthProvider>().initialAuth.future,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                var res = snapshot.data!;
+                return MaterialApp(
+                  builder: (context, child) =>
+                      responsiveWidgetSetup(context, child),
+                  debugShowCheckedModeBanner: false,
+                  initialRoute: res.fold(
+                    (l) => "/",
+                    (r) => r == null ? "/" : "/HomePage",
+                  ),
+                  theme: themeData(),
+                  routes: routeConstructor,
+                );
+              });
+        },
       ),
     );
   }

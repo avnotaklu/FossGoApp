@@ -10,6 +10,7 @@ import 'package:go/modules/gameplay/middleware/local_gameplay_server.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 
 import 'package:go/modules/auth/error_screen.dart';
+import 'package:go/utils/auth_navigation.dart';
 import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
@@ -21,37 +22,6 @@ class SignIn extends StatefulWidget {
 
 class _SignInState extends State<SignIn> {
   @override
-  void initState() {
-    var authBloc = Provider.of<AuthProvider>(context, listen: false);
-    var signalRBloc = Provider.of<SignalRProvider>(context, listen: false);
-
-    authBloc.authResult.listen((res) async {
-      res.fold((l) {
-        authBloc.logout();
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => ErrorPage(l),
-          ),
-          (route) => route.isFirst,
-        );
-      }, (r) {
-        if (r != null) {
-          navigateToHome();
-        } else {
-          Navigator.popUntil(context, ModalRoute.withName('/'));
-        }
-      });
-    });
-  }
-
-  Future<Object?> navigateToHome() {
-    return Navigator.of(context).pushNamedAndRemoveUntil(
-      '/HomePage',
-      (route) => false,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     final authBloc = Provider.of<AuthProvider>(context);
     return Scaffold(
@@ -61,13 +31,15 @@ class _SignInState extends State<SignIn> {
             Buttons.Google,
             onPressed: () async {
               var result = await authBloc.loginGoogle();
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(result.fold(
-                      (l) => l.toString(), (r) => "Successfully logged in")),
-                ),
-              );
+              if (context.mounted) {
+                authNavigation(context, result);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(result.fold(
+                        (l) => l.toString(), (r) => "Successfully logged in")),
+                  ),
+                );
+              }
             },
           ),
           FilledButton(

@@ -18,27 +18,28 @@ class LogInProvider {
   final api = Api();
 
   Validator<String?, String> usernameValidator() {
-    return NonRequiredValidator()
-        .add(Validator.getValidator(Validations.validateUsernameFirst))
-        .add(Validator.getValidator(Validations.validateUsernameCharacters));
+    return RequiredValidator(
+        Validator.getValidator(Validations.validateUsernameFirst).add(
+            Validator.getValidator(Validations.validateUsernameCharacters)));
+    // ;
   }
 
   Validator<String?, String> emailValidator() {
-    return NonRequiredValidator()
-        .add(Validator.getValidator(Validations.validateEmail));
+    return RequiredValidator(
+        Validator.getValidator(Validations.validateEmail));
   }
 
-  OrValidator<String?, String, String> emailOrUsernameValidator() {
+  OrValidator<String?, String?, String?> emailOrUsernameValidator() {
     return OrValidator(usernameValidator(), emailValidator(),
         (usernameE, emailE) => "Invalid username or email");
   }
 
   Validator<String?, String> passwordValidator() {
-    return RequiredValidator()
-        .add(Validator.getValidator(Validations.validatePassword));
+    return RequiredValidator(
+        Validator.getValidator(Validations.validatePassword));
   }
 
-  Future<Either<AppError, AbstractUserAccount>> logIn(
+  Future<Either<AppError, UserAccount>> logIn(
     String authName,
     String password,
   ) async {
@@ -53,7 +54,7 @@ class LogInProvider {
             (authValid) async {
       var ((username, email), password) = authValid;
 
-      if (Validations.validatePassword(password) == false) {
+      if (Validations.validatePassword(password) != null) {
         return Either.left(
             AppError(message: "Password must be at least 6 characters"));
       }

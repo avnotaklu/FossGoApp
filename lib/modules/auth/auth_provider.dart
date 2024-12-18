@@ -17,6 +17,7 @@ import 'package:go/services/user_rating_result.dart';
 import 'package:go/services/user_stats.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:signalr_netcore/hub_connection.dart';
 
 class AuthProvider {
   final sharedPrefs = SharedPreferencesAsync();
@@ -58,6 +59,8 @@ class AuthProvider {
   String? _token;
   String? get token => _token;
 
+  Completer<Either<AppError, UserAccount?>> initialAuth = Completer();
+
   // bool locallyInitialedAuth = false;
   AuthProvider(this.signlRBloc) {
     getToken().then((value) {
@@ -66,10 +69,13 @@ class AuthProvider {
         getUser(value).then((authRes) {
           authRes.fold((e) {
             debugPrint(e.toString());
-          }, (m) {
-            authenticateNormalUser(m.user, m.token);
+          }, (m) async {
+            var res = await authenticateNormalUser(m.user, m.token);
+            initialAuth.complete(res);
           });
         });
+      } else {
+        initialAuth.complete(right(null));
       }
     });
   }
@@ -227,7 +233,13 @@ class AuthProvider {
   Future<void> logout() async {
     await sharedPrefs.remove('user');
     await sharedPrefs.remove('token');
-    await signlRBloc.disconnect();
+
+    final con = signlRBloc.hubConnection;
+
+    if (con != null && con.state == HubConnectionState.Connected) {
+      await signlRBloc.disconnect();
+    }
+
     _authResultStreamController.add(right(null));
     _currentUserRaw = null;
     _token = null;

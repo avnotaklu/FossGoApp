@@ -32,18 +32,18 @@ class EditProfileProvider extends ChangeNotifier {
   }
 
   Validator<String?, String?> fullNameValidator() {
-    return NonRequiredValidator()
-        .add(Validator.getValidator(Validations.validateFullName));
+    return NonRequiredValidator(
+        Validator.getValidator(Validations.validateFullName));
   }
 
   Validator<String?, String?> emailValidator() {
-    return NonRequiredValidator()
-        .add(Validator.getValidator(Validations.validateEmail));
+    return NonRequiredValidator(
+        Validator.getValidator(Validations.validateEmail));
   }
 
   Validator<String?, String?> bioValidator() {
-    return NonRequiredValidator()
-        .add(Validator.getValidator(Validations.validateBio));
+    return NonRequiredValidator(
+        Validator.getValidator(Validations.validateBio));
   }
 
   Future<Either<AppError, UserAccount>> saveProfile(
