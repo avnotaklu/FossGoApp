@@ -141,6 +141,7 @@ class LiveGameOracle extends GameStateOracle {
 
   late final List<StreamSubscription> subscriptions;
   late final Stream<GameJoinMessage> listenForGameJoin;
+  late final Stream<GameStartMessage> listenForGameStart;
   late final Stream<EditDeadStoneMessage> listenForEditDeadStone;
   late final Stream<NewMoveMessage> listenFromMove;
   late final Stream<GameOverMessage> listenFromGameOver;
@@ -158,11 +159,18 @@ class LiveGameOracle extends GameStateOracle {
       }
     });
 
+    listenForGameStart = gameMessageStream.asyncExpand((message) async* {
+      if (message.type == SignalRMessageTypes.gameStart) {
+        yield message.data as GameStartMessage;
+      }
+    });
+
     listenForEditDeadStone = gameMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.editDeadStone) {
         yield message.data as EditDeadStoneMessage;
       }
     });
+
     listenFromMove = gameMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.newMove) {
         yield message.data as NewMoveMessage;
@@ -208,6 +216,7 @@ class LiveGameOracle extends GameStateOracle {
 
     subscriptions = [
       listenFromGameJoin(),
+      listenFromGameStart(),
       listenForMove(),
       listenForContinueGame(),
       listenForAcceptScore(),
@@ -224,6 +233,15 @@ class LiveGameOracle extends GameStateOracle {
       gameUpdateC.add(message.game.toGameUpdate());
     });
   }
+
+  StreamSubscription listenFromGameStart() {
+    return listenForGameStart.listen((message) {
+      debugPrint(
+          "Signal R said, ::${SignalRMessageTypes.gameStart}::\n\t\t${message.toMap()}");
+      gameUpdateC.add(message.game.toGameUpdate());
+    });
+  }
+
 
   StreamSubscription listenForContinueGame() {
     return listenFromContinueGame.listen((message) {

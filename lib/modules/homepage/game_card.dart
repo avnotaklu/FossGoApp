@@ -41,7 +41,7 @@ class GameCard extends StatelessWidget {
       );
     }, (GameJoinMessage joinMessage) {
       final statRepo = context.read<IStatsRepository>();
-      Navigator.pushReplacement(context,
+      Navigator.push(context,
           MaterialPageRoute<void>(builder: (BuildContext context) {
         return LiveGameWidget(
             joinMessage.game, joinMessage.getGameAndOpponent(), statRepo);

@@ -61,6 +61,8 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
   switch (type) {
     case SignalRMessageTypes.gameJoin:
       return GameJoinMessage.fromMap(map);
+    case SignalRMessageTypes.gameStart:
+      return GameStartMessage.fromMap(map);
     case SignalRMessageTypes.newGame:
       return NewGameCreatedMessage.fromMap(map);
     case SignalRMessageTypes.newMove:
@@ -90,6 +92,8 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
   switch (type) {
     case SignalRMessageTypes.gameJoin:
       return GameJoinMessage.fromJson(json);
+    case SignalRMessageTypes.gameStart:
+      return GameStartMessage.fromJson(json);
     case SignalRMessageTypes.newGame:
       return NewGameCreatedMessage.fromJson(json);
     case SignalRMessageTypes.newMove:
@@ -118,6 +122,7 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
 class SignalRMessageTypes {
   static const String newGame = "NewGame";
   static const String gameJoin = "GameJoin";
+  static const String gameStart = "GameStart";
   static const String newMove = "NewMove";
   static const String continueGame = "ContinueGame";
   static const String editDeadStone = "EditDeadStone";
@@ -225,6 +230,33 @@ class ContinueGameMessage extends SignalRMessageType {
   factory ContinueGameMessage.fromJson(String source) =>
       ContinueGameMessage.fromMap(json.decode(source) as Map<String, dynamic>);
 }
+
+class GameStartMessage extends SignalRMessageType {
+  final Game game;
+  GameStartMessage({
+    required this.game,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'game': game.toMap(),
+    };
+  }
+
+  factory GameStartMessage.fromMap(Map<String, dynamic> map) {
+    return GameStartMessage(
+      game: Game.fromMap(map['game'] as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  String toJson() => json.encode(toMap());
+
+  factory GameStartMessage.fromJson(String source) =>
+      GameStartMessage.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
 
 class NewMoveMessage extends SignalRMessageType {
   final Game game;
