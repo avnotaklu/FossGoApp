@@ -78,6 +78,11 @@ class AuthProvider {
         initialAuth.complete(right(null));
       }
     });
+    Future.delayed(Duration(seconds: 2), () {
+      if (!initialAuth.isCompleted) {
+        initialAuth.complete(left(AppError(message: "Login Timeout")));
+      }
+    });
   }
 
   Future<Either<AppError, UserAccount>> loginGoogle() async {

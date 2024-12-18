@@ -37,7 +37,7 @@ class LogInProvider {
   Validator<String?, String> passwordValidator() {
     return RequiredValidator(
         Validator.getValidator(Validations.validatePassword));
-  }
+   }
 
   Future<Either<AppError, UserAccount>> logIn(
     String authName,
