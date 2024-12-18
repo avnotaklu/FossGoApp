@@ -17,7 +17,7 @@ class HomepageBloc extends ChangeNotifier {
   List<UserAccount> otherActivePlayers = [];
   List<AvailableGame> _availableGames = [];
   List<AvailableGame> get availableGames => _availableGames
-      .where((a) => a.game.didStart() && !a.game.didEnd())
+      .where((a) => !a.game.didStart() && !a.game.didEnd())
       .toList();
   List<MyGame> myGames = [];
 
