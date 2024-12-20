@@ -115,6 +115,11 @@ class GameUpdate {
   get state => null;
 }
 
+enum GamePlatform {
+  online,
+  local,
+}
+
 abstract class GameStateOracle {
   final StreamController<GameUpdate> gameUpdateC = StreamController.broadcast();
   Stream<GameUpdate> get gameUpdate => gameUpdateC.stream;
@@ -131,6 +136,8 @@ abstract class GameStateOracle {
 
   bool isThisAccountsTurn(Game game);
   StoneType thisAccountStone(Game game);
+
+  GamePlatform getPlatform();
 }
 
 class LiveGameOracle extends GameStateOracle {
@@ -242,7 +249,6 @@ class LiveGameOracle extends GameStateOracle {
     });
   }
 
-
   StreamSubscription listenForContinueGame() {
     return listenFromContinueGame.listen((message) {
       debugPrint(
@@ -308,13 +314,16 @@ class LiveGameOracle extends GameStateOracle {
     }
 
     return DisplayablePlayerData(
-        displayName: publicInfo.username ?? "Anonymous",
-        stoneType: stone,
-        rating: game.didEnd()
-            ? stone?.getValueFromPlayerList(game.ratingsBefore())
-            : rating?.glicko.minimal,
-        ratingDiffOnEnd:
-            stone?.getValueFromPlayerList(game.playersRatingsDiff));
+      displayName: publicInfo.username ?? "Anonymous",
+      stoneType: stone,
+      rating: game.didEnd()
+          ? stone?.getValueFromPlayerList(game.ratingsBefore())
+          : rating?.glicko.minimal,
+      ratingDiffOnEnd: stone?.getValueFromPlayerList(game.playersRatingsDiff),
+      komi: stone?.komi(game),
+      prisoners: stone?.prisoners(game),
+      score: stone?.score(game),
+    );
   }
 
   @override
@@ -334,13 +343,16 @@ class LiveGameOracle extends GameStateOracle {
     }
 
     return DisplayablePlayerData(
-        displayName: publicInfo.username ?? "Anonymous",
-        stoneType: stone,
-        rating: game.didEnd()
-            ? stone?.getValueFromPlayerList(game.ratingsBefore())
-            : rating?.glicko.minimal,
-        ratingDiffOnEnd:
-            stone?.getValueFromPlayerList(game.playersRatingsDiff));
+      displayName: publicInfo.username ?? "Anonymous",
+      stoneType: stone,
+      rating: game.didEnd()
+          ? stone?.getValueFromPlayerList(game.ratingsBefore())
+          : rating?.glicko.minimal,
+      ratingDiffOnEnd: stone?.getValueFromPlayerList(game.playersRatingsDiff),
+      komi: stone?.komi(game),
+      prisoners: stone?.prisoners(game),
+      score: stone?.score(game),
+    );
   }
 
   @override
@@ -390,6 +402,11 @@ class LiveGameOracle extends GameStateOracle {
   StoneType thisAccountStone(Game game) {
     return game.getStoneFromPlayerId(authBloc.myId)!;
   }
+
+  @override
+  GamePlatform getPlatform() {
+    return GamePlatform.online;
+  }
 }
 
 // This assumes the game is already started at time of creation
@@ -410,10 +427,14 @@ class FaceToFaceGameOracle extends GameStateOracle {
     StoneType stone = game.getStoneFromPlayerId(myPlayerId)!;
 
     return DisplayablePlayerData(
-        displayName: stone.color,
-        stoneType: stone,
-        rating: null, // No rating for face to face games
-        ratingDiffOnEnd: null);
+      displayName: stone.color,
+      stoneType: stone,
+      rating: null, // No rating for face to face games
+      ratingDiffOnEnd: null,
+      komi: stone.komi(game),
+      prisoners: stone.prisoners(game),
+      score: stone.score(game),
+    );
   }
 
   @override
@@ -421,10 +442,14 @@ class FaceToFaceGameOracle extends GameStateOracle {
     StoneType stone = game.getStoneFromPlayerId(otherPlayerId)!;
 
     return DisplayablePlayerData(
-        displayName: stone.color,
-        stoneType: stone,
-        rating: null, // No rating for face to face games
-        ratingDiffOnEnd: null);
+      displayName: stone.color,
+      stoneType: stone,
+      rating: null, // No rating for face to face games
+      ratingDiffOnEnd: null,
+      komi: stone.komi(game),
+      prisoners: stone.prisoners(game),
+      score: stone.score(game),
+    );
   }
 
   @override
@@ -461,5 +486,10 @@ class FaceToFaceGameOracle extends GameStateOracle {
   @override
   StoneType thisAccountStone(Game game) {
     return game.getStoneFromPlayerId(game.getPlayerIdWithTurn()!)!;
+  }
+
+  @override
+  GamePlatform getPlatform() {
+    return GamePlatform.local;
   }
 }

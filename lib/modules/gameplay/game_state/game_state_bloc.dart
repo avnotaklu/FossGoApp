@@ -23,12 +23,18 @@ class DisplayablePlayerData {
   final StoneType? stoneType;
   final MinimalRating? rating;
   final int? ratingDiffOnEnd;
+  final double? komi;
+  final int? prisoners;
+  final int? score;
 
   DisplayablePlayerData({
     required this.displayName,
     required this.stoneType,
     required this.rating,
-    required this.ratingDiffOnEnd
+    required this.ratingDiffOnEnd,
+    required this.komi,
+    required this.prisoners,
+    required this.score,
   });
 }
 
@@ -55,12 +61,27 @@ class GameStateBloc extends ChangeNotifier {
     StoneType.white: false
   };
 
-  // Join Data
+  // Oracle getters
+  GamePlatform getPlatform() {
+    return gameOracle.getPlatform();
+  }
+
+  DisplayablePlayerData? get blackPlayer => [
+        bottomPlayerUserInfo,
+        topPlayerUserInfo
+      ].firstWhere((a) => a?.stoneType == StoneType.black);
+
+  DisplayablePlayerData? get whitePlayer => [
+        bottomPlayerUserInfo,
+        topPlayerUserInfo
+      ].firstWhere((a) => a?.stoneType == StoneType.white);
 
   DisplayablePlayerData get bottomPlayerUserInfo =>
       gameOracle.myPlayerData(game);
   DisplayablePlayerData? get topPlayerUserInfo =>
       gameOracle.otherPlayerData(game);
+
+
 
   // List<Duration> times;
   final List<TimerController> _controller;
@@ -71,7 +92,12 @@ class GameStateBloc extends ChangeNotifier {
 
   final GameStateOracle gameOracle;
   final SystemUtilities systemUtilities;
+
   late final StreamSubscription<GameUpdate> gameUpdateListener;
+
+  final StreamController<Null> _gameEndStreamController =
+      StreamController.broadcast();
+  Stream<Null> get gameEndStream => _gameEndStreamController.stream;
 
   GameStateBloc(
     this.game,
@@ -156,24 +182,6 @@ class GameStateBloc extends ChangeNotifier {
     });
   }
 
-  // void addDeadStones(Position pos) async {
-  //   final token = authBloc.token!;
-  //   final res = await api.editDeadStoneCluster(
-  //     EditDeadStoneClusterDto(position: pos, state: DeadStoneState.Dead),
-  //     token,
-  //     gameStateBloc.game.gameId,
-  //   );
-
-  //   res.fold((e) {}, (r) {
-  //     applyDeadStones(pos, DeadStoneState.Dead);
-  //   });
-  // }
-
-  // void removeDeadStones(Position pos) async {
-  //   final token = authBloc.token!;
-  //   applyDeadStones(pos, DeadStoneState.Alive);
-  // }
-
   Future<Either<AppError, Game>> editDeadStone(
       Position pos, DeadStoneState state) async {
     return gameOracle.editDeadStoneCluster(game, pos, state);
@@ -185,6 +193,11 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   Game updateStateFromGame(Game game) {
+    if (game.gameState == GameState.ended &&
+        this.game.gameState != GameState.ended) {
+      _gameEndStreamController.add(null);
+    }
+
     this.game = game;
     updateStageType(game.gameState);
 
@@ -214,5 +227,9 @@ class GameStateBloc extends ChangeNotifier {
     } else if (state == GameState.waitingForStart) {
       curStageType = StageType.BeforeStart;
     }
+  }
+
+  void testGameEndCard() {
+    _gameEndStreamController.add(null);
   }
 }

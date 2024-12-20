@@ -5,7 +5,7 @@ import 'package:go/core/foundation/duration.dart';
 import 'package:go/models/game.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/models/variant_type.dart';
-
+import 'package:go/services/time_control_dto.dart';
 
 final TimeControl ultrabullet = TimeControl(
   mainTimeSeconds: 10,
@@ -42,8 +42,15 @@ extension TimeControlExt on TimeControl {
       snapshotTimestamp: startTime,
     );
   }
-}
 
+  TimeControlDto getTimeControlDto() {
+    return TimeControlDto(
+      mainTimeSeconds: mainTimeSeconds,
+      incrementSeconds: incrementSeconds,
+      byoYomiTime: byoYomiTime,
+    );
+  }
+}
 
 class TimeControl {
   final int mainTimeSeconds;
@@ -85,21 +92,21 @@ class TimeControl {
   factory TimeControl.fromJson(String source) =>
       TimeControl.fromMap(json.decode(source) as Map<String, dynamic>);
 
-  String repr() {
-    var repr = "";
-    final mainTimeString = Duration(seconds: mainTimeSeconds).smallRepr();
-    repr += mainTimeString;
-    if (incrementSeconds != null) {
-      final incrementTimeString =
-          Duration(seconds: incrementSeconds!).smallRepr();
-      repr += " + $incrementTimeString";
-    }
+  // String repr() {
+  //   var repr = "";
+  //   final mainTimeString = Duration(seconds: mainTimeSeconds).smallRepr();
+  //   repr += mainTimeString;
+  //   if (incrementSeconds != null) {
+  //     final incrementTimeString =
+  //         Duration(seconds: incrementSeconds!).smallRepr();
+  //     repr += " + $incrementTimeString";
+  //   }
 
-    if (byoYomiTime != null) {
-      repr += " + ${byoYomiTime!.byoYomis} x ${byoYomiTime!.byoYomiSeconds}s";
-    }
-    return repr;
-  }
+  //   if (byoYomiTime != null) {
+  //     repr += " + ${byoYomiTime!.byoYomis} x ${byoYomiTime!.byoYomiSeconds}s";
+  //   }
+  //   return repr;
+  // }
 }
 
 class ByoYomiTime {

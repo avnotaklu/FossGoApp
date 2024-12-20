@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:go/models/variant_type.dart';
 import 'package:go/services/time_control_dto.dart';
 
 extension MatchableBoardSizesExtension on MatchableBoardSizes {
@@ -12,6 +13,21 @@ extension MatchableBoardSizesExtension on MatchableBoardSizes {
         return '13x13';
       case MatchableBoardSizes.nineteen:
         return '19x19';
+    }
+  }
+}
+
+extension BoardSizesExtensionForMatcheable on BoardSize {
+  MatchableBoardSizes? get matchableBoardSize {
+    switch (this) {
+      case BoardSize.nine:
+        return MatchableBoardSizes.nine;
+      case BoardSize.thirteen:
+        return MatchableBoardSizes.thirteen;
+      case BoardSize.nineteen:
+        return MatchableBoardSizes.nineteen;
+      case BoardSize.other:
+        return null;
     }
   }
 }

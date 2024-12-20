@@ -42,7 +42,7 @@ class _BoardState extends State<Board> {
         2; // Don't make spacing so large that to get that spacing Stones start to move out of position
 
     //double boardInset = stoneInsetstoneSpacing;
-    return InteractiveViewer(
+    return InteractiveViewer( 
       child: Center(
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {

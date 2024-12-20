@@ -36,6 +36,18 @@ extension StoneTypeExtension on StoneType {
   T? getValueFromPlayerList<T>(List<T> list) {
     return list.getValueByStone(this);
   }
+
+  double? komi(Game game) {
+    return game.komiForPlayer(this);
+  }
+
+  int? prisoners(Game game) {
+    return game.prisonersForPlayer(this);
+  }
+
+  int? score(Game game) {
+    return game.scoreForPlayer(this);
+  }
 }
 
 enum StoneType { black, white }
@@ -281,6 +293,24 @@ extension GameExts on Game {
       getBoardVariant(),
       getTimeStandardVariant(),
     ];
+  }
+
+  double? komiForPlayer(StoneType stone) {
+    return stone == StoneType.white ? komi : null;
+  }
+
+  int? prisonersForPlayer(StoneType stone) {
+    if (!didStart()) return null;
+    if (prisoners.length < 2) return null;
+    return stone == StoneType.white ? prisoners[1] : prisoners[0];
+  }
+
+  int? scoreForPlayer(StoneType stone) {
+    if (!didEnd()) return null;
+    if (finalTerritoryScores.length < 2) return null;
+    return stone == StoneType.white
+        ? finalTerritoryScores[1]
+        : finalTerritoryScores[0];
   }
 }
 

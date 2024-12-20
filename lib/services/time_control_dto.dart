@@ -5,8 +5,6 @@ import 'package:go/models/game.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/models/variant_type.dart';
 
-
-
 extension TimeControlDtoExt on TimeControlDto {
   TimeControl getTimeControl() {
     return TimeControl(
@@ -17,7 +15,6 @@ extension TimeControlDtoExt on TimeControlDto {
     );
   }
 }
-
 
 class TimeControlDto {
   final int mainTimeSeconds;
@@ -66,5 +63,52 @@ class TimeControlDto {
       repr += " + ${byoYomiTime!.byoYomis} x ${byoYomiTime!.byoYomiSeconds}s";
     }
     return repr;
+  }
+
+  String simpleRepr() {
+    final ms = mainTimeSeconds;
+    final ins = incrementSeconds;
+    final bys = byoYomiTime?.byoYomiSeconds;
+    final byc = byoYomiTime?.byoYomis;
+
+    if (ins == null && bys == null) {
+      return '$ms';
+    } else if (ins == null) {
+      return '$ms+$bys x $byc';
+    } else if (bys == null) {
+      return '$ms+$ins';
+    } else {
+      throw Exception('Invalid time control');
+    }
+  }
+
+  static TimeControlDto fromSimpleRepr(String repr) {
+    final parts = repr.split('+');
+    final mainTimeSeconds = int.parse(parts[0]);
+    int? incrementSeconds;
+    ByoYomiTime? byoYomiTime;
+
+    if (parts.length == 1) {
+      incrementSeconds = null;
+      byoYomiTime = null;
+    } else {
+      final secondPart = parts[1].split('x');
+      if (secondPart.length == 1) {
+        incrementSeconds = int.parse(secondPart[0]);
+        byoYomiTime = null;
+      } else {
+        incrementSeconds = null;
+        byoYomiTime = ByoYomiTime(
+          byoYomis: int.parse(secondPart[0]),
+          byoYomiSeconds: int.parse(secondPart[1]),
+        );
+      }
+    }
+
+    return TimeControlDto(
+      mainTimeSeconds: mainTimeSeconds,
+      incrementSeconds: incrementSeconds,
+      byoYomiTime: byoYomiTime,
+    );
   }
 }

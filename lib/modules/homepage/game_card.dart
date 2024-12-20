@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
+import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/game.dart';
@@ -107,7 +108,7 @@ class TimeControlInfoWidget extends StatelessWidget {
         style: context.textTheme.bodyLarge,
         children: [
           TextSpan(
-            text: game.timeControl.repr(),
+            text: game.timeControl.getTimeControlDto().repr(),
             style: context.textTheme.labelLarge,
           ),
         ],

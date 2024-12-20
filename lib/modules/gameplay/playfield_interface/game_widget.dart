@@ -6,6 +6,7 @@ import 'package:go/core/foundation/string.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
+import 'package:go/modules/gameplay/playfield_interface/gameui/game_over_card.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
@@ -15,6 +16,7 @@ import 'package:go/modules/auth/auth_provider.dart';
 
 import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
+import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/my_app_drawer.dart';
 import 'package:provider/provider.dart';
@@ -84,6 +86,9 @@ class _GameWidgetState extends State<GameWidget> {
           return Scaffold(
             key: key,
             drawer: const MyAppDrawer(),
+            floatingActionButton: FloatingActionButton(onPressed: () {
+              context.read<GameStateBloc>().testGameEndCard();
+            }),
             appBar: MyAppBar(
               gameTitle(context.read<GameStateBloc>().game),
               leading: IconButton(
@@ -164,6 +169,27 @@ class WrapperGame extends StatefulWidget {
 
 class _WrapperGameState extends State<WrapperGame> {
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      context.read<GameStateBloc>().gameEndStream.listen((event) {
+        final c = context;
+        if (c.mounted) {
+          showDialog(
+            context: c,
+            builder: (context) => GameOverCard(
+              gameStat: c.read<GameStateBloc>(),
+              oldContext: c,
+            ),
+          );
+        }
+      });
+    });
+  }
+
+  @override
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
@@ -172,6 +198,7 @@ class _WrapperGameState extends State<WrapperGame> {
   @override
   Widget build(BuildContext context) {
     context.read<Stage>().initializeWhenAllMiddlewareAvailable(context);
+
     return Container(
       //color: Colors.black,
       decoration: BoxDecoration(
