@@ -75,7 +75,7 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                     Center(
                       child: PrimaryButton(
                         onPressed: () {
-                          showCreateCustomGameDialog(context);
+                          showLiveCreateCustomGameDialog(context);
                         },
                         text: "Create New",
                       ),

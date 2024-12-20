@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/game.dart';
@@ -11,9 +14,18 @@ import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/models/variant_type.dart';
 
+typedef GameCreationParams = ({
+  StoneSelectionType stone,
+  TimeControlDto time,
+  Constants.BoardSizeData board
+});
+
 class CreateGameProvider extends ChangeNotifier {
-  // final SignalRProvider signalRBloc;
-  final SignalRProvider signalRBloc;
+  // final Future<Either<AppError, Game>> Function(
+  //         StoneSelectionType stone, TimeControlDto time, BoardSizeData board)
+  //     onCreate;
+  final Completer<GameCreationParams> paramsCompleter;
+
   var api = Api();
 
   // static const title = 'Grid List';
@@ -30,21 +42,18 @@ class CreateGameProvider extends ChangeNotifier {
   TimeStandard _timeStandard = TimeStandard.blitz;
   TimeStandard get timeStandard => _timeStandard;
 
-  Duration _mainTime =
-      Constants.timeStandardMainTime[TimeStandard.blitz]!;
+  Duration _mainTime = Constants.timeStandardMainTime[TimeStandard.blitz]!;
   Duration get mainTimeSeconds => _mainTime;
 
-  Duration _increment =
-      Constants.timeStandardIncrement[TimeStandard.blitz]!;
+  Duration _increment = Constants.timeStandardIncrement[TimeStandard.blitz]!;
   Duration get incrementSeconds => _increment;
 
-  Duration _byoYomi =
-      Constants.timeStandardByoYomiTime[TimeStandard.blitz]!;
+  Duration _byoYomi = Constants.timeStandardByoYomiTime[TimeStandard.blitz]!;
   Duration get byoYomiSeconds => _byoYomi;
 
   final byoYomiCountController = TextEditingController();
 
-  CreateGameProvider(this.signalRBloc);
+  CreateGameProvider(this.paramsCompleter);
 
   void init() async {
     _mStoneType = StoneSelectionType.black;
@@ -99,7 +108,8 @@ class CreateGameProvider extends ChangeNotifier {
     byoYomiCountController.dispose();
   }
 
-  Future<Either<AppError, Game>> createGame(String token) async {
+  // Future<Either<AppError, Game>>
+  void createGame(String token) async {
     var timeControl = TimeControlDto(
       mainTimeSeconds: _mainTime.inSeconds,
       incrementSeconds: _timeFormat == Constants.TimeFormat.fischer
@@ -112,14 +122,10 @@ class CreateGameProvider extends ChangeNotifier {
             )
           : null,
     );
-    var game = await api.createGame(
-        GameCreationDto(
-          rows: boardSize.rows,
-          columns: boardSize.cols,
-          timeControl: timeControl,
-          firstPlayerStone: _mStoneType,
-        ),
-        token);
-    return game;
+    paramsCompleter.complete((
+      stone: _mStoneType,
+      time: timeControl,
+      board: boardSize,
+    ));
   }
 }

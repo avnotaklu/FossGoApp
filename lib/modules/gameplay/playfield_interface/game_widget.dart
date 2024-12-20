@@ -25,11 +25,11 @@ import 'package:go/constants/constants.dart' as Constants;
 
 class GameWidget extends StatefulWidget {
   final Game game;
-  final GameStateOracle gameInteractor;
+  final GameStateOracle gameOracle;
 
   const GameWidget({
     required this.game,
-    required this.gameInteractor,
+    required this.gameOracle,
     super.key,
   });
   @override
@@ -77,7 +77,7 @@ class _GameWidgetState extends State<GameWidget> {
     return ChangeNotifierProvider(
         create: (context) => GameStateBloc(
               widget.game,
-              widget.gameInteractor,
+              widget.gameOracle,
               systemUtils,
             ),
         builder: (context, child) {

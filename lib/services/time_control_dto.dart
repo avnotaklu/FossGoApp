@@ -3,6 +3,21 @@ import 'dart:convert';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/time_control.dart';
+import 'package:go/models/variant_type.dart';
+
+
+
+extension TimeControlDtoExt on TimeControlDto {
+  TimeControl getTimeControl() {
+    return TimeControl(
+      mainTimeSeconds: mainTimeSeconds,
+      incrementSeconds: incrementSeconds,
+      byoYomiTime: byoYomiTime,
+      timeStandard: TimeStandard.blitz,
+    );
+  }
+}
+
 
 class TimeControlDto {
   final int mainTimeSeconds;

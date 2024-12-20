@@ -63,23 +63,6 @@ class _SignInState extends State<SignIn> {
           const SizedBox(
             height: 20,
           ),
-          LoaderButton(
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    var localGame = LocalGameplayServer(9, 9, ultrabullet);
-                    return GameWidget(
-                      game: localGame.getGame(),
-                      gameInteractor: FaceToFaceGameOracle(localGame),
-                    );
-                  },
-                ),
-              );
-            },
-            label: "Over the board",
-          ),
           const SizedBox(
             height: 20,
           ),

@@ -44,8 +44,14 @@ class MyAppDrawer extends StatelessWidget {
             leading: const Icon(Icons.create),
             title: const Text('Create Game'),
             onTap: () {
-              Scaffold.of(context).closeDrawer();
-              showCreateCustomGameDialog(context);
+              showLiveCreateCustomGameDialog(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.dashboard_customize),
+            title: const Text('Over the board'),
+            onTap: () {
+              showOverTheBoardCreateCustomGameDialog(context);
             },
           ),
         ],

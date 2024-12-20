@@ -1,12 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/foundation/string.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
+import 'package:go/models/game.dart';
 import 'package:go/models/variant_type.dart';
+import 'package:go/modules/gameplay/middleware/local_gameplay_server.dart';
 import 'package:go/modules/homepage/custom_games_page.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
@@ -18,16 +24,104 @@ import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/services/game_creation_dto.dart';
+import 'package:go/services/time_control_dto.dart';
 
 import 'package:go/widgets/buttons.dart';
 import 'package:go/widgets/my_text_form_field.dart';
 import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
 
-void showCreateCustomGameDialog(BuildContext context) {
+// Future<Either<AppError, Game>> Function(
+//     StoneSelectionType stone,
+//     TimeControlDto time,
+//     Constants.BoardSizeData board) liveGameCreate(String token, Api api) {
+//   return (stone, time, boardSize) {
+//     return api.createGame(
+//         GameCreationDto(
+//           rows: boardSize.rows,
+//           columns: boardSize.cols,
+//           timeControl: time,
+//           firstPlayerStone: stone,
+//         ),
+//         token);
+//   };
+// }
+
+Future<Either<AppError, Game>> Function(GameCreationParams) liveGameCreate(
+    String token, Api api) {
+  return (params) {
+    return api.createGame(
+        GameCreationDto(
+          rows: params.board.rows,
+          columns: params.board.cols,
+          timeControl: params.time,
+          firstPlayerStone: params.stone,
+        ),
+        token);
+  };
+}
+
+Future<Either<AppError, LocalGameplayServer>> Function(GameCreationParams)
+    overTheBoardCreate() {
+  return (params) {
+    var localGame = LocalGameplayServer(
+        params.board.rows, params.board.cols, params.time.getTimeControl());
+    return Future.value(right(localGame));
+  };
+}
+
+void showOverTheBoardCreateCustomGameDialog(BuildContext context) async {
+  final Completer<GameCreationParams> paramsCompleter = Completer();
+
+  await showDialog(
+      context: context,
+      builder: (context) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider(
+                  create: (context) =>
+                      CreateGameProvider(paramsCompleter)..init(),
+                ),
+              ],
+              builder: (context, child) {
+                return const CreateGameScreen();
+              }));
+
+  if (paramsCompleter.isCompleted) {
+    final params = await paramsCompleter.future;
+    final res = await overTheBoardCreate()(params);
+
+    if (context.mounted) {
+      res.fold((l) {
+        if (context.mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l.message),
+            ),
+          );
+        }
+      }, (r) {
+        Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => GameWidget(
+                  game: r.getGame(), gameOracle: FaceToFaceGameOracle(r)),
+            ));
+      });
+    }
+  } else {
+    // NOOOTHING TO DO
+  }
+}
+
+void showLiveCreateCustomGameDialog(BuildContext context) async {
   final signalRBloc = context.read<SignalRProvider>();
+  final authPro = context.read<AuthProvider>();
   final statsRepo = context.read<IStatsRepository>();
-  showDialog(
+  final Completer<GameCreationParams> paramsCompleter = Completer();
+
+  final res = await showDialog(
       context: context,
       builder: (context) => MultiProvider(
               providers: [
@@ -36,12 +130,42 @@ void showCreateCustomGameDialog(BuildContext context) {
                 ),
                 Provider.value(value: statsRepo),
                 ChangeNotifierProvider(
-                  create: (context) => CreateGameProvider(signalRBloc)..init(),
+                  create: (context) => CreateGameProvider(
+                    paramsCompleter,
+                  )..init(),
                 ),
               ],
               builder: (context, child) {
                 return const CreateGameScreen();
               }));
+
+  if (paramsCompleter.isCompleted) {
+    final params = await paramsCompleter.future;
+    final res = await liveGameCreate(authPro.token!, Api())(params);
+
+    if (context.mounted) {
+      res.fold((l) {
+        if (context.mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l.message),
+            ),
+          );
+        }
+      }, (r) {
+        final statRepo = context.read<IStatsRepository>();
+        Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) =>
+                  LiveGameWidget(r, null, statRepo),
+            ));
+      });
+    }
+  } else {
+    // NOOOTHING TO DO
+  }
 }
 
 class CreateGameScreen extends StatelessWidget {
@@ -259,26 +383,14 @@ class CreateGameScreen extends StatelessWidget {
               BadukButton(
                 onPressed: () async {
                   final token = context.read<AuthProvider>().token;
-                  final res = await context
-                      .read<CreateGameProvider>()
-                      .createGame(token!);
+                  final res =
+                      context.read<CreateGameProvider>().createGame(token!);
 
-                  res.fold((e) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(e.message),
-                      ),
-                    );
-                  }, (game) {
-                    final statRepo = context.read<IStatsRepository>();
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) =>
-                              LiveGameWidget(game, null, statRepo),
-                        ));
-                  });
+                  // res.fold((e) {
+                  // }, (game) {
+                  //   cgp.gameCompleter.complete(game);
+                  // });
+                  Navigator.pop(context);
                 },
                 child: const Text("Create"),
               ),

@@ -44,6 +44,7 @@ extension TimeControlExt on TimeControl {
   }
 }
 
+
 class TimeControl {
   final int mainTimeSeconds;
   final int? incrementSeconds;

@@ -29,7 +29,7 @@ class LiveGameWidget extends StatelessWidget {
                 if (snapshot.data != null) {
                   return GameWidget(
                       game: game,
-                      gameInteractor: LiveGameOracle(
+                      gameOracle: LiveGameOracle(
                         api: Api(),
                         authBloc: context.read<AuthProvider>(),
                         signalRbloc: context.read<SignalRProvider>(),
