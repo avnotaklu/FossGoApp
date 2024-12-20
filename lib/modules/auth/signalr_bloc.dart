@@ -116,14 +116,6 @@ class SignalRProvider extends ChangeNotifier {
 
   // Hub methods
   Future<Either<AppError, Null>> findMatch(FindMatchDto dto) async {
-    // var res = await hubConnection
-    //     .invoke('FindMatch', args: [dto.toMap()]).catchError((e) {
-    //   var err = "Error in findMatch: $e";
-    //   debugPrint(err);
-    //   return err;
-    // });
-    // debugPrint(res.toString());
-
     if (hubConnection == null ||
         hubConnection!.state != HubConnectionState.Connected) {
       return left(AppError(message: "Player Not connected"));
@@ -135,7 +127,20 @@ class SignalRProvider extends ChangeNotifier {
     });
 
     return right(null);
-    // debugPrint(res.toString());
+  }
+
+  Future<Either<AppError, Null>> cancelFind() async {
+    if (hubConnection == null ||
+        hubConnection!.state != HubConnectionState.Connected) {
+      return left(AppError(message: "Player Not connected"));
+    }
+
+    await hubConnection!.send('CancelFind').catchError((e) {
+      var err = "Error in findMatch: $e";
+      debugPrint(err);
+    });
+
+    return right(null);
   }
 
   // Utils

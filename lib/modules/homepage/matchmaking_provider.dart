@@ -2,6 +2,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/time_control_dto.dart';
@@ -16,15 +18,19 @@ import 'package:go/constants/constants.dart' as constants;
 // }
 
 class MatchmakingProvider extends ChangeNotifier {
+  bool findingMatch = false;
+
   final SignalRProvider signalRProvider;
 
   MatchmakingProvider(this.signalRProvider) {
     // TODO: this should also maybe have some notification to the user
 
     signalRProvider.userMessagesStream.listen((event) {
-      if (event.data case GameJoinMessage res) {
+      if (event.type == SignalRMessageTypes.matchFound) {
         debugPrint("Got matchmaking update");
-        onMatchmakingUpdated.add(res);
+        onMatchmakingUpdated.add(event.data as GameJoinMessage);
+        findingMatch = false;
+        notifyListeners();
       }
     });
   }
@@ -66,11 +72,31 @@ class MatchmakingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void findMatch() async {
-    await signalRProvider.findMatch(
+  Future<Either<AppError, Null>> findMatch() async {
+    final res = await signalRProvider.findMatch(
       FindMatchDto(
           boardSizes: selectedBoardSizes.map((a) => a).toList(),
           timeStandards: selectedTimeControls.map((a) => a).toList()),
     );
+
+    return res.fold((l) {
+      return left(l);
+    }, (r) {
+      findingMatch = true;
+      notifyListeners();
+      return right(null);
+    });
+  }
+
+  Future<Either<AppError, Null>> cancelFind() async {
+    final res = await signalRProvider.cancelFind();
+
+    return res.fold((l) {
+      return left(l);
+    }, (r) {
+      findingMatch = false;
+      notifyListeners();
+      return right(null);
+    });
   }
 }

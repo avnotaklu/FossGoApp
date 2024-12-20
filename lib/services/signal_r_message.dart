@@ -61,6 +61,8 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
   switch (type) {
     case SignalRMessageTypes.gameJoin:
       return GameJoinMessage.fromMap(map);
+    case SignalRMessageTypes.matchFound:
+      return GameJoinMessage.fromMap(map);
     case SignalRMessageTypes.gameStart:
       return GameStartMessage.fromMap(map);
     case SignalRMessageTypes.newGame:
@@ -75,8 +77,6 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
       return GameOverMessage.fromMap(map);
     case SignalRMessageTypes.gameTimerUpdate:
       return GameTimerUpdateMessage.fromMap(map);
-    case SignalRMessageTypes.matchFound:
-      return FindMatchResult.fromMap(map);
     case SignalRMessageTypes.statUpdate:
       return StatUpdateMessage.fromMap(map);
     case SignalRMessageTypes.scoreCaculationStarted:
@@ -92,6 +92,8 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
   switch (type) {
     case SignalRMessageTypes.gameJoin:
       return GameJoinMessage.fromJson(json);
+    case SignalRMessageTypes.matchFound:
+      return GameJoinMessage.fromJson(json);
     case SignalRMessageTypes.gameStart:
       return GameStartMessage.fromJson(json);
     case SignalRMessageTypes.newGame:
@@ -106,8 +108,6 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
       return GameOverMessage.fromJson(json);
     case SignalRMessageTypes.gameTimerUpdate:
       return GameTimerUpdateMessage.fromJson(json);
-    case SignalRMessageTypes.matchFound:
-      return FindMatchResult.fromJson(json);
     case SignalRMessageTypes.statUpdate:
       return StatUpdateMessage.fromJson(json);
     case SignalRMessageTypes.scoreCaculationStarted:

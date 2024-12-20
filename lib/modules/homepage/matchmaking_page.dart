@@ -136,7 +136,6 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                       .map((rec) => rec.$2)
                       .map(
                         (e) => ButtonSegment(
-                          
                           value: e,
                           icon: Icon(Icons.close),
                           label: Text(
@@ -180,26 +179,7 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  PrimaryButton(
-                      text: "Play",
-                      onPressed: () {
-                        provider.findMatch();
-
-                        context
-                            .read<MatchmakingProvider>()
-                            .onMatchmakingUpdated
-                            .stream
-                            .listen((event) {
-                          if (context.mounted) {
-                            final statRepo = context.read<IStatsRepository>();
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return LiveGameWidget(event.game,
-                                  event.getGameAndOpponent(), statRepo);
-                            }));
-                          }
-                        });
-                      }),
+                  FindButton(),
                 ],
               ),
               SizedBox(
@@ -269,6 +249,42 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
 
   TextStyle? titleLargeStyle(BuildContext context) {
     return context.textTheme.titleLarge;
+  }
+}
+
+class FindButton extends StatelessWidget {
+  const FindButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MatchmakingProvider>(builder: (context, provider, child) {
+      return provider.findingMatch
+          ? IconButton(onPressed: () {
+            provider.cancelFind();
+          }, icon: const Icon(Icons.close))
+          : PrimaryButton(
+              text: "Play",
+              onPressed: () {
+                provider.findMatch();
+
+                context
+                    .read<MatchmakingProvider>()
+                    .onMatchmakingUpdated
+                    .stream
+                    .listen((event) {
+                  if (context.mounted) {
+                    final statRepo = context.read<IStatsRepository>();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return LiveGameWidget(
+                          event.game, event.getGameAndOpponent(), statRepo);
+                    }));
+                  }
+                });
+              });
+    });
   }
 }
 
