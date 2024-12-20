@@ -20,6 +20,7 @@ import 'package:go/services/player_rating.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/user_account.dart';
 import 'package:go/utils/auth_navigation.dart';
+import 'package:go/widgets/loader_button.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
@@ -49,8 +50,9 @@ class ProfilePage extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.popUntil(
+                        Navigator.pushNamedAndRemoveUntil(
                           context,
+                          "/",
                           (c) => false,
                         );
                       },
@@ -343,14 +345,14 @@ class ProfilePage extends StatelessWidget {
                           SizedBox(
                             height: 20,
                           ),
-                          PrimaryButton(
+                          LoaderButton(
                             onPressed: () async {
                               await authProvider.logout();
                               if (context.mounted) {
                                 authNavigation(context, right(null));
                               }
                             },
-                            text: "Logout",
+                            label: "Logout",
                           ),
                         ],
                       ),

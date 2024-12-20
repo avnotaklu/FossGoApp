@@ -33,9 +33,9 @@ class AuthProvider {
       clientId:
           "983500952462-p1upu5nu2bis5565bj6nbqu3iqsp5209.apps.googleusercontent.com");
 
-  final StreamController<UserAccount> _currentUserStreamController =
-      StreamController.broadcast();
-  Stream<UserAccount> get currentUser => _currentUserStreamController.stream;
+  // final StreamController<UserAccount> _currentUserStreamController =
+  //     StreamController.broadcast();
+  // Stream<UserAccount> get currentUser => _currentUserStreamController.stream;
 
   final StreamController<Either<AppError, AbstractUserAccount?>>
       _authResultStreamController = StreamController.broadcast();
@@ -117,14 +117,14 @@ class AuthProvider {
     }
   }
 
-  void _setUser(String token, UserAccount user) {
-    _currentUserStreamController.add(user);
+  void _setUser(String token, AbstractUserAccount user) {
     _currentUserRaw = user;
-
     _token = token;
 
-    storeToken(token);
-    storeUser(user);
+    if (user is UserAccount) {
+      storeToken(token);
+      storeUser(user);
+    }
 
     debugPrint("email");
   }
@@ -158,9 +158,7 @@ class AuthProvider {
     final registerTas = registerUser(token, user.id);
 
     var res = (await registerTas.run()).flatMap((r) {
-      _token = token;
-      _currentUserRaw = user;
-
+      _setUser(token, user);
       return right(user);
     }).mapLeft((e) {
       signlRBloc.disconnect();

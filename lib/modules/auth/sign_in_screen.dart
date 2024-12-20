@@ -11,6 +11,7 @@ import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 
 import 'package:go/modules/auth/error_screen.dart';
 import 'package:go/utils/auth_navigation.dart';
+import 'package:go/widgets/loader_button.dart';
 import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
@@ -62,7 +63,7 @@ class _SignInState extends State<SignIn> {
           const SizedBox(
             height: 20,
           ),
-          FilledButton(
+          LoaderButton(
             onPressed: () async {
               Navigator.push(
                 context,
@@ -77,16 +78,26 @@ class _SignInState extends State<SignIn> {
                 ),
               );
             },
-            child: const Text("Over the board"),
+            label: "Over the board",
           ),
           const SizedBox(
             height: 20,
           ),
-          FilledButton(
-            onPressed: () {
-              authBloc.loginAsGuest();
+          LoaderButton(
+            onPressed: () async {
+              var result = await authBloc.loginAsGuest();
+
+              if (context.mounted) {
+                authNavigation(context, result);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(result.fold(
+                        (l) => l.toString(), (r) => "Logged in as guest")),
+                  ),
+                );
+              }
             },
-            child: const Text("Enter as guest"),
+            label: "Enter as guest",
           ),
         ]),
       ),
