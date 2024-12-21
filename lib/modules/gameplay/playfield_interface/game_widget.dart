@@ -86,9 +86,6 @@ class _GameWidgetState extends State<GameWidget> {
           return Scaffold(
             key: key,
             drawer: const MyAppDrawer(),
-            floatingActionButton: FloatingActionButton(onPressed: () {
-              context.read<GameStateBloc>().testGameEndCard();
-            }),
             appBar: MyAppBar(
               gameTitle(context.read<GameStateBloc>().game),
               leading: IconButton(

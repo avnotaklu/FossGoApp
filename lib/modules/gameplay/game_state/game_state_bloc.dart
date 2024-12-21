@@ -228,8 +228,4 @@ class GameStateBloc extends ChangeNotifier {
       curStageType = StageType.BeforeStart;
     }
   }
-
-  void testGameEndCard() {
-    _gameEndStreamController.add(null);
-  }
 }
