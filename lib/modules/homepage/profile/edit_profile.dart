@@ -58,113 +58,117 @@ class _EditProfilePageState extends State<EditProfilePage> {
           return Consumer<EditProfileProvider>(builder: (context, pro, child) {
             return Form(
               key: key,
-              autovalidateMode: AutovalidateMode.onUnfocus,
+              autovalidateMode: AutovalidateMode.always,
               child: Container(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      "Edit your profile",
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.headlineLarge,
-                    ),
-                    SizedBox(height: context.height * 0.1),
-                    MyTextFormField(
-                      controller: emailController,
-                      hintText: 'Email',
-                      enabled: false,
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return const BasicDialog(
-                              title: "Email Services not available",
-                              content: "Planning to do later",
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          "Edit your profile",
+                          textAlign: TextAlign.center,
+                          style: context.textTheme.headlineLarge,
+                        ),
+                        SizedBox(height: context.height * 0.1),
+                        MyTextFormField(
+                          controller: emailController,
+                          hintText: 'Email',
+                          enabled: false,
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return const BasicDialog(
+                                  title: "Email Services not available",
+                                  content: "Planning to do later",
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                      validator: pro.emailValidator().flutterFieldValidate,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    MyTextFormField(
-                      controller: nameController,
-                      hintText: 'Name',
-                      validator: pro.fullNameValidator().flutterFieldValidate,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    MyTextFormField(
-                      controller: bioController,
-                      hintText: 'Bio',
-                      validator: pro.bioValidator().flutterFieldValidate,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "Nationality",
-                              style: context.textTheme.titleLarge,
-                            ),
-                            WidgetSpan(
-                                child: IconButton(
-                                    style: ButtonStyle(
-                                      padding: WidgetStateProperty.all(
-                                        const EdgeInsets.all(0),
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      showPicker(
-                                        setNationality,
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.flag_circle,
-                                      size: 25,
-                                    )),
-                                baseline: TextBaseline.ideographic,
-                                alignment: PlaceholderAlignment.baseline),
-
-                            WidgetSpan(
-                                child: SizedBox(width: 20,),
-                                baseline: TextBaseline.alphabetic,
-                                alignment: PlaceholderAlignment.baseline),
-                            if (nationality != null)
-                              TextSpan(
-                                text: "Current: ${countryCodesMap[nationality]!}",
-                                style: context.textTheme.labelSmall,
-                              ),
-                          ],
+                          validator: pro.emailValidator().flutterFieldValidate,
                         ),
-                      ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        MyTextFormField(
+                          controller: nameController,
+                          hintText: 'Name',
+                          validator: pro.fullNameValidator().flutterFieldValidate,
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        MyTextFormField(
+                          controller: bioController,
+                          hintText: 'Bio',
+                          validator: pro.bioValidator().flutterFieldValidate,
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Nationality",
+                                  style: context.textTheme.titleLarge,
+                                ),
+                                WidgetSpan(
+                                    child: IconButton(
+                                        style: ButtonStyle(
+                                          padding: WidgetStateProperty.all(
+                                            const EdgeInsets.all(0),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          showPicker(
+                                            setNationality,
+                                          );
+                                        },
+                                        icon: Icon(
+                                          Icons.flag_circle,
+                                          size: 25,
+                                        )),
+                                    baseline: TextBaseline.ideographic,
+                                    alignment: PlaceholderAlignment.baseline),
+                    
+                                WidgetSpan(
+                                    child: SizedBox(width: 20,),
+                                    baseline: TextBaseline.alphabetic,
+                                    alignment: PlaceholderAlignment.baseline),
+                                if (nationality != null)
+                                  TextSpan(
+                                    text: "Current: ${countryCodesMap[nationality]!}",
+                                    style: context.textTheme.labelSmall,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        PrimaryButton(
+                            onPressed: () async {
+                              var res = await pro.saveProfile(
+                                nameController.text.trim(),
+                                bioController.text.trim(),
+                                nationality ?? "",
+                              );
+                    
+                              if (context.mounted) {
+                                showAppErrorSnackBar(context, res,
+                                    successPhrase: "Profile Successfully Updated");
+                              }
+                            },
+                            text: "Save")
+                      ],
                     ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    PrimaryButton(
-                        onPressed: () async {
-                          var res = await pro.saveProfile(
-                            nameController.text.trim(),
-                            bioController.text.trim(),
-                            nationality ?? "",
-                          );
-
-                          if (context.mounted) {
-                            showAppErrorSnackBar(context, res,
-                                successPhrase: "Profile Successfully Updated");
-                          }
-                        },
-                        text: "Save")
-                  ],
+                  ),
                 ),
               ),
             );

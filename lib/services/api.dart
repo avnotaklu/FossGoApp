@@ -15,6 +15,7 @@ import 'package:go/services/game_and_opponent.dart';
 import 'package:go/services/game_creation_dto.dart';
 import 'package:go/services/game_join_dto.dart';
 import 'package:go/services/games_history_batch.dart';
+import 'package:go/services/google_o_auth_model.dart';
 import 'package:go/services/guest_user.dart';
 import 'package:go/services/guest_user_result.dart';
 import 'package:go/services/move_position.dart';
@@ -106,13 +107,23 @@ class Api {
     return "$baseUrl/flags/${countryCode.toLowerCase()}.jpg";
   }
 
-  Future<Either<AppError, UserAuthenticationModel>> googleSignIn(
-      GoogleSignInAuthentication userCreds) async {
-    var idToken = userCreds.idToken!;
+  Future<Either<AppError, GoogleSignInResponse>> googleSignIn(
+      GoogleSignInBody body) async {
+    var res = await post(
+      Uri.parse("$baseUrl/Authentication/GoogleSignIn"),
+      body.toJson(),
+      null,
+    );
+    return convert(res, (a) => GoogleSignInResponse.fromJson(a));
+  }
 
-    // FIXME: server is taking a body json with token
-    var res =
-        await get(Uri.parse("$baseUrl/Authentication/GoogleSignIn"), idToken);
+  Future<Either<AppError, UserAuthenticationModel>> googleSignUp(
+      GoogleSignUpBody body, String token) async {
+    var res = await post(
+      Uri.parse("$baseUrl/Authentication/GoogleSignUp"),
+      body.toJson(),
+      token,
+    );
     return convert(res, (a) => UserAuthenticationModel.fromJson(a));
   }
 
@@ -211,10 +222,8 @@ class Api {
     return convert(res, (a) => PublicUserInfo.fromJson(a));
   }
 
-
   Future<Either<AppError, GamesHistoryBatch>> getGamesHistory(
       String token, int page) async {
-
     var res = await get(
       Uri.parse("$baseUrl/Player/MyGameHistory/$page"),
       token,
@@ -301,7 +310,7 @@ class Api {
     );
 
     return ApiError(
-      message: badRequest.toNullable()?.title ?? res.body,
+      message: badRequest.toNullable()?.message ?? res.body,
       statusCode: res.statusCode,
       reasonPhrase: res.reasonPhrase,
     );

@@ -21,7 +21,7 @@ import 'package:go/services/player_rating.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/user_account.dart';
 import 'package:go/utils/auth_navigation.dart';
-import 'package:go/widgets/loader_button.dart';
+import 'package:go/widgets/loader_basic_button.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
@@ -92,7 +92,7 @@ class ProfilePage extends StatelessWidget {
                                     builder: (context, cons) => Row(
                                       children: [
                                         Container(
-                                          width: cons.maxWidth * 0.64,
+                                          width: cons.maxWidth * 0.5,
                                           child: Column(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.start,
@@ -106,7 +106,7 @@ class ProfilePage extends StatelessWidget {
                                                       text:
                                                           "${user.myUsername} ",
                                                       style: context.textTheme
-                                                          .headlineLarge,
+                                                          .headlineSmall,
                                                     ),
                                                     if (user.nationality !=
                                                         null)
@@ -161,37 +161,49 @@ class ProfilePage extends StatelessWidget {
                                             ],
                                           ),
                                         ),
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            if (user.fullName != null)
+                                        Container(
+                                          width: cons.maxWidth * 0.5,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              if (user.fullName != null)
+                                                RichText(
+                                                    text: TextSpan(
+                                                  children: [
+                                                    TextSpan(
+                                                      text: "${user.fullName} ",
+                                                      style: context
+                                                          .textTheme.bodySmall,
+                                                    ),
+                                                    TextSpan(
+                                                      text: "(hidden)",
+                                                      style: context
+                                                          .textTheme.labelSmall
+                                                          ?.copyWith(
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic),
+                                                    ),
+                                                  ],
+                                                )),
+                                              if (user.email != null)
+                                                // Flexible(
+                                                //   child: Text(
+                                                //     "${user.email} ",
+                                                //     style: context
+                                                //         .textTheme.labelLarge,
+                                                //   ),
+                                                // ),
                                               RichText(
-                                                  text: TextSpan(
-                                                children: [
-                                                  TextSpan(
-                                                    text: "${user.fullName} ",
-                                                    style: context
-                                                        .textTheme.bodySmall,
-                                                  ),
-                                                  TextSpan(
-                                                    text: "(hidden)",
-                                                    style: context
-                                                        .textTheme.labelSmall
-                                                        ?.copyWith(
-                                                            fontStyle: FontStyle
-                                                                .italic),
-                                                  ),
-                                                ],
-                                              )),
-                                            if (user.email != null)
-                                              RichText(
+                                                textAlign: TextAlign.end,
                                                 text: TextSpan(
                                                   children: [
                                                     TextSpan(
                                                       text: "${user.email} ",
+
                                                       style: context
                                                           .textTheme.bodySmall,
                                                     ),
@@ -207,7 +219,8 @@ class ProfilePage extends StatelessWidget {
                                                   ],
                                                 ),
                                               ),
-                                          ],
+                                            ],
+                                          ),
                                         )
                                       ],
                                     ),
@@ -351,7 +364,7 @@ class ProfilePage extends StatelessWidget {
                           SizedBox(
                             height: 20,
                           ),
-                          LoaderButton(
+                          LoaderBasicButton(
                             onPressed: () async {
                               await authProvider.logout();
                               if (context.mounted) {

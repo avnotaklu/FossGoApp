@@ -54,4 +54,6 @@ class BadRequestError {
 
   factory BadRequestError.fromJson(String source) =>
       BadRequestError.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  String get message => errors.isNotEmpty ? errors.values.first.first : title;
 }

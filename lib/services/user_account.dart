@@ -27,6 +27,10 @@ extension AbstractUserAccountExt on AbstractUserAccount {
         : left(AppError(message: 'Not a user account'));
   }
 
+  UserAccount get forceUserAccount {
+    return this as UserAccount;
+  }
+
   PublicUserInfo getPublicUserInfo(PlayerRating? ratings) {
     return switch (this) {
       GuestUser(id: var id) => PublicUserInfo(

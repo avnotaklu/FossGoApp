@@ -4,7 +4,7 @@ import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/auth/sign_up_provider.dart';
 import 'package:go/utils/auth_navigation.dart';
-import 'package:go/widgets/loader_button.dart';
+import 'package:go/widgets/loader_basic_button.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/my_text_form_field.dart';
 import 'package:provider/provider.dart';
@@ -67,7 +67,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     const SizedBox(
                       height: 20,
                     ),
-                    LoaderButton(
+                    LoaderBasicButton(
                         onPressed: () async {
                           var response = await signUpPro.signUp(
                             userNameController.text,

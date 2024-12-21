@@ -25,8 +25,7 @@ class LogInProvider {
   }
 
   Validator<String?, String> emailValidator() {
-    return RequiredValidator(
-        Validator.getValidator(Validations.validateEmail));
+    return RequiredValidator(Validator.getValidator(Validations.validateEmail));
   }
 
   OrValidator<String?, String?, String?> emailOrUsernameValidator() {
@@ -37,7 +36,7 @@ class LogInProvider {
   Validator<String?, String> passwordValidator() {
     return RequiredValidator(
         Validator.getValidator(Validations.validatePassword));
-   }
+  }
 
   Future<Either<AppError, UserAccount>> logIn(
     String authName,

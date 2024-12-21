@@ -14,7 +14,7 @@ import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/find_match_dto.dart';
 import 'package:go/services/time_control_dto.dart';
-import 'package:go/widgets/loader_button.dart';
+import 'package:go/widgets/loader_basic_button.dart';
 import 'package:provider/provider.dart';
 import 'package:go/constants/constants.dart' as Constants;
 
@@ -65,7 +65,7 @@ class _GameOverCardState extends State<GameOverCard> {
               ],
             ),
             SizedBox(height: 10),
-            LoaderButton(
+            LoaderBasicButton(
                 onPressed: () async {
                   if (widget.gameStat.getPlatform() == GamePlatform.local) {
                     showOverTheBoardCreateCustomGameDialog(widget.oldContext);
@@ -75,7 +75,7 @@ class _GameOverCardState extends State<GameOverCard> {
                   }
                 },
                 label: "Create New"),
-            LoaderButton(
+            LoaderBasicButton(
                 onPressed: () async {
                   Navigator.pushNamedAndRemoveUntil(
                       context, "/HomePage", (v) => false);

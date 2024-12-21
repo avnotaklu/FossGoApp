@@ -2,33 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/auth/log_in_provider.dart';
+import 'package:go/modules/auth/new_o_auth_provider.dart';
 import 'package:go/utils/auth_navigation.dart';
 import 'package:go/widgets/loader_basic_button.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/my_text_form_field.dart';
 import 'package:provider/provider.dart';
 
-class LogInScreen extends StatefulWidget {
-  const LogInScreen({super.key});
+class NewOAuthAccountScreen extends StatefulWidget {
+  final String token;
+  const NewOAuthAccountScreen({required this.token, super.key});
 
   @override
-  State<LogInScreen> createState() => _LogInScreenState();
+  State<NewOAuthAccountScreen> createState() => _NewOAuthAccountState();
 }
 
-class _LogInScreenState extends State<LogInScreen> {
-  final emailOrUsernameController = TextEditingController();
+class _NewOAuthAccountState extends State<NewOAuthAccountScreen> {
+  final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    return Provider<LogInProvider>(
-      create: (context) => LogInProvider(authBloc: context.read()),
+    return Provider<NewOAuthProvider>(
+      create: (context) =>
+          NewOAuthProvider(authBloc: context.read(), token: widget.token),
       builder: (context, child) {
-        final pro = context.read<LogInProvider>();
+        final pro = context.read<NewOAuthProvider>();
         return Scaffold(
           appBar: const MyAppBar(
-            "Log In",
+            "Create Account",
             showBackButton: true,
           ),
           body: Form(
@@ -42,35 +45,24 @@ class _LogInScreenState extends State<LogInScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "Log in to your\n Account",
+                      "Select a username",
                       textAlign: TextAlign.center,
                       style: context.textTheme.headlineLarge,
                     ),
                     SizedBox(height: context.height * 0.1),
                     MyTextFormField(
-                      controller: emailOrUsernameController,
-                      hintText: 'Email/Username',
-                      validator:
-                          pro.emailOrUsernameValidator().flutterFieldValidate,
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    MyTextFormField(
-                      controller: passwordController,
-                      hintText: 'Password',
-                      validator: pro.passwordValidator().flutterFieldValidate,
+                      controller: usernameController,
+                      hintText: 'Username',
+                      validator: pro.usernameValidator().flutterFieldValidate,
                     ),
                     const SizedBox(
                       height: 20,
                     ),
                     LoaderBasicButton(
                         onPressed: () async {
-                          var response =
-                              await context.read<LogInProvider>().logIn(
-                                    emailOrUsernameController.text.trim(),
-                                    passwordController.text.trim(),
-                                  );
+                          var response = await pro.signUp(
+                            usernameController.text.trim(),
+                          );
                           if (context.mounted) {
                             authNavigation(context, response);
                             ScaffoldMessenger.of(context).showSnackBar(

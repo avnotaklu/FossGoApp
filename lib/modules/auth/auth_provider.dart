@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
+import 'package:go/services/google_o_auth_model.dart';
 import 'package:go/services/user_account.dart';
 import 'package:go/services/guest_user.dart';
 import 'package:go/services/public_user_info.dart';
@@ -85,29 +86,55 @@ class AuthProvider {
     });
   }
 
-  Future<Either<AppError, UserAccount>> loginGoogle() async {
+  Future<Either<AppError, Either<String, UserAccount>>> loginGoogle() async {
     try {
       Future<GoogleSignInAccount?> googleUser() async =>
           await googleSignIn.signIn();
       GoogleSignInAuthentication googleAuth =
           await (await googleUser())!.authentication;
 
-      // final AuthCredential credential = GoogleAuthProvider.credential(
-      //     idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
+      final result = TaskEither(
+        () => api.googleSignIn(GoogleSignInBody(token: googleAuth.idToken!)),
+      );
 
-      // final result = await authService.signInWithCredentials(credential);
-      final result = TaskEither(() => api.googleSignIn(googleAuth));
-
-      var res = result.flatMap((r) {
-        return TaskEither(
-          () => authenticateNormalUser(
-            r.user,
-            r.token,
-          ),
-        );
+      // FIXME: Here be dragons
+      var res = result.map((r) {
+        if (r.authenticated) {
+          return right<String, UserAuthenticationModel>(r.auth!);
+        } else {
+          return left<String, UserAuthenticationModel>(r.newOAuthToken!);
+        }
       });
 
-      return await res.run();
+      var mapCircus = res.map((r) {
+        var res = r.map((r) {
+          return TaskEither(() {
+            return (authenticateNormalUser(
+              r.user,
+              r.token,
+            ));
+          });
+        });
+        return res;
+      });
+
+      var taskEitherWrestling =
+          mapCircus.match<TaskEither<AppError, Either<String, UserAccount>>>(
+        (l) {
+          return TaskEither(() => Future.value(left(l)));
+        },
+        (r) {
+          return r.match((l) {
+            return TaskEither(() => Future.value(right(left(l))));
+          }, (r) {
+            var res = r.map((r) => right<String, UserAccount>(r));
+            return res;
+          });
+        },
+      );
+
+      var magicShow = await (await taskEitherWrestling.run()).run();
+      return magicShow;
     } catch (error) {
       debugPrint(error.toString());
 

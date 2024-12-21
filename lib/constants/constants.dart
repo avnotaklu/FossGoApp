@@ -595,4 +595,22 @@ class Validations {
         ? "Please enter a valid bio"
         : null;
   }
+
+  static String? validateNationalityLength(String nat) {
+    return nat.length != 2
+        ? "Nationality must be 2 characters long"
+        : null;
+  }
+
+  static String? validateNationalityFormat(String nat) {
+    final RegExp reg = RegExp(
+      r"^[A-Z][A-Z]$",
+    );
+    // final RegExp fullNameRegex = RegExp(r"\p{Letter}");
+
+    return !reg.hasMatch(nat)
+        ? "Please enter a valid nationality"
+        : null;
+
+  }
 }

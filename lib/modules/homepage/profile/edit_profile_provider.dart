@@ -14,21 +14,20 @@ class EditProfileProvider extends ChangeNotifier {
 
   EditProfileProvider({required this.auth, required this.api});
 
-  Either<AppError, UserAccount> get user =>
-      auth.currentUserAccount!.asUserAccount;
+  UserAccount get user => auth.currentUserAccount!.forceUserAccount;
 
   void setup(
       void Function(
               {String? fName, String? email, String? bio, String? nationality})
           s) {
-    user.fold((l) {}, (user) {
-      s.call(
-        fName: user.fullName,
-        email: user.email,
-        bio: user.bio,
-        nationality: user.nationality,
-      );
-    });
+    // user.fold((l) {}, (user) {
+    s.call(
+      fName: user.fullName,
+      email: user.email,
+      bio: user.bio,
+      nationality: user.nationality,
+    );
+    // });
   }
 
   Validator<String?, String?> fullNameValidator() {
@@ -46,21 +45,51 @@ class EditProfileProvider extends ChangeNotifier {
         Validator.getValidator(Validations.validateBio));
   }
 
+  Validator<String?, String?> nationalityValidator() {
+    return NonRequiredValidator(
+        Validator.getValidator(Validations.validateNationalityLength).add(
+            Validator.getValidator(Validations.validateNationalityFormat)));
+  }
+
   Future<Either<AppError, UserAccount>> saveProfile(
       String fullName, String bio, String nationality) async {
-    var res = await api.updateProfile(
-      UpdateProfileDto(
-        fullName: fullName,
-        bio: bio,
-        nationality: nationality,
-      ),
-      auth.myId,
-      auth.token!,
-    );
+    final fullNameRes = fullNameValidator().validate(fullName);
+    final bioRes = bioValidator().validate(bio);
+    final natRes = nationalityValidator().validate(nationality);
 
-    return res.map((a) {
-      auth.updateUserAccount(a.user);
-      return a.user;
+    var res = await fullNameRes
+        .flatMap((f) => bioRes.map<({String? fullName, String? bio})>(
+            (b) => (fullName: f, bio: b)))
+        .flatMap((f) =>
+            natRes.map<({String? fullName, String? bio, String? nat})>(
+                (b) => (fullName: f.fullName, bio: f.bio, nat: b)))
+        .match(
+            (l) async =>
+                Either<AppError, UserAccount>.left(AppError(message: l)),
+            (r) async {
+      if (user.fullName == r.fullName &&
+          user.bio == r.bio &&
+          user.nationality == r.nat) {
+        return Either<AppError, UserAccount>.left(
+            AppError(message: "No changes to save"));
+      }
+
+      var res = await api.updateProfile(
+        UpdateProfileDto(
+          fullName: r.fullName,
+          bio: r.bio,
+          nationality: r.nat,
+        ),
+        auth.myId,
+        auth.token!,
+      );
+
+      return res.map((a) {
+        auth.updateUserAccount(a.user);
+        return a.user;
+      });
     });
+
+    return res;
   }
 }

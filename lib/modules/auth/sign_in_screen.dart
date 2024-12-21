@@ -11,7 +11,7 @@ import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 
 import 'package:go/modules/auth/error_screen.dart';
 import 'package:go/utils/auth_navigation.dart';
-import 'package:go/widgets/loader_button.dart';
+import 'package:go/widgets/loader_basic_button.dart';
 import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
@@ -28,12 +28,11 @@ class _SignInState extends State<SignIn> {
     return Scaffold(
       body: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          SignInButton(
-            Buttons.Google,
+          LoaderCustomButton(
             onPressed: () async {
               var result = await authBloc.loginGoogle();
               if (context.mounted) {
-                authNavigation(context, result);
+                googleOAuthNavigation(context, result);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(result.fold(
@@ -42,6 +41,10 @@ class _SignInState extends State<SignIn> {
                 );
               }
             },
+            buttonBuilder: (onPressed) => SignInButton(
+              Buttons.Google,
+              onPressed: onPressed,
+            ),
           ),
           FilledButton(
               onPressed: () {
@@ -66,7 +69,7 @@ class _SignInState extends State<SignIn> {
           const SizedBox(
             height: 20,
           ),
-          LoaderButton(
+          LoaderBasicButton(
             onPressed: () async {
               var result = await authBloc.loginAsGuest();
 
