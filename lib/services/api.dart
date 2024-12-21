@@ -102,6 +102,10 @@ class Api {
     }
   }
 
+  static String flagUrl(String countryCode) {
+    return "$baseUrl/flags/${countryCode.toLowerCase()}.jpg";
+  }
+
   Future<Either<AppError, UserAuthenticationModel>> googleSignIn(
       GoogleSignInAuthentication userCreds) async {
     var idToken = userCreds.idToken!;

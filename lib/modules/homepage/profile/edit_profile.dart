@@ -116,30 +116,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               style: context.textTheme.titleLarge,
                             ),
                             WidgetSpan(
-                                child: SizedBox(width: 10),
-                                baseline: TextBaseline.alphabetic,
-                                alignment: PlaceholderAlignment.baseline),
-                            if (nationality != null)
-                              WidgetSpan(
-                                  child: Container(
-                                    height: 20,
-                                    child: Image.network(
-                                      "https://www.worldometers.info//img/flags/small/tn_${nationality?.toLowerCase()}-flag.gif",
-                                      errorBuilder:
-                                          (context, error, stackTrace) => Text(
-                                        countryCodesMap[nationality]!,
-                                      ),
-                                    ),
-                                  ),
-                                  baseline: TextBaseline.ideographic,
-                                  alignment: PlaceholderAlignment.baseline),
-                            WidgetSpan(
-                                child: SizedBox(width: 20),
-                                baseline: TextBaseline.alphabetic,
-                                alignment: PlaceholderAlignment.baseline),
-                            // if (pro.user.nationality == null)
-                            WidgetSpan(
-                                child: FilledButton(
+                                child: IconButton(
                                     style: ButtonStyle(
                                       padding: WidgetStateProperty.all(
                                         const EdgeInsets.all(0),
@@ -150,12 +127,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                         setNationality,
                                       );
                                     },
-                                    child: Icon(
+                                    icon: Icon(
                                       Icons.flag_circle,
                                       size: 25,
                                     )),
                                 baseline: TextBaseline.ideographic,
-                                alignment: PlaceholderAlignment.baseline)
+                                alignment: PlaceholderAlignment.baseline),
+
+                            WidgetSpan(
+                                child: SizedBox(width: 20,),
+                                baseline: TextBaseline.alphabetic,
+                                alignment: PlaceholderAlignment.baseline),
+                            if (nationality != null)
+                              TextSpan(
+                                text: "Current: ${countryCodesMap[nationality]!}",
+                                style: context.textTheme.labelSmall,
+                              ),
                           ],
                         ),
                       ),

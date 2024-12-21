@@ -16,6 +16,7 @@ import 'package:go/modules/homepage/profile/edit_profile.dart';
 import 'package:go/modules/homepage/profile/profile_page_provider.dart';
 import 'package:go/modules/stats/stats_page.dart';
 import 'package:go/modules/stats/stats_repository.dart';
+import 'package:go/services/api.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/user_account.dart';
@@ -107,18 +108,23 @@ class ProfilePage extends StatelessWidget {
                                                       style: context.textTheme
                                                           .headlineLarge,
                                                     ),
-                                                    WidgetSpan(
-                                                        child: Container(
-                                                          height: 20,
-                                                          child: Image.network(
-                                                            "https://www.worldometers.info//img/flags/small/tn_af-flag.gif",
+                                                    if (user.nationality !=
+                                                        null)
+                                                      WidgetSpan(
+                                                          child: Container(
+                                                            height: 20,
+                                                            child:
+                                                                Image.network(
+                                                              Api.flagUrl(
+                                                                user.nationality!,
+                                                              ),
+                                                            ),
                                                           ),
-                                                        ),
-                                                        baseline: TextBaseline
-                                                            .alphabetic,
-                                                        alignment:
-                                                            PlaceholderAlignment
-                                                                .baseline),
+                                                          baseline: TextBaseline
+                                                              .alphabetic,
+                                                          alignment:
+                                                              PlaceholderAlignment
+                                                                  .baseline),
                                                   ],
                                                 ),
                                               ),
