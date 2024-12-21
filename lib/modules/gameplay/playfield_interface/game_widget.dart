@@ -188,7 +188,6 @@ class _WrapperGameState extends State<WrapperGame> {
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
   }
 
@@ -196,46 +195,12 @@ class _WrapperGameState extends State<WrapperGame> {
   Widget build(BuildContext context) {
     context.read<Stage>().initializeWhenAllMiddlewareAvailable(context);
 
-    return Container(
-      //color: Colors.black,
-      decoration: BoxDecoration(
-          //image: DecorationImage(image: AssetImage(Constants.assets['table']!), fit: BoxFit.fitHeight, repeat: ImageRepeat.repeatY),
-          ),
-      child: GameUi(
-        boardWidget: Board(
-          widget.game.rows,
-          widget.game.columns,
-          widget.game.playgroundMap,
-        ),
+    return GameUi(
+      boardWidget: Board(
+        widget.game.rows,
+        widget.game.columns,
+        widget.game.playgroundMap,
       ),
     );
-
-    // return Stack(
-    //   children: [
-    //     Container(
-    //       //color: Colors.black,
-    //       decoration: BoxDecoration(
-    //         color: Constants.defaultTheme.backgroundColor,
-    //         //image: DecorationImage(image: AssetImage(Constants.assets['table']!), fit: BoxFit.fitHeight, repeat: ImageRepeat.repeatY),
-    //       ),
-    //     ),
-    //     Stack(
-    //       children: [
-    //         Column(children: [
-    //           Spacer(
-    //             flex: 6,
-    //           ),
-    //           Expanded(
-    //             flex: 18,
-    //             child: ,
-    //           ),
-    //           Spacer(
-    //             flex: 6,
-    //           ),
-    //         ]),
-    //       ],
-    //     ),
-    //   ],
-    // );
   }
 }

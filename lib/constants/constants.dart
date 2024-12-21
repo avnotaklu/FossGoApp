@@ -381,6 +381,7 @@ TextTheme buildTextTheme(Color tc) {
     bodySmall: bodyS(tc),
     labelLarge: lableL(tc),
     labelSmall: lableS(tc),
+    
   );
 }
 

@@ -32,6 +32,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
 
     return Container(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
               flex: 4,

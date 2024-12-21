@@ -51,7 +51,7 @@ class StatsPage extends StatelessWidget {
                   create: (context) => StatsPageProvider(
                     context.read<AuthProvider>(),
                     Api(),
-                    VariantType(BoardSize.nine, TimeStandard.blitz),
+                    defaultVariant,
                     data.$1,
                     data.$2,
                   ),

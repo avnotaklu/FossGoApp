@@ -95,7 +95,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         MyTextFormField(
                           controller: nameController,
                           hintText: 'Name',
-                          validator: pro.fullNameValidator().flutterFieldValidate,
+                          validator:
+                              pro.fullNameValidator().flutterFieldValidate,
                         ),
                         SizedBox(
                           height: 10,
@@ -135,14 +136,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                         )),
                                     baseline: TextBaseline.ideographic,
                                     alignment: PlaceholderAlignment.baseline),
-                    
                                 WidgetSpan(
-                                    child: SizedBox(width: 20,),
+                                    child: SizedBox(
+                                      width: 20,
+                                    ),
                                     baseline: TextBaseline.alphabetic,
                                     alignment: PlaceholderAlignment.baseline),
                                 if (nationality != null)
                                   TextSpan(
-                                    text: "Current: ${countryCodesMap[nationality]!}",
+                                    text:
+                                        "Current: ${countryCodesMap[nationality]!}",
                                     style: context.textTheme.labelSmall,
                                   ),
                               ],
@@ -159,10 +162,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 bioController.text.trim(),
                                 nationality ?? "",
                               );
-                    
+
                               if (context.mounted) {
                                 showAppErrorSnackBar(context, res,
-                                    successPhrase: "Profile Successfully Updated");
+                                    successPhrase:
+                                        "Profile Successfully Updated");
+                                Navigator.pushNamedAndRemoveUntil(
+                                    context, '/HomePage', (route) => false);
                               }
                             },
                             text: "Save")
