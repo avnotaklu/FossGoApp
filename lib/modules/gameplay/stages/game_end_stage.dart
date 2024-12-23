@@ -12,24 +12,11 @@ import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
 
-// class GameEndStage extends Stage<GameEndStage> {
 class GameEndStage extends Stage {
   late final Map<Position, Stone> stonesCopy;
 
-  // GameEndStage.fromScratch(context) {}
-
   final GameStateBloc gameStateBloc;
-  GameEndStage(this.gameStateBloc) {
-    // gameStateBloc.timerController[0].pause();
-    // gameStateBloc.timerController[1].pause();
-  }
-
-  @override
-  GameEndStage get stage => this;
-  @override
-  List<Widget> buttons() {
-    return [const Pass(), const Resign()];
-  }
+  GameEndStage(this.gameStateBloc);
 
   @override
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
@@ -42,7 +29,8 @@ class GameEndStage extends Stage {
                   child: Stack(
                     children: [
                       stone?.color != null
-                          ? StoneWidget(stone!.color!.withOpacity(0.6), position)
+                          ? StoneWidget(
+                              stone!.color!.withOpacity(0.6), position)
                           : const SizedBox.shrink(),
                       Center(
                         child: FractionallySizedBox(
@@ -91,5 +79,5 @@ class GameEndStage extends Stage {
   }
 
   @override
-  StageType get getType => StageType.GameEnd;
+  StageType get getType => StageType.gameEnd;
 }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
@@ -9,16 +8,10 @@ import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
 
-// class GameplayStage extends Stage<GameplayStage> {
 class GameplayStage extends Stage {
-  // StreamSubscription? listenNewStone;
 
-  GameplayStage.fromScratch();
-
-  GameplayStage(context);
-
-  @override
-  GameplayStage get stage => this;
+  final GameStateBloc gameStatBloc;
+  GameplayStage(this.gameStatBloc);
 
   @override
   void initializeWhenAllMiddlewareAvailable(BuildContext context) {
@@ -26,11 +19,6 @@ class GameplayStage extends Stage {
     gameStateBloc.startPausedTimerOfActivePlayer();
     // listenNewStone = gameStateBloc.listenForMove();
     context.read<ScoreCalculationBloc>().calculateScore();
-  }
-
-  @override
-  List<Widget> buttons() {
-    return [const Pass(), const Resign()];
   }
 
   @override
@@ -52,11 +40,10 @@ class GameplayStage extends Stage {
   }
 
   @override
-  disposeStage() {
-    // TODO: implement disposeStage
-    // listenNewStone?.cancel();
+  void disposeStage() {
+    // Empty
   }
 
   @override
-  StageType get getType => StageType.Gameplay;
+  StageType get getType => StageType.gameplay;
 }

@@ -1,6 +1,8 @@
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:go/models/game.dart';
+import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
+import 'package:provider/provider.dart';
 import 'stone_widget.dart';
 import '../../../models/position.dart';
 
@@ -42,7 +44,7 @@ class _BoardState extends State<Board> {
         2; // Don't make spacing so large that to get that spacing Stones start to move out of position
 
     //double boardInset = stoneInsetstoneSpacing;
-    return InteractiveViewer( 
+    return InteractiveViewer(
       child: Center(
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -69,9 +71,16 @@ class _BoardState extends State<Board> {
                 ),
                 BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows,
                     widget.cols, stoneInset)),
-                StoneLayoutGrid(
-                  GridInfo(constraints, stoneSpacing, widget.rows, widget.cols,
-                      stoneInset,),
+                Consumer<AnalysisBloc>(
+                  builder: (context, bloc, child) => StoneLayoutGrid(
+                    GridInfo(
+                      constraints,
+                      stoneSpacing,
+                      widget.rows,
+                      widget.cols,
+                      stoneInset,
+                    ),
+                  ),
                 ),
               ],
             );

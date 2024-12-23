@@ -27,6 +27,9 @@ class LocalGameplayServer {
   DateTime get now => systemUtilities.currentTime;
   late Timer _timer;
 
+  // TODO: This stream only streams the game end, and timer updates
+  // This should within the theme of the app be a stream of the whole game
+
   final StreamController<GameUpdate> gameUpdateC = StreamController.broadcast();
   Stream<GameUpdate> get gameUpdate => gameUpdateC.stream;
 
@@ -210,14 +213,6 @@ class LocalGameplayServer {
 
     if (turnPlayerMS == 0) {
       _endGame(GameOverMethod.Timeout, StoneType.values[turnPlayer].other);
-
-      gameUpdateC.add(
-        GameUpdate(
-          game: getGame(),
-          curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
-          playerWithTurn: StoneType.values[turnPlayer],
-        ),
-      );
     }
   }
 
@@ -302,6 +297,14 @@ class LocalGameplayServer {
     _result = winner?.resultForIWon;
     _gameOverMethod = method;
     _endTime = now;
+
+    gameUpdateC.add(
+      GameUpdate(
+        game: getGame(),
+        curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
+        playerWithTurn: StoneType.values[turnPlayer],
+      ),
+    );
   }
 
   // Helpers

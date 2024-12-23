@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/foundation/string.dart';
 import 'package:go/core/utils/system_utilities.dart';
+import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_over_card.dart';
@@ -66,11 +67,11 @@ class _GameWidgetState extends State<GameWidget> {
   }
 
   StageType getStageType() => switch (widget.game.gameState) {
-        GameState.waitingForStart => StageType.BeforeStart,
-        GameState.playing => StageType.Gameplay,
-        GameState.scoreCalculation => StageType.ScoreCalculation,
-        GameState.ended => StageType.GameEnd,
-        GameState.paused => StageType.BeforeStart,
+        GameState.waitingForStart => StageType.beforeStart,
+        GameState.playing => StageType.gameplay,
+        GameState.scoreCalculation => StageType.scoreCalculation,
+        GameState.ended => StageType.gameEnd,
+        GameState.paused => StageType.beforeStart,
       };
 
   // Board
@@ -106,45 +107,42 @@ class _GameWidgetState extends State<GameWidget> {
                   providers: [
                     ChangeNotifierProvider(
                       create: (context) => GameBoardBloc(game),
-                    )
+                    ),
+                    Provider(
+                      create: (context) => StoneLogic(game),
+                    ),
+                    ChangeNotifierProvider(
+                      create: (context) => AnalysisBloc( gameStateBloc),
+                    ),
                   ],
                   builder: (context, child) {
                     context.read<GameBoardBloc>().setupGame(game);
-                    return Provider(
-                      create: (context) => StoneLogic(game),
-                      builder: (context, child) => ChangeNotifierProvider(
-                        create: (context) {
-                          return ScoreCalculationBloc(
-                            api: context.read<AuthProvider>().api,
-                            authBloc: context.read<AuthProvider>(),
-                            gameStateBloc: context.read<GameStateBloc>(),
-                            gameBoardBloc: context.read<GameBoardBloc>(),
-                          );
-                        },
-                        builder: (context, child) {
-                          // return ValueListenableBuilder<StageType>( valueListenable: context
-                          //     .read<GameStateBloc>()!
-                          //     .curStageTypeNotifier,
-                          // builder: (context, stageType, idk) {
-                          var stage = context
-                              .read<GameStateBloc>()
-                              .curStageType
-                              .stageConstructor(
-                                context,
-                                context.read(),
-                              );
-                          return ChangeNotifierProvider<Stage>.value(
-                            value: stage,
-                            builder: (context, child) {
-                              return Consumer<ScoreCalculationBloc>(
-                                  builder: (context, dyn, child) =>
-                                      WrapperGame(game));
-                            },
-                          );
-                        },
-                        // );
-                        // },
-                      ),
+                    return ChangeNotifierProvider(
+                      create: (context) {
+                        return ScoreCalculationBloc(
+                          api: context.read<AuthProvider>().api,
+                          authBloc: context.read<AuthProvider>(),
+                          gameStateBloc: context.read<GameStateBloc>(),
+                          gameBoardBloc: context.read<GameBoardBloc>(),
+                        );
+                      },
+                      builder: (context, child) {
+                        var stage = context
+                            .read<GameStateBloc>()
+                            .curStageType
+                            .stageConstructor(
+                              context.read<GameStateBloc>(),
+                              context.read<AnalysisBloc>(),
+                            );
+                        return ChangeNotifierProvider<Stage>.value(
+                          value: stage,
+                          builder: (context, child) {
+                            return Consumer<ScoreCalculationBloc>(
+                                builder: (context, dyn, child) =>
+                                    WrapperGame(game));
+                          },
+                        );
+                      },
                     );
                   },
                 );

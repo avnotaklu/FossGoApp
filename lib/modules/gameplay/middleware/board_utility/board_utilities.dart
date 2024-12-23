@@ -39,6 +39,7 @@ class BoardState {
 }
 
 class BoardStateUtilities {
+  // TODO: rows, cols here are redundant in most cases
   final int rows;
   final int cols;
   BoardStateUtilities(this.rows, this.cols);

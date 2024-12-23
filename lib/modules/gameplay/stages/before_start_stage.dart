@@ -9,14 +9,6 @@ class BeforeStartStage extends Stage {
   BeforeStartStage();
 
   @override
-  BeforeStartStage get stage => this;
-
-  @override
-  List<Widget> buttons() {
-    return [const Pass(), const Resign()];
-  }
-
-  @override
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
     return Container(
       color: Colors.transparent,
@@ -35,5 +27,5 @@ class BeforeStartStage extends Stage {
   void initializeWhenAllMiddlewareAvailable(context) {}
 
   @override
-  StageType get getType => StageType.BeforeStart;
+  StageType get getType => StageType.beforeStart;
 }

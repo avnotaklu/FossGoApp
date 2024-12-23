@@ -161,6 +161,7 @@ class Api {
       String token) async {
     var res = await get(Uri.parse("$baseUrl/Authentication/GetUser"), token);
 
+    // FIXME: This api returns emtpy body of failure sometimes, that shouldn't happen
     return convert(res, (a) => UserAuthenticationModel.fromJson(a));
   }
 

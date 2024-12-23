@@ -182,7 +182,7 @@ void main() {
   // });
 
   final sGame = gameConstructor(simpleBoard(), _1980Jan1_1_30PM);
-  const curStage = StageType.Gameplay;
+  const curStage = StageType.gameplay;
 
   // joins game on client1 when constructing gameStateBloc
   // final l1 = LiveGameInteractor(api: api, authBloc: auth, signalRbloc: signalR);

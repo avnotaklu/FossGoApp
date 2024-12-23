@@ -14,15 +14,11 @@ import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
 
-// class ScoreCalculationStage extends Stage<ScoreCalculationStage> {
 class ScoreCalculationStage extends Stage {
   StreamSubscription? removedClusterSubscription;
   StreamSubscription? opponentConfirmationStream;
-  //get context => _context;
   late Map<Position, Stone> stonesCopy;
 
-  @override
-  ScoreCalculationStage? get stage => this;
   @override
   void initializeWhenAllMiddlewareAvailable(context) {
     final gameBoarcBloc = context.read<GameBoardBloc>();
@@ -31,15 +27,9 @@ class ScoreCalculationStage extends Stage {
     gameStateBloc.timerController[1].pause();
     context.read<ScoreCalculationBloc>().setupScore();
     stonesCopy = gameBoarcBloc.stones;
-    // ScoreCalculation.of(context)!.calculateScore(context);
   }
 
   ScoreCalculationStage();
-
-  @override
-  List<Widget> buttons() {
-    return [const Accept(), const Resign()];
-  }
 
   @override
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
@@ -104,5 +94,5 @@ class ScoreCalculationStage extends Stage {
   }
 
   @override
-  StageType get getType => StageType.ScoreCalculation;
+  StageType get getType => StageType.scoreCalculation;
 }

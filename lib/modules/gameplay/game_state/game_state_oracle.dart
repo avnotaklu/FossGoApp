@@ -112,7 +112,7 @@ class GameUpdate {
     this.deadStoneState,
   });
 
-  get state => null;
+  // get state => null;
 }
 
 enum GamePlatform {
@@ -121,8 +121,16 @@ enum GamePlatform {
 }
 
 abstract class GameStateOracle {
+  // FIXME: Controllers being here means they are easy to miss in implementation
+
   final StreamController<GameUpdate> gameUpdateC = StreamController.broadcast();
   Stream<GameUpdate> get gameUpdate => gameUpdateC.stream;
+
+  final StreamController<Null> gameEndC = StreamController.broadcast();
+  Stream<Null> get gameEndStream => gameEndC.stream;
+
+  final StreamController<GameMove> moveUpdateC = StreamController.broadcast();
+  Stream<GameMove> get moveUpdate => moveUpdateC.stream;
 
   DisplayablePlayerData myPlayerData(Game game);
   DisplayablePlayerData? otherPlayerData(Game game);
@@ -180,7 +188,9 @@ class LiveGameOracle extends GameStateOracle {
 
     listenFromMove = gameMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.newMove) {
-        yield message.data as NewMoveMessage;
+        final moveMessage = message.data as NewMoveMessage;
+        moveUpdateC.add(moveMessage.game.moves.last);
+        yield moveMessage;
       }
     });
 
@@ -198,7 +208,9 @@ class LiveGameOracle extends GameStateOracle {
 
     listenFromGameOver = gameMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.gameOver) {
-        yield message.data as GameOverMessage;
+        final gameOverMessage = message.data as GameOverMessage;
+        gameEndC.add(null);
+        yield gameOverMessage;
       }
     });
 
@@ -417,6 +429,12 @@ class FaceToFaceGameOracle extends GameStateOracle {
 
   FaceToFaceGameOracle(this.gp) {
     gameUpdateC.addStream(gp.gameUpdate);
+    gp.gameUpdate.listen((d) {
+      if (d.game?.gameState == GameState.ended) {
+        gameEndC.add(null); 
+        // NOTE: After end there are no other updates, so this will happen once only
+      }
+    });
   }
 
   String get myPlayerId => "bottom";
@@ -470,6 +488,11 @@ class FaceToFaceGameOracle extends GameStateOracle {
   @override
   Future<Either<AppError, Game>> playMove(Game game, MovePosition move) async {
     var newGame = gp.makeMove(move, thisAccountStone(game));
+
+    newGame.fold(identity, (r) {
+      moveUpdateC.add(r.moves.last);
+    });
+
     return newGame;
   }
 

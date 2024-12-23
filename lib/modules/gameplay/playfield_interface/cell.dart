@@ -1,63 +1,35 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
-import 'package:go/constants/constants.dart' as constants;
-
-import 'package:go/modules/gameplay/stages/stage.dart';
-import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
 import 'package:provider/provider.dart';
-import 'stone_widget.dart';
+
+import 'package:go/constants/constants.dart' as constants;
+import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
+import 'package:go/modules/gameplay/stages/stage.dart';
+
 import '../../../models/position.dart';
+import 'stone_widget.dart';
 
-class Cell extends StatefulWidget {
-  Position position;
-  // Map<Position?,Stone?> playgroundMap;
-  // final VoidCallback cellChanged;
-  Cell(this.position, {super.key});
+class Cell extends StatelessWidget {
+  final Position position;
 
-  @override
-  State<Cell> createState() => _CellState();
-}
+  const Cell(this.position, {super.key});
 
-class _CellState extends State<Cell> {
-  // StoneWidget? tmp;
   @override
   Widget build(BuildContext context) {
-    // final Stream<StoneWidget?> _bids = (() async* {
-    //   yield StoneLogic.of(context)?.stoneAt(widget.position);
-    // })();
-
-    // return ValueListenableBuilder<StoneWidget?>(
-    //   valueListenable: StoneLogic.of(context)!.stoneNotifierAt(widget.position),
-    //   builder: (BuildContext context, dyn, wid) {
-
     GameBoardBloc gameBoard = context.read();
-    final stone = gameBoard.stoneAt(widget.position);
+    final stone = gameBoard.stoneAt(position);
     final stage = context.read<Stage>();
     return GestureDetector(
       onTap: () {
-        setState(() {
-          stage.onClickCell(widget.position, context);
-        });
+        stage.onClickCell(position, context);
       },
-      child:
-          //  StoneWidget(
-          //   constants.playerColors[stone!.player],
-          //   stone.position,
-          // ),
-          // //  stone == null
-          // //     ?  Container(
-          // //         height: 20,
-          // //         width: 20,
-          // //         color: Colors.red,
-          // //       )
-          stage.drawCell(
-              widget.position,
-              StoneWidget(
-                stone == null ? null : constants.playerColors[stone.player],
-                widget.position,
-              ),
-              context),
+      child: stage.drawCell(
+          position,
+          StoneWidget(
+            stone == null ? null : constants.playerColors[stone.player],
+            position,
+          ),
+          context),
     );
-    //   },
-    // );
   }
 }

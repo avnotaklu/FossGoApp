@@ -1,12 +1,22 @@
 import 'dart:convert';
 
 import 'package:go/models/game.dart';
+import 'package:go/models/position.dart';
 
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+extension GameMoveExt on GameMove {
+  Position? toPosition() {
+    if (x == null || y == null) {
+      return null;
+    }
+    return Position(x!, y!);
+  }
+}
+
 class GameMove {
   final int secondsAfterStart;
   final int? x;
   final int? y;
+
   GameMove({
     required this.secondsAfterStart,
     required this.x,

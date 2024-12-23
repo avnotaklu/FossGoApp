@@ -5,6 +5,8 @@ import 'package:go/constants/constants.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
+import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
+import 'package:go/modules/gameplay/stages/analysis_stage.dart';
 import 'package:go/modules/gameplay/stages/game_end_stage.dart';
 import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
@@ -81,7 +83,9 @@ class _GameUiState extends State<GameUi> {
             if (context.read<Stage>() is! GameEndStage)
               context.read<Stage>() is ScoreCalculationStage
                   ? const ScoreActions()
-                  : const PlayingGameActions()
+                  : context.read<Stage>() is AnalysisStage
+                      ? const AnalsisModeActions()
+                      : const PlayingGameActions()
             else
               const PlayingEndedActions()
             // SizedBox(
@@ -214,6 +218,19 @@ class PlayingGameActions extends StatelessWidget {
   }
 }
 
+class AnalsisModeActions extends StatelessWidget {
+  const AnalsisModeActions({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ActionStrip(actions: [
+      ExitAnalysisButton(),
+      BackwardButton(),
+      ForwardButton(),
+    ]);
+  }
+}
+
 class ActionStrip extends StatelessWidget {
   final List<Widget> actions;
   const ActionStrip({required this.actions, super.key});
@@ -332,11 +349,10 @@ class EnterAnalysisButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButtonWidget(() {
-      // Navigator.pushNamedAndRemoveUntil(context, "/HomePage", (v) => false);
+      context.read<GameStateBloc>().enterAnalysisMode();
     }, ActionType.analyze);
   }
 }
-
 
 class ExitAnalysisButton extends StatelessWidget {
   const ExitAnalysisButton({super.key});
@@ -344,11 +360,32 @@ class ExitAnalysisButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButtonWidget(() {
-      // Navigator.pushNamedAndRemoveUntil(context, "/HomePage", (v) => false);
+      context.read<GameStateBloc>().exitAnalysisMode();
     }, ActionType.exitAnalysis);
   }
 }
 
+class ForwardButton extends StatelessWidget {
+  const ForwardButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionButtonWidget(() {
+      context.read<AnalysisBloc>().forward();
+    }, ActionType.forward);
+  }
+}
+
+class BackwardButton extends StatelessWidget {
+  const BackwardButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionButtonWidget(() {
+      context.read<AnalysisBloc>().backward();
+    }, ActionType.backward);
+  }
+}
 
 extension ActionButtonUiExt on ActionType {
   String get label {

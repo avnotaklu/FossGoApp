@@ -13,7 +13,7 @@ import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/models/variant_type.dart';
 
-extension StoneTypeExtension on StoneType {
+extension StoneTypeExt on StoneType {
   String get color => switch (this) {
         StoneType.black => "Black",
         StoneType.white => "White",
@@ -32,6 +32,10 @@ extension StoneTypeExtension on StoneType {
         StoneType.black => GameResult.whiteWon,
         StoneType.white => GameResult.blackWon,
       };
+
+  static StoneType fromMoveNumber(int moveNumber) {
+    return moveNumber.isEven ? StoneType.black : StoneType.white;
+  }
 
   T? getValueFromPlayerList<T>(List<T> list) {
     return list.getValueByStone(this);

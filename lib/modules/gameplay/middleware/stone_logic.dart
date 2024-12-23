@@ -23,6 +23,10 @@ class StoneLogic {
     return board.playgroundMap[pos];
   }
 
+  StoneType? stoneAt(Position pos) {
+    return _stoneAt(pos)?.toStoneType();
+  }
+
   void _setStoneAt(Position pos, Stone stone) {
     board.playgroundMap[pos] = stone;
   }
@@ -189,6 +193,8 @@ class StoneLogic {
 
   ({bool result, BoardState board}) handleStoneUpdate(
       Position? position, StoneType stone) {
+    
+    // REVIEW: This is stone update, and it handles passes as well
     if (position == null) {
       return (result: true, board: board);
     }

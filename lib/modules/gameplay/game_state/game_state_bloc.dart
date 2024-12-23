@@ -81,8 +81,6 @@ class GameStateBloc extends ChangeNotifier {
   DisplayablePlayerData? get topPlayerUserInfo =>
       gameOracle.otherPlayerData(game);
 
-
-
   // List<Duration> times;
   final List<TimerController> _controller;
 
@@ -95,9 +93,8 @@ class GameStateBloc extends ChangeNotifier {
 
   late final StreamSubscription<GameUpdate> gameUpdateListener;
 
-  final StreamController<Null> _gameEndStreamController =
-      StreamController.broadcast();
-  Stream<Null> get gameEndStream => _gameEndStreamController.stream;
+  Stream<Null> get gameEndStream => gameOracle.gameEndStream;
+  Stream<GameMove> get gameMoveStream => gameOracle.moveUpdate;
 
   GameStateBloc(
     this.game,
@@ -193,13 +190,8 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   Game updateStateFromGame(Game game) {
-    if (game.gameState == GameState.ended &&
-        this.game.gameState != GameState.ended) {
-      _gameEndStreamController.add(null);
-    }
-
     this.game = game;
-    updateStageType(game.gameState);
+    _updateStageType(game.gameState);
 
     if (game.didStart()) {
       updateNewPlayerTimes(game);
@@ -217,15 +209,26 @@ class GameStateBloc extends ChangeNotifier {
     return game;
   }
 
-  void updateStageType(GameState state) {
+  void _updateStageType(GameState state) {
     if (state == GameState.playing) {
-      curStageType = StageType.Gameplay;
+      curStageType = StageType.gameplay;
     } else if (state == GameState.scoreCalculation) {
-      curStageType = StageType.ScoreCalculation;
+      curStageType = StageType.scoreCalculation;
     } else if (state == GameState.ended) {
-      curStageType = StageType.GameEnd;
+      curStageType = StageType.gameEnd;
     } else if (state == GameState.waitingForStart) {
-      curStageType = StageType.BeforeStart;
+      curStageType = StageType.beforeStart;
     }
+  }
+
+  void enterAnalysisMode() {
+    curStageType = StageType.analysis;
+    notifyListeners();
+  }
+
+  void exitAnalysisMode() {
+    var curState = game.gameState;
+    _updateStageType( curState);
+    notifyListeners();
   }
 }
