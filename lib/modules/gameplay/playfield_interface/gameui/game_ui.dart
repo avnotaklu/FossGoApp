@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:core';
 
 import 'package:flutter/material.dart';
@@ -132,9 +133,21 @@ class _GameUiState extends State<GameUi> {
 }
 
 class ActionButtonWidget extends StatelessWidget {
-  const ActionButtonWidget(this.action, this.actionType,
-      {super.key, this.isDisabled = false});
+  const ActionButtonWidget(
+    this.action,
+    this.actionType, {
+    super.key,
+    this.isDisabled = false,
+    this.longPress,
+    this.longPressEnd,
+    this.longPressStart,
+  });
   final bool isDisabled;
+  final VoidCallback? longPress;
+
+  final void Function(LongPressStartDetails)? longPressStart;
+  final void Function(LongPressEndDetails)? longPressEnd;
+
   final VoidCallback action;
   final ActionType actionType;
 
@@ -157,24 +170,32 @@ class ActionButtonWidget extends StatelessWidget {
     // );
 
     return Expanded(
-      child: Material(
-        child: InkWell(
-          splashFactory: InkRipple.splashFactory,
-          onTap: isDisabled ? null : action,
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            child: Column(
-              children: [
-                Icon(
-                  actionType.icon,
-                  size: 20,
-                ),
-                Text(actionType.label, style: context.textTheme.labelSmall),
-              ],
-            ),
+      child:
+          // Material(
+          //   child: InkWell(
+          //     splashFactory: InkRipple.splashFactory,
+          //     onTap: isDisabled ? null : action,
+          //     child:
+          GestureDetector(
+        onTap: isDisabled ? null : action,
+        onLongPress: longPress,
+        onLongPressStart: longPressStart,
+        onLongPressEnd: longPressEnd,
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          child: Column(
+            children: [
+              Icon(
+                actionType.icon,
+                size: 20,
+              ),
+              Text(actionType.label, style: context.textTheme.labelSmall),
+            ],
           ),
         ),
       ),
+      //   ),
+      // ),
     );
   }
 }
@@ -223,8 +244,8 @@ class AnalsisModeActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ActionStrip(actions: [
-      ExitAnalysisButton(),
+    return ActionStrip(actions: [
+      const ExitAnalysisButton(),
       BackwardButton(),
       ForwardButton(),
     ]);
@@ -366,24 +387,48 @@ class ExitAnalysisButton extends StatelessWidget {
 }
 
 class ForwardButton extends StatelessWidget {
-  const ForwardButton({super.key});
+  Timer? timer;
+  ForwardButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ActionButtonWidget(() {
-      context.read<AnalysisBloc>().forward();
-    }, ActionType.forward);
+    return ActionButtonWidget(
+      () {
+        context.read<AnalysisBloc>().forward();
+      },
+      ActionType.forward,
+      longPressStart: (det) {
+        timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+          context.read<AnalysisBloc>().forward();
+        });
+      },
+      longPressEnd: (details) {
+        timer?.cancel();
+      },
+    );
   }
 }
 
 class BackwardButton extends StatelessWidget {
-  const BackwardButton({super.key});
+  Timer? timer;
+  BackwardButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ActionButtonWidget(() {
-      context.read<AnalysisBloc>().backward();
-    }, ActionType.backward);
+    return ActionButtonWidget(
+      () {
+        context.read<AnalysisBloc>().backward();
+      },
+      ActionType.backward,
+      longPressStart: (det) {
+        timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+          context.read<AnalysisBloc>().backward();
+        });
+      },
+      longPressEnd: (details) {
+        timer?.cancel();
+      },
+    );
   }
 }
 
