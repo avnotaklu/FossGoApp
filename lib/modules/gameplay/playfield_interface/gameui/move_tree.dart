@@ -13,20 +13,26 @@ class TreeDimens {
   static const double circle_dia = 26;
   static const double parent_child_dist = 24;
 
-  static double get node_vertical_extent => circle_dia + parent_child_dist;
+  static double get node_main_extent => circle_dia + parent_child_dist;
 
   static const double siblings_dist = 16;
   static const double selected_circle_dia = 30;
 
-  static double get node_horizontal_extent => circle_dia + siblings_dist;
+  static double get node_cross_extent => circle_dia + siblings_dist;
 
-  static const double bottom_relaxation = 50;
-  static const double top_relaxation = 10;
-  static const double left_relaxation = 10;
-  static const double right_relaxation = 10;
+  static const double main_start_relaxation = 30;
+  static const double main_end_relaxation = 50;
+  static const double cross_start_relaxation = 30;
+  static const double cross_end_relaxation = 10;
+}
+
+enum TreeDirection {
+  horizontal,
+  vertical,
 }
 
 class MoveTree extends StatelessWidget {
+  final TreeDirection direction;
   final RootMove root;
   final TransformationController _transformationController =
       TransformationController();
@@ -34,7 +40,7 @@ class MoveTree extends StatelessWidget {
   final Map<Rect, MoveBranch> interactionRectForMoves = {};
   final List<Rect> allInteractionRects = [];
 
-  MoveTree({required this.root, super.key});
+  MoveTree({required this.root, required this.direction, super.key});
 
   Offset transformPosToInteractiveViewerViewport(Offset pos) {
     final mat = _transformationController.value;
@@ -91,15 +97,17 @@ class MoveTree extends StatelessWidget {
               },
               child: CustomPaint(
                 size: Size(
-                    max(
-                      context.width * 0.6,
-                      calculateMaxWidth(bloc),
-                    ),
-                    max(
-                      context.height * 0.8,
-                      calculateMaxHeight(bloc),
-                    )),
+                  max(
+                    context.width * 0.8,
+                    maxWidth(bloc),
+                  ),
+                  max(
+                    context.height * 0.5,
+                    maxHeight(bloc),
+                  ),
+                ),
                 painter: MoveCanvas(
+                  direction: direction,
                   root: root,
                   realMoves: bloc.realMoves,
                   currentMove: bloc.currentMove,
@@ -123,20 +131,33 @@ class MoveTree extends StatelessWidget {
     );
   }
 
-  double calculateMaxWidth(AnalysisBloc bloc) {
-    return TreeDimens.node_horizontal_extent * bloc.highestMoveLevel +
-        TreeDimens.left_relaxation +
-        TreeDimens.right_relaxation /* relaxation */;
+  double maxWidth(AnalysisBloc bloc) {
+    return direction == TreeDirection.horizontal
+        ? calculateMaxMainExtent(bloc)
+        : calculateMaxCrossExtent(bloc);
   }
 
-  double calculateMaxHeight(AnalysisBloc bloc) {
-    return TreeDimens.node_vertical_extent * bloc.highestLineDepth +
-        TreeDimens.top_relaxation +
-        TreeDimens.bottom_relaxation /* relaxation */;
+  double maxHeight(AnalysisBloc bloc) {
+    return direction == TreeDirection.horizontal
+        ? calculateMaxCrossExtent(bloc)
+        : calculateMaxMainExtent(bloc);
+  }
+
+  double calculateMaxCrossExtent(AnalysisBloc bloc) {
+    return TreeDimens.node_cross_extent * bloc.highestMoveLevel +
+        TreeDimens.cross_start_relaxation +
+        TreeDimens.cross_end_relaxation /* relaxation */;
+  }
+
+  double calculateMaxMainExtent(AnalysisBloc bloc) {
+    return TreeDimens.node_main_extent * bloc.highestLineDepth +
+        TreeDimens.main_start_relaxation +
+        TreeDimens.main_end_relaxation /* relaxation */;
   }
 }
 
 class MoveCanvas extends CustomPainter {
+  final TreeDirection direction;
   final RootMove root;
   final List<RealMoveBranch> realMoves;
   final MoveBranch? currentMove;
@@ -152,6 +173,7 @@ class MoveCanvas extends CustomPainter {
   final List<Rect> allInteractionRects;
 
   MoveCanvas({
+    required this.direction,
     required this.root,
     required this.realMoves,
     required this.currentMove,
@@ -174,25 +196,36 @@ class MoveCanvas extends CustomPainter {
   }
 
   Offset getNodeStartOffset(MoveBranch alt, [int? parentLevel]) {
-    double v_node_extent = TreeDimens.node_vertical_extent;
-    double h_node_extent = TreeDimens.node_horizontal_extent;
+    double v_node_extent = TreeDimens.node_main_extent;
+    double h_node_extent = TreeDimens.node_cross_extent;
 
     double rad = TreeDimens.circle_dia / 2;
 
     int moveL = max(parentLevel ?? 0, (moveLevel[alt.move] ?? 0));
 
-    double gap_top = TreeDimens.top_relaxation + v_node_extent * alt.move;
-    double gap_left = TreeDimens.left_relaxation + h_node_extent * moveL;
+    double gap_main =
+        TreeDimens.main_start_relaxation + v_node_extent * alt.move;
+    double gap_cross =
+        TreeDimens.cross_start_relaxation + h_node_extent * moveL;
 
-    return Offset(gap_left + rad, gap_top);
+    return direction == TreeDirection.vertical
+        ? Offset(gap_cross + rad, gap_main)
+        : Offset(gap_main, gap_cross + rad);
   }
 
   Offset toNodeEnd(Offset start) {
-    return Offset(start.dx, start.dy + TreeDimens.circle_dia);
+    return Offset(start.dx, start.dy) +
+        (direction == TreeDirection.vertical
+            ? Offset(0, TreeDimens.circle_dia)
+            : Offset(TreeDimens.circle_dia, 0));
   }
 
   Offset toNodeCenter(Offset start) {
-    return Offset(start.dx, start.dy + TreeDimens.circle_dia / 2);
+    return Offset(start.dx, start.dy) +
+        (direction == TreeDirection.vertical
+            ? Offset(0, TreeDimens.circle_dia / 2)
+            : Offset(TreeDimens.circle_dia / 2, 0));
+    ;
   }
 
   void drawRealNodes(Canvas canvas, List<RealMoveBranch> reals) {

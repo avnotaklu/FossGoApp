@@ -37,7 +37,10 @@ class _GameUiState extends State<GameUi> {
           value: analysisBloc,
           child: Container(
             height: context.height * 0.8,
-            child: MoveTree(root: analysisBloc.start),
+            child: MoveTree(
+              root: analysisBloc.start,
+              direction: TreeDirection.horizontal,
+            ),
           ),
         );
       },
