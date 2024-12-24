@@ -71,7 +71,7 @@ class RealMoveLeaf extends MoveLeaf {
       required this.child});
 }
 
-class RootMove {
+class RootMove implements PrimaryLeafWithAlternatives {
   RealMoveLeaf? child;
   List<AlternativeMoveLeaf> alternativesChildren;
 
@@ -187,7 +187,7 @@ class AnalysisBloc extends ChangeNotifier {
     return line.reversed.toList();
   }
 
-  void setCurrentMove(MoveLeaf move) {
+  void setCurrentMove(MoveLeaf? move) {
     currentMove = move;
 
     var curLine = currentLine;
@@ -208,15 +208,15 @@ class AnalysisBloc extends ChangeNotifier {
   }
 
   void backward() {
-    if (currentMove != null && currentMove!.parent != null) {
-      setCurrentMove(currentMove!.parent!);
+    if (currentMove != null) {
+      setCurrentMove(currentMove!.parent);
     }
   }
 
   void forward() {
-    var cur = currentMove ?? start.child;
-    if (cur != null && cur.primary != null) {
-      setCurrentMove(currentMove!.primary!);
+    PrimaryLeafWithAlternatives cur = currentMove ?? start;
+    if (cur.primary != null) {
+      setCurrentMove(cur.primary!);
     }
   }
 
