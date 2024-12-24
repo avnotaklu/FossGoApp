@@ -10,13 +10,13 @@ import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
 class TreeDimens {
-  static const double circle_dia = 32;
-  static const double parent_child_dist = 30;
+  static const double circle_dia = 26;
+  static const double parent_child_dist = 24;
 
   static double get node_vertical_extent => circle_dia + parent_child_dist;
 
-  static const double siblings_dist = 20;
-  static const double selected_circle_dia = 38;
+  static const double siblings_dist = 16;
+  static const double selected_circle_dia = 30;
 
   static double get node_horizontal_extent => circle_dia + siblings_dist;
 
@@ -61,9 +61,10 @@ class MoveTree extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.theme.colorScheme.surfaceContainerLow,
-      body: Consumer<AnalysisBloc>(
+    return Material(
+      // backgroundColor: context.theme.colorScheme.surfaceContainerLow,
+      color: context.theme.colorScheme.surfaceContainerLow,
+      child: Consumer<AnalysisBloc>(
         builder: (context, bloc, child) => InteractiveViewer(
           transformationController: _transformationController,
           constrained: false,
@@ -91,11 +92,11 @@ class MoveTree extends StatelessWidget {
               child: CustomPaint(
                 size: Size(
                     max(
-                      context.width,
+                      context.width * 0.6,
                       calculateMaxWidth(bloc),
                     ),
                     max(
-                      context.height * 0.5,
+                      context.height * 0.8,
                       calculateMaxHeight(bloc),
                     )),
                 painter: MoveCanvas(

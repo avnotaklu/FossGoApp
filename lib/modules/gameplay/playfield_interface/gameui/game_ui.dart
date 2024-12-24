@@ -36,7 +36,7 @@ class _GameUiState extends State<GameUi> {
         return ChangeNotifierProvider<AnalysisBloc>.value(
           value: analysisBloc,
           child: Container(
-            height: context.height * 0.5,
+            height: context.height * 0.8,
             child: MoveTree(root: analysisBloc.start),
           ),
         );
