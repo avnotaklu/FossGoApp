@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
       );
 
   ThemeData? themeData() {
-    return Constants.darkTheme;
+    return Constants.lightTheme;
   }
 
   Map<String, WidgetBuilder> get routeConstructor {

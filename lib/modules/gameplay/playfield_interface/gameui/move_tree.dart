@@ -63,7 +63,7 @@ class MoveTree extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       // backgroundColor: context.theme.colorScheme.surfaceContainerLow,
-      color: context.theme.colorScheme.surfaceContainerLow,
+      color: context.theme.colorScheme.surfaceContainerHigh,
       child: Consumer<AnalysisBloc>(
         builder: (context, bloc, child) => InteractiveViewer(
           transformationController: _transformationController,
@@ -103,6 +103,7 @@ class MoveTree extends StatelessWidget {
                   root: root,
                   realMoves: bloc.realMoves,
                   currentMove: bloc.currentMove,
+                  currentLine: bloc.currentLine,
 
                   interactionRectForMoves: interactionRectForMoves,
                   allInteractionRects: allInteractionRects,
@@ -139,6 +140,7 @@ class MoveCanvas extends CustomPainter {
   final RootMove root;
   final List<RealMoveBranch> realMoves;
   final MoveBranch? currentMove;
+  final List<MoveBranch> currentLine;
 
   final Color surfaceHighest;
   final Color surface;
@@ -153,6 +155,7 @@ class MoveCanvas extends CustomPainter {
     required this.root,
     required this.realMoves,
     required this.currentMove,
+    required this.currentLine,
     required this.surfaceHighest,
     required this.surface,
     required this.onSurface,
@@ -192,24 +195,6 @@ class MoveCanvas extends CustomPainter {
     return Offset(start.dx, start.dy + TreeDimens.circle_dia / 2);
   }
 
-  // Offset getRealNodeStartOffset(int move) {
-  //   double node_extent = TreeDimens.node_vertical_extent;
-  //   double gap_top = TreeDimens.top_relaxation + node_extent * move;
-
-  //   return Offset(
-  //       TreeDimens.left_relaxation + TreeDimens.circle_dia / 2, gap_top);
-  // }
-
-  // Offset getRealNodeEndOffset(int move) {
-  //   var start = getRealNodeStartOffset(move);
-  //   return Offset(start.dx, start.dy + TreeDimens.circle_dia);
-  // }
-
-  // Offset getRealNodeCenterOffset(int move) {
-  //   var start = getRealNodeStartOffset(move);
-  //   return Offset(start.dx, start.dy + TreeDimens.circle_dia / 2);
-  // }
-
   void drawRealNodes(Canvas canvas, List<RealMoveBranch> reals) {
     var rev_reals = reals.reversed;
 
@@ -220,7 +205,7 @@ class MoveCanvas extends CustomPainter {
       if (node.$2.parent != null) {
         var parentStart = getNodeStartOffset(node.$2.parent!);
         var parentEnd = toNodeEnd(parentStart);
-        drawStraightArrow(canvas, start, parentEnd);
+        drawArrow(canvas, start, parentEnd, node.$2);
       }
 
       drawMoveNode(canvas, start, node.$2);
@@ -243,7 +228,7 @@ class MoveCanvas extends CustomPainter {
     if (branch.parent != null) {
       final parentStart = getNodeStartOffset(branch.parent!, parentLevel);
       final parentEnd = toNodeEnd(parentStart);
-      drawStraightArrow(canvas, parentEnd, start);
+      drawArrow(canvas, parentEnd, start, branch);
     }
 
     drawMoveNode(canvas, start, branch);
@@ -257,13 +242,31 @@ class MoveCanvas extends CustomPainter {
     }
   }
 
-  void drawStraightArrow(Canvas canvas, Offset start, Offset end) {
-    canvas.drawLine(
-      start,
-      end,
-      Paint()
-        ..color = surface
-        ..strokeWidth = 1,
+  void drawArrow(Canvas canvas, Offset start, Offset end, MoveBranch endNode) {
+    final path = Path();
+
+    path.moveTo(start.dx, start.dy);
+
+    path.quadraticBezierTo(
+      start.dx + (end.dx - start.dx) / 2,
+      start.dy,
+      end.dx,
+      end.dy,
+    );
+
+    final normalPaint = Paint()
+      ..color = surface
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    final mainLinePaint = Paint()
+      ..color = surfaceHighest.withOpacity(0.5)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawPath(
+      path,
+      currentLine.contains(endNode) ? mainLinePaint : normalPaint,
     );
   }
 
@@ -302,8 +305,16 @@ class MoveCanvas extends CustomPainter {
     final center = toNodeCenter(startPos);
 
     if (branch == currentMove) {
-      canvas.drawCircle(center, TreeDimens.selected_circle_dia / 2,
-          Paint()..color = surfaceHighest);
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(
+              Rect.fromCircle(
+                  center: center,
+                  radius: TreeDimens.selected_circle_dia / 2 + 2),
+              Radius.circular(4)),
+          Paint()..color = onSurface);
+    } else if (currentLine.contains(branch)) {
+      canvas.drawCircle(center, TreeDimens.selected_circle_dia / 2 + 2,
+          Paint()..color = surfaceHighest.withOpacity(0.5));
     }
 
     final interactionRect =
