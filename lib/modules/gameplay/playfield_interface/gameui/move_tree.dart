@@ -165,13 +165,13 @@ class MoveCanvas extends CustomPainter {
     drawRealNodes(canvas, realMoves);
   }
 
-  Offset getNodeStartOffset(MoveBranch alt) {
+  Offset getNodeStartOffset(MoveBranch alt, [int? parentLevel]) {
     double v_node_extent = TreeDimens.node_vertical_extent;
     double h_node_extent = TreeDimens.node_horizontal_extent;
 
     double rad = TreeDimens.circle_dia / 2;
 
-    int moveL = (moveLevel[alt.move] ?? 0);
+    int moveL = max(parentLevel ?? 0, (moveLevel[alt.move] ?? 0));
 
     double gap_top = TreeDimens.top_relaxation + v_node_extent * alt.move;
     double gap_left = TreeDimens.left_relaxation + h_node_extent * moveL;
@@ -179,13 +179,13 @@ class MoveCanvas extends CustomPainter {
     return Offset(gap_left + rad, gap_top);
   }
 
-  Offset getNodeEndOffset(MoveBranch alt) {
-    var start = getNodeStartOffset(alt);
+  Offset getNodeEndOffset(MoveBranch alt, [int? parentLevel]) {
+    var start = getNodeStartOffset(alt, parentLevel);
     return Offset(start.dx, start.dy + TreeDimens.circle_dia);
   }
 
-  Offset getNodeCenterOffset(MoveBranch alt) {
-    var start = getNodeStartOffset(alt);
+  Offset getNodeCenterOffset(MoveBranch alt, [int? parentLevel]) {
+    var start = getNodeStartOffset(alt, parentLevel);
     return Offset(start.dx, start.dy + TreeDimens.circle_dia / 2);
   }
 
@@ -220,29 +220,35 @@ class MoveCanvas extends CustomPainter {
       }
 
       drawMoveNode(canvas, center, node.$2);
+
       for (var child_branch in node.$2.alternativeChildren) {
-        drawAlternativeMoveBranch(canvas, child_branch);
+        drawAlternativeMoveBranch(canvas, child_branch, 0);
       }
     }
   }
 
   /// Returns the start of newly drawn branch
-  void drawAlternativeMoveBranch(Canvas canvas, AlternativeMoveBranch branch) {
+  void drawAlternativeMoveBranch(
+      Canvas canvas, AlternativeMoveBranch branch, int parentLevel) {
     final prevLevel = moveLevel[branch.move] ?? 0;
     moveLevel[branch.move] = prevLevel + 1;
 
-    final center = getNodeCenterOffset(branch);
+    final center = getNodeCenterOffset(branch, parentLevel);
 
     if (branch.parent != null) {
-      final start = getNodeStartOffset(branch);
-      final parentEnd = getNodeEndOffset(branch.parent!);
+      final start = getNodeStartOffset(branch, parentLevel);
+      final parentEnd = getNodeEndOffset(branch.parent!, parentLevel);
       drawStraightArrow(canvas, parentEnd, start);
     }
 
     drawMoveNode(canvas, center, branch);
 
     for (var child_branch in branch.alternativeChildren) {
-      drawAlternativeMoveBranch(canvas, child_branch);
+      drawAlternativeMoveBranch(
+        canvas,
+        child_branch,
+        max(moveLevel[branch.move]!, parentLevel),
+      );
     }
   }
 
