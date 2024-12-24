@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
@@ -9,35 +11,35 @@ import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dar
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 
-abstract interface class PrimaryLeafWithAlternatives {
-  MoveLeaf? get primary;
-  List<MoveLeaf> get alternatives;
+abstract interface class PrimaryChildWithAlternatives {
+  MoveBranch? get primary;
+  List<MoveBranch> get alternatives;
 }
 
-abstract class MoveLeaf implements PrimaryLeafWithAlternatives {
+abstract class MoveBranch implements PrimaryChildWithAlternatives {
   Position? get position;
-  List<AlternativeMoveLeaf> get alternativeChildren;
-  MoveLeaf? get parent;
+  List<AlternativeMoveBranch> get alternativeChildren;
+  MoveBranch? get parent;
   int get move;
 }
 
-class AlternativeMoveLeaf extends MoveLeaf {
+class AlternativeMoveBranch extends MoveBranch {
   @override
   Position? position;
   @override
-  List<AlternativeMoveLeaf> alternativeChildren;
+  List<AlternativeMoveBranch> alternativeChildren;
   @override
-  MoveLeaf? parent;
+  MoveBranch? parent;
   @override
   int move;
 
   // PrimaryLeafWithAlternatives
   @override
-  MoveLeaf? get primary => alternativeChildren.firstOrNull;
+  MoveBranch? get primary => alternativeChildren.firstOrNull;
   @override
-  List<MoveLeaf> get alternatives => alternativeChildren;
+  List<MoveBranch> get alternatives => alternativeChildren;
 
-  AlternativeMoveLeaf({
+  AlternativeMoveBranch({
     required this.position,
     required this.parent,
     required this.alternativeChildren,
@@ -45,25 +47,25 @@ class AlternativeMoveLeaf extends MoveLeaf {
   });
 }
 
-class RealMoveLeaf extends MoveLeaf {
+class RealMoveBranch extends MoveBranch {
   @override
   Position? position;
   @override
-  List<AlternativeMoveLeaf> alternativeChildren;
+  List<AlternativeMoveBranch> alternativeChildren;
   @override
-  MoveLeaf? parent;
+  MoveBranch? parent;
   @override
   int move;
 
-  RealMoveLeaf? child;
+  RealMoveBranch? child;
 
   // PrimaryLeafWithAlternatives
   @override
-  MoveLeaf? get primary => child;
+  MoveBranch? get primary => child;
   @override
-  List<MoveLeaf> get alternatives => alternativeChildren;
+  List<MoveBranch> get alternatives => alternativeChildren;
 
-  RealMoveLeaf(
+  RealMoveBranch(
       {required this.position,
       required this.move,
       required this.parent,
@@ -71,13 +73,13 @@ class RealMoveLeaf extends MoveLeaf {
       required this.child});
 }
 
-class RootMove implements PrimaryLeafWithAlternatives {
-  RealMoveLeaf? child;
-  List<AlternativeMoveLeaf> alternativesChildren;
+class RootMove implements PrimaryChildWithAlternatives {
+  RealMoveBranch? child;
+  List<AlternativeMoveBranch> alternativesChildren;
 
   // PrimaryLeafWithAlternatives
-  MoveLeaf? get primary => child;
-  List<MoveLeaf> get alternatives => alternativesChildren;
+  MoveBranch? get primary => child;
+  List<MoveBranch> get alternatives => alternativesChildren;
 
   RootMove({
     required this.child,
@@ -86,12 +88,16 @@ class RootMove implements PrimaryLeafWithAlternatives {
 }
 
 class AnalysisBloc extends ChangeNotifier {
-  List<RealMoveLeaf> realMoves = [];
+  List<RealMoveBranch> realMoves = [];
   RootMove start = RootMove(child: null, alternativesChildren: []);
 
   final GameStateBloc gameStateBloc;
 
-  MoveLeaf? currentMove;
+  int highestLineDepth = 0;
+  int highestMoveLevel = 0;
+  final Map<int, int> moveLevel = {};
+
+  MoveBranch? currentMove;
   StoneLogic stoneLogic;
 
   Game get game => gameStateBloc.game;
@@ -102,21 +108,9 @@ class AnalysisBloc extends ChangeNotifier {
       addReal(event.toPosition());
     });
 
-    RealMoveLeaf? parent;
+    RealMoveBranch? parent;
     for (var (idx, move) in game.moves.indexed) {
-      final leaf = RealMoveLeaf(
-        move: idx,
-        position: move.toPosition(),
-        alternativeChildren: [],
-        parent: parent,
-        child: null,
-      );
-      if (parent == null) {
-        start.child = leaf;
-      } else {
-        parent.child = leaf;
-      }
-      parent = leaf;
+      addReal(move.toPosition());
     }
   }
 
@@ -129,11 +123,16 @@ class AnalysisBloc extends ChangeNotifier {
 
   void addAlternative(Position? position) {
     final move = ((currentMove?.move ?? -1) + 1); // null makes 0;
+
+    moveLevel[move] = (moveLevel[move] ?? 0) + 1;
+    highestMoveLevel = max(highestMoveLevel, moveLevel[move]!);
+    highestLineDepth = max(highestLineDepth, move);
+
     if (!updateBoard(position, move)) {
       return;
     }
 
-    final newMove = AlternativeMoveLeaf(
+    final newMove = AlternativeMoveBranch(
         position: position,
         parent: currentMove,
         alternativeChildren: [],
@@ -149,11 +148,13 @@ class AnalysisBloc extends ChangeNotifier {
   void addReal(Position? position) {
     final move = realMoves.length;
 
+    highestLineDepth = max(highestLineDepth, move);
+
     // NOTE: We don't update board on real move, we should keep state of analyzed line
     // final res = updateBoard(position, move);
     // assert(res); // This is external stuff, so we assume it's correct
 
-    var newMove = RealMoveLeaf(
+    var newMove = RealMoveBranch(
       move: move,
       position: position,
       alternativeChildren: [],
@@ -175,9 +176,9 @@ class AnalysisBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<MoveLeaf> get currentLine {
-    final List<MoveLeaf> line = [];
-    MoveLeaf? current = currentMove;
+  List<MoveBranch> get currentLine {
+    final List<MoveBranch> line = [];
+    MoveBranch? current = currentMove;
 
     while (current != null) {
       line.add(current);
@@ -187,7 +188,7 @@ class AnalysisBloc extends ChangeNotifier {
     return line.reversed.toList();
   }
 
-  void setCurrentMove(MoveLeaf? move) {
+  void setCurrentMove(MoveBranch? move) {
     currentMove = move;
 
     var curLine = currentLine;
@@ -214,7 +215,7 @@ class AnalysisBloc extends ChangeNotifier {
   }
 
   void forward() {
-    PrimaryLeafWithAlternatives cur = currentMove ?? start;
+    PrimaryChildWithAlternatives cur = currentMove ?? start;
     if (cur.primary != null) {
       setCurrentMove(cur.primary!);
     }

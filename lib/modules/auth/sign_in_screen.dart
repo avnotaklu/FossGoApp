@@ -87,21 +87,6 @@ class _SignInState extends State<SignIn> {
             },
             label: "Enter as guest",
           ),
-          LoaderBasicButton(
-              onPressed: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MoveTree(
-                      root: RootMove(
-                        child: null,
-                        alternativesChildren: [],
-                      ),
-                    ),
-                  ),
-                );
-              },
-              label: "asdf"),
         ]),
       ),
     );
