@@ -108,9 +108,11 @@ class AnalysisBloc extends ChangeNotifier {
       addReal(event.toPosition());
     });
 
-    RealMoveBranch? parent;
     for (var (idx, move) in game.moves.indexed) {
       addReal(move.toPosition());
+    }
+    if(realMoves.isNotEmpty) {
+      setCurrentMove(realMoves.last);
     }
   }
 
@@ -142,6 +144,7 @@ class AnalysisBloc extends ChangeNotifier {
     } else {
       currentMove!.alternativeChildren.add(newMove);
     }
+    currentMove = newMove;
     notifyListeners();
   }
 

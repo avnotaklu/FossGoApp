@@ -43,6 +43,6 @@ class AnalysisStage extends Stage {
 
   @override
   void onClickCell(Position? position, BuildContext context) {
-    // analysisBloc.a
+    analysisBloc.addAlternative(position);
   }
 }

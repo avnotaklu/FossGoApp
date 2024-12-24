@@ -143,7 +143,7 @@ class MoveCanvas extends CustomPainter {
   final Color surface;
   final Color onSurface;
 
-  final Map<int, int> moveLevel = {};
+  Map<int, int> moveLevel = {};
 
   final Map<Rect, MoveBranch> interactionRectForMoves;
   final List<Rect> allInteractionRects;
@@ -161,67 +161,94 @@ class MoveCanvas extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    moveLevel = {};
     drawRealNodes(canvas, realMoves);
   }
 
-  Offset getRealNodeStartOffset(int move) {
-    double node_extent = TreeDimens.node_vertical_extent;
-    double x_gap_top = TreeDimens.top_relaxation + node_extent * move;
+  Offset getNodeStartOffset(MoveBranch alt) {
+    double v_node_extent = TreeDimens.node_vertical_extent;
+    double h_node_extent = TreeDimens.node_horizontal_extent;
 
-    return Offset(
-        TreeDimens.left_relaxation + TreeDimens.circle_dia / 2, x_gap_top);
+    double rad = TreeDimens.circle_dia / 2;
+
+    int moveL = (moveLevel[alt.move] ?? 0);
+
+    double gap_top = TreeDimens.top_relaxation + v_node_extent * alt.move;
+    double gap_left = TreeDimens.left_relaxation + h_node_extent * moveL;
+
+    return Offset(gap_left + rad, gap_top);
   }
 
-  Offset getRealNodeEndOffset(int move) {
-    var start = getRealNodeStartOffset(move);
+  Offset getNodeEndOffset(MoveBranch alt) {
+    var start = getNodeStartOffset(alt);
     return Offset(start.dx, start.dy + TreeDimens.circle_dia);
   }
 
-  Offset getRealNodeCenterOffset(int move) {
-    var start = getRealNodeStartOffset(move);
+  Offset getNodeCenterOffset(MoveBranch alt) {
+    var start = getNodeStartOffset(alt);
     return Offset(start.dx, start.dy + TreeDimens.circle_dia / 2);
   }
+
+  // Offset getRealNodeStartOffset(int move) {
+  //   double node_extent = TreeDimens.node_vertical_extent;
+  //   double gap_top = TreeDimens.top_relaxation + node_extent * move;
+
+  //   return Offset(
+  //       TreeDimens.left_relaxation + TreeDimens.circle_dia / 2, gap_top);
+  // }
+
+  // Offset getRealNodeEndOffset(int move) {
+  //   var start = getRealNodeStartOffset(move);
+  //   return Offset(start.dx, start.dy + TreeDimens.circle_dia);
+  // }
+
+  // Offset getRealNodeCenterOffset(int move) {
+  //   var start = getRealNodeStartOffset(move);
+  //   return Offset(start.dx, start.dy + TreeDimens.circle_dia / 2);
+  // }
 
   void drawRealNodes(Canvas canvas, List<RealMoveBranch> reals) {
     var rev_reals = reals.reversed;
 
     for (var node in rev_reals.indexed) {
-      var center = getRealNodeCenterOffset(node.$1);
+      var center = getNodeCenterOffset(node.$2);
 
-      if (node.$1 > 0) {
-        var start = getRealNodeEndOffset(node.$1);
-        var prevEnd = getRealNodeEndOffset(node.$1 - 1);
+      if (node.$2.parent != null) {
+        var start = getNodeEndOffset(node.$2);
+        var prevEnd = getNodeEndOffset(node.$2.parent!);
         drawStraightArrow(canvas, start, prevEnd);
       }
 
       drawMoveNode(canvas, center, node.$2);
+      for (var child_branch in node.$2.alternativeChildren) {
+        drawAlternativeMoveBranch(canvas, child_branch);
+      }
+    }
+  }
+
+  /// Returns the start of newly drawn branch
+  void drawAlternativeMoveBranch(Canvas canvas, AlternativeMoveBranch branch) {
+    final prevLevel = moveLevel[branch.move] ?? 0;
+    moveLevel[branch.move] = prevLevel + 1;
+
+    final center = getNodeCenterOffset(branch);
+
+    if (branch.parent != null) {
+      final start = getNodeStartOffset(branch);
+      final parentEnd = getNodeEndOffset(branch.parent!);
+      drawStraightArrow(canvas, parentEnd, start);
+    }
+
+    drawMoveNode(canvas, center, branch);
+
+    for (var child_branch in branch.alternativeChildren) {
+      drawAlternativeMoveBranch(canvas, child_branch);
     }
   }
 
   void drawStraightArrow(Canvas canvas, Offset start, Offset end) {
     canvas.drawLine(start, end, Paint()..color = surface);
   }
-
-  void drawRoot(Canvas canvas, RootMove root) {
-    if (root.child != null) {
-      drawRealMoveBranch(canvas, root.child!);
-    }
-    // for
-    // TOD: draw alts
-  }
-
-  // void drawMoveBranch(Canvas canvas, MoveBranch branch) {
-  //   if (branch is RealMoveBranch) {
-  //     drawRealMoveBranch(canvas, branch);
-  //   }
-  //   if (branch is AlternativeMoveBranch) {
-  //     drawAltMoveBranch(canvas, branch);
-  //   }
-  // }
-
-  void drawRealMoveBranch(Canvas canvas, RealMoveBranch branch) {}
-  void drawAltMoveBranch(
-      Canvas canvas, AlternativeMoveBranch branch, int level) {}
 
   void drawMoveNode(Canvas canvas, Offset pos, MoveBranch branch) {
     if (branch == currentMove) {
@@ -245,6 +272,7 @@ class MoveCanvas extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    moveLevel = {};
     return true;
   }
 }
