@@ -22,10 +22,6 @@ class StatefulCard extends StatelessWidget {
           : context.theme.colorScheme.surfaceVariant,
       child: Theme(
         data: context.theme.copyWith(
-          //   colorScheme: context.theme.colorScheme.copyWith(
-          // onSurface: state == StatefulCardState.enabled
-          //     ? context.theme.colorScheme.onSurface
-          //     : context.theme.colorScheme.surfaceContainerLow,
           textTheme: buildTextTheme(
             state == StatefulCardState.enabled
                 ? context.theme.colorScheme.onSurface

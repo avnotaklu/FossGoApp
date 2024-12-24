@@ -7,6 +7,7 @@ import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
+import 'package:go/modules/gameplay/playfield_interface/gameui/move_tree.dart';
 import 'package:go/modules/gameplay/stages/analysis_stage.dart';
 import 'package:go/modules/gameplay/stages/game_end_stage.dart';
 import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
@@ -28,11 +29,20 @@ class GameUi extends StatefulWidget {
 }
 
 class _GameUiState extends State<GameUi> {
-  // final Stream<String?> _bids = (() async* {
-  //   await Future<void>.delayed(const Duration(seconds: 0));
-  //   yield "hello";
-  //   // yield "hello";
-  // })();
+  void openBottomSheet(AnalysisBloc analysisBloc) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return ChangeNotifierProvider<AnalysisBloc>.value(
+          value: analysisBloc,
+          child: Container(
+            height: context.height * 0.5,
+            child: MoveTree(root: analysisBloc.start),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,17 +77,6 @@ class _GameUiState extends State<GameUi> {
                 gameStateBloc.game,
               ),
             ),
-            // context.read<Stage>() is GameEndStage &&
-            //         gameStateBloc.game.result != null
-            //     ? Text(
-            //         "${() {
-            //           return gameStateBloc.getWinnerStone!.index == 0
-            //               ? 'Black'
-            //               : 'White';
-            //         }.call()} won by ${getWinningMethod(context)}",
-            //         style: context.textTheme.labelLarge,
-            //       )
-            //     : SizedBox(),
             SizedBox(
               height: context.height * 0.04,
             ),
@@ -85,38 +84,14 @@ class _GameUiState extends State<GameUi> {
               context.read<Stage>() is ScoreCalculationStage
                   ? const ScoreActions()
                   : context.read<Stage>() is AnalysisStage
-                      ? const AnalsisModeActions()
+                      ? AnalsisModeActions(
+                          openTree: () => openBottomSheet(
+                            context.read<AnalysisBloc>(),
+                          ),
+                        )
                       : const PlayingGameActions()
             else
               const PlayingEndedActions()
-            // SizedBox(
-            //   height: context.height * 0.05,
-            //   child: IntrinsicHeight(
-            //     child: Row(
-            //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            //       crossAxisAlignment: CrossAxisAlignment.stretch,
-            //       children: [
-            //         // gameStateBloc.cur_stage.buttons()[0],
-            //         Expanded(
-            //           flex: 3,
-            //           child: context.read<Stage>() is ScoreCalculationStage
-            //               ? const Accept()
-            //               : const Pass(),
-            //         ),
-            //         const VerticalDivider(
-            //           width: 2,
-            //         ),
-            //         Expanded(
-            //           flex: 3,
-            //           child: context.read<Stage>() is ScoreCalculationStage
-            //               ? const ContinueGame()
-            //               : const Resign(),
-            //         )
-            //         // GameData.of(context)!.cur_stage.buttons()[1],
-            //       ],
-            //     ),
-            //   ),
-            // ),
           ],
         );
       },
@@ -240,12 +215,14 @@ class PlayingGameActions extends StatelessWidget {
 }
 
 class AnalsisModeActions extends StatelessWidget {
-  const AnalsisModeActions({super.key});
+  final VoidCallback openTree;
+  const AnalsisModeActions({required this.openTree, super.key});
 
   @override
   Widget build(BuildContext context) {
     return ActionStrip(actions: [
       const ExitAnalysisButton(),
+      OpenTree(openTree: openTree),
       BackwardButton(),
       ForwardButton(),
     ]);
@@ -432,6 +409,21 @@ class BackwardButton extends StatelessWidget {
   }
 }
 
+class OpenTree extends StatelessWidget {
+  final VoidCallback openTree;
+  const OpenTree({required this.openTree, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionButtonWidget(
+      () {
+        openTree();
+      },
+      ActionType.analysisTree,
+    );
+  }
+}
+
 extension ActionButtonUiExt on ActionType {
   String get label {
     switch (this) {
@@ -455,6 +447,8 @@ extension ActionButtonUiExt on ActionType {
         return "Analyze";
       case ActionType.exitAnalysis:
         return "Exit";
+      case ActionType.analysisTree:
+        return "Lines";
     }
   }
 
@@ -480,6 +474,8 @@ extension ActionButtonUiExt on ActionType {
         return Icons.analytics;
       case ActionType.exitAnalysis:
         return Icons.exit_to_app;
+      case ActionType.analysisTree:
+        return Icons.account_tree;
     }
   }
 }
@@ -495,4 +491,5 @@ enum ActionType {
   backward,
   analyze,
   exitAnalysis,
+  analysisTree,
 }

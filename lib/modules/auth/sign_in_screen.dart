@@ -6,10 +6,12 @@ import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
 import 'package:go/modules/gameplay/middleware/local_gameplay_server.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 
 import 'package:go/modules/auth/error_screen.dart';
+import 'package:go/modules/gameplay/playfield_interface/gameui/move_tree.dart';
 import 'package:go/utils/auth_navigation.dart';
 import 'package:go/widgets/loader_basic_button.dart';
 import 'package:provider/provider.dart';
@@ -85,6 +87,21 @@ class _SignInState extends State<SignIn> {
             },
             label: "Enter as guest",
           ),
+          LoaderBasicButton(
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MoveTree(
+                      root: RootMove(
+                        child: null,
+                        alternativesChildren: [],
+                      ),
+                    ),
+                  ),
+                );
+              },
+              label: "asdf"),
         ]),
       ),
     );
