@@ -165,6 +165,10 @@ class MoveCanvas extends CustomPainter {
     drawRealNodes(canvas, realMoves);
   }
 
+  Offset toTopLeft(Offset start) {
+    return Offset(start.dx - TreeDimens.circle_dia / 2, start.dy);
+  }
+
   Offset getNodeStartOffset(MoveBranch alt, [int? parentLevel]) {
     double v_node_extent = TreeDimens.node_vertical_extent;
     double h_node_extent = TreeDimens.node_horizontal_extent;
@@ -179,13 +183,11 @@ class MoveCanvas extends CustomPainter {
     return Offset(gap_left + rad, gap_top);
   }
 
-  Offset getNodeEndOffset(MoveBranch alt, [int? parentLevel]) {
-    var start = getNodeStartOffset(alt, parentLevel);
+  Offset toNodeEnd(Offset start) {
     return Offset(start.dx, start.dy + TreeDimens.circle_dia);
   }
 
-  Offset getNodeCenterOffset(MoveBranch alt, [int? parentLevel]) {
-    var start = getNodeStartOffset(alt, parentLevel);
+  Offset toNodeCenter(Offset start) {
     return Offset(start.dx, start.dy + TreeDimens.circle_dia / 2);
   }
 
@@ -211,15 +213,16 @@ class MoveCanvas extends CustomPainter {
     var rev_reals = reals.reversed;
 
     for (var node in rev_reals.indexed) {
-      var center = getNodeCenterOffset(node.$2);
+      var start = getNodeStartOffset(node.$2);
+      var center = toNodeCenter(start);
 
       if (node.$2.parent != null) {
-        var start = getNodeEndOffset(node.$2);
-        var prevEnd = getNodeEndOffset(node.$2.parent!);
-        drawStraightArrow(canvas, start, prevEnd);
+        var parentStart = getNodeStartOffset(node.$2.parent!);
+        var parentEnd = toNodeEnd(parentStart);
+        drawStraightArrow(canvas, start, parentEnd);
       }
 
-      drawMoveNode(canvas, center, node.$2);
+      drawMoveNode(canvas, start, node.$2);
 
       for (var child_branch in node.$2.alternativeChildren) {
         drawAlternativeMoveBranch(canvas, child_branch, 0);
@@ -233,15 +236,16 @@ class MoveCanvas extends CustomPainter {
     final prevLevel = moveLevel[branch.move] ?? 0;
     moveLevel[branch.move] = prevLevel + 1;
 
-    final center = getNodeCenterOffset(branch, parentLevel);
+    final start = getNodeStartOffset(branch, parentLevel);
+    final center = toNodeCenter(start);
 
     if (branch.parent != null) {
-      final start = getNodeStartOffset(branch, parentLevel);
-      final parentEnd = getNodeEndOffset(branch.parent!, parentLevel);
+      final parentStart = getNodeStartOffset(branch.parent!, parentLevel);
+      final parentEnd = toNodeEnd(parentStart);
       drawStraightArrow(canvas, parentEnd, start);
     }
 
-    drawMoveNode(canvas, center, branch);
+    drawMoveNode(canvas, start, branch);
 
     for (var child_branch in branch.alternativeChildren) {
       drawAlternativeMoveBranch(
@@ -253,26 +257,73 @@ class MoveCanvas extends CustomPainter {
   }
 
   void drawStraightArrow(Canvas canvas, Offset start, Offset end) {
-    canvas.drawLine(start, end, Paint()..color = surface);
+    canvas.drawLine(
+      start,
+      end,
+      Paint()
+        ..color = surface
+        ..strokeWidth = 1,
+    );
   }
 
-  void drawMoveNode(Canvas canvas, Offset pos, MoveBranch branch) {
+  void drawText(
+      Canvas canvas, String text, Offset offset, Size size, Color color) {
+    final textStyle = TextStyle(
+      color: color,
+      fontSize: 12,
+    );
+
+    final textSpan = TextSpan(
+      text: text,
+      style: textStyle,
+    );
+
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+
+    textPainter.layout(
+      minWidth: size.width,
+      maxWidth: size.width,
+    );
+
+    var textOffset = Offset(
+      offset.dx - textPainter.width / 2,
+      offset.dy - textPainter.height / 2,
+    );
+
+    textPainter.paint(canvas, textOffset);
+  }
+
+  void drawMoveNode(Canvas canvas, Offset startPos, MoveBranch branch) {
+    final center = toNodeCenter(startPos);
+
     if (branch == currentMove) {
-      canvas.drawCircle(pos, TreeDimens.selected_circle_dia / 2,
+      canvas.drawCircle(center, TreeDimens.selected_circle_dia / 2,
           Paint()..color = surfaceHighest);
     }
 
     final interactionRect =
-        Rect.fromCircle(center: pos, radius: TreeDimens.circle_dia / 2);
+        Rect.fromCircle(center: center, radius: TreeDimens.circle_dia / 2);
 
     allInteractionRects.add(interactionRect);
 
     interactionRectForMoves[interactionRect] = branch;
 
-    return canvas.drawCircle(
-      pos,
+    canvas.drawCircle(
+      center,
       TreeDimens.circle_dia / 2,
       Paint()..color = Constants.playerColors[branch.move % 2],
+    );
+
+    drawText(
+      canvas,
+      branch.move.toString(),
+      center,
+      Size(TreeDimens.circle_dia, TreeDimens.circle_dia),
+      Constants.playerColors[1 - branch.move % 2],
     );
   }
 
