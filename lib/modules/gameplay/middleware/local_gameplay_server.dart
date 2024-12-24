@@ -297,6 +297,7 @@ class LocalGameplayServer {
     _result = winner?.resultForIWon;
     _gameOverMethod = method;
     _endTime = now;
+    _timer.cancel();
 
     gameUpdateC.add(
       GameUpdate(
