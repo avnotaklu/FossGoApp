@@ -68,7 +68,7 @@ class MoveTree extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      // backgroundColor: context.theme.colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(10),
       color: context.theme.colorScheme.surfaceContainerHigh,
       child: Consumer<AnalysisBloc>(
         builder: (context, bloc, child) => InteractiveViewer(

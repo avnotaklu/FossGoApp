@@ -1,3 +1,4 @@
+
 import 'package:barebones_timer/timer_controller.dart';
 import 'package:barebones_timer/timer_display.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,9 +19,11 @@ class GameTimer extends StatefulWidget {
     required this.isMyTurn,
     required this.timeControl,
     required this.playerTimeSnapshot,
+     this.customStyle,
   });
 
   final StoneType player;
+  final TextStyle Function(BuildContext context)? customStyle;
   final TimeControl timeControl;
   final PlayerTimeSnapshot? playerTimeSnapshot;
   final TimerController controller;
@@ -40,6 +43,7 @@ class _GameTimerState extends State<GameTimer> {
       builder: (c) => Align(
         alignment: Alignment.centerRight,
         child: MyTimeDisplay(
+          customStyle: widget.customStyle,
           controller: widget.controller,
           timeControl: widget.timeControl,
           playerTimeSnapshot: widget.playerTimeSnapshot,
@@ -53,11 +57,13 @@ class MyTimeDisplay extends StatelessWidget {
   final TimeControl timeControl;
   final PlayerTimeSnapshot? playerTimeSnapshot;
   final TimerController controller;
+  final TextStyle Function(BuildContext context)? customStyle;
 
   const MyTimeDisplay({
     required this.controller,
     required this.timeControl,
     required this.playerTimeSnapshot,
+     this.customStyle,
     super.key,
   });
 
@@ -74,30 +80,30 @@ class MyTimeDisplay extends StatelessWidget {
             children: [
               Text(
                 (time.toInt() ~/ 60).toString(),
-                style: context.textTheme.titleLarge,
+                 style: customStyle?.call(context) ?? context.textTheme.titleLarge,
               ),
               Text(
                 ':',
-                style: context.textTheme.titleLarge,
+                 style: customStyle?.call(context) ?? context.textTheme.titleLarge,
               ),
               Text(
                 (time.toInt() % 60).toString(),
-                style: context.textTheme.titleLarge,
+                 style: customStyle?.call(context) ?? context.textTheme.titleLarge,
               ),
               if (timeControl.byoYomiTime != null) ...[
                 Text(
                   ' + ',
-                  style: context.textTheme.titleLarge,
+                 style: customStyle?.call(context) ?? context.textTheme.titleLarge,
                 ),
                 Text(
                   playerTimeSnapshot != null
                       ? (playerTimeSnapshot!.byoYomisLeft ?? "").toString()
                       : (timeControl.byoYomiTime?.byoYomis ?? "").toString(),
-                  style: context.textTheme.titleLarge,
+                 style: customStyle?.call(context) ?? context.textTheme.titleLarge,
                 ),
                 Text(
                   " x ${(Duration(seconds: timeControl.byoYomiTime!.byoYomiSeconds)).smallRepr()}",
-                  style: context.textTheme.titleLarge,
+                 style: customStyle?.call(context) ?? context.textTheme.titleLarge,
                 ),
               ]
             ],

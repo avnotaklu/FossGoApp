@@ -7,6 +7,7 @@ import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
+import 'package:go/modules/gameplay/playfield_interface/gameui/compact_ui.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_over_card.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/time_control.dart';
@@ -74,6 +75,8 @@ class _GameWidgetState extends State<GameWidget> {
         GameState.paused => StageType.beforeStart,
       };
 
+  bool compact_ui = false;
+
   // Board
   @override
   Widget build(BuildContext context) {
@@ -87,19 +90,21 @@ class _GameWidgetState extends State<GameWidget> {
           return Scaffold(
             key: key,
             drawer: const MyAppDrawer(),
-            appBar: MyAppBar(
-              gameTitle(context.read<GameStateBloc>().game),
-              leading: IconButton(
-                onPressed: () {
-                  if (key.currentState!.isDrawerOpen) {
-                    key.currentState!.closeDrawer();
-                  } else {
-                    key.currentState!.openDrawer();
-                  }
-                },
-                icon: const Icon(Icons.menu),
-              ),
-            ),
+            appBar: compact_ui
+                ? null
+                : MyAppBar(
+                    gameTitle(context.read<GameStateBloc>().game),
+                    leading: IconButton(
+                      onPressed: () {
+                        if (key.currentState!.isDrawerOpen) {
+                          key.currentState!.closeDrawer();
+                        } else {
+                          key.currentState!.openDrawer();
+                        }
+                      },
+                      icon: const Icon(Icons.menu),
+                    ),
+                  ),
             body: Consumer<GameStateBloc>(
               builder: (context, gameStateBloc, child) {
                 final game = gameStateBloc.game;
@@ -112,7 +117,7 @@ class _GameWidgetState extends State<GameWidget> {
                       create: (context) => StoneLogic(game),
                     ),
                     ChangeNotifierProvider(
-                      create: (context) => AnalysisBloc( gameStateBloc),
+                      create: (context) => AnalysisBloc(gameStateBloc),
                     ),
                   ],
                   builder: (context, child) {
@@ -138,8 +143,10 @@ class _GameWidgetState extends State<GameWidget> {
                           value: stage,
                           builder: (context, child) {
                             return Consumer<ScoreCalculationBloc>(
-                                builder: (context, dyn, child) =>
-                                    WrapperGame(game));
+                                builder: (context, dyn, child) => WrapperGame(
+                                      game,
+                                      compact_ui: compact_ui,
+                                    ));
                           },
                         );
                       },
@@ -154,9 +161,10 @@ class _GameWidgetState extends State<GameWidget> {
 }
 
 class WrapperGame extends StatefulWidget {
+  final bool compact_ui;
   final Game game;
 
-  const WrapperGame(this.game, {super.key});
+  const WrapperGame(this.game, {required this.compact_ui, super.key});
 
   @override
   State<WrapperGame> createState() => _WrapperGameState();
@@ -192,6 +200,12 @@ class _WrapperGameState extends State<WrapperGame> {
   @override
   Widget build(BuildContext context) {
     context.read<Stage>().initializeWhenAllMiddlewareAvailable(context);
+
+    if (widget.compact_ui) {
+      return CompactGameUi(
+          boardWidget: Board(widget.game.rows, widget.game.columns,
+              widget.game.playgroundMap));
+    }
 
     return GameUi(
       boardWidget: Board(

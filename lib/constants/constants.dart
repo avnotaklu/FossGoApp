@@ -256,6 +256,7 @@ ThemeData buildTheme({
 
       onSurface: tc,
       onInverseSurface: tci,
+      shadow: shadow
     ),
     cardTheme: null,
     textTheme: buildTextTheme(tc),
@@ -381,7 +382,6 @@ TextTheme buildTextTheme(Color tc) {
     bodySmall: bodyS(tc),
     labelLarge: lableL(tc),
     labelSmall: lableS(tc),
-    
   );
 }
 
@@ -530,9 +530,9 @@ class VisualTheme {
   // Color get secDarkTextColor => color5;
   // Color get secLightTextColor => color5;
 
-  Color get darkShadow => Colors.grey.shade300.withOpacity(0.3);
+  Color get darkShadow => Colors.grey.shade700.withOpacity(0.9);
   // Color get darkShadow => Colors.blueGrey.shade100;
-  Color get lightShadow => Colors.blueGrey.shade100;
+  Color get lightShadow => Colors.blueGrey.shade100.withOpacity(0.9);
   // Color get lightShadow => Colors.blueGrey.shade100;
 
   final Color color1;
@@ -598,9 +598,7 @@ class Validations {
   }
 
   static String? validateNationalityLength(String nat) {
-    return nat.length != 2
-        ? "Nationality must be 2 characters long"
-        : null;
+    return nat.length != 2 ? "Nationality must be 2 characters long" : null;
   }
 
   static String? validateNationalityFormat(String nat) {
@@ -609,9 +607,6 @@ class Validations {
     );
     // final RegExp fullNameRegex = RegExp(r"\p{Letter}");
 
-    return !reg.hasMatch(nat)
-        ? "Please enter a valid nationality"
-        : null;
-
+    return !reg.hasMatch(nat) ? "Please enter a valid nationality" : null;
   }
 }
