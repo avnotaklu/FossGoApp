@@ -1,9 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:fpdart/fpdart.dart';
 
 import 'package:go/constants/constants.dart';
+import 'package:go/core/foundation/string.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/minimal_rating.dart';
 import 'package:go/models/position.dart';
@@ -316,6 +318,17 @@ extension GameExts on Game {
         ? finalTerritoryScores[1]
         : finalTerritoryScores[0];
   }
+
+  int? finalScoreDifferenceForWinner() {
+    if (!didEnd()) return null;
+    if (finalTerritoryScores.length < 2) return null;
+    var score= (finalTerritoryScores[0] - finalTerritoryScores[1]).abs();
+    if(score == 0) return null;
+    return score;
+  }
+
+  String get title =>
+      "${getBoardSize().paddedToLargestDisplay}•${timeControl.timeStandard.standardName}•${gameType.name.capitalize()}";
 }
 
 class Game {

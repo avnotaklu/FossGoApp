@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:barebones_timer/timer_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/minimal_rating.dart';
@@ -158,7 +159,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
         TextSpan(
           text: " $sign${diff.abs()}",
           style: TextStyle(
-            color: diff < 0 ? Colors.red : Colors.green,
+            color: diff < 0 ? otherColors.loss : otherColors.win,
             fontSize: 12,
           ),
         )

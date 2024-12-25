@@ -4,11 +4,29 @@ import 'dart:convert';
 import 'package:go/models/game.dart';
 import 'package:go/services/signal_r_message.dart';
 
+extension GameOverMethodExt on GameOverMethod {
+  String get displayString => switch (this) {
+        GameOverMethod.Timeout => 'Timeout',
+        GameOverMethod.Resign => 'Resignation',
+        GameOverMethod.Score => 'Score',
+        GameOverMethod.Abandon => 'Abandonment',
+      };
+
+  String displayStringWithScoreForWinner(Game game) => switch (this) {
+        GameOverMethod.Timeout => 'Timeout',
+        GameOverMethod.Resign => 'Resignation',
+        GameOverMethod.Score =>
+          '${game.finalScoreDifferenceForWinner()} Points',
+        GameOverMethod.Abandon => 'Abandonment',
+      };
+}
+
 enum GameOverMethod {
   Timeout("Timeout"),
   Resign("Resignation"),
   Score("Score"),
-  Abandon("Abandonment"),;
+  Abandon("Abandonment"),
+  ;
 
   final String actualName;
 

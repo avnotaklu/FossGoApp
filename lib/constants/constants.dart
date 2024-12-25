@@ -7,6 +7,7 @@ import 'package:go/models/time_control.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/time_control_dto.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class BoardSizeData {
   final int rows;
@@ -225,39 +226,30 @@ ThemeData buildTheme({
   return ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme(
-      brightness: b,
+        brightness: b,
+        primary: card,
+        onPrimary: cardi,
+        secondary: highlight,
+        onSecondary: tc,
+        secondaryContainer: highlight,
+        onSecondaryContainer: Colors.black,
+        tertiary: cardi,
+        onTertiary: card,
+        surfaceContainerHigh: dialog, // Users: Dialog
+        surfaceContainer: dialog, // Users: Navigation bar
+        surfaceContainerLow: card, // Users: Card, Button
 
-      primary: card,
-      onPrimary: cardi,
+        onSurfaceVariant: cardi,
+        surfaceContainerHighest: highlight,
+        surfaceVariant: cardi, // REVIEW: M3 Spec defines it, so i'm using it
 
-      secondary: highlight,
-      onSecondary: tc,
-
-      secondaryContainer: highlight,
-      onSecondaryContainer: Colors.black,
-
-      tertiary: cardi,
-      onTertiary: card,
-
-      surfaceContainerHigh: dialog, // Users: Dialog
-      surfaceContainer: dialog, // Users: Navigation bar
-      surfaceContainerLow: card, // Users: Card, Button
-
-      onSurfaceVariant: cardi,
-      surfaceContainerHighest: highlight,
-      surfaceVariant: cardi, // REVIEW: M3 Spec defines it, so i'm using it
-
-      error: Colors.red,
-      onError: Colors.white,
-
-      outlineVariant: dialogi,
-
-      surface: bg,
-
-      onSurface: tc,
-      onInverseSurface: tci,
-      shadow: shadow
-    ),
+        error: Colors.red,
+        onError: Colors.white,
+        outlineVariant: dialogi,
+        surface: bg,
+        onSurface: tc,
+        onInverseSurface: tci,
+        shadow: shadow),
     cardTheme: null,
     textTheme: buildTextTheme(tc),
   );
@@ -374,18 +366,41 @@ ThemeData get oldDarkTheme {
   );
 }
 
+const otherColors = OtherColors(
+  win: Colors.green,
+  loss: Colors.red,
+);
+
+class OtherColors {
+  final Color win;
+  final Color loss;
+
+  const OtherColors({
+    required this.win,
+    required this.loss,
+  });
+}
+
 TextTheme buildTextTheme(Color tc) {
   return TextTheme(
-    headlineSmall: headingS(tc),
-    titleLarge: titleL(tc),
-    bodyLarge: bodyL(tc),
-    bodySmall: bodyS(tc),
-    labelLarge: lableL(tc),
-    labelSmall: lableS(tc),
+
+    headlineLarge:
+        headingL(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
+    headlineSmall:
+        headingS(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
+    titleLarge:
+        titleL(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
+    bodyLarge: bodyL(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
+    bodySmall: bodyS(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
+    labelLarge:
+        lableL(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
+    labelSmall:
+        lableS(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
   );
 }
 
-TextStyle headingS(Color col) {
+
+TextStyle headingL(Color col) {
   return TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.w400,
@@ -393,7 +408,8 @@ TextStyle headingS(Color col) {
   );
 }
 
-TextStyle titleL(Color col) {
+
+TextStyle headingS(Color col) {
   return TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.w400,
@@ -401,7 +417,7 @@ TextStyle titleL(Color col) {
   );
 }
 
-TextStyle bodyL(Color col) {
+TextStyle titleL(Color col) {
   return TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w400,
@@ -409,7 +425,7 @@ TextStyle bodyL(Color col) {
   );
 }
 
-TextStyle bodyS(Color col) {
+TextStyle bodyL(Color col) {
   return TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,
@@ -417,7 +433,7 @@ TextStyle bodyS(Color col) {
   );
 }
 
-TextStyle lableL(Color col) {
+TextStyle bodyS(Color col) {
   return TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w400,
@@ -425,9 +441,17 @@ TextStyle lableL(Color col) {
   );
 }
 
-TextStyle lableS(Color col) {
+TextStyle lableL(Color col) {
   return TextStyle(
     fontSize: 12,
+    fontWeight: FontWeight.w400,
+    color: col,
+  );
+}
+
+TextStyle lableS(Color col) {
+  return TextStyle(
+    fontSize: 10,
     fontWeight: FontWeight.w400,
     color: col,
   );

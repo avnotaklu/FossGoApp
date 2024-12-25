@@ -4,7 +4,7 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/modules/games_history/query_params.dart';
+import 'package:go/modules/games_history/player_result.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/game_and_opponent.dart';
 

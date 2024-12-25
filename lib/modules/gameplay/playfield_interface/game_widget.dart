@@ -59,12 +59,7 @@ class _GameWidgetState extends State<GameWidget> {
   }
 
   String gameTitle(Game game) {
-    // final mTime = mainTime(time);
-    // final iTime = incrementTime(time);
-    // final bTime = byoYomiTime(time);
-
-    // return "$mTime${iTime ?? ""}${bTime ?? ""}";
-    return "${game.timeControl.timeStandard.standardName} + ${game.gameType.name.capitalize()}";
+    return game.title;
   }
 
   StageType getStageType() => switch (widget.game.gameState) {

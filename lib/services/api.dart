@@ -9,7 +9,7 @@ import 'package:go/core/foundation/fpdart.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/sign_in_dto.dart';
-import 'package:go/modules/games_history/query_params.dart';
+import 'package:go/modules/games_history/player_result.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/bad_request_error.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';

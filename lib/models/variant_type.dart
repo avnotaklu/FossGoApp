@@ -28,6 +28,13 @@ extension BoardSizeDataExt on BoardSize {
         BoardSize.nineteen => '19x19',
         BoardSize.other => 'Other',
       };
+
+  String get paddedToLargestDisplay => switch (this) {
+        BoardSize.nine => '9x9  ',
+        BoardSize.thirteen => '13x13',
+        BoardSize.nineteen => '19x19',
+        BoardSize.other => 'Other',
+      };
 }
 
 enum BoardSize {
