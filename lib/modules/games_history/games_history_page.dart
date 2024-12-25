@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:go/constants/constants.dart';
+import 'package:go/core/foundation/string.dart';
 import 'package:go/core/utils/intl/formatters.dart';
+import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
+import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/games_history/games_history_provider.dart';
+import 'package:go/modules/games_history/query_params.dart';
+import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/game_and_opponent.dart';
@@ -27,18 +33,109 @@ class GamesHistoryPage extends StatelessWidget {
                 title: Text('Games History'),
               ),
               body: Container(
-                child: PaginatedList(
-                  loadingIndicator: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Center(
-                      child: CircularProgressIndicator(color: Colors.black),
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 90,
+                          child: MyDropDown(
+                            label: 'Board',
+                            items: [null, ...BoardSize.values],
+                            selectedItem: pro.boardSize,
+                            itemBuilder: (v) => DropdownMenuItem(
+                              value: v,
+                              child: Text(
+                                v?.toDisplayString ?? "All",
+                                style: context.textTheme.labelLarge,
+                              ),
+                            ),
+                            onChanged: (v) => pro.setQueryParams(boardSize: v),
+                          ),
+                        ),
+                        Spacer(),
+                        SizedBox(
+                          width: 90,
+                          child: MyDropDown(
+                            label: "Result",
+                            items: [null, ...PlayerResult.values],
+                            selectedItem: pro.result,
+                            itemBuilder: (v) => DropdownMenuItem(
+                              value: v,
+                              child: Text(
+                                v?.name.capitalize() ?? "All",
+                                style: context.textTheme.labelLarge,
+                              ),
+                            ),
+                            onChanged: (v) => pro.setQueryParams(result: v),
+                          ),
+                        ),
+                        Spacer(),
+                        SizedBox(
+                          width: 150,
+                          child: MyDropDown(
+                            label: "Time",
+                            items: [null, ...TimeStandard.values],
+                            selectedItem: pro.timeStandard,
+                            itemBuilder: (v) => DropdownMenuItem(
+                              value: v,
+                              child: Text(
+                                v?.standardName ?? "All",
+                                style: context.textTheme.labelLarge,
+                              ),
+                            ),
+                            onChanged: (v) =>
+                                pro.setQueryParams(timeStandard: v),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  items: pro.games,
-                  isRecentSearch: false,
-                  isLastPage: pro.isLastPage,
-                  onLoadMore: (index) => pro.loadGames(),
-                  builder: (game, index) => GameListTile(game: game),
+                    Container(
+                      height: context.height * 0.72,
+                      child: PaginatedList(
+                        loadingIndicator: const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        shrinkWrap: true,
+                        items: pro.games,
+                        isRecentSearch: false,
+                        isLastPage: pro.isLastPage,
+                        onLoadMore: (index) => pro.loadGames(),
+                        builder: (game, index) => GameListTile(game: game),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Game Played Since: ${sinceTimeText(
+                          pro.sinceTime,
+                        )}"),
+                        IconButton(
+                          padding: EdgeInsets.all(0),
+                          onPressed: () async {
+                            final res = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
+                              lastDate: DateTime.now(),
+                            );
+
+                            if (res != null) {
+                              pro.setSinceTime(res);
+                            }
+                          },
+                          icon: Icon(Icons.calendar_month),
+                        )
+                      ],
+                    ),
+                  ],
                 ),
               ),
             );
@@ -53,6 +150,11 @@ class GamesHistoryPage extends StatelessWidget {
           ),
           Provider<IStatsRepository>.value(value: statsRepo)
         ]);
+  }
+
+  String sinceTimeText(DateTime? sinceTime) {
+    if (sinceTime == null) return "Start";
+    return sinceTime.pastTimeFrameDiffDisplay(DateTime.now(), 2);
   }
 }
 
@@ -75,7 +177,7 @@ class GameListTile extends StatelessWidget {
         style: context.textTheme.bodySmall,
       ),
       subtitle: Text(
-        game.creationTime.MMM_dd_yyyy(),
+        game.creationTime.pastTimeFrameDiffDisplay(DateTime.now(), 2),
         style: context.textTheme.labelLarge,
       ),
       contentPadding: EdgeInsets.all(0),

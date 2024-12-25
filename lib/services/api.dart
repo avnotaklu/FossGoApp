@@ -7,7 +7,9 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/error_handling/http_error.dart';
 import 'package:go/core/foundation/fpdart.dart';
 import 'package:go/models/game.dart';
+import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/sign_in_dto.dart';
+import 'package:go/modules/games_history/query_params.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/bad_request_error.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
@@ -224,9 +226,25 @@ class Api {
   }
 
   Future<Either<AppError, GamesHistoryBatch>> getGamesHistory(
-      String token, int page) async {
+    String token,
+    int page,
+    BoardSize? board,
+    TimeStandard? time,
+    PlayerResult? result,
+    DateTime? until,
+  ) async {
     var res = await get(
-      Uri.parse("$baseUrl/Player/MyGameHistory/$page"),
+      // Uri.parse("$baseUrl/Player/MyGameHistory/$page"),
+      Uri.http(
+        basePath,
+        "/Player/MyGameHistory/$page",
+        {
+          "boardSize": board?.index.toString(),
+          "timeStandard": time?.index.toString(),
+          "result": result?.index.toString(),
+          "time": until?.toIso8601String()
+        },
+      ),
       token,
     );
 

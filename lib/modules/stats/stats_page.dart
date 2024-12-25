@@ -60,11 +60,7 @@ class StatsPage extends StatelessWidget {
                       builder: (context, pro, child) => Scaffold(
                         body: Container(
                             padding: const EdgeInsets.all(10),
-                            child:
-                                // SingleChildScrollView(
-
-                                //   child:
-                                CustomScrollView(
+                            child: CustomScrollView(
                               slivers: [
                                 SliverPersistentHeader(
                                   pinned: true,
@@ -80,7 +76,6 @@ class StatsPage extends StatelessWidget {
                                       SizedBox(
                                         width: 90,
                                         child: MyDropDown(
-                                          // label: "Time",
                                           label: null,
                                           items: FilteredBoardSize.values,
                                           selectedItem: pro.boardSize,
@@ -99,7 +94,6 @@ class StatsPage extends StatelessWidget {
                                       SizedBox(
                                         width: 150,
                                         child: MyDropDown(
-                                          // label: "Size",
                                           label: null,
                                           items: FilteredTimeStandard.values,
                                           selectedItem: pro.timeStandard,
@@ -125,7 +119,7 @@ class StatsPage extends StatelessWidget {
                                     children: [
                                       const SizedBox(height: 20),
                                       Container(
-                                        padding: EdgeInsets.symmetric(
+                                        padding: const EdgeInsets.symmetric(
                                             horizontal: 24),
                                         child: Column(
                                           children: [
