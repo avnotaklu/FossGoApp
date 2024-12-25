@@ -19,7 +19,8 @@ class GamesHistoryProvider extends ChangeNotifier {
   TimeStandard? timeStandard;
   PlayerResult? result;
 
-  DateTime? sinceTime;
+  DateTime? from;
+  DateTime? to;
 
   static const historyPageSize = 12;
 
@@ -33,7 +34,8 @@ class GamesHistoryProvider extends ChangeNotifier {
       boardSize,
       timeStandard,
       result,
-      sinceTime
+      from,
+      to,
     );
 
     res.fold(
@@ -81,20 +83,31 @@ class GamesHistoryProvider extends ChangeNotifier {
       games.clear();
     }
 
-    this.boardSize = boardSize??  this.boardSize;
-    this.timeStandard = timeStandard?? this.timeStandard;
-    this.result = result?? this.result;
+    this.boardSize = boardSize ?? this.boardSize;
+    this.timeStandard = timeStandard ?? this.timeStandard;
+    this.result = result ?? this.result;
     notifyListeners();
   }
 
-  void setSinceTime(DateTime? sinceTime) {
-    if (this.sinceTime != sinceTime) {
+  void setFromTime(DateTime? fromTime) {
+    if (from != fromTime) {
       page = 0;
       isLastPage = false;
       games.clear();
     }
 
-    this.sinceTime = sinceTime;
+    from = fromTime;
+    notifyListeners();
+  }
+
+  void setToTime(DateTime? toTime) {
+    if (to != toTime) {
+      page = 0;
+      isLastPage = false;
+      games.clear();
+    }
+
+    to = toTime;
     notifyListeners();
   }
 }

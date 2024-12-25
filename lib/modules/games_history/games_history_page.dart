@@ -115,24 +115,59 @@ class GamesHistoryPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Game Played Since: ${sinceTimeText(
-                          pro.sinceTime,
-                        )}"),
+                        Text("Games Played From "),
                         IconButton(
                           padding: EdgeInsets.all(0),
                           onPressed: () async {
                             final res = await showDatePicker(
                               context: context,
                               firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
+                              lastDate: pro.to ?? DateTime.now(),
+                            );
+
+                            if (res != null) {
+                              pro.setFromTime(res);
+                            }
+                          },
+                          icon: Column(
+                            children: [
+                              Icon(Icons.calendar_month),
+                              Text(
+                                "${fromTimeText(
+                                  pro.from,
+                                )}",
+                                style: context.textTheme.labelSmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text("To"),
+                        IconButton(
+                          padding: EdgeInsets.all(0),
+                          onPressed: () async {
+                            final res = await showDatePicker(
+                              context: context,
+                              firstDate: pro.from ??
+                                  DateTime.fromMicrosecondsSinceEpoch(0),
                               lastDate: DateTime.now(),
                             );
 
                             if (res != null) {
-                              pro.setSinceTime(res);
+                              pro.setToTime(res);
                             }
                           },
-                          icon: Icon(Icons.calendar_month),
-                        )
+                          icon: Column(
+                            children: [
+                              Icon(Icons.calendar_month),
+                              Text(
+                                "${toTimeText(
+                                  pro.to,
+                                )}",
+                                style: context.textTheme.labelSmall,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -152,9 +187,12 @@ class GamesHistoryPage extends StatelessWidget {
         ]);
   }
 
-  String sinceTimeText(DateTime? sinceTime) {
-    if (sinceTime == null) return "Start";
-    return sinceTime.pastTimeFrameDiffDisplay(DateTime.now(), 2);
+  String fromTimeText(DateTime? fromTime) {
+    return fromTime?.MMM_dd_yyyy() ?? "Start";
+  }
+
+  String toTimeText(DateTime? fromTime) {
+    return fromTime?.MMM_dd_yyyy() ?? "Now";
   }
 }
 

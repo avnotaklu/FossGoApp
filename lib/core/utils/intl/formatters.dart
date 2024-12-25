@@ -43,3 +43,15 @@ extension DateTimeFormatter on DateTime {
     return partsString;
   }
 }
+
+
+
+  String pastTimeFrameDiffToSmallDisplay(String time) {
+    time.replaceAll("Years", "yr");
+    time.replaceAll("Months", "mon");
+    time.replaceAll("Days", "days");
+    time.replaceAll("Hours", "hrs");
+    time.replaceAll("Mins", "min");
+
+    return time;
+  }

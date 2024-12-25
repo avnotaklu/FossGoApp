@@ -231,7 +231,8 @@ class Api {
     BoardSize? board,
     TimeStandard? time,
     PlayerResult? result,
-    DateTime? until,
+    DateTime? from,
+    DateTime? to,
   ) async {
     var res = await get(
       // Uri.parse("$baseUrl/Player/MyGameHistory/$page"),
@@ -242,7 +243,8 @@ class Api {
           "boardSize": board?.index.toString(),
           "timeStandard": time?.index.toString(),
           "result": result?.index.toString(),
-          "time": until?.toIso8601String()
+          "from": from?.toIso8601String(),
+          "to": to?.toIso8601String()
         },
       ),
       token,
