@@ -5,6 +5,9 @@ import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/homepage/home_page.dart';
 import 'package:go/modules/auth/log_in_screen.dart';
 import 'package:go/modules/auth/sign_up_screen.dart';
+import 'package:go/modules/settings/settings_page.dart';
+import 'package:go/modules/settings/settings_provider.dart';
+import 'package:go/services/local_datasource.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -39,8 +42,14 @@ class MyApp extends StatelessWidget {
       builder: (context, child) => MultiProvider(
         providers: [
           Provider(
-              create: (context) =>
-                  AuthProvider(context.read<SignalRProvider>())),
+              create: (context) => AuthProvider(
+                    context.read<SignalRProvider>(),
+                    LocalDatasource(),
+                  )),
+          ChangeNotifierProvider(
+              create: (context) => SettingsProvider(
+                    localDatasource: LocalDatasource(),
+                  )),
         ],
         builder: (context, child) {
           return FutureBuilder(
@@ -51,16 +60,20 @@ class MyApp extends StatelessWidget {
                 }
 
                 var res = snapshot.data!;
-                return MaterialApp(
-                  builder: (context, child) =>
-                      responsiveWidgetSetup(context, child),
-                  debugShowCheckedModeBanner: false,
-                  initialRoute: res.fold(
-                    (l) => "/",
-                    (r) => r == null ? "/" : "/HomePage",
+                return Consumer<SettingsProvider>(
+                  builder: (context, settingsProvider, child) => MaterialApp(
+                    darkTheme: Constants.darkTheme,
+                    builder: (context, child) =>
+                        responsiveWidgetSetup(context, child),
+                    debugShowCheckedModeBanner: false,
+                    initialRoute: res.fold(
+                      (l) => "/",
+                      (r) => r == null ? "/" : "/HomePage",
+                    ),
+                    themeMode: settingsProvider.themeSetting.themeMode,
+                    theme: Constants.lightTheme,
+                    routes: routeConstructor,
                   ),
-                  theme: themeData(),
-                  routes: routeConstructor,
                 );
               });
         },
@@ -102,6 +115,7 @@ class MyApp extends StatelessWidget {
       },
       '/SignUp': (BuildContext context) => const SignUpScreen(),
       '/LogIn': (BuildContext context) => const LogInScreen(),
+      '/Settings': (BuildContext context) => const SettingsPage(),
     };
   }
 }

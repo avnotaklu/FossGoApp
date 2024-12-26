@@ -18,6 +18,7 @@ import 'package:go/modules/auth/auth_provider.dart';
 
 import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
+import 'package:go/modules/settings/settings_provider.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/my_app_drawer.dart';
@@ -70,88 +71,104 @@ class _GameWidgetState extends State<GameWidget> {
         GameState.paused => StageType.beforeStart,
       };
 
-  bool compact_ui = false;
+  // bool compact_ui = true;
 
   // Board
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (context) => GameStateBloc(
-              widget.game,
-              widget.gameOracle,
-              systemUtils,
-            ),
-        builder: (context, child) {
-          return Scaffold(
-            key: key,
-            drawer: const MyAppDrawer(),
-            appBar: compact_ui
-                ? null
-                : MyAppBar(
-                    gameTitle(context.read<GameStateBloc>().game),
-                    leading: IconButton(
-                      onPressed: () {
-                        if (key.currentState!.isDrawerOpen) {
-                          key.currentState!.closeDrawer();
-                        } else {
-                          key.currentState!.openDrawer();
-                        }
-                      },
-                      icon: const Icon(Icons.menu),
-                    ),
-                  ),
-            body: Consumer<GameStateBloc>(
-              builder: (context, gameStateBloc, child) {
-                final game = gameStateBloc.game;
-                return MultiProvider(
-                  providers: [
-                    ChangeNotifierProvider(
-                      create: (context) => GameBoardBloc(game),
-                    ),
-                    Provider(
-                      create: (context) => StoneLogic(game),
-                    ),
-                    ChangeNotifierProvider(
-                      create: (context) => AnalysisBloc(gameStateBloc),
-                    ),
-                  ],
-                  builder: (context, child) {
-                    context.read<GameBoardBloc>().setupGame(game);
-                    return ChangeNotifierProvider(
-                      create: (context) {
-                        return ScoreCalculationBloc(
-                          api: context.read<AuthProvider>().api,
-                          authBloc: context.read<AuthProvider>(),
-                          gameStateBloc: context.read<GameStateBloc>(),
-                          gameBoardBloc: context.read<GameBoardBloc>(),
-                        );
-                      },
-                      builder: (context, child) {
-                        var stage = context
-                            .read<GameStateBloc>()
-                            .curStageType
-                            .stageConstructor(
-                              context.read<GameStateBloc>(),
-                              context.read<AnalysisBloc>(),
-                            );
-                        return ChangeNotifierProvider<Stage>.value(
-                          value: stage,
-                          builder: (context, child) {
-                            return Consumer<ScoreCalculationBloc>(
+    return Consumer<SettingsProvider>(
+      builder: (context, settingsProvider, child) => ChangeNotifierProvider(
+          create: (context) => GameStateBloc(
+                widget.game,
+                widget.gameOracle,
+                systemUtils,
+              ),
+          builder: (context, child) {
+            return Scaffold(
+              key: key,
+              drawer: const MyAppDrawer(
+                showCompactUiSwitch: true,
+              ),
+              appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(50),
+                child: Consumer<GameStateBloc>(
+                  builder: (context, gameStateBloc, child) => settingsProvider
+                          .compactGameUISetting
+                          .isCompact(context.read<GameStateBloc>().curStageType)
+                      ? SizedBox.shrink()
+                      : MyAppBar(
+                          gameTitle(context.read<GameStateBloc>().game),
+                          leading: IconButton(
+                            onPressed: () {
+                              if (key.currentState!.isDrawerOpen) {
+                                key.currentState!.closeDrawer();
+                              } else {
+                                key.currentState!.openDrawer();
+                              }
+                            },
+                            icon: const Icon(Icons.menu),
+                          ),
+                        ),
+                ),
+              ),
+              body: Consumer<GameStateBloc>(
+                builder: (context, gameStateBloc, child) {
+                  final game = gameStateBloc.game;
+                  return MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider(
+                        create: (context) => GameBoardBloc(game),
+                      ),
+                      Provider(
+                        create: (context) => StoneLogic(game),
+                      ),
+                      ChangeNotifierProvider(
+                        create: (context) => AnalysisBloc(gameStateBloc),
+                      ),
+                    ],
+                    builder: (context, child) {
+                      context.read<GameBoardBloc>().setupGame(game);
+                      return ChangeNotifierProvider(
+                        create: (context) {
+                          return ScoreCalculationBloc(
+                            api: context.read<AuthProvider>().api,
+                            authBloc: context.read<AuthProvider>(),
+                            gameStateBloc: context.read<GameStateBloc>(),
+                            gameBoardBloc: context.read<GameBoardBloc>(),
+                          );
+                        },
+                        builder: (context, child) {
+                          var stage = context
+                              .read<GameStateBloc>()
+                              .curStageType
+                              .stageConstructor(
+                                context.read<GameStateBloc>(),
+                                context.read<AnalysisBloc>(),
+                              );
+                          return ChangeNotifierProvider<Stage>.value(
+                            value: stage,
+                            builder: (context, child) {
+                              return Consumer<ScoreCalculationBloc>(
                                 builder: (context, dyn, child) => WrapperGame(
-                                      game,
-                                      compact_ui: compact_ui,
-                                    ));
-                          },
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
-          );
-        });
+                                  game,
+                                  compact_ui: settingsProvider
+                                      .compactGameUISetting
+                                      .isCompact(context
+                                          .read<GameStateBloc>()
+                                          .curStageType),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          }),
+    );
   }
 }
 

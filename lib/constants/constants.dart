@@ -555,8 +555,9 @@ class VisualTheme {
   // Color get secLightTextColor => color5;
 
   Color get darkShadow => Colors.grey.shade700.withOpacity(0.9);
+  Color get lightShadow => Colors.grey.shade700.withOpacity(0.3);
   // Color get darkShadow => Colors.blueGrey.shade100;
-  Color get lightShadow => Colors.blueGrey.shade100.withOpacity(0.9);
+  // Color get lightShadow => Colors.blueGrey.shade700.withOpacity(0.3);
   // Color get lightShadow => Colors.blueGrey.shade100;
 
   final Color color1;

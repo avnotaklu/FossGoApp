@@ -6,6 +6,7 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/google_o_auth_model.dart';
+import 'package:go/services/local_datasource.dart';
 import 'package:go/services/user_account.dart';
 import 'package:go/services/guest_user.dart';
 import 'package:go/services/public_user_info.dart';
@@ -21,7 +22,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signalr_netcore/hub_connection.dart';
 
 class AuthProvider {
-  final sharedPrefs = SharedPreferencesAsync();
+  final LocalDatasource localDatasource;
   final SignalRProvider signlRBloc;
   // final authService = Auth();
   final api = Api();
@@ -63,7 +64,7 @@ class AuthProvider {
   Completer<Either<AppError, UserAccount?>> initialAuth = Completer();
 
   // bool locallyInitialedAuth = false;
-  AuthProvider(this.signlRBloc) {
+  AuthProvider(this.signlRBloc, this.localDatasource) {
     getToken().then((value) {
       if (value != null) {
         _token = value;
@@ -236,11 +237,11 @@ class AuthProvider {
   }
 
   void storeToken(String token) {
-    sharedPrefs.setString('token', token);
+    localDatasource.storeToken(token);
   }
 
   void storeUser(UserAccount user) {
-    sharedPrefs.setString('user', user.toJson());
+    localDatasource.storeUser(user);
   }
 
   void updateUserAccount(UserAccount user) {
@@ -251,7 +252,7 @@ class AuthProvider {
   }
 
   Future<String?> getToken() {
-    return sharedPrefs.getString('token');
+    return localDatasource.getToken();
   }
 
   Future<Either<AppError, UserAuthenticationModel>> getUser(
@@ -261,8 +262,7 @@ class AuthProvider {
   }
 
   Future<void> logout() async {
-    await sharedPrefs.remove('user');
-    await sharedPrefs.remove('token');
+    await localDatasource.clear();
 
     final con = signlRBloc.hubConnection;
 

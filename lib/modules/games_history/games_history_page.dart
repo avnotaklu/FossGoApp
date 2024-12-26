@@ -362,7 +362,7 @@ class GameListTile extends StatelessWidget {
   }
 
   Widget gameOverText(BuildContext context) {
-    if (!game.didEnd()) return SizedBox.shrink();
+    if (!game.didEnd()) return const SizedBox.shrink();
 
     PlayerResult myRes = getMyResult(context, game.result!);
 

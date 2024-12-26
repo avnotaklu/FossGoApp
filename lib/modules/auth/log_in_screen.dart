@@ -37,54 +37,56 @@ class _LogInScreenState extends State<LogInScreen> {
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Log in to your\n Account",
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.headlineLarge,
-                    ),
-                    SizedBox(height: context.height * 0.1),
-                    MyTextFormField(
-                      controller: emailOrUsernameController,
-                      hintText: 'Email/Username',
-                      validator:
-                          pro.emailOrUsernameValidator().flutterFieldValidate,
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    MyTextFormField(
-                      controller: passwordController,
-                      hintText: 'Password',
-                      validator: pro.passwordValidator().flutterFieldValidate,
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    LoaderBasicButton(
-                        onPressed: () async {
-                          var response =
-                              await context.read<LogInProvider>().logIn(
-                                    emailOrUsernameController.text.trim(),
-                                    passwordController.text.trim(),
-                                  );
-                          if (context.mounted) {
-                            authNavigation(context, response);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(response.fold(
-                                  (e) => e.message,
-                                  (v) => "Successfully logged in",
-                                )),
-                              ),
-                            );
-                          }
-                        },
-                        label: "Log In")
-                  ],
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Log in to your\n Account",
+                        textAlign: TextAlign.center,
+                        style: context.textTheme.headlineLarge,
+                      ),
+                      SizedBox(height: context.height * 0.1),
+                      MyTextFormField(
+                        controller: emailOrUsernameController,
+                        hintText: 'Email/Username',
+                        validator:
+                            pro.emailOrUsernameValidator().flutterFieldValidate,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      MyTextFormField(
+                        controller: passwordController,
+                        hintText: 'Password',
+                        validator: pro.passwordValidator().flutterFieldValidate,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      LoaderBasicButton(
+                          onPressed: () async {
+                            var response =
+                                await context.read<LogInProvider>().logIn(
+                                      emailOrUsernameController.text.trim(),
+                                      passwordController.text.trim(),
+                                    );
+                            if (context.mounted) {
+                              authNavigation(context, response);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(response.fold(
+                                    (e) => e.message,
+                                    (v) => "Successfully logged in",
+                                  )),
+                                ),
+                              );
+                            }
+                          },
+                          label: "Log In")
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -39,56 +39,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Create Your\n Account",
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.headlineLarge,
-                    ),
-                    SizedBox(height: context.height * 0.1),
-                    MyTextFormField(
-                      hintText: "Username",
-                      controller: userNameController,
-                      validator: (v) =>
-                          signUpPro.usernameValidator().flutterFieldValidate(v),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    MyTextFormField(
-                      hintText: "Password",
-                      controller: passwordController,
-                      validator: (v) =>
-                          signUpPro.passwordValidator().flutterFieldValidate(v),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    LoaderBasicButton(
-                        onPressed: () async {
-                          var response = await signUpPro.signUp(
-                            userNameController.text,
-                            passwordController.text,
-                          );
-
-                          if (context.mounted) {
-                            authNavigation(context, response);
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(response.fold(
-                                  (e) => e.message,
-                                  (v) => "Successfully logged in",
-                                )),
-                              ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Create Your\n Account",
+                        textAlign: TextAlign.center,
+                        style: context.textTheme.headlineLarge,
+                      ),
+                      SizedBox(height: context.height * 0.1),
+                      MyTextFormField(
+                        hintText: "Username",
+                        controller: userNameController,
+                        validator: (v) => signUpPro
+                            .usernameValidator()
+                            .flutterFieldValidate(v),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      MyTextFormField(
+                        hintText: "Password",
+                        controller: passwordController,
+                        validator: (v) => signUpPro
+                            .passwordValidator()
+                            .flutterFieldValidate(v),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      LoaderBasicButton(
+                          onPressed: () async {
+                            var response = await signUpPro.signUp(
+                              userNameController.text,
+                              passwordController.text,
                             );
-                          }
-                        },
-                        label: "Sign Up"),
-                  ],
+
+                            if (context.mounted) {
+                              authNavigation(context, response);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(response.fold(
+                                    (e) => e.message,
+                                    (v) => "Successfully logged in",
+                                  )),
+                                ),
+                              );
+                            }
+                          },
+                          label: "Sign Up"),
+                    ],
+                  ),
                 ),
               ),
             ),

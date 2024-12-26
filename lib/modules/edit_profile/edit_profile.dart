@@ -6,7 +6,7 @@ import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/homepage/matchmaking_page.dart';
-import 'package:go/modules/homepage/profile/edit_profile_provider.dart';
+import 'package:go/modules/edit_profile/edit_profile_provider.dart';
 import 'package:go/services/api.dart';
 import 'package:go/widgets/app_error_snackbar.dart';
 import 'package:go/widgets/basic_alert.dart';

@@ -23,64 +23,68 @@ class CompactGameUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<GameStateBloc>(builder: (context, gameStateBloc, child) {
-      return Column(
-        children: [
-          SizedBox(
-            height: context.height * 0.02,
-          ),
-          Container(
-            height: context.height * 0.08,
-            padding: EdgeInsets.symmetric(horizontal: 5),
-            child: Row(
-              children: [
-                Expanded(
-                  child: CompactPlayerCard(
-                    playerData: gameStateBloc.topPlayerUserInfo,
-                    game: gameStateBloc.game,
-                  ),
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-                Expanded(
-                  child: CompactPlayerCard(
-                    playerData: gameStateBloc.bottomPlayerUserInfo,
-                    game: gameStateBloc.game,
-                  ),
-                ),
-              ],
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 5),
+        child: Column(
+          children: [
+            SizedBox(
+              height: context.height * 0.02,
             ),
-          ),
-          Container(
-            child: boardWidget,
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 5),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-            height: context.height * 0.27,
-            child: MoveTree(
-              root: context.read<AnalysisBloc>().start,
-              direction: TreeDirection.horizontal,
+            Container(
+              height: context.height * 0.08,
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CompactPlayerCard(
+                      playerData: gameStateBloc.topPlayerUserInfo,
+                      game: gameStateBloc.game,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    child: CompactPlayerCard(
+                      playerData: gameStateBloc.bottomPlayerUserInfo,
+                      game: gameStateBloc.game,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Spacer(),
-          if (context.read<Stage>() is! GameEndStage)
-            context.read<Stage>() is ScoreCalculationStage
-                ? const ScoreActions()
-                : context.read<Stage>() is AnalysisStage
-                    ? AnalsisModeActions(
-                        openTree: () {},
-                        // openTree: () => openBottomSheet(
-                        //   context.read<AnalysisBloc>(),
-                        // ),
-                      )
-                    : const PlayingGameActions()
-          else
-            const PlayingEndedActions(),
-          SizedBox(
-            height: 5,
-          ),
-        ],
+            SizedBox(height: 5,),
+            Container(
+              child: boardWidget,
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+              height: context.height * 0.25,
+              child: MoveTree(
+                root: context.read<AnalysisBloc>().start,
+                direction: TreeDirection.horizontal,
+              ),
+            ),
+            Spacer(),
+            if (context.read<Stage>() is! GameEndStage)
+              context.read<Stage>() is ScoreCalculationStage
+                  ? const ScoreActions()
+                  : context.read<Stage>() is AnalysisStage
+                      ? AnalsisModeActions(
+                          openTree: () {},
+                          // openTree: () => openBottomSheet(
+                          //   context.read<AnalysisBloc>(),
+                          // ),
+                        )
+                      : const PlayingGameActions()
+            else
+              const PlayingEndedActions(),
+            SizedBox(
+              height: 5,
+            ),
+          ],
+        ),
       );
     });
   }
@@ -100,13 +104,14 @@ class CompactPlayerCard extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
+        
         color: Constants.playerColors[playerData!.stoneType!.index]
             .withOpacity(0.7),
         boxShadow: [
           BoxShadow(
-            color: context.theme.colorScheme.shadow,
+            color: Colors.grey.shade700.withOpacity(0.5),
             blurRadius: 5,
-            spreadRadius: 1,
+            spreadRadius: 2,
           ),
         ],
       ),
