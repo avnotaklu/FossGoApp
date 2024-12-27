@@ -5,10 +5,10 @@ import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
+import 'package:go/services/find_match_result.dart';
 import 'package:go/services/game_and_opponent.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/public_user_info.dart';
-import 'package:go/services/find_match_result.dart';
 import 'package:go/services/stat_update_message.dart';
 
 class SignalRMessage {
@@ -79,6 +79,8 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
       return GameTimerUpdateMessage.fromMap(map);
     case SignalRMessageTypes.statUpdate:
       return StatUpdateMessage.fromMap(map);
+    case SignalRMessageTypes.opponentConnection:
+      return ConnectionStrength.fromMap(map);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     case SignalRMessageTypes.acceptedScores:
@@ -110,6 +112,8 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
       return GameTimerUpdateMessage.fromJson(json);
     case SignalRMessageTypes.statUpdate:
       return StatUpdateMessage.fromJson(json);
+    case SignalRMessageTypes.opponentConnection:
+      return ConnectionStrength.fromJson(json);
     case SignalRMessageTypes.scoreCaculationStarted:
       return null;
     case SignalRMessageTypes.acceptedScores:
@@ -132,6 +136,7 @@ class SignalRMessageTypes {
   static const String gameTimerUpdate = "GameTimerUpdate";
   static const String matchFound = "MatchFound";
   static const String statUpdate = "StatUpdate";
+  static const String opponentConnection = "OpponentConnection";
 }
 
 abstract class SignalRMessageType {
@@ -169,6 +174,35 @@ class GameTimerUpdateMessage extends SignalRMessageType {
   factory GameTimerUpdateMessage.fromJson(String source) =>
       GameTimerUpdateMessage.fromMap(
           json.decode(source) as Map<String, dynamic>);
+}
+
+
+extension ConnectionStrengthExt on ConnectionStrength {
+  bool get isStrong => ping < 100;
+}
+
+class ConnectionStrength extends SignalRMessageType {
+  final int ping;
+  ConnectionStrength({
+    required this.ping,
+  });
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'ping': ping,
+    };
+  }
+
+  factory ConnectionStrength.fromMap(Map<String, dynamic> map) {
+    return ConnectionStrength(
+      ping: map['ping'] as int,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory ConnectionStrength.fromJson(String source) =>
+      ConnectionStrength.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class EditDeadStoneMessage extends SignalRMessageType {
@@ -256,7 +290,6 @@ class GameStartMessage extends SignalRMessageType {
   factory GameStartMessage.fromJson(String source) =>
       GameStartMessage.fromMap(json.decode(source) as Map<String, dynamic>);
 }
-
 
 class NewMoveMessage extends SignalRMessageType {
   final Game game;

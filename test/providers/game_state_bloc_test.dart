@@ -247,7 +247,7 @@ void main() {
       // 3 seconds spent playing first move
       currentTime = currentTime.add(const Duration(seconds: 3));
 
-      await bloc.playMove(a1, stoneLogic);
+      await bloc.makeMove(a1, stoneLogic);
 
       expect(bloc.timerController[0].duration.inSeconds, 296);
       expect(bloc.timerController[1].duration.inSeconds, 300);
@@ -273,7 +273,7 @@ void main() {
       // player 2 uses 5 seconds to play his move
       currentTime2 = currentTime2.add(const Duration(seconds: 5));
 
-      await bloc2.playMove(a2, stoneLogic);
+      await bloc2.makeMove(a2, stoneLogic);
 
       expect(bloc2.timerController[0].duration.inSeconds, 296);
       expect(bloc2.timerController[1].duration.inSeconds, 294);

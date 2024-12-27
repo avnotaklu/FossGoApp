@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/time_control.dart';
+import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/game.dart';
@@ -40,12 +41,11 @@ class GameCard extends StatelessWidget {
           content: Text(e.message),
         ),
       );
-    }, (GameJoinMessage joinMessage) {
+    }, (data) {
       final statRepo = context.read<IStatsRepository>();
       Navigator.push(context,
           MaterialPageRoute<void>(builder: (BuildContext context) {
-        return LiveGameWidget(
-            joinMessage.game, joinMessage.getGameAndOpponent(), statRepo);
+        return LiveGameWidget(data.game, data, statRepo);
       }));
     });
   }

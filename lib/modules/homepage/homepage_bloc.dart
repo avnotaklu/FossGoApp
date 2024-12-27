@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/models/game.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
+import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
 import 'package:go/services/api.dart';
 import 'package:go/services/user_account.dart';
 import 'package:go/modules/auth/auth_provider.dart';
@@ -33,7 +34,7 @@ class HomepageBloc extends ChangeNotifier {
 
   final AuthProvider authBloc;
 
-  Future<Either<AppError, GameJoinMessage>> joinGame(
+  Future<Either<AppError, GameEntranceData>> joinGame(
       String gameId, String token) async {
     var game = await api.joinGame(GameJoinDto(gameId: gameId), token);
     return game;

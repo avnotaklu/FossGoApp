@@ -39,23 +39,31 @@ class SignalRProvider extends ChangeNotifier {
     try {
       hubConnection = HubConnectionBuilder()
           .withUrl(
-            serverUrl,
-            options: HttpConnectionOptions(
-              accessTokenFactory: () async => token,
-            ),
-          )
-          .withAutomaticReconnect()
-          // .withHubProtocol(JsonHubProtocol())
-          .build();
+        serverUrl,
+        options: HttpConnectionOptions(
+          accessTokenFactory: () async => token,
+        ),
+      )
+          .withAutomaticReconnect(
+        reconnectPolicy: null,
+        // retryDelays: [
+        //   0,
+        //   2000,
+        //   2000,
+        //   2000,
+        // ],
+      ).build();
       hubConnection!.onclose(({Exception? error}) {
         debugPrint("Connection closed: ${error.toString()}");
       });
 
       hubConnection!.onreconnecting(({Exception? error}) {
+        _reconnectionC.sink.add(false);
         debugPrint("Connection reconnecting: ${error.toString()}");
       });
 
       hubConnection!.onreconnected(({String? connectionId}) {
+        _reconnectionC.sink.add(true);
         debugPrint("Connection reconnected with Id: $connectionId");
       });
 
@@ -70,6 +78,9 @@ class SignalRProvider extends ChangeNotifier {
       return left(AppError(message: e.toString()));
     }
   }
+
+  final StreamController<bool> _reconnectionC = StreamController.broadcast();
+  Stream<bool> get reconnectionStream => _reconnectionC.stream;
 
   Stream<SignalRMessage> get gameMessageStream => _gameMessageController.stream;
 
@@ -93,7 +104,7 @@ class SignalRProvider extends ChangeNotifier {
       var messageList = messagesRaw.signalRMessageList;
       var message = messageList.first;
 
-      debugPrint("Got user update: ${message.toJson()}");
+      debugPrint("Got game update: ${message.toJson()}");
 
       _gameMessageController.add(message);
     });

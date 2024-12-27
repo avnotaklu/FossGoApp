@@ -1,5 +1,6 @@
 enum PlayerResult {
   won,
   lost,
-  draw
+  draw,
+  noResult
 }

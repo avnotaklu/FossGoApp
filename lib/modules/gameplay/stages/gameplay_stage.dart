@@ -36,7 +36,7 @@ class GameplayStage extends Stage {
   @override
   onClickCell(Position? position, BuildContext context) {
     StoneLogic stoneLogic = context.read();
-    context.read<GameStateBloc>().playMove(position, stoneLogic);
+    context.read<GameStateBloc>().makeMove(position, stoneLogic);
   }
 
   @override

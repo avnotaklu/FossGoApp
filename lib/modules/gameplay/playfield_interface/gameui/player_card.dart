@@ -1,12 +1,17 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:barebones_timer/timer_controller.dart';
+import 'package:barebones_timer/timer_display.dart';
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/minimal_rating.dart';
+import 'package:go/modules/gameplay/playfield_interface/gameui/connection_display.dart';
+import 'package:go/modules/stats/stats_page.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/player_rating.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:provider/provider.dart';
 
 import 'package:go/constants/constants.dart' as Constants;
@@ -15,11 +20,17 @@ import 'package:go/modules/gameplay/playfield_interface/gameui/game_timer.dart';
 
 class PlayerDataUi extends StatefulWidget {
   final DisplayablePlayerData? playerInfo;
+  final Stream<ConnectionStrength>? connectionStream;
   final Game game;
 
   @override
   State<PlayerDataUi> createState() => _PlayerDataUiState();
-  const PlayerDataUi(this.playerInfo, this.game, {super.key});
+  const PlayerDataUi(
+    this.playerInfo,
+    this.game, {
+    this.connectionStream,
+    super.key,
+  });
 }
 
 class _PlayerDataUiState extends State<PlayerDataUi> {
@@ -51,14 +62,11 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                                     height: 25,
                                     child: CircularProgressIndicator()),
                               )
-                            : Container(
-                                width: 15,
-                                height: 15,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.lightGreenAccent,
-                                ),
-                              ),
+                            : widget.connectionStream == null
+                                ? const SizedBox.shrink()
+                                : ConnectionDisplay(
+                                    connectionStream: widget.connectionStream!,
+                                  ),
                       ),
                       Text(
                         player?.displayName ?? "Unknown",
@@ -69,38 +77,60 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                         ratingText(widget.playerInfo!.rating!),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Container(
-                        width: size.width * 0.09,
-                      ),
+                  if (game.bothPlayersIn() &&
+                      game.gameState == GameState.waitingForStart &&
+                      player?.stoneType == StoneType.black)
+                    Row(
+                      children: [
+                        Container(
+                          width: size.width * 0.09,
+                        ),
+                        TimerDisplay(
+                          builder: (p0) {
+                            return Text(
+                              "Time for first move: ${p0.duration.smallRepr()}",
+                              style: context.textTheme.labelLarge,
+                            );
+                          },
+                          controller: context
+                              .read<GameStateBloc>()
+                              .headsUpTimeController,
+                        )
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        Container(
+                          width: size.width * 0.09,
+                        ),
 
-                      if (player?.stoneType != null)
-                        if (getFinalScore(game, player!.stoneType!) != null)
+                        if (player?.stoneType != null)
+                          if (getFinalScore(game, player!.stoneType!) != null)
+                            Text(
+                              " + ${getFinalScore(game, player!.stoneType!)} Points",
+                              style: context.textTheme.labelLarge,
+                            ),
+
+                        if (player?.stoneType != null)
                           Text(
-                            " + ${getFinalScore(game, player!.stoneType!)} Points",
+                            " + ${getPrisonersCount(game, player!.stoneType!)} Prisoners",
                             style: context.textTheme.labelLarge,
                           ),
-
-                      if (player?.stoneType != null)
-                        Text(
-                          " + ${getPrisonersCount(game, player!.stoneType!)} Prisoners",
-                          style: context.textTheme.labelLarge,
+                        if (player?.stoneType != null &&
+                            player?.stoneType == StoneType.white)
+                          Text(
+                            " + ${getKomi(game, player!.stoneType!)} Komi",
+                            style: context.textTheme.labelLarge,
+                          ),
+                        // : const Spacer(
+                        //     flex: 2,
+                        //   ),
+                        const Spacer(
+                          flex: 3,
                         ),
-                      if (player?.stoneType != null &&
-                          player?.stoneType == StoneType.white)
-                        Text(
-                          " + ${getKomi(game, player!.stoneType!)} Komi",
-                          style: context.textTheme.labelLarge,
-                        ),
-                      // : const Spacer(
-                      //     flex: 2,
-                      //   ),
-                      const Spacer(
-                        flex: 3,
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   Row(
                     children: [
                       Container(

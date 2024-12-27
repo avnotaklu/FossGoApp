@@ -8,6 +8,7 @@ import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/core/utils/theme_helpers/text_theme_helper.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/stats/stats_page_provider.dart';
@@ -499,7 +500,7 @@ class GameResultWidget extends StatelessWidget {
           },
           (r) {
             Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return LiveGameWidget(r.game, r, statsRepo);
+              return LiveGameWidget(r.game, GameEntranceData.fromGameAndOpponent(r), statsRepo);
             }));
           },
         );

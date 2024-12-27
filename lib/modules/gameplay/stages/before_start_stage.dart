@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go/models/game.dart';
+import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
+import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
+import 'package:provider/provider.dart';
 
 // class BeforeStartStage extends Stage<BeforeStartStage> {
 class BeforeStartStage extends Stage {
@@ -17,7 +21,12 @@ class BeforeStartStage extends Stage {
 
   @override
   onClickCell(Position? position, BuildContext context) {
-    // Before game do nothing on click on cell
+    final bloc = context.read<GameStateBloc>();
+
+    if (bloc.game.bothPlayersIn()) {
+      StoneLogic stoneLogic = context.read();
+      context.read<GameStateBloc>().makeMove(position, stoneLogic);
+    }
   }
 
   @override

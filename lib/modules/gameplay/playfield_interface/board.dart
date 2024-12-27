@@ -1,5 +1,7 @@
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
+import 'package:go/core/utils/my_responsive_framework/extensions.dart';
+import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
 import 'package:provider/provider.dart';
@@ -44,53 +46,64 @@ class _BoardState extends State<Board> {
         2; // Don't make spacing so large that to get that spacing Stones start to move out of position
 
     //double boardInset = stoneInsetstoneSpacing;
-    return InteractiveViewer(
-      child: Center(
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            // return StatefulBuilder(
-            //   builder: (BuildContext context, StateSetter setState) {
-            //     print("${constraints.maxHeight}, ${constraints.maxWidth}");
-            return Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
-                  child: AspectRatio(
-                    aspectRatio: 1.0,
-                    child: Container(
-                      height: constraints.maxHeight,
-                      width: constraints.maxWidth,
-                      //color: Colors.black,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(Constants.assets['board']!),
-                            fit: BoxFit.fill),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        InteractiveViewer(
+          child: Center(
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                // return StatefulBuilder(
+                //   builder: (BuildContext context, StateSetter setState) {
+                //     print("${constraints.maxHeight}, ${constraints.maxWidth}");
+                return Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
+                      child: AspectRatio(
+                        aspectRatio: 1.0,
+                        child: Container(
+                          height: constraints.maxHeight,
+                          width: constraints.maxWidth,
+                          //color: Colors.black,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(Constants.assets['board']!),
+                                fit: BoxFit.fill),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows,
-                    widget.cols, stoneInset)),
-                Consumer<AnalysisBloc>(
-                  builder: (context, bloc, child) => StoneLayoutGrid(
-                    GridInfo(
-                      constraints,
-                      stoneSpacing,
-                      widget.rows,
-                      widget.cols,
-                      stoneInset,
+                    BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows,
+                        widget.cols, stoneInset)),
+                    Consumer<AnalysisBloc>(
+                      builder: (context, bloc, child) => StoneLayoutGrid(
+                        GridInfo(
+                          constraints,
+                          stoneSpacing,
+                          widget.rows,
+                          widget.cols,
+                          stoneInset,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            );
-          },
-          //   ),
-          // ),
-          // );
-          // },
+                  ],
+                );
+              },
+            ),
+          ),
         ),
-      ),
+        // context.read<GameStateBloc>()
+        // Center(
+        //   child: Text(
+        //     "3",
+        //     style: context.textTheme.headlineLarge?.copyWith(
+        //       fontSize: context.height * 0.15,
+        //       // color: Colors.black,
+        //     ),
+        //   ),
+        // ),
+      ],
     );
   }
 }

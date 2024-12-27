@@ -35,5 +35,4 @@ extension DurationExtension on Duration {
 
     return parts.join(", ");
   }
-
 }

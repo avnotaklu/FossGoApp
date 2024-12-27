@@ -207,7 +207,7 @@ class HomeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButtonWidget(() {
-      // Navigator.pushNamedAndRemoveUntil(context, "/HomePage", (v) => false);
+      Navigator.pushNamedAndRemoveUntil(context, "/HomePage", (v) => false);
     }, ActionType.home);
   }
 }

@@ -18,6 +18,7 @@ import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/player_card.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:provider/provider.dart';
 
 class GameUi extends StatefulWidget {
@@ -61,6 +62,13 @@ class _GameUiState extends State<GameUi> {
               child: PlayerDataUi(
                 gameStateBloc.topPlayerUserInfo,
                 gameStateBloc.game,
+                connectionStream: gameStateBloc.gameOracle.getPlatform() ==
+                        GamePlatform.online
+                    ? () async* {
+                        yield ConnectionStrength(ping: 0);
+                        yield* gameStateBloc.opponentConnection!;
+                      }()
+                    : null,
               ),
             ),
             SizedBox(
@@ -78,6 +86,13 @@ class _GameUiState extends State<GameUi> {
               child: PlayerDataUi(
                 gameStateBloc.bottomPlayerUserInfo,
                 gameStateBloc.game,
+                connectionStream: gameStateBloc.gameOracle.getPlatform() ==
+                        GamePlatform.online
+                    ? Stream.fromFuture(Future.microtask(() async {
+                        await Future.delayed(Duration(seconds: 2));
+                        return ConnectionStrength(ping: 0);
+                      }))
+                    : null,
               ),
             ),
             Spacer(),
@@ -93,7 +108,6 @@ class _GameUiState extends State<GameUi> {
                       : const PlayingGameActions()
             else
               const PlayingEndedActions(),
-
             SizedBox(
               height: 5,
             ),

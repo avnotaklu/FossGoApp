@@ -15,6 +15,7 @@ import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/services/player_rating.dart';
+import 'package:go/services/signal_r_message.dart';
 
 import 'package:signalr_netcore/errors.dart';
 
@@ -90,11 +91,14 @@ class GameStateBloc extends ChangeNotifier {
 
   final GameStateOracle gameOracle;
   final SystemUtilities systemUtilities;
+  late final TimerController headsUpTimeController;
 
   late final StreamSubscription<GameUpdate> gameUpdateListener;
 
   Stream<Null> get gameEndStream => gameOracle.gameEndStream;
   Stream<GameMove> get gameMoveStream => gameOracle.moveUpdate;
+  Stream<ConnectionStrength>? get opponentConnection =>
+      gameOracle.opponentConnection;
 
   GameStateBloc(
     this.game,
@@ -119,7 +123,7 @@ class GameStateBloc extends ChangeNotifier {
     });
   }
 
-  Future<Either<AppError, Game>> playMove(
+  Future<Either<AppError, Game>> makeMove(
       Position? position, StoneLogic stoneLogic) async {
     bool canPlayMove = gameOracle.isThisAccountsTurn(game);
     var updateStone = gameOracle.thisAccountStone(game);
@@ -205,6 +209,14 @@ class GameStateBloc extends ChangeNotifier {
       timerController[1].pause();
     }
 
+    if (game.bothPlayersIn() && game.gameState == GameState.waitingForStart) {
+      headsUpTimeController = TimerController(
+        autoStart: true,
+        updateInterval: const Duration(milliseconds: 200),
+        duration: gameOracle.headsUpTime,
+      );
+    }
+
     notifyListeners();
     return game;
   }
@@ -228,7 +240,7 @@ class GameStateBloc extends ChangeNotifier {
 
   void exitAnalysisMode() {
     var curState = game.gameState;
-    _updateStageType( curState);
+    _updateStageType(curState);
     notifyListeners();
   }
 }

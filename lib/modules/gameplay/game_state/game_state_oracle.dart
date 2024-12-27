@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
 import 'package:go/modules/gameplay/middleware/local_gameplay_server.dart';
 import 'package:go/modules/gameplay/middleware/score_calculator.dart';
 import 'package:go/modules/gameplay/middleware/time_calculator.dart';
@@ -132,6 +133,10 @@ abstract class GameStateOracle {
   final StreamController<GameMove> moveUpdateC = StreamController.broadcast();
   Stream<GameMove> get moveUpdate => moveUpdateC.stream;
 
+  Stream<ConnectionStrength>? get opponentConnection;
+
+  Duration get headsUpTime;
+
   DisplayablePlayerData myPlayerData(Game game);
   DisplayablePlayerData? otherPlayerData(Game game);
 
@@ -163,6 +168,13 @@ class LiveGameOracle extends GameStateOracle {
   late final Stream<GameTimerUpdateMessage> listenFromGameTimerUpdate;
   late final Stream<Null> listenFromAcceptScores;
   late final Stream<ContinueGameMessage> listenFromContinueGame;
+  late final Stream<ConnectionStrength> listenFromOpponentConnection;
+
+  DateTime? playersJoinTime;
+
+  @override
+  Stream<ConnectionStrength>? get opponentConnection =>
+      listenFromOpponentConnection;
 
   void setupStreams() {
     var gameMessageStream = signalRbloc.gameMessageStream;
@@ -219,6 +231,13 @@ class LiveGameOracle extends GameStateOracle {
         yield message.data as GameTimerUpdateMessage;
       }
     });
+
+    listenFromOpponentConnection =
+        gameMessageStream.asyncExpand((message) async* {
+      if (message.type == SignalRMessageTypes.opponentConnection) {
+        yield message.data as ConnectionStrength;
+      }
+    });
   }
 
   LiveGameOracle({
@@ -226,11 +245,14 @@ class LiveGameOracle extends GameStateOracle {
     required this.authBloc,
     required this.signalRbloc,
     required this.ratings,
-    GameAndOpponent? joiningData,
+    required this.systemUtilities,
+    GameEntranceData? joiningData,
   }) {
     if (joiningData != null) {
-      otherPlayerInfo = joiningData.opponent;
+      playersJoinTime = joiningData.joinTime;
+      otherPlayerInfo = joiningData.otherPlayerData;
     }
+
     setupStreams();
 
     subscriptions = [
@@ -240,7 +262,8 @@ class LiveGameOracle extends GameStateOracle {
       listenForContinueGame(),
       listenForAcceptScore(),
       listenForGameOver(),
-      listenForGameTimerUpdate()
+      listenForGameTimerUpdate(),
+      listenForOpponentConnection()
     ];
   }
 
@@ -249,6 +272,7 @@ class LiveGameOracle extends GameStateOracle {
       debugPrint(
           "Signal R said, ::${SignalRMessageTypes.gameJoin}::\n\t\t${message.toMap()}");
       otherPlayerInfo = message.otherPlayerData;
+      playersJoinTime = message.joinTime;
       gameUpdateC.add(message.game.toGameUpdate());
     });
   }
@@ -307,11 +331,23 @@ class LiveGameOracle extends GameStateOracle {
     });
   }
 
-  // TODO: listenForGameJoin + update otherPlayerInfo there
+  StreamSubscription listenForOpponentConnection() {
+    return listenFromOpponentConnection.listen((message) {
+      debugPrint(
+          "Signal R said, ::${SignalRMessageTypes.opponentConnection}::\n\t\t${message.toMap()}");
+    });
+  }
 
   PublicUserInfo? otherPlayerInfo;
 
   AbstractUserAccount get myPlayerUserInfo => authBloc.currentUserAccount;
+
+  final SystemUtilities systemUtilities;
+
+  @override
+  Duration get headsUpTime =>
+      const Duration(seconds: 10) -
+      systemUtilities.currentTime.difference(playersJoinTime!);
 
   @override
   DisplayablePlayerData myPlayerData(Game game) {
@@ -319,7 +355,7 @@ class LiveGameOracle extends GameStateOracle {
     var rating = publicInfo.rating?.getRatingForGame(game);
     StoneType? stone;
 
-    if (game.didStart()) {
+    if (game.bothPlayersIn()) {
       stone = game.getStoneFromPlayerId(publicInfo.id);
     } else if (game.gameCreator == publicInfo.id) {
       stone = game.stoneSelectionType.type;
@@ -344,7 +380,7 @@ class LiveGameOracle extends GameStateOracle {
     var rating = publicInfo?.rating?.getRatingForGame(game);
     StoneType? stone;
 
-    if (game.didStart()) {
+    if (game.bothPlayersIn()) {
       stone = game.getStoneFromPlayerId(publicInfo!.id);
     } else if (game.gameCreator == publicInfo?.id) {
       stone = game.stoneSelectionType.type;
@@ -384,12 +420,6 @@ class LiveGameOracle extends GameStateOracle {
 
   @override
   Future<Either<AppError, Game>> playMove(Game game, MovePosition move) async {
-    // final sl = StoneLogic(game);
-
-    // if (!move.isPass()) {
-    //   sl.handleStoneUpdate(Position(move.x!, move.y!), thisAccountStone(game));
-    // }
-
     return (await api.makeMove(move, authBloc.token!, game.gameId))
         .map((a) => a.game);
   }
@@ -427,11 +457,14 @@ class LiveGameOracle extends GameStateOracle {
 class FaceToFaceGameOracle extends GameStateOracle {
   final LocalGameplayServer gp;
 
+  @override
+  Stream<ConnectionStrength>? get opponentConnection => null;
+
   FaceToFaceGameOracle(this.gp) {
     gameUpdateC.addStream(gp.gameUpdate);
     gp.gameUpdate.listen((d) {
       if (d.game?.gameState == GameState.ended) {
-        gameEndC.add(null); 
+        gameEndC.add(null);
         // NOTE: After end there are no other updates, so this will happen once only
       }
     });
@@ -439,6 +472,9 @@ class FaceToFaceGameOracle extends GameStateOracle {
 
   String get myPlayerId => "bottom";
   String get otherPlayerId => "top";
+
+  @override
+  Duration get headsUpTime => Duration.zero;
 
   @override
   DisplayablePlayerData myPlayerData(Game game) {

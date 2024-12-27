@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/foundation/set.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
+import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
@@ -261,9 +262,11 @@ class FindButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<MatchmakingProvider>(builder: (context, provider, child) {
       return provider.findingMatch
-          ? IconButton(onPressed: () {
-            provider.cancelFind();
-          }, icon: const Icon(Icons.close))
+          ? IconButton(
+              onPressed: () {
+                provider.cancelFind();
+              },
+              icon: const Icon(Icons.close))
           : PrimaryButton(
               text: "Play",
               onPressed: () {
@@ -278,8 +281,8 @@ class FindButton extends StatelessWidget {
                     final statRepo = context.read<IStatsRepository>();
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
-                      return LiveGameWidget(
-                          event.game, event.getGameAndOpponent(), statRepo);
+                      return LiveGameWidget(event.game,
+                          GameEntranceData.fromJoinMessage(event), statRepo);
                     }));
                   }
                 });

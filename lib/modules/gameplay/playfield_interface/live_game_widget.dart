@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/models/game.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
+import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
@@ -12,7 +14,7 @@ import 'package:provider/provider.dart';
 
 class LiveGameWidget extends StatelessWidget {
   final Game game;
-  final GameAndOpponent? joinMessage;
+  final GameEntranceData? joinMessage;
   final IStatsRepository statsRepo;
 
   const LiveGameWidget(this.game, this.joinMessage, this.statsRepo,
@@ -31,6 +33,7 @@ class LiveGameWidget extends StatelessWidget {
                       game: game,
                       gameOracle: LiveGameOracle(
                         api: Api(),
+                        systemUtilities: const SystemUtilities(),
                         authBloc: context.read<AuthProvider>(),
                         signalRbloc: context.read<SignalRProvider>(),
                         ratings: snapshot.data?.fold((l) => null, (r) => r.$2),

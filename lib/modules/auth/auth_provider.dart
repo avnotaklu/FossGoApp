@@ -159,7 +159,7 @@ class AuthProvider {
 
   Future<Either<AppError, UserAccount>> authenticateNormalUser(
       UserAccount user, String token) async {
-    final registerTas = registerUser(token, user.id);
+    final registerTas = connectUser(token, user.id);
 
     var res = (await registerTas.run()).flatMap((r) {
       _setUser(token, user);
@@ -183,7 +183,7 @@ class AuthProvider {
 
   Future<Either<AppError, GuestUser>> authenticateGuestUser(
       GuestUser user, String token) async {
-    final registerTas = registerUser(token, user.id);
+    final registerTas = connectUser(token, user.id);
 
     var res = (await registerTas.run()).flatMap((r) {
       _setUser(token, user);
@@ -197,16 +197,11 @@ class AuthProvider {
     return res;
   }
 
-  TaskEither<AppError, RegisterUserResult> registerUser(
-      String token, String userId) {
+  TaskEither<AppError, String> connectUser(String token, String userId) {
     var signalRConnectionId =
         TaskEither(() => signlRBloc.connectSignalR(token));
 
-    var registerTas = signalRConnectionId.flatMap((r) {
-      return TaskEither(() => _registerUser(token, r));
-    });
-
-    return registerTas;
+    return signalRConnectionId;
   }
 
   Future<Either<AppError, RegisterUserResult>> _registerUser(

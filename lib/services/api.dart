@@ -9,6 +9,7 @@ import 'package:go/core/foundation/fpdart.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/sign_in_dto.dart';
+import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
 import 'package:go/modules/games_history/player_result.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/bad_request_error.dart';
@@ -43,7 +44,7 @@ import 'package:http/http.dart' as http;
 // }
 
 class Api {
-  static const String basePath = "192.168.238.22:8080";
+  static const String basePath = "192.168.83.22:8080";
   // static const String basePath = "192.168.170.71:8080";
   static const String baseUrl = "http://$basePath";
 
@@ -261,12 +262,12 @@ class Api {
     return convert(res, (a) => Game.fromJson(a));
   }
 
-  Future<Either<AppError, GameJoinMessage>> joinGame(
+  Future<Either<AppError, GameEntranceData>> joinGame(
       GameJoinDto data, String token) async {
     var res =
         await post(Uri.parse("$baseUrl/Player/JoinGame"), data.toJson(), token);
 
-    return convert(res, (a) => GameJoinMessage.fromJson(a));
+    return convert(res, (a) => GameEntranceData.fromJson(a));
   }
 
   Future<Either<AppError, NewMoveResult>> makeMove(

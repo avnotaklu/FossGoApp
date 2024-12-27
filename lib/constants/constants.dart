@@ -600,7 +600,7 @@ class Validations {
 
   static String? validatePassword(String password) {
     return password.length < 6
-        ? "Password must be larger than 6 characters"
+        ? "Password must be not be smaller than 6 characters"
         : null;
   }
 

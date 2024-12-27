@@ -175,6 +175,7 @@ extension GameResultExt on GameResult {
       GameResult.blackWon => StoneType.black,
       GameResult.whiteWon => StoneType.white,
       GameResult.draw => null,
+      GameResult.noResult => null,
     };
   }
 
@@ -187,6 +188,7 @@ enum GameResult {
   blackWon,
   whiteWon,
   draw,
+  noResult,
 }
 
 extension PlayerListExt<T> on List<T> {
@@ -201,7 +203,7 @@ extension PlayerListExt<T> on List<T> {
 
 extension GameExts on Game {
   String? getPlayerIdWithTurn() {
-    if (startTime == null) return null;
+    if (!bothPlayersIn()) return null;
 
     final turn = moves.length % 2;
 
@@ -244,6 +246,10 @@ extension GameExts on Game {
 
   bool didStart() {
     return gameState != GameState.waitingForStart;
+  }
+
+  bool bothPlayersIn() {
+    return players.length == 2;
   }
 
   bool didEnd() {

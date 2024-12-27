@@ -9,6 +9,7 @@ import 'package:go/core/utils/theme_helpers/text_theme_helper.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
 import 'package:go/modules/games_history/games_history_provider.dart';
 import 'package:go/modules/games_history/player_result.dart';
@@ -251,9 +252,12 @@ class GameListTile extends StatelessWidget {
                 });
           },
           (r) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return LiveGameWidget(game, r, statsRepo);
-            }));
+            if (r != null) {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return LiveGameWidget(
+                    game, GameEntranceData.fromGameAndOpponent(r), statsRepo);
+              }));
+            }
           },
         );
       },
@@ -346,6 +350,7 @@ class GameListTile extends StatelessWidget {
   PlayerResult getMyResult(BuildContext context, GameResult result) {
     final auth = context.read<AuthProvider>();
     if (result == GameResult.draw) return PlayerResult.draw;
+    if (result == GameResult.noResult) return PlayerResult.noResult;
     return result.getWinnerStone() == game.getStoneFromPlayerId(auth.myId)
         ? PlayerResult.won
         : PlayerResult.lost;
@@ -357,6 +362,7 @@ class GameListTile extends StatelessWidget {
     PlayerResult myRes = getMyResult(context, game.result!);
 
     if (myRes == PlayerResult.draw) return "Draw";
+    if (myRes == PlayerResult.noResult) return "No result";
 
     return "${myRes.name.capitalize()} By ${game.gameOverMethod!.displayStringWithScoreForWinner(game)}";
   }
@@ -369,7 +375,7 @@ class GameListTile extends StatelessWidget {
     return Text(
       " • ${getGameOverMethod(context, game)}",
       style: context.textTheme.labelSmall?.copyWith(
-          color: myRes == PlayerResult.draw
+          color: myRes == PlayerResult.draw || myRes == PlayerResult.noResult
               ? null
               : myRes == PlayerResult.won
                   ? otherColors.win

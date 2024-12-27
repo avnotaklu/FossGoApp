@@ -1,5 +1,7 @@
 import 'package:barebones_timer/timer_controller.dart';
+import 'package:barebones_timer/timer_display.dart';
 import 'package:flutter/material.dart';
+import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
@@ -53,13 +55,16 @@ class CompactGameUi extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 5,),
+            SizedBox(
+              height: 5,
+            ),
             Container(
               child: boardWidget,
             ),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 5),
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(10)),
               height: context.height * 0.25,
               child: MoveTree(
                 root: context.read<AnalysisBloc>().start,
@@ -104,7 +109,6 @@ class CompactPlayerCard extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        
         color: Constants.playerColors[playerData!.stoneType!.index]
             .withOpacity(0.7),
         boxShadow: [
@@ -175,20 +179,43 @@ class CompactPlayerCard extends StatelessWidget {
                               SizedBox(
                                 height: 5,
                               ),
-                              Row(
-                                children: [
-                                  if (playerData!.komi != null)
-                                    Text(
-                                      "Komi: ${playerData!.komi} | ",
-                                      style: context.theme.textTheme.labelSmall,
+                              if (game.bothPlayersIn() &&
+                                  game.gameState == GameState.waitingForStart && player == StoneType.black)
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: context.width * 0.09,
                                     ),
-                                  if (playerData!.prisoners != null)
-                                    Text(
-                                      "Caps: ${playerData!.prisoners}",
-                                      style: context.theme.textTheme.labelSmall,
-                                    ),
-                                ],
-                              )
+                                    TimerDisplay(
+                                      builder: (p0) {
+                                        return Text(
+                                          "Time for first move: ${p0.duration.smallRepr()}",
+                                          style: context.textTheme.labelLarge,
+                                        );
+                                      },
+                                      controller: context
+                                          .read<GameStateBloc>()
+                                          .headsUpTimeController,
+                                    )
+                                  ],
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    if (playerData!.komi != null)
+                                      Text(
+                                        "Komi: ${playerData!.komi} | ",
+                                        style:
+                                            context.theme.textTheme.labelSmall,
+                                      ),
+                                    if (playerData!.prisoners != null)
+                                      Text(
+                                        "Caps: ${playerData!.prisoners}",
+                                        style:
+                                            context.theme.textTheme.labelSmall,
+                                      ),
+                                  ],
+                                )
                               // Text(
                               //   playerData!.score.toString(),
                               //   style: context.theme.textTheme.headline6,
