@@ -42,10 +42,7 @@ class ScoreCalculationStage extends Stage {
                   child: Stack(
                     children: [
                       stone != null
-                          ? StoneWidget(
-                              constants.playerColors[dyn!.owner!]
-                                  .withOpacity(0.6),
-                              position)
+                          ? StoneWidget(stone.color?.withOpacity(0.8), position)
                           : const SizedBox.shrink(),
                       Center(
                         child: FractionallySizedBox(
@@ -65,10 +62,10 @@ class ScoreCalculationStage extends Stage {
                           if (stonesCopy.containsKey(stone.pos) &&
                               context
                                   .read<ScoreCalculationBloc>()
-                                  .virtualRemovedCluster
+                                  .removedClusters
                                   .contains(stonesCopy[stone.pos]!.cluster)) {
                             return StoneWidget(
-                                stone.color!.withOpacity(0.6), position);
+                                stone.color!.withOpacity(0.8), position);
                           } else {
                             return stone;
                           }

@@ -20,7 +20,10 @@ class ScoreCalculationBloc extends ChangeNotifier {
 
   // BuildContext? _context;
   Map<Position, Stone> virtualPlaygroundMap = {};
-  Set<Cluster> virtualRemovedCluster = {};
+  Set<Position> removedPositions = {};
+  List<Cluster> get removedClusters => removedPositions
+      .map((pos) => gameBoardBloc.stoneAt(pos)!.cluster)
+      .toList();
 
   final Api api;
   final AuthProvider authBloc;
@@ -35,6 +38,7 @@ class ScoreCalculationBloc extends ChangeNotifier {
     required this.gameBoardBloc,
   }) {
     setupScore();
+    listenFromEditDeadStone();
   }
 
   void setupScore() {
@@ -51,7 +55,7 @@ class ScoreCalculationBloc extends ChangeNotifier {
     }
 
     for (final pos in gameStateBloc.game.deadStones) {
-      virtualRemovedCluster.add(gameBoardBloc.stoneAt(pos)!.cluster);
+      removedPositions.add(pos);
     }
 
     calculateScore();
@@ -73,9 +77,9 @@ class ScoreCalculationBloc extends ChangeNotifier {
   void applyDeadStones(Position pos, DeadStoneState state) {
     final cluster = gameBoardBloc.stoneAt(pos)!.cluster;
     if (state == DeadStoneState.Dead) {
-      virtualRemovedCluster.add(cluster);
+      removedPositions.add(pos);
     } else {
-      virtualRemovedCluster.remove(cluster);
+      removedPositions.remove(pos);
     }
     calculateScore();
     notifyListeners();
@@ -83,7 +87,7 @@ class ScoreCalculationBloc extends ChangeNotifier {
 
   void onClickStone(Position pos) async {
     final cluster = gameBoardBloc.stoneAt(pos)!.cluster;
-    if (virtualRemovedCluster.contains(cluster)) {
+    if (cluster.data.any(removedPositions.contains)) {
       var res = await gameStateBloc.editDeadStone(pos, DeadStoneState.Alive);
       res.map((res) => {applyDeadStones(pos, DeadStoneState.Alive)});
     } else {
@@ -106,17 +110,15 @@ class ScoreCalculationBloc extends ChangeNotifier {
 
   void continueGame() {
     virtualPlaygroundMap.clear();
-    virtualRemovedCluster.clear();
+    removedPositions.clear();
   }
 
   createVirtualPlayground() {
     virtualPlaygroundMap.clear();
     virtualPlaygroundMap.addAll(gameBoardBloc.stones);
 
-    for (Cluster cluster in virtualRemovedCluster) {
-      for (var pos in cluster.data) {
-        virtualPlaygroundMap.remove(pos);
-      }
+    for (var pos in removedPositions) {
+      virtualPlaygroundMap.remove(pos);
     }
   }
 

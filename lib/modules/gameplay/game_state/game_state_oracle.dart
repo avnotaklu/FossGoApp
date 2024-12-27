@@ -160,9 +160,9 @@ class LiveGameOracle extends GameStateOracle {
   final PlayerRating? ratings;
 
   late final List<StreamSubscription> subscriptions;
-  late final Stream<GameJoinMessage> listenForGameJoin;
-  late final Stream<GameStartMessage> listenForGameStart;
-  late final Stream<EditDeadStoneMessage> listenForEditDeadStone;
+  late final Stream<GameJoinMessage> listenFromGameJoin;
+  late final Stream<GameStartMessage> listenFromGameStart;
+  late final Stream<EditDeadStoneMessage> listenFromEditDeadStone;
   late final Stream<NewMoveMessage> listenFromMove;
   late final Stream<GameOverMessage> listenFromGameOver;
   late final Stream<GameTimerUpdateMessage> listenFromGameTimerUpdate;
@@ -180,19 +180,19 @@ class LiveGameOracle extends GameStateOracle {
     var gameMessageStream = signalRbloc.gameMessageStream;
     var userMessageStream = signalRbloc.userMessagesStream;
 
-    listenForGameJoin = userMessageStream.asyncExpand((message) async* {
+    listenFromGameJoin = userMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.gameJoin) {
         yield message.data as GameJoinMessage;
       }
     });
 
-    listenForGameStart = gameMessageStream.asyncExpand((message) async* {
+    listenFromGameStart = gameMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.gameStart) {
         yield message.data as GameStartMessage;
       }
     });
 
-    listenForEditDeadStone = gameMessageStream.asyncExpand((message) async* {
+    listenFromEditDeadStone = gameMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.editDeadStone) {
         yield message.data as EditDeadStoneMessage;
       }
@@ -256,19 +256,20 @@ class LiveGameOracle extends GameStateOracle {
     setupStreams();
 
     subscriptions = [
-      listenFromGameJoin(),
-      listenFromGameStart(),
+      listenForGameJoin(),
+      listenForGameStart(),
       listenForMove(),
       listenForContinueGame(),
       listenForAcceptScore(),
       listenForGameOver(),
       listenForGameTimerUpdate(),
-      listenForOpponentConnection()
+      listenForOpponentConnection(),
+      listenForEditDeadStone()
     ];
   }
 
-  StreamSubscription listenFromGameJoin() {
-    return listenForGameJoin.listen((message) {
+  StreamSubscription listenForGameJoin() {
+    return listenFromGameJoin.listen((message) {
       debugPrint(
           "Signal R said, ::${SignalRMessageTypes.gameJoin}::\n\t\t${message.toMap()}");
       otherPlayerInfo = message.otherPlayerData;
@@ -277,8 +278,8 @@ class LiveGameOracle extends GameStateOracle {
     });
   }
 
-  StreamSubscription listenFromGameStart() {
-    return listenForGameStart.listen((message) {
+  StreamSubscription listenForGameStart() {
+    return listenFromGameStart.listen((message) {
       debugPrint(
           "Signal R said, ::${SignalRMessageTypes.gameStart}::\n\t\t${message.toMap()}");
       gameUpdateC.add(message.game.toGameUpdate());
@@ -335,6 +336,17 @@ class LiveGameOracle extends GameStateOracle {
     return listenFromOpponentConnection.listen((message) {
       debugPrint(
           "Signal R said, ::${SignalRMessageTypes.opponentConnection}::\n\t\t${message.toMap()}");
+    });
+  }
+
+  StreamSubscription listenForEditDeadStone() {
+    return listenFromEditDeadStone.listen((message) {
+      debugPrint(
+          "Signal R said, ::${SignalRMessageTypes.editDeadStone}::\n\t\t${message.toMap()}");
+      gameUpdateC.add(GameUpdate(
+        deadStonePosition: message.position,
+        deadStoneState: message.state,
+      ));
     });
   }
 
@@ -428,7 +440,7 @@ class LiveGameOracle extends GameStateOracle {
   Future<Either<AppError, Game>> editDeadStoneCluster(
       Game game, Position pos, DeadStoneState state) async {
     final res = await api.editDeadStoneCluster(
-      EditDeadStoneClusterDto(position: pos, state: DeadStoneState.Alive),
+      EditDeadStoneClusterDto(position: pos, state: state),
       authBloc.token!,
       game.gameId,
     );

@@ -146,7 +146,7 @@ class PlayerTile extends StatelessWidget {
                       style: context.textTheme.labelSmall),
                   const SizedBox(width: 5),
                   if (data.score != null) ...[
-                    Text("Komi: ${data.score}",
+                    Text("Points: ${data.score}",
                         style: context.textTheme.labelSmall),
                     const SizedBox(width: 5),
                   ]

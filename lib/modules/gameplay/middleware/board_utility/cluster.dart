@@ -12,11 +12,18 @@ class Cluster {
     if (other is! Cluster) {
       return false;
     }
-    return other.data == data && other.freedoms == freedoms;
+    return other.data == data &&
+        other.freedoms == freedoms &&
+        other.player == player &&
+        other.freedomPositions == freedomPositions;
   }
 
   @override
-  int get hashCode => data.hashCode ^ freedoms.hashCode;
+  int get hashCode =>
+      data.hashCode ^
+      freedoms.hashCode ^
+      player.hashCode ^
+      freedomPositions.hashCode;
 
   Position smallestPosition() {
     Position smallest = data.first;

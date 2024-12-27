@@ -50,7 +50,7 @@ class GameEndStage extends Stage {
                           if (stonesCopy[stone.pos] != null &&
                               context
                                   .read<ScoreCalculationBloc>()
-                                  .virtualRemovedCluster
+                                  .removedClusters
                                   .contains(stonesCopy[stone.pos]!.cluster)) {
                             return StoneWidget(
                                 stone.color!.withOpacity(0.6), position);
