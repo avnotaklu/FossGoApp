@@ -42,13 +42,13 @@ class CreateGameProvider extends ChangeNotifier {
   TimeStandard _timeStandard = TimeStandard.blitz;
   TimeStandard get timeStandard => _timeStandard;
 
-  Duration _mainTime = Constants.timeStandardMainTime[TimeStandard.blitz]!;
+  Duration _mainTime = Constants.timeStandardMainTimesCons(TimeStandard.blitz)[0];
   Duration get mainTimeSeconds => _mainTime;
 
-  Duration _increment = Constants.timeStandardIncrement[TimeStandard.blitz]!;
+  Duration _increment = Constants.timeStandardIncrementCons(TimeStandard.blitz)[0];
   Duration get incrementSeconds => _increment;
 
-  Duration _byoYomi = Constants.timeStandardByoYomiTime[TimeStandard.blitz]!;
+  Duration _byoYomi = Constants.timeStandardByoYomiTimesCons(TimeStandard.blitz)[0];
   Duration get byoYomiSeconds => _byoYomi;
 
   final byoYomiCountController = TextEditingController();
@@ -78,9 +78,9 @@ class CreateGameProvider extends ChangeNotifier {
   void changeTimeStandard(TimeStandard standard) {
     _timeStandard = standard;
 
-    _mainTime = Constants.timeStandardMainTime[standard]!;
-    _increment = Constants.timeStandardIncrement[standard]!;
-    _byoYomi = Constants.timeStandardByoYomiTime[standard]!;
+    _mainTime = Constants.timeStandardMainTimesCons(standard)[0];
+    _increment = Constants.timeStandardIncrementCons(standard)[0];
+    _byoYomi = Constants.timeStandardByoYomiTimesCons(standard)[0];
 
     notifyListeners();
   }

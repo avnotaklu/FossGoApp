@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go/core/foundation/duration.dart';
 
 import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
@@ -34,8 +35,6 @@ class BoardSizeData {
 }
 
 const String title = "Go";
-// const List<String> boardsizes = ["9x9", "13x13", "19x19"];
-// const List<(int rows, int cols)> boardsizes = [(9, 9), (13, 13), (19, 19)];
 
 const List<BoardSizeData> boardSizes = [
   BoardSizeData(9, 9),
@@ -54,7 +53,6 @@ enum TimeFormat {
 }
 
 final List<TimeControlDto> timeControlsForMatch = [
-  // TimeStandard.blitz
   TimeControlDto(
     mainTimeSeconds: 30,
     incrementSeconds: 3,
@@ -64,7 +62,6 @@ final List<TimeControlDto> timeControlsForMatch = [
       mainTimeSeconds: 30,
       incrementSeconds: null,
       byoYomiTime: ByoYomiTime(byoYomis: 5, byoYomiSeconds: 10)),
-  // TimeStandard.rapid
   TimeControlDto(
     mainTimeSeconds: 5 * 60,
     incrementSeconds: 5,
@@ -74,7 +71,6 @@ final List<TimeControlDto> timeControlsForMatch = [
       mainTimeSeconds: 5 * 60,
       incrementSeconds: null,
       byoYomiTime: ByoYomiTime(byoYomis: 5, byoYomiSeconds: 30)),
-
   TimeControlDto(
     mainTimeSeconds: 10 * 60,
     incrementSeconds: 10,
@@ -86,72 +82,152 @@ final List<TimeControlDto> timeControlsForMatch = [
       byoYomiTime: ByoYomiTime(byoYomis: 5, byoYomiSeconds: 30)),
 ];
 
-const Map<TimeStandard, Duration> timeStandardMainTime = {
-  TimeStandard.blitz: Duration(seconds: 300),
-  TimeStandard.rapid: Duration(seconds: 1200),
-  TimeStandard.classical: Duration(seconds: 3600),
-  TimeStandard.correspondence: Duration(days: 1),
+const Map<TimeStandard, (Duration, Duration, Duration)> timeStandardMainTime = {
+  TimeStandard.blitz: (
+    Duration(seconds: 30),
+    Duration(seconds: 5 * 60),
+    Duration(seconds: 30)
+  ),
+  TimeStandard.rapid: (
+    Duration(minutes: 5),
+    Duration(minutes: 20),
+    Duration(minutes: 1)
+  ),
+  TimeStandard.classical: (
+    Duration(minutes: 20),
+    Duration(minutes: 120),
+    Duration(minutes: 5)
+  ),
+  TimeStandard.correspondence: (
+    Duration(days: 14),
+    Duration(days: 28),
+    Duration(days: 1)
+  ),
 };
 
-final Map<TimeStandard, List<Duration>> timeStandardMainTimeAlt = {
-  TimeStandard.blitz: [
-    const Duration(seconds: 180),
-    timeStandardMainTime[TimeStandard.blitz]!,
-  ],
-  TimeStandard.rapid: [
-    timeStandardMainTime[TimeStandard.rapid]!,
-  ],
-  TimeStandard.classical: [
-    timeStandardMainTime[TimeStandard.classical]!,
-  ],
-  TimeStandard.correspondence: [
-    timeStandardMainTime[TimeStandard.correspondence]!,
-  ],
+List<Duration> timeStandardMainTimesCons(TimeStandard s) {
+  return List.generate(
+    (timeStandardMainTime[s]!.$2 - timeStandardMainTime[s]!.$1)
+        .dividedBy(timeStandardMainTime[s]!.$3) + 1,
+    (i) =>
+        timeStandardMainTime[s]!.$1 +
+        Duration(seconds: i * timeStandardMainTime[s]!.$3.inSeconds),
+  );
+}
+
+// final Map<TimeStandard, List<Duration>> timeStandardMainTimeAlt = {
+//   TimeStandard.blitz: [
+//     const Duration(seconds: 180),
+//     timeStandardMainTime[TimeStandard.blitz]!,
+//   ],
+//   TimeStandard.rapid: [
+//     timeStandardMainTime[TimeStandard.rapid]!,
+//   ],
+//   TimeStandard.classical: [
+//     timeStandardMainTime[TimeStandard.classical]!,
+//   ],
+//   TimeStandard.correspondence: [
+//     timeStandardMainTime[TimeStandard.correspondence]!,
+//   ],
+// };
+
+const Map<TimeStandard, (Duration, Duration, Duration)> timeStandardIncrement =
+    {
+  TimeStandard.blitz: (
+    Duration(seconds: 2),
+    Duration(seconds: 10),
+    Duration(seconds: 2)
+  ),
+  TimeStandard.rapid: (
+    Duration(seconds: 10),
+    Duration(seconds: 30),
+    Duration(seconds: 5)
+  ),
+  TimeStandard.classical: (
+    Duration(seconds: 30),
+    Duration(seconds: 60),
+    Duration(seconds: 10)
+  ),
+  TimeStandard.correspondence: (
+    Duration(days: 1),
+    Duration(days: 4),
+    Duration(days: 1)
+  ),
 };
 
-const Map<TimeStandard, Duration> timeStandardIncrement = {
-  TimeStandard.blitz: Duration(seconds: 2),
-  TimeStandard.rapid: Duration(seconds: 5),
-  TimeStandard.classical: Duration(seconds: 10),
-  TimeStandard.correspondence: Duration(hours: 1)
+List<Duration> timeStandardIncrementCons(TimeStandard s) {
+  return List.generate(
+    (timeStandardIncrement[s]!.$2 - timeStandardIncrement[s]!.$1)
+        .dividedBy(timeStandardIncrement[s]!.$3) + 1,
+    (i) =>
+        timeStandardIncrement[s]!.$1 +
+        Duration(seconds: i * timeStandardIncrement[s]!.$3.inSeconds),
+  );
+}
+
+// final Map<TimeStandard, List<Duration>> timeStandardIncrementAlt = {
+//   TimeStandard.blitz: [
+//     timeStandardIncrement[TimeStandard.blitz]!,
+//   ],
+//   TimeStandard.rapid: [
+//     timeStandardIncrement[TimeStandard.rapid]!,
+//   ],
+//   TimeStandard.classical: [
+//     timeStandardIncrement[TimeStandard.classical]!,
+//   ],
+//   TimeStandard.correspondence: [
+//     timeStandardIncrement[TimeStandard.correspondence]!,
+//   ],
+// };
+
+const Map<TimeStandard, (Duration, Duration, Duration)>
+    timeStandardByoYomiTime = {
+  TimeStandard.blitz: (
+    Duration(seconds: 10),
+    Duration(seconds: 30),
+    Duration(seconds: 5)
+  ),
+  TimeStandard.rapid: (
+    Duration(seconds: 30),
+    Duration(seconds: 60),
+    Duration(seconds: 10)
+  ),
+  TimeStandard.classical: (
+    Duration(seconds: 60),
+    Duration(seconds: 120),
+    Duration(seconds: 20)
+  ),
+  TimeStandard.correspondence: (
+    Duration(days: 1),
+    Duration(days: 4),
+    Duration(days: 1)
+  ),
 };
 
-final Map<TimeStandard, List<Duration>> timeStandardIncrementAlt = {
-  TimeStandard.blitz: [
-    timeStandardIncrement[TimeStandard.blitz]!,
-  ],
-  TimeStandard.rapid: [
-    timeStandardIncrement[TimeStandard.rapid]!,
-  ],
-  TimeStandard.classical: [
-    timeStandardIncrement[TimeStandard.classical]!,
-  ],
-  TimeStandard.correspondence: [
-    timeStandardIncrement[TimeStandard.correspondence]!,
-  ],
-};
+List<Duration> timeStandardByoYomiTimesCons(TimeStandard s) {
+  return List.generate(
+    (timeStandardByoYomiTime[s]!.$2 - timeStandardByoYomiTime[s]!.$1)
+        .dividedBy(timeStandardByoYomiTime[s]!.$3) + 1,
+    (i) =>
+        timeStandardByoYomiTime[s]!.$1 +
+        Duration(seconds: i * timeStandardByoYomiTime[s]!.$3.inSeconds),
+  );
+}
 
-const Map<TimeStandard, Duration> timeStandardByoYomiTime = {
-  TimeStandard.blitz: Duration(seconds: 10),
-  TimeStandard.rapid: Duration(seconds: 30),
-  TimeStandard.classical: Duration(seconds: 60),
-  TimeStandard.correspondence: Duration(minutes: 5)
-};
-
-final Map<TimeStandard, List<Duration>> timeStandardByoYomiTimeAlt = {
-  TimeStandard.blitz: [
-    timeStandardByoYomiTime[TimeStandard.blitz]!,
-  ],
-  TimeStandard.rapid: [
-    timeStandardByoYomiTime[TimeStandard.rapid]!,
-  ],
-  TimeStandard.classical: [
-    timeStandardByoYomiTime[TimeStandard.classical]!,
-  ],
-  TimeStandard.correspondence: [
-    timeStandardByoYomiTime[TimeStandard.correspondence]!,
-  ],
-};
+// final Map<TimeStandard, List<Duration>> timeStandardByoYomiTimeAlt = {
+//   TimeStandard.blitz: [
+//     timeStandardByoYomiTime[TimeStandard.blitz]!,
+//   ],
+//   TimeStandard.rapid: [
+//     timeStandardByoYomiTime[TimeStandard.rapid]!,
+//   ],
+//   TimeStandard.classical: [
+//     timeStandardByoYomiTime[TimeStandard.classical]!,
+//   ],
+//   TimeStandard.correspondence: [
+//     timeStandardByoYomiTime[TimeStandard.correspondence]!,
+//   ],
+// };
 
 const List<Color> playerColors = [(Colors.black), (Colors.white)];
 
@@ -181,16 +257,6 @@ const Map<String, List<Position>> boardCircleDecoration = {
   ]
 };
 
-// class BoardCircleDecorations {
-//   static const val;
-//   const BoardCircleDecorations{
-//     return const ;
-//     // return Map<String, List<Position>>.fromIterable(boardsizes.map((element) {
-//     //   return MapEntry(element, Position(0, 0));
-//     // }));
-//   }
-// }
-
 ThemeData get oldLightTheme {
   var tc = defaultTheme.mainLightTextColor;
   return ThemeData.light().copyWith(
@@ -200,13 +266,6 @@ ThemeData get oldLightTheme {
     hintColor: defaultTheme.darkCardColor,
     shadowColor: defaultTheme.lightShadow,
     dialogBackgroundColor: defaultTheme.lightDialogColor,
-
-    // elevatedButtonTheme: ElevatedButtonThemeData(
-    //   style: ButtonStyle(
-    //     backgroundColor:
-    //         WidgetStateProperty.all<Color>(defaultTheme.focusColor),
-    //   ),
-    // ),
     textTheme: buildTextTheme(tc),
   );
 }
@@ -286,24 +345,16 @@ ThemeData get lightTheme => buildTheme(
 
 ThemeData get oldDarkTheme {
   var tc = defaultTheme.mainDarkTextColor;
-  // var s = ColorScheme.fromSeed(seedColor: Color(0xff9C27B0));
-  // dark();
+
   var bg = Color(0xff111118);
-  // var bg = Color(0xff141414);
 
   return ThemeData(
     useMaterial3: true,
-    // colorScheme: ColorScheme.highContrastDark(),
-
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
 
       primary: defaultTheme.darkCardColor,
       onPrimary: defaultTheme.lightCardColor,
-
-      // : onPrimary,
-      // secondary: defaultTheme.focusColor,
-      // onSecondary: onSecondary,
 
       secondary: defaultTheme.mainHighlightColor,
       onSecondary: tc,
@@ -311,21 +362,14 @@ ThemeData get oldDarkTheme {
       tertiary: defaultTheme.lightCardColor,
       onTertiary: defaultTheme.darkCardColor,
 
-      // sele
-
       surfaceContainerHigh: defaultTheme.darkDialogColor,
       surfaceContainer: defaultTheme.darkDialogColor,
       surfaceContainerLow: defaultTheme.darkCardColor,
 
-      // onPrimaryContainer: defaultTheme.darkCardColor,
-      // onSecondaryContainer: defaultTheme.darkCardColor,
-      // onTertiaryContainer: defaultTheme.darkCardColor,
-
       onSurfaceVariant: defaultTheme.lightCardColor,
-      // onSurfaceVariant:,
       surfaceContainerHighest: defaultTheme.mainHighlightColor,
-      surfaceVariant: defaultTheme
-          .lightCardColor, // REVIEW: M3 Spec defines it, so i'm using it
+      // ignore: deprecated_member_use // REVIEW: M3 Spec defines it, so i'm using it
+      surfaceVariant: defaultTheme.lightCardColor,
 
       error: Colors.red,
       onError: Colors.white,
@@ -335,33 +379,7 @@ ThemeData get oldDarkTheme {
       onSurface: defaultTheme.mainDarkTextColor,
       onInverseSurface: defaultTheme.mainLightTextColor,
     ),
-
-    // canvasColor: defaultTheme.darkBackground,
-
-    // cardColor: defaultTheme.darkCardColor,
-    // indicatorColor: defaultTheme.enabledColor,
-    // disabledColor: defaultTheme.lightCardColor,
-    // hintColor: defaultTheme.lightCardColor,
-    // shadowColor: defaultTheme.darkShadow,
-    // dialogBackgroundColor: defaultTheme.darkDialogColor,
-
     cardTheme: null,
-
-    // cardColor: s.secondaryContainer,
-    // indicatorColor: s.primary,
-    // disabledColor: s.inverseSurface,
-    // hintColor: s.primary,
-    // shadowColor: s.shadow,
-    // dialogBackgroundColor: s.primaryContainer,
-
-    // elevatedButtonTheme: ElevatedButtonThemeData(
-    //   style: ButtonStyle(
-    //     backgroundColor:
-    //         WidgetStateProperty.all<Color>(defaultTheme.focusColor),
-    //   ),
-    // ),
-    // shadow color is default
-
     textTheme: buildTextTheme(tc),
   );
 }
@@ -383,7 +401,6 @@ class OtherColors {
 
 TextTheme buildTextTheme(Color tc) {
   return TextTheme(
-
     headlineLarge:
         headingL(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
     headlineSmall:
@@ -399,7 +416,6 @@ TextTheme buildTextTheme(Color tc) {
   );
 }
 
-
 TextStyle headingL(Color col) {
   return TextStyle(
     fontSize: 22,
@@ -407,7 +423,6 @@ TextStyle headingL(Color col) {
     color: col,
   );
 }
-
 
 TextStyle headingS(Color col) {
   return TextStyle(

@@ -9,7 +9,7 @@ import 'package:go/models/game.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
+import 'package:go/modules/gameplay/game_state/oracle/game_state_oracle.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/find_match_dto.dart';

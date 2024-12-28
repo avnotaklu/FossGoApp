@@ -1,9 +1,11 @@
+
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
+import 'package:go/modules/gameplay/game_state/oracle/game_state_oracle.dart';
 import 'package:go/modules/gameplay/middleware/local_gameplay_server.dart';
 import 'package:go/modules/gameplay/middleware/score_calculator.dart';
 import 'package:go/modules/gameplay/middleware/time_calculator.dart';
@@ -31,127 +33,6 @@ import 'package:go/services/move_position.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/player_rating.dart';
-
-// HACK: `GameUpdate` object is a hack as signalR messages don't always give the full game state
-extension GameExt on Game {
-  GameUpdate toGameUpdate() {
-    return GameUpdate(
-      game: this,
-      curPlayerTimeSnapshot: didStart()
-          ? playerTimeSnapshots[
-              getStoneFromPlayerId(getPlayerIdWithTurn()!)!.index]
-          : null,
-      playerWithTurn:
-          didStart() ? getStoneFromPlayerId(getPlayerIdWithTurn()!) : null,
-    );
-  }
-}
-
-extension GameUpdateExt on GameUpdate {
-  Game makeCopyFromOldGame(Game game) {
-    // REVIEW: this works for now,
-    // but it might have some nullability issues down the line.
-    // e.g. if the new game updated some value to a null value, it would be ignored by `??` operator.
-    // In this case the update won't be communicated.
-    var newGame = Game(
-      gameId: this.game?.gameId ?? game.gameId,
-      rows: this.game?.rows ?? game.rows,
-      columns: this.game?.columns ?? game.columns,
-      timeControl: this.game?.timeControl ?? game.timeControl,
-      playgroundMap: this.game?.playgroundMap ?? game.playgroundMap,
-      moves: this.game?.moves ?? game.moves,
-      players: this.game?.players ?? game.players,
-      prisoners: this.game?.prisoners ?? game.prisoners,
-      startTime: this.game?.startTime ?? game.startTime,
-      koPositionInLastMove:
-          this.game?.koPositionInLastMove ?? game.koPositionInLastMove,
-      gameState: this.game?.gameState ?? game.gameState,
-      deadStones: this.game?.deadStones ?? game.deadStones,
-      result: this.game?.result ?? game.result,
-      komi: this.game?.komi ?? game.komi,
-      finalTerritoryScores:
-          this.game?.finalTerritoryScores ?? game.finalTerritoryScores,
-      gameOverMethod: this.game?.gameOverMethod ?? game.gameOverMethod,
-      endTime: this.game?.endTime ?? game.endTime,
-      stoneSelectionType:
-          this.game?.stoneSelectionType ?? game.stoneSelectionType,
-      gameCreator: this.game?.gameCreator ?? game.gameCreator,
-      playerTimeSnapshots:
-          this.game?.playerTimeSnapshots ?? game.playerTimeSnapshots,
-      playersRatingsAfter:
-          this.game?.playersRatingsAfter ?? game.playersRatingsAfter,
-      playersRatingsDiff:
-          this.game?.playersRatingsDiff ?? game.playersRatingsDiff,
-      gameType: GameType.anonymous,
-      creationTime: this.game?.creationTime ?? game.creationTime,
-      usernames: this.game?.usernames ?? game.usernames,
-    );
-
-    var tmpTimes = [...newGame.playerTimeSnapshots];
-
-    if (playerWithTurn != null && curPlayerTimeSnapshot != null) {
-      var idx = playerWithTurn!.index;
-      tmpTimes[idx] = curPlayerTimeSnapshot!;
-    }
-
-    return newGame.copyWith(playerTimeSnapshots: tmpTimes);
-  }
-}
-
-class GameUpdate {
-  final Game? game;
-  final PlayerTimeSnapshot? curPlayerTimeSnapshot;
-  final StoneType? playerWithTurn;
-  final Position? deadStonePosition;
-  final DeadStoneState? deadStoneState;
-
-  GameUpdate({
-    this.game,
-    this.curPlayerTimeSnapshot,
-    this.playerWithTurn,
-    this.deadStonePosition,
-    this.deadStoneState,
-  });
-
-  // get state => null;
-}
-
-enum GamePlatform {
-  online,
-  local,
-}
-
-abstract class GameStateOracle {
-  // FIXME: Controllers being here means they are easy to miss in implementation
-
-  final StreamController<GameUpdate> gameUpdateC = StreamController.broadcast();
-  Stream<GameUpdate> get gameUpdate => gameUpdateC.stream;
-
-  final StreamController<Null> gameEndC = StreamController.broadcast();
-  Stream<Null> get gameEndStream => gameEndC.stream;
-
-  final StreamController<GameMove> moveUpdateC = StreamController.broadcast();
-  Stream<GameMove> get moveUpdate => moveUpdateC.stream;
-
-  Stream<ConnectionStrength>? get opponentConnection;
-
-  Duration get headsUpTime;
-
-  DisplayablePlayerData myPlayerData(Game game);
-  DisplayablePlayerData? otherPlayerData(Game game);
-
-  Future<Either<AppError, Game>> resignGame(Game game);
-  Future<Either<AppError, Game>> acceptScores(Game game);
-  Future<Either<AppError, Game>> continueGame(Game game);
-  Future<Either<AppError, Game>> playMove(Game game, MovePosition move);
-  Future<Either<AppError, Game>> editDeadStoneCluster(
-      Game game, Position pos, DeadStoneState state);
-
-  bool isThisAccountsTurn(Game game);
-  StoneType thisAccountStone(Game game);
-
-  GamePlatform getPlatform();
-}
 
 class LiveGameOracle extends GameStateOracle {
   final Api api;
@@ -460,107 +341,5 @@ class LiveGameOracle extends GameStateOracle {
   @override
   GamePlatform getPlatform() {
     return GamePlatform.online;
-  }
-}
-
-// This assumes the game is already started at time of creation
-// This assumes the two player's ids are "bottom" and "top"
-
-class FaceToFaceGameOracle extends GameStateOracle {
-  final LocalGameplayServer gp;
-
-  @override
-  Stream<ConnectionStrength>? get opponentConnection => null;
-
-  FaceToFaceGameOracle(this.gp) {
-    gameUpdateC.addStream(gp.gameUpdate);
-    gp.gameUpdate.listen((d) {
-      if (d.game?.gameState == GameState.ended) {
-        gameEndC.add(null);
-        // NOTE: After end there are no other updates, so this will happen once only
-      }
-    });
-  }
-
-  String get myPlayerId => "bottom";
-  String get otherPlayerId => "top";
-
-  @override
-  Duration get headsUpTime => Duration.zero;
-
-  @override
-  DisplayablePlayerData myPlayerData(Game game) {
-    StoneType stone = game.getStoneFromPlayerId(myPlayerId)!;
-
-    return DisplayablePlayerData(
-      displayName: stone.color,
-      stoneType: stone,
-      rating: null, // No rating for face to face games
-      ratingDiffOnEnd: null,
-      komi: stone.komi(game),
-      prisoners: stone.prisoners(game),
-      score: stone.score(game),
-    );
-  }
-
-  @override
-  DisplayablePlayerData otherPlayerData(Game game) {
-    StoneType stone = game.getStoneFromPlayerId(otherPlayerId)!;
-
-    return DisplayablePlayerData(
-      displayName: stone.color,
-      stoneType: stone,
-      rating: null, // No rating for face to face games
-      ratingDiffOnEnd: null,
-      komi: stone.komi(game),
-      prisoners: stone.prisoners(game),
-      score: stone.score(game),
-    );
-  }
-
-  @override
-  Future<Either<AppError, Game>> resignGame(Game game) async {
-    return gp.resignGame(thisAccountStone(game));
-  }
-
-  @override
-  Future<Either<AppError, Game>> acceptScores(Game game) async {
-    return gp.acceptScores(thisAccountStone(game));
-  }
-
-  @override
-  Future<Either<AppError, Game>> continueGame(Game game) async {
-    return gp.continueGame();
-  }
-
-  @override
-  Future<Either<AppError, Game>> playMove(Game game, MovePosition move) async {
-    var newGame = gp.makeMove(move, thisAccountStone(game));
-
-    newGame.fold(identity, (r) {
-      moveUpdateC.add(r.moves.last);
-    });
-
-    return newGame;
-  }
-
-  Future<Either<AppError, Game>> editDeadStoneCluster(
-      Game game, Position pos, DeadStoneState state) async {
-    return gp.editDeadStone(thisAccountStone(game), pos, state);
-  }
-
-  @override
-  bool isThisAccountsTurn(Game game) {
-    return true;
-  }
-
-  @override
-  StoneType thisAccountStone(Game game) {
-    return game.getStoneFromPlayerId(game.getPlayerIdWithTurn()!)!;
-  }
-
-  @override
-  GamePlatform getPlatform() {
-    return GamePlatform.local;
   }
 }

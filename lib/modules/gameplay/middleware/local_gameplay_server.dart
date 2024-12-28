@@ -8,7 +8,7 @@ import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
-import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
+import 'package:go/modules/gameplay/game_state/oracle/game_state_oracle.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 import 'package:go/modules/gameplay/middleware/score_calculator.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
@@ -193,27 +193,23 @@ class LocalGameplayServer {
     var turnPlayerMS = _playerTimeSnapshots[turnPlayer].mainTimeMilliseconds;
     if (turnPlayerMS != 0) {
       _timer = Timer(Duration(milliseconds: turnPlayerMS), _timeoutTimer);
+      gameUpdateC.add(
+        GameUpdate(
+          game: getGame(),
+          curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
+          playerWithTurn: StoneType.values[turnPlayer],
+        ),
+      );
+    } else {
+      _endGame(GameOverMethod.Timeout, StoneType.values[turnPlayer].other);
+      _timer.cancel();
     }
-
-    gameUpdateC.add(
-      GameUpdate(
-        game: getGame(),
-        curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
-        playerWithTurn: StoneType.values[turnPlayer],
-      ),
-    );
 
     log("Reset clock to ${_playerTimeSnapshots[turnPlayer].mainTimeMilliseconds / 1000} seconds");
   }
 
   void _timeoutTimer() {
     _setTimes(now);
-
-    var turnPlayerMS = _playerTimeSnapshots[turnPlayer].mainTimeMilliseconds;
-
-    if (turnPlayerMS == 0) {
-      _endGame(GameOverMethod.Timeout, StoneType.values[turnPlayer].other);
-    }
   }
 
   Either<AppError, Game> resignGame(StoneType playerStone) {

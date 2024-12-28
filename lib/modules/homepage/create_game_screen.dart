@@ -12,6 +12,7 @@ import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/variant_type.dart';
+import 'package:go/modules/gameplay/game_state/oracle/face_to_face_game_oracle.dart';
 import 'package:go/modules/gameplay/middleware/local_gameplay_server.dart';
 import 'package:go/modules/homepage/custom_games_page.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
@@ -19,7 +20,7 @@ import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/homepage/create_game_provider.dart';
-import 'package:go/modules/gameplay/game_state/game_state_oracle.dart';
+import 'package:go/modules/gameplay/game_state/oracle/game_state_oracle.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
@@ -269,7 +270,7 @@ class CreateGameScreen extends StatelessWidget {
                     sectionHeading(context, "Time Control"),
                     flatDropdown(
                       context,
-                      TimeStandard.values,
+                      TimeStandard.values.take(3).toList(), // TODO: Add correspondance as well, after proper correspondance support
                       cgp.timeStandard,
                       cgp.changeTimeStandard,
                       (t) => t.standardName,
@@ -327,7 +328,7 @@ class CreateGameScreen extends StatelessWidget {
                         flex: 3,
                         child: timeSelectionDropdown(
                           context,
-                          Constants.timeStandardMainTimeAlt[cgp.timeStandard]!,
+                          Constants.timeStandardMainTimesCons(cgp.timeStandard),
                           cgp.mainTimeSeconds,
                           cgp.changeMainTimeSeconds,
                           "Main",
@@ -339,8 +340,8 @@ class CreateGameScreen extends StatelessWidget {
                           flex: 3,
                           child: timeSelectionDropdown(
                             context,
-                            Constants
-                                .timeStandardIncrementAlt[cgp.timeStandard]!,
+                            Constants.timeStandardIncrementCons(
+                                cgp.timeStandard),
                             cgp.incrementSeconds,
                             cgp.changeIncrementSeconds,
                             "Increment",
@@ -370,8 +371,8 @@ class CreateGameScreen extends StatelessWidget {
                           flex: 3,
                           child: timeSelectionDropdown(
                               context,
-                              Constants.timeStandardByoYomiTimeAlt[
-                                  cgp.timeStandard]!,
+                              Constants.timeStandardByoYomiTimesCons(
+                                  cgp.timeStandard),
                               cgp.byoYomiSeconds,
                               cgp.changeByoYomiSeconds,
                               "Byo-Yomi Time"),

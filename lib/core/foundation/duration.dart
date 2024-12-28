@@ -7,9 +7,9 @@ extension DurationExtension on Duration {
     var minutes = inMinutes % 60;
     var seconds = inSeconds % 60;
 
-    var daysS = days > 0 ? "${days}d" : "";
-    var hoursS = hours > 0 ? "${hours}h" : "";
-    var minutesS = minutes > 0 ? "${minutes}m" : "";
+    var daysS = days > 0 ? "${days}d " : "";
+    var hoursS = hours > 0 ? "${hours}h " : "";
+    var minutesS = minutes > 0 ? "${minutes}m " : "";
     var secondsS = seconds > 0 ? "${seconds}s" : "";
 
     return "$daysS$hoursS$minutesS$secondsS";
@@ -34,5 +34,10 @@ extension DurationExtension on Duration {
     }
 
     return parts.join(", ");
+  }
+
+  /// Returns the division by precision of seconds
+  int dividedBy(Duration other) {
+    return (inSeconds / other.inSeconds).round();
   }
 }
