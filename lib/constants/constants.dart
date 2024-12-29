@@ -108,7 +108,8 @@ const Map<TimeStandard, (Duration, Duration, Duration)> timeStandardMainTime = {
 List<Duration> timeStandardMainTimesCons(TimeStandard s) {
   return List.generate(
     (timeStandardMainTime[s]!.$2 - timeStandardMainTime[s]!.$1)
-        .dividedBy(timeStandardMainTime[s]!.$3) + 1,
+            .dividedBy(timeStandardMainTime[s]!.$3) +
+        1,
     (i) =>
         timeStandardMainTime[s]!.$1 +
         Duration(seconds: i * timeStandardMainTime[s]!.$3.inSeconds),
@@ -145,8 +146,8 @@ const Map<TimeStandard, (Duration, Duration, Duration)> timeStandardIncrement =
   ),
   TimeStandard.classical: (
     Duration(seconds: 30),
-    Duration(seconds: 60),
-    Duration(seconds: 10)
+    Duration(seconds: 3 * 60),
+    Duration(seconds: 30)
   ),
   TimeStandard.correspondence: (
     Duration(days: 1),
@@ -158,7 +159,8 @@ const Map<TimeStandard, (Duration, Duration, Duration)> timeStandardIncrement =
 List<Duration> timeStandardIncrementCons(TimeStandard s) {
   return List.generate(
     (timeStandardIncrement[s]!.$2 - timeStandardIncrement[s]!.$1)
-        .dividedBy(timeStandardIncrement[s]!.$3) + 1,
+            .dividedBy(timeStandardIncrement[s]!.$3) +
+        1,
     (i) =>
         timeStandardIncrement[s]!.$1 +
         Duration(seconds: i * timeStandardIncrement[s]!.$3.inSeconds),
@@ -193,9 +195,9 @@ const Map<TimeStandard, (Duration, Duration, Duration)>
     Duration(seconds: 10)
   ),
   TimeStandard.classical: (
-    Duration(seconds: 60),
-    Duration(seconds: 120),
-    Duration(seconds: 20)
+    Duration(minutes: 1),
+    Duration(minutes: 5),
+    Duration(minutes: 1)
   ),
   TimeStandard.correspondence: (
     Duration(days: 1),
@@ -207,7 +209,8 @@ const Map<TimeStandard, (Duration, Duration, Duration)>
 List<Duration> timeStandardByoYomiTimesCons(TimeStandard s) {
   return List.generate(
     (timeStandardByoYomiTime[s]!.$2 - timeStandardByoYomiTime[s]!.$1)
-        .dividedBy(timeStandardByoYomiTime[s]!.$3) + 1,
+            .dividedBy(timeStandardByoYomiTime[s]!.$3) +
+        1,
     (i) =>
         timeStandardByoYomiTime[s]!.$1 +
         Duration(seconds: i * timeStandardByoYomiTime[s]!.$3.inSeconds),
@@ -289,7 +292,7 @@ ThemeData buildTheme({
         primary: card,
         onPrimary: cardi,
         secondary: highlight,
-        onSecondary: tc,
+        onSecondary: Colors.black,
         secondaryContainer: highlight,
         onSecondaryContainer: Colors.black,
         tertiary: cardi,

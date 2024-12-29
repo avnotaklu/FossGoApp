@@ -5,6 +5,7 @@ import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
+import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
@@ -15,6 +16,8 @@ import 'package:go/modules/gameplay/stages/analysis_stage.dart';
 import 'package:go/modules/gameplay/stages/game_end_stage.dart';
 import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
+import 'package:go/widgets/stateful_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class CompactGameUi extends StatelessWidget {
@@ -33,7 +36,7 @@ class CompactGameUi extends StatelessWidget {
               height: context.height * 0.02,
             ),
             Container(
-              height: context.height * 0.08,
+              height: context.height * 0.1,
               padding: EdgeInsets.symmetric(horizontal: 5),
               child: Row(
                 children: [
@@ -148,7 +151,11 @@ class CompactPlayerCard extends StatelessWidget {
                       children: [
                         Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
+                              SizedBox(
+                                height: 10,
+                              ),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -157,23 +164,6 @@ class CompactPlayerCard extends StatelessWidget {
                                     playerData!.displayName,
                                     style: context.theme.textTheme.titleLarge,
                                   ),
-                                  if (playerData?.stoneType != null)
-                                    Container(
-                                      height: 28,
-                                      width: 60,
-                                      child: GameTimer(
-                                          customStyle: (context) =>
-                                              context.textTheme.bodySmall!,
-                                          controller: getTimerController(
-                                              context, player),
-                                          player: player,
-                                          isMyTurn:
-                                              isPlayerTurn(context, player),
-                                          timeControl: game.timeControl,
-                                          playerTimeSnapshot:
-                                              getPlayerTimeSnapshot(
-                                                  game, player)),
-                                    )
                                 ],
                               ),
                               SizedBox(
@@ -190,8 +180,8 @@ class CompactPlayerCard extends StatelessWidget {
                                     TimerDisplay(
                                       builder: (p0) {
                                         return Text(
-                                          "Time for first move: ${p0.duration.smallRepr()}",
-                                          style: context.textTheme.labelLarge,
+                                          "Start: ${p0.duration.smallRepr()}",
+                                          style: context.textTheme.bodyLarge,
                                         );
                                       },
                                       controller: context
@@ -207,7 +197,7 @@ class CompactPlayerCard extends StatelessWidget {
                                       Text(
                                         "Komi: ${playerData!.komi} | ",
                                         style:
-                                            context.theme.textTheme.labelSmall,
+                                            context.theme.textTheme.labelLarge,
                                       ),
                                   ],
                                 )
@@ -216,6 +206,20 @@ class CompactPlayerCard extends StatelessWidget {
                               //   style: context.theme.textTheme.headline6,
                               // ),
                             ]),
+                        Spacer(),
+                        if (playerData?.stoneType != null)
+                          SizedBox(
+                            height: 90,
+                            width: 90,
+                            child: CompactGameTimer(
+                              controller: getTimerController(context, player),
+                              player: player,
+                              isMyTurn: isPlayerTurn(context, player),
+                              timeControl: game.timeControl,
+                              playerTimeSnapshot:
+                                  getPlayerTimeSnapshot(game, player),
+                            ),
+                          )
                       ],
                     ),
             );
@@ -234,5 +238,155 @@ class CompactPlayerCard extends StatelessWidget {
 
   TimerController getTimerController(BuildContext context, StoneType player) {
     return context.read<GameStateBloc>().timerController[player.index];
+  }
+}
+
+class CompactGameTimer extends StatefulWidget {
+  const CompactGameTimer({
+    super.key,
+    required this.controller,
+    required this.player,
+    required this.isMyTurn,
+    required this.timeControl,
+    required this.playerTimeSnapshot,
+    this.customStyle,
+  });
+
+  final StoneType player;
+  final TextStyle Function(BuildContext context)? customStyle;
+  final TimeControl timeControl;
+  final PlayerTimeSnapshot? playerTimeSnapshot;
+  final TimerController controller;
+  final bool isMyTurn;
+
+  @override
+  State<CompactGameTimer> createState() => _CompactGameTimerState();
+}
+
+class _CompactGameTimerState extends State<CompactGameTimer> {
+  @override
+  Widget build(BuildContext context) {
+    return StatefulCard(
+      state: widget.isMyTurn
+          ? StatefulCardState.enabled
+          : StatefulCardState.disabled,
+      builder: (c) => Align(
+        alignment: Alignment.centerRight,
+        child: CompactMyTimeDisplay(
+          customStyle: widget.customStyle,
+          controller: widget.controller,
+          timeControl: widget.timeControl,
+          playerTimeSnapshot: widget.playerTimeSnapshot,
+        ),
+      ),
+    );
+  }
+}
+
+class CompactMyTimeDisplay extends StatelessWidget {
+  final TimeControl timeControl;
+  final PlayerTimeSnapshot? playerTimeSnapshot;
+  final TimerController controller;
+  final TextStyle Function(BuildContext context)? customStyle;
+
+  const CompactMyTimeDisplay({
+    required this.controller,
+    required this.timeControl,
+    required this.playerTimeSnapshot,
+    this.customStyle,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(4),
+      child: TimerDisplay(
+        controller: controller,
+        builder: (controller) {
+          var parts = controller.duration.getDurationReprParts();
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.ideographic,
+                  children: [
+                    if (parts.h > 0) ...[
+                      largeTimeStepText(context, parts.h.timeStepPadded()),
+                      largeTimeStepText(context, ":")
+                    ],
+                    largeTimeStepText(context, parts.m.timeStepPadded()),
+                    if (parts.h == 0) ...[
+                      largeTimeStepText(context, ":"),
+                      largeTimeStepText(context, parts.s.timeStepPadded()),
+                    ],
+                    SizedBox(
+                      width: 4,
+                    ),
+                  if (parts.h > 0 || parts.m > 0)
+                      smallTimeStepText(context, parts.s.timeStepPadded()),
+                    if (parts.h == 0 && parts.m == 0 && parts.s < 10)
+                      smallTimeStepText(context, parts.d.timeStepPadded()),
+                  ],
+                ),
+              ),
+              Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (timeControl.byoYomiTime != null) ...[
+                      extraText(context, " +"),
+                      extraText(
+                        context,
+                        playerTimeSnapshot != null
+                            ? (playerTimeSnapshot!.byoYomisLeft ?? "")
+                                .toString()
+                            : (timeControl.byoYomiTime?.byoYomis ?? "")
+                                .toString(),
+                      ),
+                      extraText(
+                        context,
+                        " x ${(Duration(seconds: timeControl.byoYomiTime!.byoYomiSeconds)).smallRepr()}",
+                      ),
+                    ]
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Text largeTimeStepText(BuildContext context, String text) {
+    return Text(
+      text,
+      style: (context.textTheme.bodyLarge)?.copyWith(
+        fontFamily: GoogleFonts.spaceMono().fontFamily,
+      ),
+    );
+  }
+
+  Text smallTimeStepText(BuildContext context, String text) {
+    return Text(
+      text,
+      style: (context.textTheme.bodySmall)?.copyWith(
+        fontFamily: GoogleFonts.spaceMono().fontFamily,
+      ),
+    );
+  }
+
+  Text extraText(BuildContext context, String text) {
+    return Text(
+      text,
+      style: (context.textTheme.bodySmall)?.copyWith(
+          // fontFamily: GoogleFonts.spaceMono().fontFamily,
+          ),
+    );
   }
 }

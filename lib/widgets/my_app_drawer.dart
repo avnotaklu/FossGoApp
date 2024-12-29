@@ -41,9 +41,7 @@ class MyAppDrawer extends StatelessWidget {
                       style: context.textTheme.headlineLarge,
                     ),
                   ),
-                  SizedBox(
-                    width: 20,
-                  ),
+                  Spacer(),
                   ValueListenableBuilder(
                       valueListenable:
                           context.read<SignalRProvider>().connectionStrength,

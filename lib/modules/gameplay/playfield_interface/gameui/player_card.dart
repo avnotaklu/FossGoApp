@@ -139,7 +139,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
               )),
           if (player?.stoneType != null)
             Expanded(
-              flex: 2,
+              flex: 4,
               child: Consumer<GameStateBloc>(
                 builder: (context, bloc, child) {
                   return GameTimer(

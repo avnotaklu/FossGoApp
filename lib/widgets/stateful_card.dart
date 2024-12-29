@@ -17,14 +17,14 @@ class StatefulCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card.filled(
       color: state == StatefulCardState.enabled
-          ? context.theme.colorScheme.surfaceContainerHighest
+          ? context.theme.colorScheme.secondary
           // ignore: deprecated_member_use
           : context.theme.colorScheme.surfaceVariant,
       child: Theme(
         data: context.theme.copyWith(
           textTheme: buildTextTheme(
             state == StatefulCardState.enabled
-                ? context.theme.colorScheme.onSurface
+                ? context.theme.colorScheme.onSecondary
                 : context.theme.colorScheme.onInverseSurface,
           ),
         ),

@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:go/constants/constants.dart';
+
 extension DurationExtension on Duration {
   String smallRepr() {
     var days = inDays;
@@ -36,8 +38,23 @@ extension DurationExtension on Duration {
     return parts.join(", ");
   }
 
+  ({int h, int m, int s, int d}) getDurationReprParts() {
+    var hours = inHours;
+    var minutes = inMinutes % 60;
+    var seconds = inSeconds % 60;
+    var decis = ((inMilliseconds % 1000) / 100).toInt();
+
+    return (h: hours, m: minutes, s: seconds, d: decis);
+  }
+
   /// Returns the division by precision of seconds
   int dividedBy(Duration other) {
     return (inSeconds / other.inSeconds).round();
+  }
+}
+
+extension DurationTimeStep on int {
+  String timeStepPadded() {
+    return toString().padLeft(2, "0");
   }
 }
