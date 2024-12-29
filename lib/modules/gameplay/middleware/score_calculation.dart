@@ -16,7 +16,7 @@ import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/models/position.dart';
 
 class ScoreCalculationBloc extends ChangeNotifier {
-  final Map<Position, ValueNotifier<Area?>> areaMap = {};
+  Map<Position, ValueNotifier<Area?>> areaMap = {};
   List<int> _score = [];
 
   Map<Position, Stone> virtualPlaygroundMap = {};
@@ -48,6 +48,8 @@ class ScoreCalculationBloc extends ChangeNotifier {
 
     _score = [0, 0];
 
+    virtualPlaygroundMap = gameBoardBloc.stones;
+
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
         areaMap[Position(i, j)] = ValueNotifier(null);
@@ -63,15 +65,22 @@ class ScoreCalculationBloc extends ChangeNotifier {
 
   void calculateScore() {
     final game = gameStateBloc.game;
-    final calc = ScoreCalculator(
-      rows: game.rows,
-      cols: game.columns,
-      komi: game.komi,
-      prisoners: game.prisoners,
-      deadStones: gameStateBloc.game.deadStones,
-      playground: virtualPlaygroundMap,
-    );
 
+    final calc = ScoreCalculator(
+        rows: game.rows,
+        cols: game.columns,
+        komi: game.komi,
+        prisoners: game.prisoners,
+        deadStones: gameStateBloc.game.deadStones,
+        playground: Map.fromEntries(virtualPlaygroundMap.entries
+            .where((e) => !removedPositions.contains(e.key))));
+
+    // areaMap = calc.areaMap;
+    calc.areaMap.forEach((key, value) {
+      areaMap[key]!.value = value;
+    });
+
+    notifyListeners();
     _score = calc.score;
   }
 
@@ -93,6 +102,7 @@ class ScoreCalculationBloc extends ChangeNotifier {
     for (var pos in cluster.data) {
       if (state == DeadStoneState.Dead) {
         removedPositions.add(pos);
+        virtualPlaygroundMap.remove(pos);
       } else {
         removedPositions.remove(pos);
       }

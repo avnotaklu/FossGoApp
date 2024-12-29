@@ -39,20 +39,15 @@ class SignalRProvider extends ChangeNotifier {
     try {
       hubConnection = HubConnectionBuilder()
           .withUrl(
-        serverUrl,
-        options: HttpConnectionOptions(
-          accessTokenFactory: () async => token,
-        ),
-      )
+            serverUrl,
+            options: HttpConnectionOptions(
+              accessTokenFactory: () async => token,
+            ),
+          )
           .withAutomaticReconnect(
-        reconnectPolicy: null,
-        // retryDelays: [
-        //   0,
-        //   2000,
-        //   2000,
-        //   2000,
-        // ],
-      ).build();
+            reconnectPolicy: null,
+          )
+          .build();
       hubConnection!.onclose(({Exception? error}) {
         debugPrint("Connection closed: ${error.toString()}");
       });
