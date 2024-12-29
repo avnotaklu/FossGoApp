@@ -3,9 +3,11 @@ import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/main.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/settings/settings_page.dart';
 import 'package:go/modules/settings/settings_provider.dart';
+import 'package:go/widgets/signal_indicator.dart';
 import 'package:provider/provider.dart';
 
 class MyAppDrawer extends StatelessWidget {
@@ -31,11 +33,24 @@ class MyAppDrawer extends StatelessWidget {
             height: context.height * 0.12,
             child: DrawerHeader(
               decoration: BoxDecoration(),
-              child: Container(
-                child: Text(
-                  getUserName(context),
-                  style: context.textTheme.headlineLarge,
-                ),
+              child: Row(
+                children: [
+                  Container(
+                    child: Text(
+                      getUserName(context),
+                      style: context.textTheme.headlineLarge,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  ValueListenableBuilder(
+                      valueListenable:
+                          context.read<SignalRProvider>().connectionStrength,
+                      builder: (context, strength, child) {
+                        return SignalIndicator(strength: strength);
+                      }),
+                ],
               ),
             ),
           ),

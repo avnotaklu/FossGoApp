@@ -85,6 +85,8 @@ SignalRMessageType? getSignalRMessageTypeFromMap(
       return null;
     case SignalRMessageTypes.acceptedScores:
       return null;
+    case SignalRMessageTypes.pong:
+      return null;
     default:
       throw Exception('Unknown signalR message type: $type');
   }
@@ -118,6 +120,8 @@ SignalRMessageType? getSignalRMessageType(String json, String type) {
       return null;
     case SignalRMessageTypes.acceptedScores:
       return null;
+    case SignalRMessageTypes.pong:
+      return null;
     default:
       throw Exception('Unknown signalR message type: $type');
   }
@@ -137,6 +141,7 @@ class SignalRMessageTypes {
   static const String matchFound = "MatchFound";
   static const String statUpdate = "StatUpdate";
   static const String opponentConnection = "OpponentConnection";
+  static const String pong = "Pong";
 }
 
 abstract class SignalRMessageType {
@@ -176,9 +181,20 @@ class GameTimerUpdateMessage extends SignalRMessageType {
           json.decode(source) as Map<String, dynamic>);
 }
 
-
 extension ConnectionStrengthExt on ConnectionStrength {
   bool get isStrong => ping < 100;
+
+  int get level {
+    if (ping < 300) {
+      return 3;
+    } else if (ping < 400) {
+      return 2;
+    } else if (ping < 500) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 }
 
 class ConnectionStrength extends SignalRMessageType {

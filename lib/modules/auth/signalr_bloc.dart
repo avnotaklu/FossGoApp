@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
@@ -14,12 +15,13 @@ class SignalRProvider extends ChangeNotifier {
   // The location of the SignalR Server.
   final serverUrl = "${Api.baseUrl}/mainHub";
   Either<SignalRError, String> connectionId;
-  // connectionCompleter.future;
-  // final Either<SignalRError, String> connectionCompleter =
-  // Completer();
-  // late final AuthProvider authBloc;
+
   HubConnection? hubConnection;
-  late final Timer _timeoutTimer;
+
+  ValueNotifier<ConnectionStrength> connectionStrength =
+      ValueNotifier(ConnectionStrength(ping: 0));
+
+  Timer? _decayTimer;
   @override
   void dispose() {
     // TODO: implement dispose
@@ -35,19 +37,20 @@ class SignalRProvider extends ChangeNotifier {
           ),
         );
 
+  late final Timer pingSchedule;
+
   Future<Either<AppError, String>> connectSignalR(String token) async {
     try {
       hubConnection = HubConnectionBuilder()
           .withUrl(
-            serverUrl,
-            options: HttpConnectionOptions(
-              accessTokenFactory: () async => token,
-            ),
-          )
-          .withAutomaticReconnect(
-            reconnectPolicy: null,
-          )
-          .build();
+        serverUrl,
+        options: HttpConnectionOptions(
+          accessTokenFactory: () async => token,
+        ),
+      )
+          .withAutomaticReconnect(reconnectPolicy: null, retryDelays: [
+        ...List.generate(20, (index) => 2000),
+      ]).build();
       hubConnection!.onclose(({Exception? error}) {
         debugPrint("Connection closed: ${error.toString()}");
       });
@@ -67,6 +70,10 @@ class SignalRProvider extends ChangeNotifier {
       connectionId = (Either.right(conId));
 
       listenMessages();
+
+      pingSchedule = Timer.periodic(const Duration(seconds: 2), (timer) {
+        ping();
+      });
 
       return right(conId);
     } catch (e) {
@@ -118,6 +125,8 @@ class SignalRProvider extends ChangeNotifier {
 
       _userMessageController.add(message);
     });
+
+    pongListener();
   }
 
   // Hub methods
@@ -147,6 +156,48 @@ class SignalRProvider extends ChangeNotifier {
     });
 
     return right(null);
+  }
+
+  late DateTime lastPingTime;
+
+  void ping() {
+    lastPingTime = DateTime.now();
+    hubConnection!.send(
+      'Ping',
+      args: [connectionStrength.value.ping],
+    ).catchError((e) {
+      var err = "Error in ping: $e";
+      debugPrint(err);
+    });
+  }
+
+  void calculatePing() {
+    final now = DateTime.now();
+
+    final diff = now.difference(lastPingTime).inMilliseconds;
+
+    connectionStrength.value = ConnectionStrength(ping: diff);
+    _setupPingDecay();
+  }
+
+  void _setupPingDecay() {
+    _decayTimer?.cancel();
+    _decayTimer = Timer(const Duration(seconds: 5), _pingDecay);
+  }
+
+  void pongListener() {
+    userMessagesStream.listen((d) {
+      if (d.type == SignalRMessageTypes.pong) {
+        calculatePing();
+      }
+    });
+  }
+
+  void _pingDecay() {
+    connectionStrength.value = ConnectionStrength(
+        ping: min(connectionStrength.value.ping * 2,
+            10000)); // TODO: Decay rate doubling is temporary
+    _setupPingDecay();
   }
 
   // Utils
