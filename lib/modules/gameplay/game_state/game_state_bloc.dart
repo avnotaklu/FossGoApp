@@ -53,8 +53,8 @@ class GameStateBloc extends ChangeNotifier {
   GameOverMethod? get getGameOverMethod => game.gameOverMethod;
 
   List<double> get getSummedPlayerScores => [
-        game.finalTerritoryScores[0].toDouble() + game.prisoners[0],
-        game.finalTerritoryScores[1].toDouble() + game.prisoners[1] + game.komi,
+        game.finalScore[0].toDouble(),
+        game.finalScore[1].toDouble() + game.komi,
       ];
 
   Map<StoneType, bool> acceptedBy = {

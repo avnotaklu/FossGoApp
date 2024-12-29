@@ -90,7 +90,7 @@ class GameFieldNames {
   static const String GameState = "gameState";
   static const String DeadStones = "deadStones";
   static const String Result = "result";
-  static const String FinalTerritoryScores = "finalTerritoryScores";
+  static const String FinalScore = "finalScore";
   static const String Komi = "komi";
   static const String GameOverMethod = "gameOverMethod";
   static const String StoneSelectionType = "stoneSelectionType";
@@ -319,16 +319,16 @@ extension GameExts on Game {
 
   int? scoreForPlayer(StoneType stone) {
     if (!didEnd()) return null;
-    if (finalTerritoryScores.length < 2) return null;
+    if (finalScore.length < 2) return null;
     return stone == StoneType.white
-        ? finalTerritoryScores[1]
-        : finalTerritoryScores[0];
+        ? finalScore[1]
+        : finalScore[0];
   }
 
   int? finalScoreDifferenceForWinner() {
     if (!didEnd()) return null;
-    if (finalTerritoryScores.length < 2) return null;
-    var score= (finalTerritoryScores[0] - finalTerritoryScores[1]).abs();
+    if (finalScore.length < 2) return null;
+    var score= (finalScore[0] - finalScore[1]).abs();
     if(score == 0) return null;
     return score;
   }
@@ -354,7 +354,7 @@ class Game {
   final GameResult? result;
   final double komi;
   final GameOverMethod? gameOverMethod;
-  final List<int> finalTerritoryScores;
+  final List<int> finalScore;
   final DateTime? endTime;
   final StoneSelectionType stoneSelectionType;
   final String? gameCreator;
@@ -379,7 +379,7 @@ class Game {
     required this.deadStones,
     required this.result,
     required this.komi,
-    required this.finalTerritoryScores,
+    required this.finalScore,
     required this.gameOverMethod,
     required this.endTime,
     required this.stoneSelectionType,
@@ -412,7 +412,7 @@ class Game {
       GameFieldNames.DeadStones: deadStones.map((e) => e.toString()).toList(),
       GameFieldNames.Result: result?.index,
       GameFieldNames.Komi: komi,
-      GameFieldNames.FinalTerritoryScores: finalTerritoryScores,
+      GameFieldNames.FinalScore: finalScore,
       GameFieldNames.GameOverMethod: gameOverMethod?.index,
       GameFieldNames.EndTime: endTime?.toIso8601String(),
       GameFieldNames.StoneSelectionType: stoneSelectionType.index,
@@ -468,8 +468,8 @@ class Game {
           ? null
           : GameResult.values[(map[GameFieldNames.Result] as int)],
       komi: map[GameFieldNames.Komi] as double,
-      finalTerritoryScores:
-          List<int>.from(map[GameFieldNames.FinalTerritoryScores] as List),
+      finalScore:
+          List<int>.from(map[GameFieldNames.FinalScore] as List),
       gameOverMethod: map[GameFieldNames.GameOverMethod] == null
           ? null
           : GameOverMethod.values[map[GameFieldNames.GameOverMethod] as int],
@@ -517,7 +517,7 @@ class Game {
     GameState? gameState,
     List<Position>? deadStones,
     double? komi,
-    List<int>? finalTerritoryScores,
+    List<int>? finalScore,
     GameResult? result,
     GameOverMethod? gameOverMethod,
     DateTime? endTime,
@@ -545,7 +545,7 @@ class Game {
       deadStones: deadStones ?? this.deadStones,
       result: result ?? this.result,
       komi: komi ?? this.komi,
-      finalTerritoryScores: finalTerritoryScores ?? this.finalTerritoryScores,
+      finalScore: finalScore ?? this.finalScore,
       gameOverMethod: gameOverMethod ?? this.gameOverMethod,
       endTime: endTime ?? this.endTime,
       stoneSelectionType: stoneSelectionType ?? this.stoneSelectionType,

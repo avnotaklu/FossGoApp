@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:collection/collection.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
@@ -10,11 +11,10 @@ void main() {
   group("Board Utilities", () {
     test("Simple board repr from high level repr", () {
       var boardState = BoardStateUtilities(5, 5);
-      var board = boardState.simpleBoardRepresentation(
-        _4_2_highLevelBoardRepresentation_5x5(),
-      );
+      var board = _4_2_highLevelBoardRepresentation_5x5()
+          .toLowLevelBoardRepresentation(const BoardSizeData(5, 5));
 
-      var dp = DeepCollectionEquality();
+      var dp = const DeepCollectionEquality();
       expect(true, dp.equals(board, _4_2_simpleBoardRepresentation_5x5()));
     });
   });

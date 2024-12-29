@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go/constants/constants.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
@@ -33,6 +34,18 @@ void main() {
       [0, 0, 2, 1, 0],
       [0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0],
+    ];
+  }
+
+  // Position from https://senseis.xmp.net/?Cycles
+  List<List<int>> _3_move_cycle_6x6_DeathBoard() {
+    return [
+      [0, 1, 0, 2, 1, 0],
+      [2, 1, 2, 2, 1, 0],
+      [0, 2, 2, 1, 1, 0],
+      [2, 2, 1, 0, 0, 0],
+      [1, 1, 1, 0, 1, 0],
+      [0, 0, 0, 0, 0, 0],
     ];
   }
 
@@ -80,7 +93,7 @@ void main() {
       var clusters = boardCons.getClusters(basicBoard);
       var stones = boardCons.getStones(clusters);
       var stoneLogic = StoneLogic.fromBoardState(
-        boardCons.constructBoard(5, 5, stones),
+        BoardState.simplePositionalBoard(5, 5, stones),
       );
 
       var movePos = const Position(0, 4);
@@ -102,7 +115,7 @@ void main() {
       var clusters = boardCons.getClusters(board);
       var stones = boardCons.getStones(clusters);
       var stoneLogic =
-          StoneLogic.fromBoardState(boardCons.constructBoard(5, 5, stones));
+          StoneLogic.fromBoardState(BoardState.simplePositionalBoard(5, 5, stones));
 
       var movePos = const Position(0, 4);
       var updateResult = stoneLogic.handleStoneUpdate(movePos, StoneType.white);
@@ -117,7 +130,7 @@ void main() {
       var boardCons = BoardStateUtilities(5, 5);
       var clusters = boardCons.getClusters(board);
       var stones = boardCons.getStones(clusters);
-      var boardState = boardCons.constructBoard(5, 5, stones);
+      var boardState = BoardState.simplePositionalBoard(5, 5, stones);
       var stoneLogic = StoneLogic.fromBoardState(boardState);
 
       var movePos = Position(1, 2);
@@ -141,7 +154,7 @@ void main() {
       var boardCons = BoardStateUtilities(5, 5);
       var clusters = boardCons.getClusters(board);
       var stones = boardCons.getStones(clusters);
-      var boardState = boardCons.constructBoard(5, 5, stones);
+      var boardState = BoardState.simplePositionalBoard(5, 5, stones);
       var stoneLogic = StoneLogic.fromBoardState(boardState);
 
       var movePos = Position(1, 2);
@@ -166,5 +179,56 @@ void main() {
       expect(
           updateResult2.board.playgroundMap.containsKey(killPosition2), isTrue);
     });
+  });
+
+  test('Test Three Move Cycle', () {
+    final pos = _3_move_cycle_6x6_DeathBoard();
+
+    final boardCons = BoardStateUtilities(6, 6);
+    const boardSize = BoardSizeData(6, 6);
+    final clusters = boardCons.getClusters(pos);
+    final stones = boardCons.getStones(clusters);
+    final stoneLogic = StoneLogic.fromBoardState(BoardState.simplePositionalBoard(
+      6,
+      6,
+      stones,
+    ));
+
+    final m1 = Position(0, 0);
+    final m2 = Position(2, 0);
+    final m3 = Position(1, 0);
+
+    final r1 = stoneLogic.handleStoneUpdate(m1, StoneType.white);
+    expect(r1.result, isTrue);
+
+    final r2 = stoneLogic.handleStoneUpdate(m2, StoneType.black);
+    expect(r2.result, isTrue);
+
+    final lastValid = BoardState(
+      rows: 6,
+      cols: 6,
+      koDelete: null,
+      playgroundMap: Map.from(r2.board.playgroundMap),
+      prisoners: [],
+    );
+
+    final r3 = stoneLogic.handleStoneUpdate(
+      m3,
+      StoneType.white,
+    );
+
+    expect(r3.result, isFalse);
+
+    expect(
+      _2DArrayEqual(
+        r3.board.playgroundMap
+            .toHighLevelBoardRepresentation()
+            .toLowLevelBoardRepresentation(boardSize),
+        lastValid.playgroundMap
+            .toHighLevelBoardRepresentation()
+            .toLowLevelBoardRepresentation(boardSize),
+      ),
+      isTrue,
+    );
   });
 }

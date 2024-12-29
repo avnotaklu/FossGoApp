@@ -1,3 +1,4 @@
+import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/cluster.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
@@ -5,8 +6,14 @@ import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 
 class ScoreCalculator {
   Map<Position, Area> areaMap = {};
+
+
   List<int> _territoryScores = [];
-  List<int> get territoryScores => List.unmodifiable(_territoryScores);
+  // List<int> get territoryScores => List.unmodifiable(_territoryScores);
+
+  List<int> _scores = [];
+  List<int> get score => List.unmodifiable(_scores);
+
   Map<Position, Stone> virtualPlaygroundMap = {};
   Set<Cluster> deadClusters = {};
   List<int> prisoners;
@@ -14,6 +21,9 @@ class ScoreCalculator {
   int rows;
   int cols;
   double komi;
+
+  late final int _winner;
+  int get winner => _winner;
 
   ScoreCalculator({
     required this.rows,
@@ -34,11 +44,17 @@ class ScoreCalculator {
     }
 
     _calculateScore();
+    _calculateWinner();
   }
 
-  int getWinner() {
-    var blackScore = _territoryScores[0] + prisoners[0];
-    var whiteScore = _territoryScores[1] + prisoners[1] + komi;
+  int _calculateWinner() {
+    var blackStones = virtualPlaygroundMap.values.where((a) => a.player == StoneType.black.index).length;
+    var blackScore = _territoryScores[0] + blackStones;
+    var whiteStones = virtualPlaygroundMap.values.where((a) => a.player == StoneType.white.index).length;
+    var whiteScore = _territoryScores[1] + whiteStones + komi;
+
+    _scores = [blackScore, (whiteScore - komi).toInt()];
+
     return (blackScore > whiteScore) ? 0 : 1;
   }
 

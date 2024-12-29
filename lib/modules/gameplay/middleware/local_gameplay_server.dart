@@ -54,7 +54,7 @@ class LocalGameplayServer {
   GameResult? _result;
   late double _komi;
   GameOverMethod? _gameOverMethod;
-  late List<int> _finalTerritoryScores;
+  late List<int> _finalScores;
   DateTime? _endTime;
 
   int get turn => _moves.length;
@@ -90,7 +90,7 @@ class LocalGameplayServer {
     _result = null;
     _komi = 6.5;
     _gameOverMethod = null;
-    _finalTerritoryScores = [];
+    _finalScores = [];
     _endTime = null;
   }
 
@@ -110,7 +110,7 @@ class LocalGameplayServer {
       deadStones: deadStones,
       result: _result,
       komi: _komi,
-      finalTerritoryScores: _finalTerritoryScores,
+      finalScore: _finalScores,
       endTime: _endTime,
       gameOverMethod: _gameOverMethod,
       playerTimeSnapshots: _playerTimeSnapshots,
@@ -136,8 +136,8 @@ class LocalGameplayServer {
         var res =
             stoneLogic.handleStoneUpdate(Position(move.x!, move.y!), stone);
         if (res.result) {
-          _playgroundMap = boardUtils
-              .makeHighLevelBoardRepresentationFromBoardState(res.board);
+          _playgroundMap =
+              res.board.playgroundMap.toHighLevelBoardRepresentation();
           _prisoners = res.board.prisoners
               .zip(_prisoners)
               .map((a) => a.$1 + a.$2)
@@ -158,13 +158,13 @@ class LocalGameplayServer {
             y: move.y),
       );
 
-      _setTimes(moveTime);
-
       log("Move played ${_moves.last.toJson()}");
 
       if (hasPassedTwice()) {
         log("Setting score calc");
         _setScoreCalculationStage();
+      } else {
+        _setTimes(moveTime);
       }
 
       return right(getGame());
@@ -178,6 +178,7 @@ class LocalGameplayServer {
     assert(hasPassedTwice(), "Both players haven't passed twice");
 
     _gameState = GameState.scoreCalculation;
+    _timer.cancel();
   }
 
   void _setTimes(DateTime time) {
@@ -192,24 +193,28 @@ class LocalGameplayServer {
 
     var turnPlayerMS = _playerTimeSnapshots[turnPlayer].mainTimeMilliseconds;
     if (turnPlayerMS != 0) {
-      _timer = Timer(Duration(milliseconds: turnPlayerMS), _timeoutTimer);
-      gameUpdateC.add(
-        GameUpdate(
-          game: getGame(),
-          curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
-          playerWithTurn: StoneType.values[turnPlayer],
-        ),
-      );
-    } else {
-      _endGame(GameOverMethod.Timeout, StoneType.values[turnPlayer].other);
       _timer.cancel();
-    }
+      _timer = Timer(Duration(milliseconds: turnPlayerMS), _timeoutTimer);
 
-    log("Reset clock to ${_playerTimeSnapshots[turnPlayer].mainTimeMilliseconds / 1000} seconds");
+      log("Reset clock to ${_playerTimeSnapshots[turnPlayer].mainTimeMilliseconds / 1000} seconds");
+    }
   }
 
   void _timeoutTimer() {
     _setTimes(now);
+
+    if (_playerTimeSnapshots[turnPlayer].mainTimeMilliseconds == 0) {
+      _endGame(GameOverMethod.Timeout, StoneType.values[turnPlayer].other);
+      _timer.cancel();
+    }
+
+    gameUpdateC.add(
+      GameUpdate(
+        game: getGame(),
+        curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
+        playerWithTurn: StoneType.values[turnPlayer],
+      ),
+    );
   }
 
   Either<AppError, Game> resignGame(StoneType playerStone) {
@@ -280,8 +285,8 @@ class LocalGameplayServer {
         playground: stoneLogic.board.playgroundMap,
       );
 
-      scores.addAll(calc.territoryScores);
-      winner = StoneType.values[calc.getWinner()];
+      scores.addAll(calc.score);
+      winner = StoneType.values[calc.winner];
     }
 
     _gameState = GameState.ended;
@@ -289,7 +294,7 @@ class LocalGameplayServer {
       _playerTimeSnapshots[0].copyWith(timeActive: false),
       _playerTimeSnapshots[1].copyWith(timeActive: false),
     ];
-    _finalTerritoryScores = scores;
+    _finalScores = scores;
     _result = winner?.resultForIWon;
     _gameOverMethod = method;
     _endTime = now;

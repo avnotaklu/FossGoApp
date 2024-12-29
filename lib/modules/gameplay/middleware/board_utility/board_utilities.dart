@@ -1,10 +1,35 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:go/constants/constants.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/cluster.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 
+typedef LowLevelBoardRepresentation = List<List<int>>;
 typedef HighLevelBoardRepresentation = Map<Position, StoneType>;
+typedef DetailedBoardRepresentation = Map<Position, Stone>;
+
+extension DetailedBoardRepresentationExt on DetailedBoardRepresentation {
+  HighLevelBoardRepresentation toHighLevelBoardRepresentation() {
+    return map((e, v) => MapEntry(e, StoneType.values[v.player]));
+  }
+}
+
+extension HighLevelBoardRepresentationExt on HighLevelBoardRepresentation {
+  LowLevelBoardRepresentation toLowLevelBoardRepresentation(
+      BoardSizeData size) {
+    List<List<int>> board =
+        List.generate(size.cols, (i) => List.generate(size.rows, (i) => 0));
+    // List<List<int>> board = List.filled(cols, List.filled(rows, 0));
+
+    for (var item in entries) {
+      var position = item.key;
+      board[position.x][position.y] = item.value.index + 1;
+    }
+
+    return board;
+  }
+}
 
 class BoardState {
   final int rows;
@@ -12,7 +37,7 @@ class BoardState {
   // koDelete assumes that this position was deleted in the last move by the opposing player
   final Position? koDelete;
   final List<int> prisoners;
-  final Map<Position, Stone> playgroundMap;
+  final DetailedBoardRepresentation playgroundMap;
 
   BoardState(
       {required this.rows,
@@ -36,6 +61,16 @@ class BoardState {
       playgroundMap: playgroundMap ?? this.playgroundMap,
     );
   }
+
+  BoardState.simplePositionalBoard(int rows, int cols, List<Stone> stones,
+      [Position? koDelete])
+      : this(
+            rows: rows,
+            cols: cols,
+            koDelete: koDelete,
+            playgroundMap:
+                Map.fromEntries(stones.map((e) => MapEntry(e.position, e))),
+            prisoners: [0, 0]);
 }
 
 class BoardStateUtilities {
@@ -47,10 +82,11 @@ class BoardStateUtilities {
   BoardState boardStateFromGame(Game game) {
     var map = game.playgroundMap;
 
-    var simpleB = simpleBoardRepresentation(map);
+    var simpleB = map.toLowLevelBoardRepresentation(BoardSizeData(rows, cols));
     var clusters = getClusters(simpleB);
     var stones = getStones(clusters);
-    var board = constructBoard(rows, cols, stones, game.koPositionInLastMove);
+    var board = BoardState.simplePositionalBoard(
+        rows, cols, stones, game.koPositionInLastMove);
 
     return board;
   }
@@ -59,20 +95,8 @@ class BoardStateUtilities {
       List<List<int>> simpleB, Position? koPosition) {
     var clusters = getClusters(simpleB);
     var stones = getStones(clusters);
-    var board = constructBoard(rows, cols, stones, koPosition);
-
-    return board;
-  }
-
-  List<List<int>> simpleBoardRepresentation(HighLevelBoardRepresentation map) {
-    List<List<int>> board =
-        List.generate(cols, (i) => List.generate(rows, (i) => 0));
-    // List<List<int>> board = List.filled(cols, List.filled(rows, 0));
-
-    for (var item in map.entries) {
-      var position = item.key;
-      board[position.x][position.y] = item.value.index + 1;
-    }
+    var board =
+        BoardState.simplePositionalBoard(rows, cols, stones, koPosition);
 
     return board;
   }
@@ -145,23 +169,6 @@ class BoardStateUtilities {
       }
     }
     return stones;
-  }
-
-  BoardState constructBoard(int rows, int cols, List<Stone> stones,
-      [Position? koDelete]) {
-    return BoardState(
-        rows: rows,
-        cols: cols,
-        koDelete: koDelete,
-        playgroundMap:
-            Map.fromEntries(stones.map((e) => MapEntry(e.position, e))),
-        prisoners: [0, 0]);
-  }
-
-  HighLevelBoardRepresentation makeHighLevelBoardRepresentationFromBoardState(
-      BoardState boardState) {
-    return boardState.playgroundMap
-        .map((e, v) => MapEntry(e, StoneType.values[v.player]));
   }
 
   bool checkIfInsideBounds(Position pos) {

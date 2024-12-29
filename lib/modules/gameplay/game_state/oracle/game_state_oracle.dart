@@ -69,8 +69,7 @@ extension GameUpdateExt on GameUpdate {
       deadStones: this.game?.deadStones ?? game.deadStones,
       result: this.game?.result ?? game.result,
       komi: this.game?.komi ?? game.komi,
-      finalTerritoryScores:
-          this.game?.finalTerritoryScores ?? game.finalTerritoryScores,
+      finalScore: this.game?.finalScore ?? game.finalScore,
       gameOverMethod: this.game?.gameOverMethod ?? game.gameOverMethod,
       endTime: this.game?.endTime ?? game.endTime,
       stoneSelectionType:

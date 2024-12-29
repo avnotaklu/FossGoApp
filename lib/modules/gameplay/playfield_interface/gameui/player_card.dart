@@ -112,11 +112,6 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                               style: context.textTheme.labelLarge,
                             ),
 
-                        if (player?.stoneType != null)
-                          Text(
-                            " + ${getPrisonersCount(game, player!.stoneType!)} Prisoners",
-                            style: context.textTheme.labelLarge,
-                          ),
                         if (player?.stoneType != null &&
                             player?.stoneType == StoneType.white)
                           Text(
@@ -212,8 +207,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
 
   int? getFinalScore(Game game, StoneType stone) {
     if (game.gameOverMethod == GameOverMethod.Score) {
-      return game.finalTerritoryScores[stone.index] +
-          game.prisoners[stone.index];
+      return game.finalScore[stone.index] + game.prisoners[stone.index];
     }
     return null;
   }
@@ -221,7 +215,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
   Widget gameOverScore(Game game, StoneType stone) {
     return game.gameOverMethod == GameOverMethod.Score
         ? Text(
-            " = ${game.finalTerritoryScores[stone.index] + game.prisoners[stone.index] + (stone.index * game.komi)}",
+            " = ${game.finalScore[stone.index] + game.prisoners[stone.index] + (stone.index * game.komi)}",
             style: context.textTheme.labelLarge,
           )
         : const SizedBox.shrink();

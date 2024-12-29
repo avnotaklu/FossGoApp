@@ -8,12 +8,15 @@ import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dar
 
 class StoneLogic {
   BoardState board;
+  final List<HighLevelBoardRepresentation> _prevBoardStates = [];
 
   StoneLogic(Game game)
-      : board = BoardStateUtilities(game.rows, game.columns)
-            .boardStateFromGame(game);
+      : this.fromBoardState(BoardStateUtilities(game.rows, game.columns)
+            .boardStateFromGame(game));
 
-  StoneLogic.fromBoardState(this.board);
+  StoneLogic.fromBoardState(this.board) {
+    _prevBoardStates.add(board.playgroundMap.toHighLevelBoardRepresentation());
+  }
 
   void _setBoardState(BoardState board) {
     this.board = board;
@@ -193,13 +196,20 @@ class StoneLogic {
 
   ({bool result, BoardState board}) handleStoneUpdate(
       Position? position, StoneType stone) {
-    
     // REVIEW: This is stone update, and it handles passes as well
     if (position == null) {
       return (result: true, board: board);
     }
 
     Position? thisCurrentCell = position;
+
+    final lastValid = BoardState(
+      rows: 6,
+      cols: 6,
+      koDelete: null,
+      playgroundMap: Map.from(board.playgroundMap),
+      prisoners: [],
+    );
 
     if (checkInsertable(position, stone)) {
       final currentCluster = Cluster({position}, {}, 0, stone.index);
@@ -222,10 +232,44 @@ class StoneLogic {
       _updateFreedomsFromNewlyInsertedStone(position);
       traversed.clear();
 
+      if (_positionIsSuperKo(board)) {
+        board = lastValid;
+        return (result: false, board: board);
+      }
+
+      _prevBoardStates
+          .add(board.playgroundMap.toHighLevelBoardRepresentation());
       return (result: true, board: board);
     }
 
     return (result: false, board: board);
+  }
+
+  bool _positionIsSuperKo(
+    BoardState newBoardState,
+  ) {
+    final newBoardStateMap = newBoardState.playgroundMap;
+
+    for (final prevBoardState in _prevBoardStates) {
+      if (prevBoardState.length != newBoardStateMap.length) {
+        continue;
+      }
+
+      bool isSame = true;
+      for (final pos in prevBoardState.keys) {
+        if (!newBoardStateMap.containsKey(pos) ||
+            newBoardStateMap[pos]!.player != prevBoardState[pos]?.index) {
+          isSame = false;
+          break;
+        }
+      }
+
+      if (isSame) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   static void doActionOnNeighbors(Position thisCell,
@@ -241,17 +285,17 @@ class StoneLogic {
   }
 }
 
-class Area {
-  Set<Position?> spaces = {};
-  // int value;
-  int get value => spaces.length;
-  int? owner;
-  bool isDame;
-  Area.from(this.isDame, this.owner);
-  Area()
-      : isDame = false,
-        owner = null;
-}
+// class Area {
+//   Set<Position?> spaces = {};
+//   // int value;
+//   int get value => spaces.length;
+//   int? owner;
+//   bool isDame;
+//   Area.from(this.isDame, this.owner);
+//   Area()
+//       : isDame = false,
+//         owner = null;
+// }
 
 // Failed approach in this i started from 0 0 and went horizontaly till end then next row and so on
 /* calculateFinalScore() {

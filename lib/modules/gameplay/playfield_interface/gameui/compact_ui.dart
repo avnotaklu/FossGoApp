@@ -180,7 +180,8 @@ class CompactPlayerCard extends StatelessWidget {
                                 height: 5,
                               ),
                               if (game.bothPlayersIn() &&
-                                  game.gameState == GameState.waitingForStart && player == StoneType.black)
+                                  game.gameState == GameState.waitingForStart &&
+                                  player == StoneType.black)
                                 Row(
                                   children: [
                                     Container(
@@ -205,12 +206,6 @@ class CompactPlayerCard extends StatelessWidget {
                                     if (playerData!.komi != null)
                                       Text(
                                         "Komi: ${playerData!.komi} | ",
-                                        style:
-                                            context.theme.textTheme.labelSmall,
-                                      ),
-                                    if (playerData!.prisoners != null)
-                                      Text(
-                                        "Caps: ${playerData!.prisoners}",
                                         style:
                                             context.theme.textTheme.labelSmall,
                                       ),

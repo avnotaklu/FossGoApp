@@ -111,7 +111,7 @@ class AnalysisBloc extends ChangeNotifier {
     for (var (idx, move) in game.moves.indexed) {
       addReal(move.toPosition());
     }
-    if(realMoves.isNotEmpty) {
+    if (realMoves.isNotEmpty) {
       setCurrentMove(realMoves.last);
     }
   }
@@ -197,8 +197,12 @@ class AnalysisBloc extends ChangeNotifier {
     var curLine = currentLine;
 
     stoneLogic = StoneLogic.fromBoardState(
-        BoardStateUtilities(game.rows, game.columns)
-            .constructBoard(game.rows, game.columns, []));
+      BoardState.simplePositionalBoard(
+        game.rows,
+        game.columns,
+        [],
+      ),
+    );
 
     for (var pos in curLine) {
       final res = stoneLogic.handleStoneUpdate(
