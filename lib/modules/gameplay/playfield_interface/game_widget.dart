@@ -76,15 +76,15 @@ class _GameWidgetState extends State<GameWidget> {
   // Board
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
-      builder: (context, settingsProvider, child) => ChangeNotifierProvider(
-          create: (context) => GameStateBloc(
-                widget.game,
-                widget.gameOracle,
-                systemUtils,
-              ),
-          builder: (context, child) {
-            return Scaffold(
+    return ChangeNotifierProvider(
+        create: (context) => GameStateBloc(
+              widget.game,
+              widget.gameOracle,
+              systemUtils,
+            ),
+        builder: (context, child) {
+          return Consumer<SettingsProvider>(
+            builder: (context, settingsProvider, child) => Scaffold(
               key: key,
               drawer: const MyAppDrawer(
                 showCompactUiSwitch: true,
@@ -166,9 +166,9 @@ class _GameWidgetState extends State<GameWidget> {
                   );
                 },
               ),
-            );
-          }),
-    );
+            ),
+          );
+        });
   }
 }
 

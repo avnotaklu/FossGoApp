@@ -49,7 +49,7 @@ class SignalRProvider extends ChangeNotifier {
         ),
       )
           .withAutomaticReconnect(reconnectPolicy: null, retryDelays: [
-        ...List.generate(20, (index) => 2000),
+        ...List.generate(10, (index) => 6000),
       ]).build();
       hubConnection!.onclose(({Exception? error}) {
         debugPrint("Connection closed: ${error.toString()}");
@@ -84,10 +84,10 @@ class SignalRProvider extends ChangeNotifier {
   final StreamController<bool> _reconnectionC = StreamController.broadcast();
   Stream<bool> get reconnectionStream => _reconnectionC.stream;
 
-  Stream<SignalRMessage> get gameMessageStream => _gameMessageController.stream;
+  // Stream<SignalRMessage> get gameMessageStream => _gameMessageController.stream;
 
-  final StreamController<SignalRMessage> _gameMessageController =
-      StreamController<SignalRMessage>.broadcast();
+  // final StreamController<SignalRMessage> _gameMessageController =
+  //     StreamController<SignalRMessage>.broadcast();
 
   Stream<SignalRMessage> get userMessagesStream =>
       _userMessageController.stream;
@@ -96,21 +96,6 @@ class SignalRProvider extends ChangeNotifier {
       StreamController<SignalRMessage>.broadcast();
 
   void listenMessages() {
-    hubConnection!.on('gameUpdate', (SignalRMessageListRaw? messagesRaw) {
-      assert(messagesRaw != null, "Message can't be null");
-
-      if (messagesRaw!.length != 1) {
-        throw "messages count ${messagesRaw.length}, WHAT TO DO?";
-      }
-
-      var messageList = messagesRaw.signalRMessageList;
-      var message = messageList.first;
-
-      debugPrint("Got game update: ${message.toJson()}");
-
-      _gameMessageController.add(message);
-    });
-
     hubConnection!.on('userUpdate', (SignalRMessageListRaw? messagesRaw) {
       assert(messagesRaw != null, "Message can't be null");
 

@@ -80,7 +80,6 @@ class ScoreCalculationBloc extends ChangeNotifier {
       areaMap[key]!.value = value;
     });
 
-    notifyListeners();
     _score = calc.score;
   }
 

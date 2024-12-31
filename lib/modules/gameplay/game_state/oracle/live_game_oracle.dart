@@ -1,4 +1,3 @@
-
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 
@@ -53,12 +52,35 @@ class LiveGameOracle extends GameStateOracle {
 
   DateTime? playersJoinTime;
 
+  Stream<SignalRMessage> get gameMessageStream => _gameMessageController.stream;
+
+  final StreamController<SignalRMessage> _gameMessageController =
+      StreamController<SignalRMessage>.broadcast();
+
+  void setupGameMessageStream(String gameId) {
+    signalRbloc.hubConnection!.on("$gameId::GameId",
+        (SignalRMessageListRaw? messagesRaw) {
+      assert(messagesRaw != null, "Message can't be null");
+
+      if (messagesRaw!.length != 1) {
+        throw "messages count ${messagesRaw.length}, WHAT TO DO?";
+      }
+
+      var messageList = messagesRaw.signalRMessageList;
+      var message = messageList.first;
+
+      debugPrint("Got game update: ${message.toJson()}");
+
+      _gameMessageController.add(message);
+    });
+  }
+
   @override
   Stream<ConnectionStrength>? get opponentConnection =>
       listenFromOpponentConnection;
 
-  void setupStreams() {
-    var gameMessageStream = signalRbloc.gameMessageStream;
+  void setupStreams(String gameId) {
+    setupGameMessageStream(gameId);
     var userMessageStream = signalRbloc.userMessagesStream;
 
     listenFromGameJoin = userMessageStream.asyncExpand((message) async* {
@@ -128,13 +150,14 @@ class LiveGameOracle extends GameStateOracle {
     required this.ratings,
     required this.systemUtilities,
     GameEntranceData? joiningData,
+    required String gameId,
   }) {
     if (joiningData != null) {
       playersJoinTime = joiningData.joinTime;
       otherPlayerInfo = joiningData.otherPlayerData;
     }
 
-    setupStreams();
+    setupStreams(gameId);
 
     subscriptions = [
       listenForGameJoin(),

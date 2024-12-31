@@ -81,7 +81,7 @@ extension GameUpdateExt on GameUpdate {
           this.game?.playersRatingsAfter ?? game.playersRatingsAfter,
       playersRatingsDiff:
           this.game?.playersRatingsDiff ?? game.playersRatingsDiff,
-      gameType: GameType.anonymous,
+      gameType: this.game?.gameType ?? game.gameType,
       creationTime: this.game?.creationTime ?? game.creationTime,
       usernames: this.game?.usernames ?? game.usernames,
     );

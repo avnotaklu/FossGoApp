@@ -99,7 +99,7 @@ class MyTimeDisplay extends StatelessWidget {
                   SizedBox(
                     width: 4,
                   ),
-                  if (parts.h > 0 || parts.m > 0)
+                  if (parts.h > 0)
                     smallTimeStepText(context, parts.s.timeStepPadded()),
                   if (parts.h == 0 && parts.m == 0 && parts.s < 10)
                     smallTimeStepText(context, parts.d.timeStepPadded()),
