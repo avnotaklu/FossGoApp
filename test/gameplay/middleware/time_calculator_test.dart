@@ -164,6 +164,65 @@ void main() {
       expect(result[0].byoYomisLeft, 0);
     });
 
+    test('TestByoYomiTurnChangeHalfway', () {
+      final timeCalculator = TimeCalculator();
+
+      setup();
+
+      List<PlayerTimeSnapshot> recalc() {
+        final result = timeCalculator.recalculateTurnPlayerTimeSnapshots(
+          curTurn(),
+          playerTimeSnapshots,
+          timeControl,
+          curTime,
+        );
+        playerTimeSnapshots = result;
+        return result;
+      }
+
+      // Simulate moves
+      curTime = curTime.add(const Duration(seconds: 8));
+      turn++;
+      var result = recalc();
+
+      expect(result[1].mainTimeMilliseconds, 10 * 1000);
+      expect(result[0].mainTimeMilliseconds, 2 * 1000);
+
+      curTime = curTime.add(const Duration(seconds: 2));
+      turn++;
+      result = recalc();
+
+      expect(result[1].mainTimeMilliseconds, 8 * 1000);
+      expect(result[0].mainTimeMilliseconds, 2 * 1000);
+
+      curTime = curTime.add(const Duration(seconds: 2));
+      result = recalc();
+
+      expect(result[1].mainTimeMilliseconds, 8 * 1000);
+      expect(result[0].mainTimeMilliseconds, 3 * 1000);
+      expect(result[0].byoYomiActive, isTrue);
+      expect(result[0].byoYomisLeft, 3);
+
+      curTime = curTime.add(const Duration(seconds: 3));
+      result = recalc();
+
+      expect(result[1].mainTimeMilliseconds, 8 * 1000);
+      expect(result[0].mainTimeMilliseconds, 3 * 1000);
+      expect(result[0].byoYomiActive, isTrue);
+      expect(result[0].byoYomisLeft, 2);
+
+      curTime = curTime.add(const Duration(seconds: 2));
+      turn += 1;
+      result = recalc();
+
+      expect(result[1].mainTimeMilliseconds, 8 * 1000);
+      expect(result[1].timeActive, isTrue);
+      expect(result[0].mainTimeMilliseconds, 3 * 1000);
+      expect(result[0].byoYomiActive, isTrue);
+      expect(result[0].timeActive, isFalse);
+      expect(result[0].byoYomisLeft, 2);
+    });
+
     test('TestIncrement', () {
       final timeCalculator = TimeCalculator();
 

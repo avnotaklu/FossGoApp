@@ -24,7 +24,7 @@ class TimeCalculator {
         : null;
 
     int activePlayerIdx = newTimes.indexWhere((snap) => snap.timeActive);
-    if(activePlayerIdx == -1) {
+    if (activePlayerIdx == -1) {
       debugPrint("No active player");
       return newTimes;
     }
@@ -48,7 +48,8 @@ class TimeCalculator {
           ? activePlayerTimeLeft + applicableIncrement
           : applicableByoYomiTime,
       byoYomisLeft: max(newByoYomi, 0),
-      byoYomiActive: activePlayerTimeLeft <= 0,
+      byoYomiActive:
+          newTimes[activePlayerIdx].byoYomiActive || activePlayerTimeLeft <= 0,
       timeActive: newTimes[activePlayerIdx].timeActive,
     );
 
@@ -62,9 +63,11 @@ class TimeCalculator {
 
     newTimes[1 - curTurn] = PlayerTimeSnapshot(
       snapshotTimestamp: curTime,
-      mainTimeMilliseconds: nonTurnPlayerSnap().mainTimeMilliseconds,
+      mainTimeMilliseconds: nonTurnPlayerSnap().byoYomiActive
+          ? byoYomiMS!
+          : nonTurnPlayerSnap().mainTimeMilliseconds,
       byoYomisLeft: nonTurnPlayerSnap().byoYomisLeft,
-      byoYomiActive: false,
+      byoYomiActive: nonTurnPlayerSnap().byoYomiActive,
       timeActive: false,
     );
 
