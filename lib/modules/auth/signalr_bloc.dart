@@ -37,7 +37,7 @@ class SignalRProvider extends ChangeNotifier {
           ),
         );
 
-  late final Timer pingSchedule;
+  Timer? pingSchedule;
 
   Future<Either<AppError, String>> connectSignalR(String token) async {
     try {

@@ -123,7 +123,8 @@ class _GameWidgetState extends State<GameWidget> {
                         create: (context) => StoneLogic(game),
                       ),
                       ChangeNotifierProvider(
-                        create: (context) => AnalysisBloc(gameStateBloc),
+                        create: (context) =>
+                            AnalysisBloc(gameStateBloc, const SystemUtilities()),
                       ),
                     ],
                     builder: (context, child) {

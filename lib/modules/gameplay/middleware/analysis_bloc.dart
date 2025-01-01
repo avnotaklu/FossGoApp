@@ -2,6 +2,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 
@@ -89,9 +90,11 @@ class RootMove implements PrimaryChildWithAlternatives {
 
 class AnalysisBloc extends ChangeNotifier {
   List<RealMoveBranch> realMoves = [];
+
   RootMove start = RootMove(child: null, alternativesChildren: []);
 
   final GameStateBloc gameStateBloc;
+  final SystemUtilities systemUtilities;
 
   int highestLineDepth = 0;
   int highestMoveLevel = 0;
@@ -102,7 +105,7 @@ class AnalysisBloc extends ChangeNotifier {
 
   Game get game => gameStateBloc.game;
 
-  AnalysisBloc(this.gameStateBloc)
+  AnalysisBloc(this.gameStateBloc, this.systemUtilities)
       : stoneLogic = StoneLogic(gameStateBloc.game) {
     gameStateBloc.gameMoveStream.listen((event) {
       addReal(event.toPosition());
@@ -123,7 +126,7 @@ class AnalysisBloc extends ChangeNotifier {
     return res.result;
   }
 
-  void addAlternative(Position? position) {
+  StoneType? addAlternative(Position? position) {
     final move = ((currentMove?.move ?? -1) + 1); // null makes 0;
 
     moveLevel[move] = (moveLevel[move] ?? 0) + 1;
@@ -131,7 +134,7 @@ class AnalysisBloc extends ChangeNotifier {
     highestLineDepth = max(highestLineDepth, move);
 
     if (!updateBoard(position, move)) {
-      return;
+      return null;
     }
 
     final newMove = AlternativeMoveBranch(
@@ -145,7 +148,14 @@ class AnalysisBloc extends ChangeNotifier {
       currentMove!.alternativeChildren.add(newMove);
     }
     currentMove = newMove;
+
     notifyListeners();
+    if (position != null) {
+      systemUtilities.playSound(SoundAsset.placeStone);
+      return stoneLogic.stoneAt(position);
+    } else {
+      return null;
+    }
   }
 
   void addReal(Position? position) {

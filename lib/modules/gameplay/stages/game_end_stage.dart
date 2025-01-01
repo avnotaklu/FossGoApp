@@ -1,5 +1,6 @@
 import 'package:go/constants/constants.dart' as constants;
 import 'package:flutter/material.dart';
+import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/score_calculator.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
@@ -67,7 +68,7 @@ class GameEndStage extends Stage {
   }
 
   @override
-  onClickCell(Position? position, BuildContext context) {
+  void onClickCell(Position? position, BuildContext context) {
     // After game ended do nothing on cell click
   }
 

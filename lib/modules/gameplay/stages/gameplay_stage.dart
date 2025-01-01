@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
@@ -9,7 +10,6 @@ import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
 
 class GameplayStage extends Stage {
-
   final GameStateBloc gameStatBloc;
   GameplayStage(this.gameStatBloc);
 
@@ -34,7 +34,7 @@ class GameplayStage extends Stage {
   }
 
   @override
-  onClickCell(Position? position, BuildContext context) {
+  void onClickCell(Position? position, BuildContext context) {
     StoneLogic stoneLogic = context.read();
     context.read<GameStateBloc>().makeMove(position, stoneLogic);
   }

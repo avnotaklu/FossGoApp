@@ -91,6 +91,7 @@ class GameStateBloc extends ChangeNotifier {
 
   final GameStateOracle gameOracle;
   final SystemUtilities systemUtilities;
+
   late final TimerController headsUpTimeController;
 
   late final StreamSubscription<GameUpdate> gameUpdateListener;
@@ -144,6 +145,7 @@ class GameStateBloc extends ChangeNotifier {
     );
 
     return (await gameOracle.playMove(game, move)).map((g) {
+      systemUtilities.playSound(SoundAsset.placeStone);
       return updateStateFromGame(g);
     });
   }

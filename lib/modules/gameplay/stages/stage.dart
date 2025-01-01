@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
 import 'package:go/modules/gameplay/stages/analysis_stage.dart';
 import 'package:go/modules/gameplay/stages/before_start_stage.dart';
@@ -30,7 +31,7 @@ abstract class Stage extends ChangeNotifier {
     notifyListeners();
   }
 
-  onClickCell(Position? position, BuildContext context);
+  void onClickCell(Position? position, BuildContext context);
 
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context);
 

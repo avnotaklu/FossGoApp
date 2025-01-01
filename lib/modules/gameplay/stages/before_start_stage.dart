@@ -20,7 +20,7 @@ class BeforeStartStage extends Stage {
   }
 
   @override
-  onClickCell(Position? position, BuildContext context) {
+  void onClickCell(Position? position, BuildContext context) {
     final bloc = context.read<GameStateBloc>();
 
     if (bloc.game.bothPlayersIn()) {
