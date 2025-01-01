@@ -117,8 +117,8 @@ class MoveTree extends StatelessWidget {
                   allInteractionRects: allInteractionRects,
 
                   // colors
-                  surfaceHighest:
-                      context.theme.colorScheme.surfaceContainerHighest,
+                  primary:
+                      context.theme.colorScheme.primary,
                   // ignore: deprecated_member_use
                   surface: context.theme.colorScheme.surfaceVariant,
                   onSurface: context.theme.colorScheme.onSurface,
@@ -163,7 +163,7 @@ class MoveCanvas extends CustomPainter {
   final MoveBranch? currentMove;
   final List<MoveBranch> currentLine;
 
-  final Color surfaceHighest;
+  final Color primary;
   final Color surface;
   final Color onSurface;
 
@@ -178,7 +178,7 @@ class MoveCanvas extends CustomPainter {
     required this.realMoves,
     required this.currentMove,
     required this.currentLine,
-    required this.surfaceHighest,
+    required this.primary,
     required this.surface,
     required this.onSurface,
     required this.interactionRectForMoves,
@@ -293,7 +293,7 @@ class MoveCanvas extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final mainLinePaint = Paint()
-      ..color = surfaceHighest.withOpacity(0.5)
+      ..color = primary.withOpacity(0.5)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
@@ -347,7 +347,7 @@ class MoveCanvas extends CustomPainter {
           Paint()..color = onSurface);
     } else if (currentLine.contains(branch)) {
       canvas.drawCircle(center, TreeDimens.selected_circle_dia / 2 + 2,
-          Paint()..color = surfaceHighest.withOpacity(0.5));
+          Paint()..color = primary.withOpacity(0.5));
     }
 
     final interactionRect =

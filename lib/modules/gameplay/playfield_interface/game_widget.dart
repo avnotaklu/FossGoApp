@@ -77,11 +77,8 @@ class _GameWidgetState extends State<GameWidget> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (context) => GameStateBloc(
-              widget.game,
-              widget.gameOracle,
-              systemUtils,
-            ),
+        create: (context) => GameStateBloc(widget.game, widget.gameOracle,
+            systemUtils, context.read<SettingsProvider>()),
         builder: (context, child) {
           return Consumer<SettingsProvider>(
             builder: (context, settingsProvider, child) => Scaffold(
@@ -123,8 +120,11 @@ class _GameWidgetState extends State<GameWidget> {
                         create: (context) => StoneLogic(game),
                       ),
                       ChangeNotifierProvider(
-                        create: (context) =>
-                            AnalysisBloc(gameStateBloc, const SystemUtilities()),
+                        create: (context) => AnalysisBloc(
+                          gameStateBloc,
+                          const SystemUtilities(),
+                          context.read<SettingsProvider>(),
+                        ),
                       ),
                     ],
                     builder: (context, child) {

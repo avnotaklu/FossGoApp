@@ -7,7 +7,6 @@ import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 class ScoreCalculator {
   Map<Position, Area> areaMap = {};
 
-
   List<int> _territoryScores = [];
   // List<int> get territoryScores => List.unmodifiable(_territoryScores);
 
@@ -47,15 +46,19 @@ class ScoreCalculator {
     _calculateWinner();
   }
 
-  int _calculateWinner() {
-    var blackStones = virtualPlaygroundMap.values.where((a) => a.player == StoneType.black.index).length;
+  void _calculateWinner() {
+    var blackStones = virtualPlaygroundMap.values
+        .where((a) => a.player == StoneType.black.index)
+        .length;
     var blackScore = _territoryScores[0] + blackStones;
-    var whiteStones = virtualPlaygroundMap.values.where((a) => a.player == StoneType.white.index).length;
+    var whiteStones = virtualPlaygroundMap.values
+        .where((a) => a.player == StoneType.white.index)
+        .length;
     var whiteScore = _territoryScores[1] + whiteStones + komi;
 
     _scores = [blackScore, (whiteScore - komi).toInt()];
 
-    return (blackScore > whiteScore) ? 0 : 1;
+    _winner = (blackScore > whiteScore) ? 0 : 1;
   }
 
   void _calculateScore() {

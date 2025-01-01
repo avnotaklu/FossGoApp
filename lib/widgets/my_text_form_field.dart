@@ -25,6 +25,7 @@ class MyTextFormField extends StatelessWidget {
       enabled: enabled,
       onTap: onTap,
       validator: validator,
+      
       textInputAction: TextInputAction.done,
       cursorColor: context.theme.colorScheme.tertiary,
       decoration: InputDecoration(
@@ -32,7 +33,7 @@ class MyTextFormField extends StatelessWidget {
         hintStyle: context.textTheme.titleMedium,
         border: InputBorder.none,
         filled: true,
-        fillColor: context.theme.colorScheme.primary,
+        fillColor: context.theme.colorScheme.secondary,
       ),
     );
   }

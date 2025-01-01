@@ -8,6 +8,7 @@ class LocalDatasource {
   final String _tokenDataKey = 'token';
   final String _themeSettingKey = 'themeSetting';
   final String _compactGameUIKey = 'compactGameUI';
+  final String _soundKey = 'soundEnabled';
 
   Future<void> storeToken(String token) async {
     await sharedPrefs.setString(_tokenDataKey, token);
@@ -24,6 +25,11 @@ class LocalDatasource {
   Future<void> storeCompactGameUISetting(
       CompactGameUISetting compactGameUISetting) async {
     await sharedPrefs.setInt(_compactGameUIKey, compactGameUISetting.index);
+  
+  }
+
+  Future<void> storeSoundEnabled(bool value) async {
+    await sharedPrefs.setBool(_soundKey, value);
   }
 
   Future<String?> getToken() async {
@@ -44,10 +50,15 @@ class LocalDatasource {
     return await sharedPrefs.getInt(_compactGameUIKey);
   }
 
+  Future<bool?> getSoundEnabled() async {
+    return await sharedPrefs.getBool(_soundKey);
+  }
+
   Future<void> clear() async {
     await sharedPrefs.remove(_userDataKey);
     await sharedPrefs.remove(_tokenDataKey);
     await sharedPrefs.remove(_themeSettingKey);
     await sharedPrefs.remove(_compactGameUIKey);
+    await sharedPrefs.remove(_soundKey);
   }
 }

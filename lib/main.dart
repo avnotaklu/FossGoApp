@@ -62,6 +62,7 @@ class MyApp extends StatelessWidget {
                 var res = snapshot.data!;
                 return Consumer<SettingsProvider>(
                   builder: (context, settingsProvider, child) => MaterialApp(
+                    
                     darkTheme: Constants.darkTheme,
                     builder: (context, child) =>
                         responsiveWidgetSetup(context, child),

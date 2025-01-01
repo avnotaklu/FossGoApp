@@ -11,6 +11,7 @@ import 'package:go/models/game.dart';
 import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/modules/gameplay/game_state/oracle/game_state_oracle.dart';
+import 'package:go/modules/settings/settings_provider.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/services/move_position.dart';
@@ -91,6 +92,7 @@ class GameStateBloc extends ChangeNotifier {
 
   final GameStateOracle gameOracle;
   final SystemUtilities systemUtilities;
+  final SettingsProvider settingsProvider;
 
   late final TimerController headsUpTimeController;
 
@@ -105,6 +107,7 @@ class GameStateBloc extends ChangeNotifier {
     this.game,
     this.gameOracle,
     this.systemUtilities,
+    this.settingsProvider,
   ) : _controller = [
           TimerController(
             autoStart: false,
@@ -145,7 +148,9 @@ class GameStateBloc extends ChangeNotifier {
     );
 
     return (await gameOracle.playMove(game, move)).map((g) {
-      systemUtilities.playSound(SoundAsset.placeStone);
+      if (settingsProvider.sound) {
+        systemUtilities.playSound(SoundAsset.placeStone);
+      }
       return updateStateFromGame(g);
     });
   }

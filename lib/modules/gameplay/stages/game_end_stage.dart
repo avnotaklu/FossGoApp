@@ -15,7 +15,7 @@ import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
 
 class GameEndStage extends Stage {
-  late final Map<Position, Stone> stonesCopy;
+  late Map<Position, Stone> stonesCopy;
 
   final GameStateBloc gameStateBloc;
   GameEndStage(this.gameStateBloc);

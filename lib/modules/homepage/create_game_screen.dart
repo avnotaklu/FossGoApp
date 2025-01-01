@@ -413,7 +413,7 @@ class CreateGameScreen extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: cgp.mStoneType == type
-              ? context.theme.colorScheme.surfaceContainerHighest
+              ? context.theme.colorScheme.primary
               : context.theme.colorScheme.surfaceContainerLow,
           shape: BoxShape.circle,
           border: Border.all(

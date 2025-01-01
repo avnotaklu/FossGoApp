@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/games_history/games_history_page.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
@@ -38,6 +39,15 @@ class SettingsPage extends StatelessWidget {
             builder: (context, pro, child) {
               return settingsKeyVal(
                   context, 'Compact Game UI', const GameUIToggle());
+            },
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Consumer<SettingsProvider>(
+            builder: (context, pro, child) {
+              return settingsKeyVal(
+                  context, 'Enable Sound', soundSwitch(context));
             },
           ),
         ]),
@@ -85,6 +95,25 @@ class SettingsPage extends StatelessWidget {
       selected: {context.read<SettingsProvider>().themeSetting},
       selectedIcon: SizedBox.shrink(),
     );
+  }
+
+  Widget soundSwitch(BuildContext context) {
+    return Switch(
+        thumbIcon: WidgetStateProperty.resolveWith(
+          (state) => state.contains(WidgetState.selected)
+              ? Icon(
+                  Icons.check,
+                  color: context.theme.colorScheme.primary,
+                )
+              : null,
+        ),
+        value: context.read<SettingsProvider>().sound,
+        onChanged: (v) {
+          if(v) {
+            SystemSound.play(SystemSoundType.click);
+          }
+          context.read<SettingsProvider>().setSound(v);
+        });
   }
 }
 

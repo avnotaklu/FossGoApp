@@ -289,10 +289,18 @@ ThemeData buildTheme({
     useMaterial3: true,
     colorScheme: ColorScheme(
         brightness: b,
-        primary: card,
-        onPrimary: cardi,
-        secondary: highlight,
-        onSecondary: Colors.black,
+        // primary: card,
+        // onPrimary: cardi,
+        // secondary: highlight,
+        // onSecondary: Colors.black,
+
+        primary: highlight,
+        onPrimary: Colors.black,
+        secondary: card,
+        onSecondary: cardi,
+
+        onPrimaryContainer: Colors.black,
+
         secondaryContainer: highlight,
         onSecondaryContainer: Colors.black,
         tertiary: cardi,
@@ -302,7 +310,7 @@ ThemeData buildTheme({
         surfaceContainerLow: card, // Users: Card, Button
 
         onSurfaceVariant: cardi,
-        surfaceContainerHighest: highlight,
+        surfaceContainerHighest: card,
         surfaceVariant: cardi, // REVIEW: M3 Spec defines it, so i'm using it
 
         error: Colors.red,

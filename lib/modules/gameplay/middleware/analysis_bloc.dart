@@ -11,6 +11,7 @@ import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
+import 'package:go/modules/settings/settings_provider.dart';
 
 abstract interface class PrimaryChildWithAlternatives {
   MoveBranch? get primary;
@@ -95,6 +96,7 @@ class AnalysisBloc extends ChangeNotifier {
 
   final GameStateBloc gameStateBloc;
   final SystemUtilities systemUtilities;
+  final SettingsProvider settingsProvider;
 
   int highestLineDepth = 0;
   int highestMoveLevel = 0;
@@ -105,7 +107,7 @@ class AnalysisBloc extends ChangeNotifier {
 
   Game get game => gameStateBloc.game;
 
-  AnalysisBloc(this.gameStateBloc, this.systemUtilities)
+  AnalysisBloc(this.gameStateBloc, this.systemUtilities, this.settingsProvider)
       : stoneLogic = StoneLogic(gameStateBloc.game) {
     gameStateBloc.gameMoveStream.listen((event) {
       addReal(event.toPosition());
@@ -151,7 +153,9 @@ class AnalysisBloc extends ChangeNotifier {
 
     notifyListeners();
     if (position != null) {
-      systemUtilities.playSound(SoundAsset.placeStone);
+      if (settingsProvider.sound) {
+        systemUtilities.playSound(SoundAsset.placeStone);
+      }
       return stoneLogic.stoneAt(position);
     } else {
       return null;

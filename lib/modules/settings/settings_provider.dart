@@ -61,6 +61,9 @@ class SettingsProvider extends ChangeNotifier {
       CompactGameUISetting.whenAnalyzing;
   CompactGameUISetting get compactGameUISetting => _compactGameUISetting;
 
+  bool _sound = false;
+  bool get sound => _sound;
+
   void setup() async {
     final themeSetting = await localDatasource.getThemeSetting();
     if (themeSetting != null) {
@@ -72,6 +75,9 @@ class SettingsProvider extends ChangeNotifier {
     if (compactGameUISetting != null) {
       _compactGameUISetting = CompactGameUISetting.values[compactGameUISetting];
     }
+
+    final soundSetting = await localDatasource.getSoundEnabled();
+    _sound = soundSetting ?? false;
   }
 
   void setThemeSetting(ThemeSetting themeSetting) {
@@ -83,6 +89,12 @@ class SettingsProvider extends ChangeNotifier {
   void setCompactGameUISetting(CompactGameUISetting compactGameUISetting) {
     _compactGameUISetting = compactGameUISetting;
     localDatasource.storeCompactGameUISetting(compactGameUISetting);
+    notifyListeners();
+  }
+
+  void setSound(bool value) {
+    _sound = value;
+    localDatasource.storeSoundEnabled(value);
     notifyListeners();
   }
 }
