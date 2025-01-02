@@ -145,10 +145,8 @@ class BorderGrid extends StatelessWidget {
       builder: (context, settings, child) => CustomPaint(
         painter: BorderPainter(
           info,
-          showLeftTop: settings.notationPosition == NotationPosition.both ||
-              settings.notationPosition == NotationPosition.onlyLeftTop,
-          showRightBottom: settings.notationPosition == NotationPosition.both ||
-              settings.notationPosition == NotationPosition.onlyRightBotton,
+          showLeftTop: settings.notationPosition.showLeftTop,
+          showRightBottom: settings.notationPosition.showRightBottom,
         ),
       ),
     );
@@ -274,7 +272,7 @@ class BorderPainter extends CustomPainter {
         if (showLeftTop) {
           textPainter.paint(
             canvas,
-            Offset(textPainter.width / 2 + 2, line),
+            Offset(textPainter.width / 2 + 4, line),
           );
         }
         if (showRightBottom) {
@@ -298,7 +296,7 @@ class BorderPainter extends CustomPainter {
             canvas,
             Offset(
               line,
-              0 + 2,
+              0 + 4,
             ),
           );
         }
