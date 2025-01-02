@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
@@ -136,11 +137,11 @@ class AuthProvider {
 
       var magicShow = await (await taskEitherWrestling.run()).run();
       return magicShow;
-    } catch (error) {
+    } on PlatformException catch (error) {
       debugPrint(error.toString());
 
       return Either.left(
-        AppError(message: error.toString()),
+        AppError(message: error.message ?? "Platform error"),
       );
     }
   }

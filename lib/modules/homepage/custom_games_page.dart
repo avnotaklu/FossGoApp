@@ -46,32 +46,40 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Available Games',
-                      style: context.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 20),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: context
-                              .read<HomepageBloc>()
-                              .availableGames
-                              .length,
-                          itemBuilder: (context, index) {
-                            final game = context
+                    if (context.read<HomepageBloc>().availableGames.isEmpty)
+                      Text(
+                        'No Available Games',
+                        style: context.textTheme.titleLarge,
+                      )
+                    else ...[
+                      Text(
+                        'Available Games',
+                        style: context.textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 20),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: context
                                 .read<HomepageBloc>()
-                                .availableGames[index];
-                            return GameCard(
-                              game: game.game,
-                              otherPlayerData: game.creatorInfo,
-                            );
-                          },
+                                .availableGames
+                                .length,
+                            itemBuilder: (context, index) {
+                              final game = context
+                                  .read<HomepageBloc>()
+                                  .availableGames[index];
+                              return GameCard(
+                                game: game.game,
+                                otherPlayerData: game.creatorInfo,
+                              );
+                            },
+                          ),
                         ),
                       ),
-                    ),
+                    ],
+                    Spacer(),
                     Center(
                       child: PrimaryButton(
                         onPressed: () {
@@ -89,6 +97,4 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
       },
     );
   }
-
-  
 }
