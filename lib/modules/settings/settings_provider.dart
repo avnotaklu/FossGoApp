@@ -88,6 +88,9 @@ class SettingsProvider extends ChangeNotifier {
 
     final soundSetting = await localDatasource.getSoundEnabled();
     _sound = soundSetting ?? false;
+
+    _notationPosition =
+        await localDatasource.getNotationPosition() ?? NotationPosition.both;
   }
 
   void setThemeSetting(ThemeSetting themeSetting) {

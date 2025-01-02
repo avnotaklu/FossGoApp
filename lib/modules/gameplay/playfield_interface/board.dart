@@ -128,6 +128,9 @@ class GridInfo {
   double stoneInset;
   int rows;
   int cols;
+
+  BoardSize get board => Constants.BoardSizeData(rows, cols).boardSize;
+
   GridInfo(this.constraints, this.stoneSpacing, this.rows, this.cols,
       this.stoneInset);
 }
@@ -142,12 +145,10 @@ class BorderGrid extends StatelessWidget {
       builder: (context, settings, child) => CustomPaint(
         painter: BorderPainter(
           info,
-          showNotationLeftTop:
-              settings.notationPosition == NotationPosition.both ||
-                  settings.notationPosition == NotationPosition.onlyLeftTop,
-          showNotationRightBottom:
-              settings.notationPosition == NotationPosition.both ||
-                  settings.notationPosition == NotationPosition.onlyRightBotton,
+          showLeftTop: settings.notationPosition == NotationPosition.both ||
+              settings.notationPosition == NotationPosition.onlyLeftTop,
+          showRightBottom: settings.notationPosition == NotationPosition.both ||
+              settings.notationPosition == NotationPosition.onlyRightBotton,
         ),
       ),
     );
@@ -156,20 +157,18 @@ class BorderGrid extends StatelessWidget {
 
 class BorderPainter extends CustomPainter {
   final GridInfo info;
-  final bool showNotationLeftTop;
-  final bool showNotationRightBottom;
+  final bool showLeftTop;
+  final bool showRightBottom;
 
   Color get myColor => Colors.black;
 
-  BoardSize get board =>
-      Constants.BoardSizeData(info.rows, info.cols).boardSize;
-
-  List<Position> get myDecorations => Constants.boardCircleDecoration[board]!;
+  List<Position> get myDecorations =>
+      Constants.boardCircleDecoration[info.board]!;
 
   BorderPainter(
     this.info, {
-    required this.showNotationLeftTop,
-    required this.showNotationRightBottom,
+    required this.showLeftTop,
+    required this.showRightBottom,
   });
 
   @override
@@ -187,16 +186,21 @@ class BorderPainter extends CustomPainter {
 
     final vOff = info.stoneInset +
         (((info.constraints.maxWidth / info.rows) / 2) - info.stoneSpacing);
-
-    // final vOff = 0.0;
-
     final hOff = vOff;
 
-    // final vOff = info.stoneInset;
-    // final hOff = info.stoneInset;
+    var top = showLeftTop ? info.board.offsetEdgeLine : 0;
+    var left = showLeftTop ? info.board.offsetEdgeLine : 0;
+    var right = showRightBottom ? info.board.offsetEdgeLine : 0;
+    var bottom = showRightBottom ? info.board.offsetEdgeLine : 0;
 
-    final gw = size.width - (hOff * 2);
-    final gh = size.height - (vOff * 2);
+    // double vOff = (top - bottom).toDouble();
+    // double hOff = (left - right).toDouble();
+
+    final gw = size.width - hOff * 2 - top - bottom;
+    final gh = size.height - vOff * 2 - left - right;
+
+    final start_grid_x = hOff + left;
+    final start_grid_y = vOff + top;
 
     final paint = Paint()
       ..color = myColor
@@ -208,24 +212,37 @@ class BorderPainter extends CustomPainter {
     var totRowSep = rowSep + extraRowSep;
 
     for (var i = 0; i < info.rows; i++) {
-      double thisRowY = i * totRowSep + vOff;
+      double thisRowY = i * totRowSep + start_grid_y;
       canvas.drawLine(
-          Offset(hOff, thisRowY), Offset(w - hOff, thisRowY), paint);
+        Offset(start_grid_x, thisRowY),
+        Offset(start_grid_x + gw, thisRowY),
+        paint,
+      );
     }
 
     var colSep = (gw / info.cols);
     double extraColSep = colSep / (info.cols - 1);
     var totColSep = colSep + extraColSep;
+
     for (var i = 0; i < info.cols; i++) {
-      var thisColX = i * totColSep + hOff;
+      var thisColX = i * totColSep + start_grid_x;
 
       canvas.drawLine(
-          Offset(thisColX, vOff), Offset(thisColX, h - vOff), paint);
+        Offset(thisColX, start_grid_y),
+        Offset(thisColX, start_grid_y + gh),
+        paint,
+      );
     }
 
     for (var decPos in myDecorations) {
-      drawDecoration(canvas, size,
-          Offset(hOff + totColSep * decPos.x, vOff + totRowSep * decPos.y));
+      drawDecoration(
+        canvas,
+        size,
+        Offset(
+          start_grid_x + totColSep * decPos.x,
+          start_grid_y + totRowSep * decPos.y,
+        ),
+      );
     }
 
     TextPainter getTextPainter(String text) {
@@ -249,18 +266,18 @@ class BorderPainter extends CustomPainter {
       return painter;
     }
 
-    if (showNotationRightBottom || showNotationLeftTop) {
+    if (showRightBottom || showLeftTop) {
       for (var i = 0; i < info.rows; i++) {
         final textPainter = getTextPainter(i.toString());
 
-        final line = vOff + (i * totRowSep) - textPainter.height / 2;
-        if (showNotationLeftTop) {
+        final line = start_grid_y + (i * totRowSep) - textPainter.height / 2;
+        if (showLeftTop) {
           textPainter.paint(
             canvas,
             Offset(textPainter.width / 2 + 2, line),
           );
         }
-        if (showNotationRightBottom) {
+        if (showRightBottom) {
           textPainter.paint(
             canvas,
             Offset(w - 10 - textPainter.width / 2, line),
@@ -274,9 +291,9 @@ class BorderPainter extends CustomPainter {
 
         final textPainter = getTextPainter(iSkippedChar);
 
-        final line = hOff + (i * totColSep) - textPainter.width / 2;
+        final line = start_grid_x + (i * totColSep) - textPainter.width / 2;
 
-        if (showNotationLeftTop) {
+        if (showLeftTop) {
           textPainter.paint(
             canvas,
             Offset(
@@ -285,7 +302,7 @@ class BorderPainter extends CustomPainter {
             ),
           );
         }
-        if (showNotationRightBottom) {
+        if (showRightBottom) {
           textPainter.paint(
             canvas,
             Offset(
@@ -307,14 +324,14 @@ class BorderPainter extends CustomPainter {
     canvas.drawCircle(center, decorSize, paint);
   }
 
-  double get decorSize => switch (board) {
+  double get decorSize => switch (info.board) {
         BoardSize.nine => 7,
         BoardSize.thirteen => 5,
         BoardSize.nineteen => 4,
         BoardSize.other => throw Exception("Can't draw decor for other boards"),
       };
 
-  double get fontSize => switch (board) {
+  double get fontSize => switch (info.board) {
         BoardSize.nine => 14,
         BoardSize.thirteen => 10,
         BoardSize.nineteen => 7,
@@ -380,24 +397,52 @@ class StoneLayoutGrid extends StatefulWidget {
 class _StoneLayoutGridState extends State<StoneLayoutGrid> {
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
+    var edgeOffset = widget.info.board.offsetEdgeLine;
+
+    return Padding(
       padding: EdgeInsets.all(widget.info.stoneInset),
-      itemCount: (widget.info.rows) * (widget.info.cols),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: (widget.info.rows),
-        childAspectRatio: 1,
-        crossAxisSpacing: widget.info.stoneSpacing,
-        mainAxisSpacing: widget.info.stoneSpacing,
-      ),
-      itemBuilder: (context, index) => SizedBox(
-        child: Stack(
-          children: [
-            Cell(Position(((index) ~/ widget.info.cols),
-                ((index) % widget.info.rows).toInt())),
-          ],
+      child: Consumer<SettingsProvider>(
+        builder: (context, settings, child) => GridView.builder(
+          shrinkWrap: true,
+          padding: EdgeInsets.only(
+            top: settings.notationPosition.showLeftTop ? edgeOffset : 0,
+            left: settings.notationPosition.showLeftTop ? edgeOffset : 0,
+            right: settings.notationPosition.showRightBottom ? edgeOffset : 0,
+            bottom: settings.notationPosition.showRightBottom ? edgeOffset : 0,
+          ),
+          itemCount: (widget.info.rows) * (widget.info.cols),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: (widget.info.rows),
+            childAspectRatio: 1,
+            crossAxisSpacing: widget.info.stoneSpacing,
+            mainAxisSpacing: widget.info.stoneSpacing,
+          ),
+          itemBuilder: (context, index) => SizedBox(
+            child: Stack(
+              children: [
+                Cell(Position(((index) ~/ widget.info.cols),
+                    ((index) % widget.info.rows).toInt())),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
+}
+
+extension NotationExts on NotationPosition {
+  bool get showLeftTop =>
+      this == NotationPosition.both || this == NotationPosition.onlyLeftTop;
+  bool get showRightBottom =>
+      this == NotationPosition.both || this == NotationPosition.onlyRightBotton;
+}
+
+extension BoardParams on BoardSize {
+  double get offsetEdgeLine => switch (this) {
+        BoardSize.nine => 8,
+        BoardSize.thirteen => 12,
+        BoardSize.nineteen => 6,
+        BoardSize.other => throw Exception("Can't draw decor for other boards"),
+      };
 }
