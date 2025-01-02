@@ -38,6 +38,15 @@ class SettingsPage extends StatelessWidget {
           Consumer<SettingsProvider>(
             builder: (context, pro, child) {
               return settingsKeyVal(
+                  context, 'Enable Sound', soundSwitch(context));
+            },
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Consumer<SettingsProvider>(
+            builder: (context, pro, child) {
+              return settingsKeyVal(
                   context, 'Compact Game UI', const GameUIToggle());
             },
           ),
@@ -47,7 +56,7 @@ class SettingsPage extends StatelessWidget {
           Consumer<SettingsProvider>(
             builder: (context, pro, child) {
               return settingsKeyVal(
-                  context, 'Enable Sound', soundSwitch(context));
+                  context, 'Notation', const NotationPositionDropDown());
             },
           ),
         ]),
@@ -109,7 +118,7 @@ class SettingsPage extends StatelessWidget {
         ),
         value: context.read<SettingsProvider>().sound,
         onChanged: (v) {
-          if(v) {
+          if (v) {
             SystemSound.play(SystemSoundType.click);
           }
           context.read<SettingsProvider>().setSound(v);
@@ -148,6 +157,53 @@ class GameUIToggle extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class NotationPositionDropDown extends StatelessWidget {
+  const NotationPositionDropDown({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SettingsProvider>(
+      builder: (context, settingsProvider, child) => Container(
+        width: 180,
+        child: MyDropDown(
+          label: null,
+          items: NotationPosition.values,
+          itemBuilder: (e) => DropdownMenuItem(
+            value: e,
+            child: Text(
+              e.displayText,
+              style: context.textTheme.labelLarge,
+            ),
+          ),
+          selectedItem: context.read<SettingsProvider>().notationPosition,
+          onChanged: (NotationPosition? e) {
+            if (e != null) {
+              context.read<SettingsProvider>().setNotationPosition(e);
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
+
+extension NotationPositionDisplay on NotationPosition {
+  String get displayText {
+    switch (this) {
+      case NotationPosition.both:
+        return 'Both';
+      case NotationPosition.onlyLeftTop:
+        return 'Top And Left';
+      case NotationPosition.onlyRightBotton:
+        return 'Bottom And Right';
+      case NotationPosition.none:
+        return 'Disable';
+    }
   }
 }
 

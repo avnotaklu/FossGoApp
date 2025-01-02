@@ -8,6 +8,7 @@ class LocalDatasource {
   final String _tokenDataKey = 'token';
   final String _themeSettingKey = 'themeSetting';
   final String _compactGameUIKey = 'compactGameUI';
+  final String _notationPositionKey = 'compactGameUI';
   final String _soundKey = 'soundEnabled';
 
   Future<void> storeToken(String token) async {
@@ -25,11 +26,14 @@ class LocalDatasource {
   Future<void> storeCompactGameUISetting(
       CompactGameUISetting compactGameUISetting) async {
     await sharedPrefs.setInt(_compactGameUIKey, compactGameUISetting.index);
-  
   }
 
   Future<void> storeSoundEnabled(bool value) async {
     await sharedPrefs.setBool(_soundKey, value);
+  }
+
+  Future<void> storeNotationPosition(NotationPosition notationPosition) async {
+    await sharedPrefs.setInt(_notationPositionKey, notationPosition.index);
   }
 
   Future<String?> getToken() async {
@@ -54,11 +58,18 @@ class LocalDatasource {
     return await sharedPrefs.getBool(_soundKey);
   }
 
+  Future<NotationPosition?> getNotationPosition() async {
+    final notationPosition = await sharedPrefs.getInt(_notationPositionKey);
+    if (notationPosition == null) return null;
+    return NotationPosition.values[notationPosition];
+  }
+
   Future<void> clear() async {
     await sharedPrefs.remove(_userDataKey);
     await sharedPrefs.remove(_tokenDataKey);
     await sharedPrefs.remove(_themeSettingKey);
     await sharedPrefs.remove(_compactGameUIKey);
     await sharedPrefs.remove(_soundKey);
+    await sharedPrefs.remove(_notationPositionKey);
   }
 }

@@ -28,6 +28,13 @@ enum CompactGameUISetting {
   whenAnalyzing,
 }
 
+enum NotationPosition {
+  none,
+  both,
+  onlyLeftTop,
+  onlyRightBotton,
+}
+
 enum ThemeSetting {
   light,
   dark,
@@ -60,6 +67,9 @@ class SettingsProvider extends ChangeNotifier {
   CompactGameUISetting _compactGameUISetting =
       CompactGameUISetting.whenAnalyzing;
   CompactGameUISetting get compactGameUISetting => _compactGameUISetting;
+
+  NotationPosition _notationPosition = NotationPosition.both;
+  NotationPosition get notationPosition => _notationPosition;
 
   bool _sound = false;
   bool get sound => _sound;
@@ -95,6 +105,12 @@ class SettingsProvider extends ChangeNotifier {
   void setSound(bool value) {
     _sound = value;
     localDatasource.storeSoundEnabled(value);
+    notifyListeners();
+  }
+
+  void setNotationPosition(NotationPosition notationPosition) {
+    _notationPosition = notationPosition;
+    localDatasource.storeNotationPosition(notationPosition);
     notifyListeners();
   }
 }

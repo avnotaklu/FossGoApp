@@ -5,6 +5,7 @@ import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
+import 'package:go/modules/settings/settings_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'stone_widget.dart';
@@ -137,14 +138,26 @@ class BorderGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: BorderPainter(info),
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) => CustomPaint(
+        painter: BorderPainter(
+          info,
+          showNotationLeftTop:
+              settings.notationPosition == NotationPosition.both ||
+                  settings.notationPosition == NotationPosition.onlyLeftTop,
+          showNotationRightBottom:
+              settings.notationPosition == NotationPosition.both ||
+                  settings.notationPosition == NotationPosition.onlyRightBotton,
+        ),
+      ),
     );
   }
 }
 
 class BorderPainter extends CustomPainter {
   final GridInfo info;
+  final bool showNotationLeftTop;
+  final bool showNotationRightBottom;
 
   Color get myColor => Colors.black;
 
@@ -153,16 +166,17 @@ class BorderPainter extends CustomPainter {
 
   List<Position> get myDecorations => Constants.boardCircleDecoration[board]!;
 
-  BorderPainter(this.info);
+  BorderPainter(
+    this.info, {
+    required this.showNotationLeftTop,
+    required this.showNotationRightBottom,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final bWidth = 0.5;
 
     // ignore: prefer_const_declarations
-    final showNotationLeftTop = true;
-    // ignore: prefer_const_declarations
-    final showNotationRightBottom = true;
 
     final lineSize = size / info.rows.toDouble();
 
