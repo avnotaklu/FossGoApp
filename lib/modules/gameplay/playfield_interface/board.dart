@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
+import 'package:go/models/variant_type.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'stone_widget.dart';
 import '../../../models/position.dart';
@@ -74,8 +76,19 @@ class _BoardState extends State<Board> {
                         ),
                       ),
                     ),
-                    BorderGrid(GridInfo(constraints, stoneSpacing, widget.rows,
-                        widget.cols, stoneInset)),
+                    Container(
+                      height: constraints.maxWidth,
+                      width: constraints.maxWidth,
+                      child: BorderGrid(
+                        GridInfo(
+                          constraints,
+                          stoneSpacing,
+                          widget.rows,
+                          widget.cols,
+                          stoneInset,
+                        ),
+                      ),
+                    ),
                     Consumer<AnalysisBloc>(
                       builder: (context, bloc, child) => StoneLayoutGrid(
                         GridInfo(
@@ -119,28 +132,225 @@ class GridInfo {
 }
 
 class BorderGrid extends StatelessWidget {
-  GridInfo info;
-  BorderGrid(this.info, {super.key});
+  final GridInfo info;
+  const BorderGrid(this.info, {super.key});
 
   @override
   Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: BorderPainter(info),
+    );
+  }
+}
+
+class BorderPainter extends CustomPainter {
+  final GridInfo info;
+
+  Color get myColor => Colors.black;
+
+  BoardSize get board =>
+      Constants.BoardSizeData(info.rows, info.cols).boardSize;
+
+  List<Position> get myDecorations => Constants.boardCircleDecoration[board]!;
+
+  BorderPainter(this.info);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bWidth = 0.5;
+
+    // ignore: prefer_const_declarations
+    final showNotationLeftTop = true;
+    // ignore: prefer_const_declarations
+    final showNotationRightBottom = true;
+
+    final lineSize = size / info.rows.toDouble();
+
+    final grid = info.rows * info.cols;
+
+    final w = size.width;
+    final h = size.height;
+
+    final vOff = info.stoneInset +
+        (((info.constraints.maxWidth / info.rows) / 2) - info.stoneSpacing);
+
+    // final vOff = 0.0;
+
+    final hOff = vOff;
+
+    // final vOff = info.stoneInset;
+    // final hOff = info.stoneInset;
+
+    final gw = size.width - (hOff * 2);
+    final gh = size.height - (vOff * 2);
+
+    final paint = Paint()
+      ..color = myColor
+      ..strokeWidth = bWidth
+      ..style = PaintingStyle.stroke;
+
+    var rowSep = (gh / info.rows);
+    double extraRowSep = rowSep / (info.rows - 1);
+    var totRowSep = rowSep + extraRowSep;
+
+    for (var i = 0; i < info.rows; i++) {
+      double thisRowY = i * totRowSep + vOff;
+      canvas.drawLine(
+          Offset(hOff, thisRowY), Offset(w - hOff, thisRowY), paint);
+    }
+
+    var colSep = (gw / info.cols);
+    double extraColSep = colSep / (info.cols - 1);
+    var totColSep = colSep + extraColSep;
+    for (var i = 0; i < info.cols; i++) {
+      var thisColX = i * totColSep + hOff;
+
+      canvas.drawLine(
+          Offset(thisColX, vOff), Offset(thisColX, h - vOff), paint);
+    }
+
+    for (var decPos in myDecorations) {
+      drawDecoration(canvas, size,
+          Offset(hOff + totColSep * decPos.x, vOff + totRowSep * decPos.y));
+    }
+
+    TextPainter getTextPainter(String text) {
+      var painter = TextPainter(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          text: text,
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: GoogleFonts.spaceMono().fontFamily,
+            fontSize: fontSize,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      painter.layout(
+        minWidth: 0,
+        maxWidth: size.width,
+      );
+
+      return painter;
+    }
+
+    if (showNotationRightBottom || showNotationLeftTop) {
+      for (var i = 0; i < info.rows; i++) {
+        final textPainter = getTextPainter(i.toString());
+
+        final line = vOff + (i * totRowSep) - textPainter.height / 2;
+        if (showNotationLeftTop) {
+          textPainter.paint(
+            canvas,
+            Offset(textPainter.width / 2 + 2, line),
+          );
+        }
+        if (showNotationRightBottom) {
+          textPainter.paint(
+            canvas,
+            Offset(w - 10 - textPainter.width / 2, line),
+          );
+        }
+      }
+      for (var i = 0; i < info.rows; i++) {
+        final char = String.fromCharCode('A'.runes.first + i);
+        final iSkippedChar = String.fromCharCode(
+            char.runes.first + ((char.runes.first >= 'I'.runes.first) ? 1 : 0));
+
+        final textPainter = getTextPainter(iSkippedChar);
+
+        final line = hOff + (i * totColSep) - textPainter.width / 2;
+
+        if (showNotationLeftTop) {
+          textPainter.paint(
+            canvas,
+            Offset(
+              line,
+              0 + 2,
+            ),
+          );
+        }
+        if (showNotationRightBottom) {
+          textPainter.paint(
+            canvas,
+            Offset(
+              line,
+              h - 10 - textPainter.height / 2,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  void drawDecoration(Canvas canvas, Size size, Offset center) {
+    var paint = Paint()
+      ..color = myColor
+      ..strokeWidth = 2
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(center, decorSize, paint);
+  }
+
+  double get decorSize => switch (board) {
+        BoardSize.nine => 7,
+        BoardSize.thirteen => 5,
+        BoardSize.nineteen => 4,
+        BoardSize.other => throw Exception("Can't draw decor for other boards"),
+      };
+
+  double get fontSize => switch (board) {
+        BoardSize.nine => 14,
+        BoardSize.thirteen => 10,
+        BoardSize.nineteen => 7,
+        BoardSize.other => throw Exception("Can't draw decor for other boards"),
+      };
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+class BorderGridS extends StatelessWidget {
+  GridInfo info;
+  BorderGridS(this.info, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final bWidth = 2.0;
+    final showNotation = true;
+
+    final grid = (info.rows - 1) * (info.cols - 1);
+
     return GridView.builder(
       shrinkWrap: true,
       padding: /*EdgeInsets.all(0)*/ EdgeInsets.all(info.stoneInset +
           (((info.constraints.maxWidth / info.rows) / 2) - info.stoneSpacing)),
-      itemCount: (info.rows - 1) * (info.cols - 1),
+      itemCount: grid,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: (info.rows - 1),
+          crossAxisCount: info.rows - 1,
           childAspectRatio: 1,
           crossAxisSpacing: 0,
           mainAxisSpacing: 0),
-      itemBuilder: (context, index) => Container(
-        height: 10,
-        width: 10,
-        decoration: BoxDecoration(
-            /*color: Colors.transparent,*/ border:
-                Border.all(width: 0.1, color: Colors.black)),
-      ),
+      itemBuilder: (context, index) {
+        return Container(
+          decoration: BoxDecoration(
+            /*color: Colors.transparent,*/
+            border: Border(
+              right: BorderSide(color: Colors.red, width: bWidth),
+              bottom: BorderSide(color: Colors.red, width: bWidth),
+              left: (index % (info.rows - 1) == 0)
+                  ? BorderSide(color: Colors.red, width: bWidth)
+                  : BorderSide.none,
+              top: (index < (info.rows - 1))
+                  ? BorderSide(color: Colors.red, width: bWidth)
+                  : BorderSide.none,
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -167,25 +377,8 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
         mainAxisSpacing: widget.info.stoneSpacing,
       ),
       itemBuilder: (context, index) => SizedBox(
-        height: 10,
-        width: 10,
         child: Stack(
           children: [
-            Constants.boardCircleDecoration[
-                        "${widget.info.rows}x${widget.info.rows}"]!
-                    .contains(Position(((index) ~/ widget.info.cols),
-                        ((index) % widget.info.rows).toInt()))
-                ? Center(
-                    child: FractionallySizedBox(
-                      heightFactor: 0.3,
-                      widthFactor: 0.3,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                            color: Colors.black, shape: BoxShape.circle),
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
             Cell(Position(((index) ~/ widget.info.cols),
                 ((index) % widget.info.rows).toInt())),
           ],

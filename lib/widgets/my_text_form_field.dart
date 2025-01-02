@@ -66,7 +66,7 @@ class MyTextField extends StatelessWidget {
         hintText: hintText,
         border: InputBorder.none,
         filled: true,
-        fillColor: context.theme.colorScheme.primary,
+        fillColor: context.theme.colorScheme.secondary,
       ),
     );
   }

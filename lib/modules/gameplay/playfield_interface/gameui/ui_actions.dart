@@ -171,21 +171,7 @@ class ContinueGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButtonWidget(() async {
-      final res = await context.read<GameStateBloc>().continueGame();
-      res.fold((e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message),
-          ),
-        );
-      }, (v) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Successfully continued game"),
-          ),
-        );
-      });
-      // });
+      await context.read<GameStateBloc>().continueGame();
     }, ActionType.continueGame);
   }
 }
