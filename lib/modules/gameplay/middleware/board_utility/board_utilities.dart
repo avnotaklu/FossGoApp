@@ -88,7 +88,7 @@ class BoardStateUtilities {
   }
 
   BoardState boardStateFromSimpleRepr(
-      List<List<int>> simpleB, Position? koPosition) {
+      List<List<int>> simpleB) {
     var clusters = getClusters(simpleB);
     var stones = getStones(clusters);
     var board = BoardState.simplePositionalBoard(rows, cols, stones);

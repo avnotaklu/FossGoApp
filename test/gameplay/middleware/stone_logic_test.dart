@@ -114,8 +114,8 @@ void main() {
       var boardCons = BoardStateUtilities(5, 5);
       var clusters = boardCons.getClusters(board);
       var stones = boardCons.getStones(clusters);
-      var stoneLogic =
-          StoneLogic.fromBoardState(BoardState.simplePositionalBoard(5, 5, stones));
+      var stoneLogic = StoneLogic.fromBoardState(
+          BoardState.simplePositionalBoard(5, 5, stones));
 
       var movePos = const Position(0, 4);
       var updateResult = stoneLogic.handleStoneUpdate(movePos, StoneType.white);
@@ -163,7 +163,6 @@ void main() {
       var updateResult = stoneLogic.handleStoneUpdate(movePos, StoneType.black);
 
       expect(updateResult.result, isTrue);
-      expect(updateResult.board.koDelete, equals(killPosition));
       expect(updateResult.board.playgroundMap.containsKey(movePos), isTrue);
       expect(
           updateResult.board.playgroundMap.containsKey(killPosition), isFalse);
@@ -171,64 +170,64 @@ void main() {
       var movePos2 = Position(1, 3);
       var killPosition2 = Position(1, 2);
 
-      var updateResult2 = StoneLogic.fromBoardState(updateResult.board)
-          .handleStoneUpdate(movePos2, StoneType.white);
+      var updateResult2 =
+          stoneLogic.handleStoneUpdate(movePos2, StoneType.white);
 
       expect(updateResult2.result, isFalse);
       expect(updateResult2.board.playgroundMap.containsKey(movePos2), isFalse);
       expect(
           updateResult2.board.playgroundMap.containsKey(killPosition2), isTrue);
     });
-  });
 
-  test('Test Three Move Cycle', () {
-    final pos = _3_move_cycle_6x6_DeathBoard();
+    test('Test Three Move Cycle', () {
+      final pos = _3_move_cycle_6x6_DeathBoard();
 
-    final boardCons = BoardStateUtilities(6, 6);
-    const boardSize = BoardSizeData(6, 6);
-    final clusters = boardCons.getClusters(pos);
-    final stones = boardCons.getStones(clusters);
-    final stoneLogic = StoneLogic.fromBoardState(BoardState.simplePositionalBoard(
-      6,
-      6,
-      stones,
-    ));
+      final boardCons = BoardStateUtilities(6, 6);
+      const boardSize = BoardSizeData(6, 6);
+      final clusters = boardCons.getClusters(pos);
+      final stones = boardCons.getStones(clusters);
+      final stoneLogic =
+          StoneLogic.fromBoardState(BoardState.simplePositionalBoard(
+        6,
+        6,
+        stones,
+      ));
 
-    final m1 = Position(0, 0);
-    final m2 = Position(2, 0);
-    final m3 = Position(1, 0);
+      final m1 = Position(0, 0);
+      final m2 = Position(2, 0);
+      final m3 = Position(1, 0);
 
-    final r1 = stoneLogic.handleStoneUpdate(m1, StoneType.white);
-    expect(r1.result, isTrue);
+      final r1 = stoneLogic.handleStoneUpdate(m1, StoneType.white);
+      expect(r1.result, isTrue);
 
-    final r2 = stoneLogic.handleStoneUpdate(m2, StoneType.black);
-    expect(r2.result, isTrue);
+      final r2 = stoneLogic.handleStoneUpdate(m2, StoneType.black);
+      expect(r2.result, isTrue);
 
-    final lastValid = BoardState(
-      rows: 6,
-      cols: 6,
-      koDelete: null,
-      playgroundMap: Map.from(r2.board.playgroundMap),
-      prisoners: [],
-    );
+      final lastValid = BoardState(
+        rows: 6,
+        cols: 6,
+        playgroundMap: Map.from(r2.board.playgroundMap),
+        prisoners: [],
+      );
 
-    final r3 = stoneLogic.handleStoneUpdate(
-      m3,
-      StoneType.white,
-    );
+      final r3 = stoneLogic.handleStoneUpdate(
+        m3,
+        StoneType.white,
+      );
 
-    expect(r3.result, isFalse);
+      expect(r3.result, isFalse);
 
-    expect(
-      _2DArrayEqual(
-        r3.board.playgroundMap
-            .toHighLevelBoardRepresentation()
-            .toLowLevelBoardRepresentation(boardSize),
-        lastValid.playgroundMap
-            .toHighLevelBoardRepresentation()
-            .toLowLevelBoardRepresentation(boardSize),
-      ),
-      isTrue,
-    );
+      expect(
+        _2DArrayEqual(
+          r3.board.playgroundMap
+              .toHighLevelBoardRepresentation()
+              .toLowLevelBoardRepresentation(boardSize),
+          lastValid.playgroundMap
+              .toHighLevelBoardRepresentation()
+              .toLowLevelBoardRepresentation(boardSize),
+        ),
+        isTrue,
+      );
+    });
   });
 }
