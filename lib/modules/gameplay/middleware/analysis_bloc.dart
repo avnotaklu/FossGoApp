@@ -142,7 +142,9 @@ class AnalysisBloc extends ChangeNotifier {
       return null;
     }
 
-    moveLevel[move] = (moveLevel[move] ?? 0) + 1;
+    moveLevel[move] =
+        max((moveLevel[move - 1] ?? 1), ((moveLevel[move] ?? 1) + 1));
+        
     highestMoveLevel = max(highestMoveLevel, moveLevel[move]!);
     highestLineDepth = max(highestLineDepth, move);
 
