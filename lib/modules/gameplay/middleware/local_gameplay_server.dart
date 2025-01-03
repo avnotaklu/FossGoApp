@@ -202,15 +202,15 @@ class LocalGameplayServer {
     if (_playerTimeSnapshots[turnPlayer].mainTimeMilliseconds == 0) {
       _endGame(GameOverMethod.Timeout, StoneType.values[turnPlayer].other);
       _timer.cancel();
+    } else {
+      gameUpdateC.add(
+        GameUpdate(
+          game: getGame(),
+          curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
+          playerWithTurn: StoneType.values[turnPlayer],
+        ),
+      );
     }
-
-    gameUpdateC.add(
-      GameUpdate(
-        game: getGame(),
-        curPlayerTimeSnapshot: _playerTimeSnapshots[turnPlayer],
-        playerWithTurn: StoneType.values[turnPlayer],
-      ),
-    );
   }
 
   Either<AppError, Game> resignGame(StoneType playerStone) {
