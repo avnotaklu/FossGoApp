@@ -38,22 +38,24 @@ class ActionButtonWidget extends StatelessWidget {
         child: InkWell(
           onTap: action,
           splashFactory: InkRipple.splashFactory,
-          child: GestureDetector(
-            onLongPress: longPress,
-            onLongPressStart: longPressStart,
-            onLongPressEnd: longPressEnd,
-            child: Container(
-              padding: const EdgeInsets.only(top: 4),
-              child: Column(
-                children: [
-                  Icon(
-                    actionType.icon,
-                    size: 18,
-                  ),
-                  Text(actionType.label,
-                      style:
-                          context.textTheme.labelSmall?.copyWith(fontSize: 12)),
-                ],
+          child: Container(
+            child: GestureDetector(
+              onLongPress: longPress,
+              onLongPressStart: longPressStart,
+              onLongPressEnd: longPressEnd,
+              child: Container(
+                padding: const EdgeInsets.only(top: 4),
+                child: Column(
+                  children: [
+                    Icon(
+                      actionType.icon,
+                      size: 18,
+                    ),
+                    Text(actionType.label,
+                        style:
+                            context.textTheme.labelSmall?.copyWith(fontSize: 12)),
+                  ],
+                ),
               ),
             ),
           ),

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart' as constants;
 import 'package:go/models/game.dart';
+import 'package:go/models/game_move.dart';
 import 'package:go/modules/gameplay/game_state/board_state_bloc.dart';
+import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
+import 'package:go/modules/gameplay/playfield_interface/board.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
@@ -11,6 +14,7 @@ import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:go/modules/settings/settings_provider.dart';
 import 'package:go/services/move_position.dart';
+import 'package:go/utils/stone_type.dart';
 import 'package:provider/provider.dart';
 
 class GameplayStage extends Stage {
@@ -32,23 +36,41 @@ class GameplayStage extends Stage {
     BoardStateBloc gameBoard = context.read();
     final boardStone = gameBoard.stoneAt(position);
 
-    var player = boardStone?.player;
+    var player = boardStone?.toStoneType();
 
     if (gameStateBloc.intermediate != null &&
         position == gameStateBloc.intermediate!.pos) {
-      player = gameStateBloc.playerTurn;
+      player = StoneTypeExt.fromMoveNumber(gameStateBloc.playerTurn);
     }
+
+    GameMove? move = gameStateBloc.game.moves.lastOrNull;
+    var board = gameStateBloc.game.getBoardSize();
 
     return Stack(
       children: [
-        player != null
-            ? StoneWidget(
-                constants.playerColors[player],
-                position,
-              )
-            : Container(
-                decoration: const BoxDecoration(color: Colors.transparent),
+        if (player != null)
+          StoneWidget(
+            constants.playerColors[player.index],
+            position,
+          ),
+        if (move?.toPosition() == position)
+          Center(
+            child: Padding(
+              padding: EdgeInsets.all(board.circleIconPaddingForCells),
+              child: SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Icon(
+                    Icons.circle_outlined,
+                    color: player!.other.materialColor,
+                  ),
+                ),
               ),
+            ),
+          ),
+        Container(
+          decoration: const BoxDecoration(color: Colors.transparent),
+        ),
       ],
     );
   }
