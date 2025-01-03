@@ -4,6 +4,8 @@ import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/variant_type.dart';
+import 'package:go/modules/gameplay/game_state/board_state_bloc.dart';
+import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
 import 'package:go/modules/settings/settings_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -90,14 +92,16 @@ class _BoardState extends State<Board> {
                         ),
                       ),
                     ),
-                    Consumer<AnalysisBloc>(
-                      builder: (context, bloc, child) => StoneLayoutGrid(
-                        GridInfo(
-                          constraints,
-                          stoneSpacing,
-                          widget.rows,
-                          widget.cols,
-                          stoneInset,
+                    Consumer<BoardStateBloc>(
+                      builder: (context, bloc, child) => Consumer<AnalysisBloc>(
+                        builder: (context, bloc, child) => StoneLayoutGrid(
+                          GridInfo(
+                            constraints,
+                            stoneSpacing,
+                            widget.rows,
+                            widget.cols,
+                            stoneInset,
+                          ),
                         ),
                       ),
                     ),

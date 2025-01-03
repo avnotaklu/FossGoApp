@@ -26,6 +26,10 @@ class StoneLogic {
     return board.playgroundMap[pos];
   }
 
+  Stone? rawStoneAt(Position pos) {
+    return _stoneAt(pos);
+  }
+
   StoneType? stoneAt(Position pos) {
     return _stoneAt(pos)?.toStoneType();
   }

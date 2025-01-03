@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
               create: (context) => SettingsProvider(
                     localDatasource: LocalDatasource(),
-                  )),
+                  )..setup()),
         ],
         builder: (context, child) {
           return FutureBuilder(
@@ -62,7 +62,6 @@ class MyApp extends StatelessWidget {
                 var res = snapshot.data!;
                 return Consumer<SettingsProvider>(
                   builder: (context, settingsProvider, child) => MaterialApp(
-                    
                     darkTheme: Constants.darkTheme,
                     builder: (context, child) =>
                         responsiveWidgetSetup(context, child),

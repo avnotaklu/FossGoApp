@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go/models/game.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
+import 'package:go/modules/gameplay/stages/gameplay_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
@@ -24,8 +25,7 @@ class BeforeStartStage extends Stage {
     final bloc = context.read<GameStateBloc>();
 
     if (bloc.game.bothPlayersIn()) {
-      StoneLogic stoneLogic = context.read();
-      context.read<GameStateBloc>().makeMove(position, stoneLogic);
+      GameplayStage.makeMove(context, position);
     }
   }
 

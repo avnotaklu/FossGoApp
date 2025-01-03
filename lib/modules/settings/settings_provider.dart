@@ -35,6 +35,8 @@ enum NotationPosition {
   onlyRightBotton,
 }
 
+enum MoveInputMode { immediate, submitButton }
+
 enum ThemeSetting {
   light,
   dark,
@@ -74,6 +76,9 @@ class SettingsProvider extends ChangeNotifier {
   bool _sound = false;
   bool get sound => _sound;
 
+  MoveInputMode _moveInput = MoveInputMode.immediate;
+  MoveInputMode get moveInput => _moveInput;
+
   void setup() async {
     final themeSetting = await localDatasource.getThemeSetting();
     if (themeSetting != null) {
@@ -91,6 +96,8 @@ class SettingsProvider extends ChangeNotifier {
 
     _notationPosition =
         await localDatasource.getNotationPosition() ?? NotationPosition.both;
+    _moveInput =
+        await localDatasource.getMoveInputMode() ?? MoveInputMode.immediate;
   }
 
   void setThemeSetting(ThemeSetting themeSetting) {
@@ -114,6 +121,12 @@ class SettingsProvider extends ChangeNotifier {
   void setNotationPosition(NotationPosition notationPosition) {
     _notationPosition = notationPosition;
     localDatasource.storeNotationPosition(notationPosition);
+    notifyListeners();
+  }
+
+  void setMoveInput(MoveInputMode moveInput) {
+    _moveInput = moveInput;
+    localDatasource.storeMoveInputMode(moveInput);
     notifyListeners();
   }
 }

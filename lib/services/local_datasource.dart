@@ -10,6 +10,7 @@ class LocalDatasource {
   final String _compactGameUIKey = 'compactGameUI';
   final String _notationPositionKey = 'compactGameUI';
   final String _soundKey = 'soundEnabled';
+  final String _moveInputKey = 'moveInput';
 
   Future<void> storeToken(String token) async {
     await sharedPrefs.setString(_tokenDataKey, token);
@@ -34,6 +35,10 @@ class LocalDatasource {
 
   Future<void> storeNotationPosition(NotationPosition notationPosition) async {
     await sharedPrefs.setInt(_notationPositionKey, notationPosition.index);
+  }
+
+  Future<void> storeMoveInputMode(MoveInputMode mode) async {
+    await sharedPrefs.setInt(_moveInputKey, mode.index);
   }
 
   Future<String?> getToken() async {
@@ -62,6 +67,12 @@ class LocalDatasource {
     final notationPosition = await sharedPrefs.getInt(_notationPositionKey);
     if (notationPosition == null) return null;
     return NotationPosition.values[notationPosition];
+  }
+
+  Future<MoveInputMode?> getMoveInputMode() async {
+    final mode = await sharedPrefs.getInt(_moveInputKey);
+    if (mode == null) return null;
+    return MoveInputMode.values[mode];
   }
 
   Future<void> clear() async {

@@ -2,11 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
+import 'package:go/models/game.dart';
+import 'package:go/modules/gameplay/game_state/board_state_bloc.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/game_state/oracle/game_state_oracle.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
+import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
+import 'package:go/modules/settings/settings_provider.dart';
+import 'package:go/services/move_position.dart';
 import 'package:provider/provider.dart';
 
 class ActionButtonWidget extends StatelessWidget {
@@ -14,46 +19,43 @@ class ActionButtonWidget extends StatelessWidget {
     this.action,
     this.actionType, {
     super.key,
-    this.isDisabled = false,
     this.longPress,
     this.longPressEnd,
     this.longPressStart,
   });
-  final bool isDisabled;
   final VoidCallback? longPress;
 
   final void Function(LongPressStartDetails)? longPressStart;
   final void Function(LongPressEndDetails)? longPressEnd;
 
-  final VoidCallback action;
+  final VoidCallback? action;
   final ActionType actionType;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child:
-          //   Material(
-          //     child: InkWell(
-          //       splashFactory: InkRipple.splashFactory,
-          //       onTap: isDisabled ? null : action,
-          // onLongPress: longPress,
-          // child:
-          GestureDetector(
-        onTap: isDisabled ? null : action,
-        onLongPress: longPress,
-        onLongPressStart: longPressStart,
-        onLongPressEnd: longPressEnd,
-        child: Container(
-          padding: const EdgeInsets.only(top: 4),
-          child: Column(
-            children: [
-              Icon(
-                actionType.icon,
-                size: 18,
+      child: Material(
+        child: InkWell(
+          onTap: action,
+          splashFactory: InkRipple.splashFactory,
+          child: GestureDetector(
+            onLongPress: longPress,
+            onLongPressStart: longPressStart,
+            onLongPressEnd: longPressEnd,
+            child: Container(
+              padding: const EdgeInsets.only(top: 4),
+              child: Column(
+                children: [
+                  Icon(
+                    actionType.icon,
+                    size: 18,
+                  ),
+                  Text(actionType.label,
+                      style:
+                          context.textTheme.labelSmall?.copyWith(fontSize: 12)),
+                ],
               ),
-              Text(actionType.label,
-                  style: context.textTheme.labelSmall?.copyWith(fontSize: 12)),
-            ],
+            ),
           ),
         ),
       ),
@@ -92,11 +94,14 @@ class PlayingGameActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ActionStrip(actions: [
-      EnterAnalysisButton(),
-      Resign(),
-      Pass(),
-    ]);
+    return Consumer<SettingsProvider>(
+      builder: (context, settingsProvider, child) => ActionStrip(actions: [
+        if (settingsProvider.moveInput == MoveInputMode.submitButton) Submit(),
+        EnterAnalysisButton(),
+        Resign(),
+        Pass(),
+      ]),
+    );
   }
 }
 
@@ -129,16 +134,25 @@ class ActionStrip extends StatelessWidget {
         ),
       ),
     );
+  }
+}
 
-    // return Container(
-    //   color: context.theme.colorScheme.surfaceContainerHigh,
-    //   height: 40,
-    //   width: double.infinity,
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //     children: actions,
-    //   ),
-    // );
+class Submit extends StatelessWidget {
+  const Submit({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final gameStateBloc = context.read<GameStateBloc>();
+    return Consumer<BoardStateBloc>(
+      builder: (context, boardStateBloc, child) => ActionButtonWidget(
+          (gameStateBloc.intermediate == null)
+              ? null
+              : () {
+                  gameStateBloc.makeMove(gameStateBloc.intermediate!);
+                  gameStateBloc.intermediate = null;
+                },
+          ActionType.submit),
+    );
   }
 }
 
@@ -148,7 +162,7 @@ class Pass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButtonWidget(() {
-      context.read<Stage>().onClickCell(null, context);
+      context.read<GameStateBloc>().makeMove(MovePosition(x: null, y: null));
     }, ActionType.pass);
   }
 }
@@ -300,6 +314,8 @@ class OpenTree extends StatelessWidget {
 extension ActionButtonUiExt on ActionType {
   String get label {
     switch (this) {
+      case ActionType.submit:
+        return "Submit";
       case ActionType.pass:
         return "Pass";
       case ActionType.accept:
@@ -329,6 +345,8 @@ extension ActionButtonUiExt on ActionType {
     switch (this) {
       case ActionType.pass:
         return Icons.close;
+      case ActionType.submit:
+        return Icons.save;
       case ActionType.accept:
         return Icons.check;
       case ActionType.continueGame:
@@ -355,6 +373,7 @@ extension ActionButtonUiExt on ActionType {
 
 enum ActionType {
   pass,
+  submit,
   accept,
   continueGame,
   resign,

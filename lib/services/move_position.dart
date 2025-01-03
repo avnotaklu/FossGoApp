@@ -1,6 +1,12 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:go/models/position.dart';
+
+extension MovePositionExt on MovePosition {
+  Position? get pos => x != null && y != null ? Position(x!, y!) : null;
+}
+
 class MovePosition {
   final int? x;
   final int? y;
@@ -31,5 +37,4 @@ class MovePosition {
   bool isPass() {
     return x == null && y == null;
   }
-
 }

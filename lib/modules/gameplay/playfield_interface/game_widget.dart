@@ -12,7 +12,7 @@ import 'package:go/modules/gameplay/playfield_interface/gameui/game_over_card.da
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
+import 'package:go/modules/gameplay/game_state/board_state_bloc.dart';
 import 'package:go/modules/gameplay/game_state/oracle/game_state_oracle.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 
@@ -114,10 +114,8 @@ class _GameWidgetState extends State<GameWidget> {
                   return MultiProvider(
                     providers: [
                       ChangeNotifierProvider(
-                        create: (context) => GameBoardBloc(game),
-                      ),
-                      Provider(
-                        create: (context) => StoneLogic(game),
+                        create: (context) => BoardStateBloc(gameStateBloc,
+                            game), // This may contain virtual intermediate positions
                       ),
                       ChangeNotifierProvider(
                         create: (context) => AnalysisBloc(
@@ -128,14 +126,14 @@ class _GameWidgetState extends State<GameWidget> {
                       ),
                     ],
                     builder: (context, child) {
-                      context.read<GameBoardBloc>().setupGame(game);
+                      context.read<BoardStateBloc>().setupGame(game);
                       return ChangeNotifierProvider(
                         create: (context) {
                           return ScoreCalculationBloc(
                             api: context.read<AuthProvider>().api,
                             authBloc: context.read<AuthProvider>(),
                             gameStateBloc: context.read<GameStateBloc>(),
-                            gameBoardBloc: context.read<GameBoardBloc>(),
+                            gameBoardBloc: context.read<BoardStateBloc>(),
                           );
                         },
                         builder: (context, child) {
@@ -144,6 +142,7 @@ class _GameWidgetState extends State<GameWidget> {
                               .curStageType
                               .stageConstructor(
                                 context.read<GameStateBloc>(),
+                                context.read<BoardStateBloc>(),
                                 context.read<AnalysisBloc>(),
                               );
                           return ChangeNotifierProvider<Stage>.value(

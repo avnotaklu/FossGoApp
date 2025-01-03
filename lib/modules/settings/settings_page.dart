@@ -59,6 +59,15 @@ class SettingsPage extends StatelessWidget {
                   context, 'Notation', const NotationPositionDropDown());
             },
           ),
+          SizedBox(
+            height: 10,
+          ),
+          Consumer<SettingsProvider>(
+            builder: (context, pro, child) {
+              return settingsKeyVal(
+                  context, 'Notation', const MoveInputDropDown());
+            },
+          ),
         ]),
       ),
     );
@@ -189,6 +198,49 @@ class NotationPositionDropDown extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class MoveInputDropDown extends StatelessWidget {
+  const MoveInputDropDown({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SettingsProvider>(
+      builder: (context, settingsProvider, child) => Container(
+        width: 180,
+        child: MyDropDown<MoveInputMode>(
+          label: null,
+          items: MoveInputMode.values,
+          itemBuilder: (e) => DropdownMenuItem(
+            value: e,
+            child: Text(
+              e.displayText,
+              style: context.textTheme.labelLarge,
+            ),
+          ),
+          selectedItem: context.read<SettingsProvider>().moveInput,
+          onChanged: (MoveInputMode? e) {
+            if (e != null) {
+              context.read<SettingsProvider>().setMoveInput(e);
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
+
+extension MoveInputDisplay on MoveInputMode {
+  String get displayText {
+    switch (this) {
+      case MoveInputMode.immediate:
+        return 'Immediate';
+      case MoveInputMode.submitButton:
+        return 'Submit Button';
+    }
   }
 }
 

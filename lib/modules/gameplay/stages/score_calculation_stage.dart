@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:go/constants/constants.dart' as constants;
 
 import 'package:flutter/material.dart';
+import 'package:go/models/game.dart';
+import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/score_calculator.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
@@ -10,7 +12,7 @@ import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
+import 'package:go/modules/gameplay/game_state/board_state_bloc.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:provider/provider.dart';
@@ -18,22 +20,26 @@ import 'package:provider/provider.dart';
 class ScoreCalculationStage extends Stage {
   StreamSubscription? removedClusterSubscription;
   StreamSubscription? opponentConfirmationStream;
-  late Map<Position, Stone> stonesCopy;
+
+  final BoardStateBloc boardStateBloc;
+  final GameStateBloc gameStateBloc;
 
   @override
   void initializeWhenAllMiddlewareAvailable(context) {
-    final gameBoarcBloc = context.read<GameBoardBloc>();
-    final gameStateBloc = context.read<GameStateBloc>();
-    gameStateBloc.timerController[0].pause();
-    gameStateBloc.timerController[1].pause();
+    boardStateBloc.resetToReal();
     context.read<ScoreCalculationBloc>().setupScore();
-    stonesCopy = gameBoarcBloc.stones;
   }
 
-  ScoreCalculationStage();
+  ScoreCalculationStage(this.boardStateBloc, this.gameStateBloc);
 
   @override
-  Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
+  Widget drawCell(
+      Position position, StoneWidget? deprStone, BuildContext context) {
+    final stone = boardStateBloc.stoneAt(position);
+
+    final stoneColor =
+        stone != null ? constants.playerColors[stone.player] : null;
+
     return ValueListenableBuilder(
         valueListenable:
             context.read<ScoreCalculationBloc>().areaMap[position]!,
@@ -43,7 +49,7 @@ class ScoreCalculationStage extends Stage {
                   child: Stack(
                     children: [
                       stone != null
-                          ? StoneWidget(stone.color?.withOpacity(0.8), position)
+                          ? StoneWidget(stoneColor?.withOpacity(0.8), position)
                           : const SizedBox.shrink(),
                       Center(
                         child: FractionallySizedBox(
@@ -59,16 +65,17 @@ class ScoreCalculationStage extends Stage {
                 )
               : () {
                   return stone != null
-                      ? (StoneWidget stone) {
-                          if (stonesCopy.containsKey(stone.pos) &&
+                      ? (Stone stone) {
+                          if (boardStateBloc.stoneAt(position) != null &&
                               context
                                   .read<ScoreCalculationBloc>()
                                   .removedClusters
-                                  .contains(stonesCopy[stone.pos]!.cluster)) {
+                                  .contains(
+                                      boardStateBloc.stoneAt(position)!.cluster)) {
                             return StoneWidget(
-                                stone.color!.withOpacity(0.8), position);
+                                stoneColor!.withOpacity(0.8), position);
                           } else {
-                            return stone;
+                            return StoneWidget(stoneColor, position);
                           }
                         }.call(stone)
                       : Container(
@@ -80,8 +87,8 @@ class ScoreCalculationStage extends Stage {
 
   @override
   onClickCell(Position? position, BuildContext context) {
-    if (stonesCopy[position] != null) {
-      context.read<ScoreCalculationBloc>().onClickStone(position!);
+    if (position != null && boardStateBloc.stoneAt(position) != null) {
+      context.read<ScoreCalculationBloc>().onClickStone(position);
     }
   }
 

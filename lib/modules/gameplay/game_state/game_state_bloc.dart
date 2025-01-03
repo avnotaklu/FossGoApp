@@ -5,6 +5,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/models/minimal_rating.dart';
+import 'package:go/modules/gameplay/game_state/board_state_bloc.dart';
+import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/game.dart';
@@ -94,6 +96,15 @@ class GameStateBloc extends ChangeNotifier {
   final SystemUtilities systemUtilities;
   final SettingsProvider settingsProvider;
 
+  MovePosition? _intermediate;
+
+  // ignore: unnecessary_getters_setters
+  MovePosition? get intermediate => _intermediate;
+
+  set intermediate(MovePosition? pos) {
+    _intermediate = pos;
+  }
+
   late final TimerController headsUpTimeController;
 
   late final StreamSubscription<GameUpdate> gameUpdateListener;
@@ -127,30 +138,42 @@ class GameStateBloc extends ChangeNotifier {
     });
   }
 
-  Future<Either<AppError, Game>> makeMove(
-      Position? position, StoneLogic stoneLogic) async {
+  Either<AppError, MovePosition> placeStone(
+    Position position,
+    BoardStateBloc bloc,
+  ) {
+    final tmpStoneLogic = StoneLogic(game);
+
     bool canPlayMove = gameOracle.isThisAccountsTurn(game);
     var updateStone = gameOracle.thisAccountStone(game);
 
-    if (position == null && canPlayMove) {
-      canPlayMove = true;
-    } else if (position != null && canPlayMove) {
-      canPlayMove = stoneLogic.checkInsertable(position, updateStone);
+    if (canPlayMove) {
+      canPlayMove =
+          tmpStoneLogic.handleStoneUpdate(position, updateStone).result;
     }
 
     if (!canPlayMove) {
       return left(AppError(message: "You can't play here"));
     }
 
+    if (settingsProvider.sound) {
+      systemUtilities.playSound(SoundAsset.placeStone);
+    }
+
+    bloc.updateBoard(tmpStoneLogic.board);
+
     final move = MovePosition(
-      x: position?.x,
-      y: position?.y,
+      x: position.x,
+      y: position.y,
     );
 
+    return right(move);
+  }
+
+  Future<Either<AppError, Game>> makeMove(
+    MovePosition move,
+  ) async {
     return (await gameOracle.playMove(game, move)).map((g) {
-      if (settingsProvider.sound) {
-        systemUtilities.playSound(SoundAsset.placeStone);
-      }
       return updateStateFromGame(g);
     });
   }

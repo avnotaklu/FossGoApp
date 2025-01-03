@@ -8,7 +8,7 @@ import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/cluster.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/modules/gameplay/game_state/game_board_bloc.dart';
+import 'package:go/modules/gameplay/game_state/board_state_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/edit_dead_stone_dto.dart';
@@ -29,7 +29,7 @@ class ScoreCalculationBloc extends ChangeNotifier {
   final AuthProvider authBloc;
 
   final GameStateBloc gameStateBloc;
-  final GameBoardBloc gameBoardBloc;
+  final BoardStateBloc gameBoardBloc;
 
   ScoreCalculationBloc({
     required this.api,
@@ -48,7 +48,8 @@ class ScoreCalculationBloc extends ChangeNotifier {
 
     _score = [0, 0];
 
-    virtualPlaygroundMap = gameBoardBloc.stones;
+    virtualPlaygroundMap =
+        Map.fromEntries(gameBoardBloc.board.playgroundMap.entries);
 
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
