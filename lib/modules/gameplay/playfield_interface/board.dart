@@ -327,9 +327,9 @@ class BorderPainter extends CustomPainter {
   }
 
   double get decorSize => switch (info.board) {
-        BoardSize.nine => 7,
-        BoardSize.thirteen => 5,
-        BoardSize.nineteen => 4,
+        BoardSize.nine => 5,
+        BoardSize.thirteen => 3,
+        BoardSize.nineteen => 2,
         BoardSize.other => throw Exception("Can't draw decor for other boards"),
       };
 
@@ -445,6 +445,20 @@ extension BoardParams on BoardSize {
         BoardSize.nine => 14,
         BoardSize.thirteen => 12,
         BoardSize.nineteen => 6,
+        BoardSize.other => throw Exception("Can't draw decor for other boards"),
+      };
+
+  double get crossIconPaddingForCells => switch (this) {
+        BoardSize.nine => 0,
+        BoardSize.thirteen => 0,
+        BoardSize.nineteen => 0,
+        BoardSize.other => throw Exception("Can't draw decor for other boards"),
+      };
+
+  double get circleIconPaddingForCells => switch (this) {
+        BoardSize.nine => 6,
+        BoardSize.thirteen => 4,
+        BoardSize.nineteen => 2,
         BoardSize.other => throw Exception("Can't draw decor for other boards"),
       };
 }

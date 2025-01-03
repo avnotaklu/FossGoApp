@@ -22,10 +22,7 @@ class Cell extends StatelessWidget {
       onTap: () {
         stage.onClickCell(position, context);
       },
-      child: stage.drawCell(
-          position,
-          null,
-          context),
+      child: stage.drawCell(position, null, context),
     );
   }
 }

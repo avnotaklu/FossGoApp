@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
+import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
+import 'package:go/modules/gameplay/playfield_interface/board.dart';
 import 'package:go/modules/gameplay/playfield_interface/stone_widget.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/constants/constants.dart' as Constants;
+import 'package:go/utils/stone_type.dart';
 
 class AnalysisStage extends Stage {
   final AnalysisBloc analysisBloc;
-  AnalysisStage(this.analysisBloc);
+  final GameStateBloc gameStateBloc;
+
+  AnalysisStage(this.analysisBloc, this.gameStateBloc);
 
   @override
   void disposeStage() {
@@ -19,17 +24,50 @@ class AnalysisStage extends Stage {
   @override
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
     var stoneAt = analysisBloc.stoneAt(position);
+    var currentMove = analysisBloc.currentMove;
+    var nextMove = currentMove?.primary ?? analysisBloc.start.primary;
 
-    var realStone = stoneAt == null
-        ? null
-        : StoneWidget(Constants.playerColors[stoneAt!.index], position);
+    var stoneWidget =
+        stoneAt == null ? null : StoneWidget(stoneAt!.materialColor, position);
+
+    var board = gameStateBloc.game.getBoardSize();
 
     return Stack(
       children: [
-        realStone ??
-            Container(
-              decoration: const BoxDecoration(color: Colors.transparent),
+        if (stoneWidget != null) stoneWidget,
+        if (nextMove != null && nextMove.position == position)
+          Center(
+            child: Padding(
+              padding: EdgeInsets.all(board.crossIconPaddingForCells),
+              child: SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
             ),
+          ),
+        if (currentMove?.position == position)
+          Center(
+            child: Padding(
+              padding: EdgeInsets.all(board.circleIconPaddingForCells),
+              child: SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Icon(
+                    Icons.circle_outlined,
+                    color: stoneAt!.other.materialColor,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        Container(
+          color: Colors.transparent,
+        )
       ],
     );
   }

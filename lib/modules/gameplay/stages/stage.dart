@@ -22,11 +22,11 @@ extension Constructor on StageType {
   ) =>
       switch (this) {
         StageType.beforeStart => BeforeStartStage(),
-        StageType.gameplay => GameplayStage(boardStateBloc,gameStateBloc),
+        StageType.gameplay => GameplayStage(boardStateBloc, gameStateBloc),
         StageType.gameEnd => GameEndStage(boardStateBloc, gameStateBloc),
         StageType.scoreCalculation =>
           ScoreCalculationStage(boardStateBloc, gameStateBloc),
-        StageType.analysis => AnalysisStage(analysisBloc),
+        StageType.analysis => AnalysisStage(analysisBloc, gameStateBloc),
       };
 }
 
