@@ -442,7 +442,7 @@ extension NotationExts on NotationPosition {
 
 extension BoardParams on BoardSize {
   double get offsetEdgeLine => switch (this) {
-        BoardSize.nine => 8,
+        BoardSize.nine => 14,
         BoardSize.thirteen => 12,
         BoardSize.nineteen => 6,
         BoardSize.other => throw Exception("Can't draw decor for other boards"),
