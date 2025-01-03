@@ -117,8 +117,7 @@ class MoveTree extends StatelessWidget {
                   allInteractionRects: allInteractionRects,
 
                   // colors
-                  primary:
-                      context.theme.colorScheme.primary,
+                  primary: context.theme.colorScheme.primary,
                   // ignore: deprecated_member_use
                   surface: context.theme.colorScheme.surfaceVariant,
                   onSurface: context.theme.colorScheme.onSurface,
@@ -253,7 +252,7 @@ class MoveCanvas extends CustomPainter {
   void drawAlternativeMoveBranch(
       Canvas canvas, AlternativeMoveBranch branch, int parentLevel) {
     final prevLevel = moveLevel[branch.move] ?? 0;
-    moveLevel[branch.move] = prevLevel + 1;
+    moveLevel[branch.move] = max(prevLevel, parentLevel) + 1;
 
     final start = getNodeStartOffset(branch, parentLevel);
     final center = toNodeCenter(start);
@@ -266,12 +265,14 @@ class MoveCanvas extends CustomPainter {
 
     drawMoveNode(canvas, start, branch);
 
-    for (var child_branch in branch.alternativeChildren) {
+    for (var (i, child) in branch.alternativeChildren.indexed) {
       drawAlternativeMoveBranch(
         canvas,
-        child_branch,
-        max(moveLevel[branch.move]!, parentLevel),
+        child,
+        // parentLevel,
+        max(moveLevel[branch.move]! - 1, parentLevel),
       );
+      // moveLevel[branch.move + 1] = moveLevel[branch.move + 1]! + 1;
     }
   }
 

@@ -145,7 +145,7 @@ class GameStateBloc extends ChangeNotifier {
     Position position,
     BoardStateBloc bloc,
   ) {
-    final tmpStoneLogic = stoneLogic.makeCopy();
+    final tmpStoneLogic = stoneLogic.deepCopy();
 
     bool canPlayMove = gameOracle.isThisAccountsTurn(game);
     var updateStone = gameOracle.thisAccountStone(game);

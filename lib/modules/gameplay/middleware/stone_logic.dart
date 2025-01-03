@@ -25,12 +25,18 @@ class StoneLogic {
     }
   }
 
-  StoneLogic makeCopy() {
+  StoneLogic deepCopy() {
     return StoneLogic.complete(
         board.copyWith(
-            playgroundMap: Map.fromEntries(
-          board.playgroundMap.entries,
-        ),),
+          playgroundMap: Map.fromEntries(
+            board.playgroundMap.entries.map(
+              (e) => MapEntry(
+                e.key,
+                e.value.deepCopy(),
+              ),
+            ),
+          ),
+        ),
         _prevBoardStates);
   }
 

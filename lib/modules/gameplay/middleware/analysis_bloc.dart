@@ -125,20 +125,26 @@ class AnalysisBloc extends ChangeNotifier {
   bool updateBoard(Position? position, int move) {
     var stone = move % 2 == 0 ? StoneType.black : StoneType.white;
 
+    var lastValidStoneLogic = stoneLogic.deepCopy();
+
     var res = stoneLogic.handleStoneUpdate(position, stone);
+
+    if (!res.result) {
+      stoneLogic = lastValidStoneLogic;
+    }
     return res.result;
   }
 
   StoneType? addAlternative(Position? position) {
     final move = ((currentMove?.move ?? -1) + 1); // null makes 0;
 
-    moveLevel[move] = (moveLevel[move] ?? 0) + 1;
-    highestMoveLevel = max(highestMoveLevel, moveLevel[move]!);
-    highestLineDepth = max(highestLineDepth, move);
-
     if (!updateBoard(position, move)) {
       return null;
     }
+
+    moveLevel[move] = (moveLevel[move] ?? 0) + 1;
+    highestMoveLevel = max(highestMoveLevel, moveLevel[move]!);
+    highestLineDepth = max(highestLineDepth, move);
 
     final newMove = AlternativeMoveBranch(
         position: position,

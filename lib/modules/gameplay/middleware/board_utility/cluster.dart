@@ -32,4 +32,13 @@ class Cluster {
     }
     return smallest;
   }
+
+  Cluster deepCopy() {
+    return Cluster(
+      data.toSet(),
+      freedomPositions.toSet(),
+      freedoms,
+      player,
+    );
+  }
 }

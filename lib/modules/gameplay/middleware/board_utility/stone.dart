@@ -31,4 +31,12 @@ class Stone {
       cluster: cluster ?? this.cluster,
     );
   }
+
+  Stone deepCopy() {
+    return Stone(
+      position: position,
+      player: player,
+      cluster: cluster.deepCopy(),
+    );
+  }
 }
