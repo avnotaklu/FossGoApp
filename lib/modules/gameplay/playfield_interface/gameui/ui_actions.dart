@@ -111,12 +111,17 @@ class AnalsisModeActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ActionStrip(actions: [
-      const ExitAnalysisButton(),
-      OpenTree(openTree: openTree),
-      BackwardButton(),
-      ForwardButton(),
-    ]);
+    return Consumer<SettingsProvider>(
+      builder: (context, settingsProvider, child) => ActionStrip(actions: [
+        const ExitAnalysisButton(),
+        const AnalysisPass(),
+        if (!settingsProvider.compactGameUISetting
+            .isCompact(StageType.analysis))
+          OpenTree(openTree: openTree),
+        BackwardButton(),
+        ForwardButton(),
+      ]),
+    );
   }
 }
 
@@ -163,6 +168,17 @@ class Pass extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionButtonWidget(() {
       context.read<GameStateBloc>().makeMove(MovePosition(x: null, y: null));
+    }, ActionType.pass);
+  }
+}
+
+class AnalysisPass extends StatelessWidget {
+  const AnalysisPass({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionButtonWidget(() {
+      context.read<AnalysisBloc>().addAlternative(null);
     }, ActionType.pass);
   }
 }
