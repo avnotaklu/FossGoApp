@@ -18,6 +18,22 @@ class StoneLogic {
     _prevBoardStates.add(board.playgroundMap.toHighLevelBoardRepresentation());
   }
 
+  StoneLogic.complete(
+      this.board, List<HighLevelBoardRepresentation> prevBoardStates) {
+    for (var st in prevBoardStates) {
+      _prevBoardStates.add(st);
+    }
+  }
+
+  StoneLogic makeCopy() {
+    return StoneLogic.complete(
+        board.copyWith(
+            playgroundMap: Map.fromEntries(
+          board.playgroundMap.entries,
+        ),),
+        _prevBoardStates);
+  }
+
   void _setBoardState(BoardState board) {
     this.board = board;
   }
@@ -71,9 +87,7 @@ class StoneLogic {
 
   bool checkInsertable(Position position, StoneType playerStone) {
     if (_stoneAt(position) != null) return false;
-    if (board.koDelete == position) {
-      return false;
-    }
+
     bool insertable = false;
     doActionOnNeighbors(position, (curpos, neighbor) {
       if (_stoneAt(neighbor) != null) {
@@ -148,25 +162,6 @@ class StoneLogic {
     if (_stoneAt(neighbor)?.player != _stoneAt(curpos)?.player &&
         _stoneAt(neighbor)?.cluster.freedoms == 1) {
       for (var i in _getClusterFromPosition(neighbor)!.data) {
-        // This supposedly works because a
-        // position where delete occurs in such a way that ko is possible
-        // the cluster at that position can only have one member because
-        // all the neighboring ones have to opposite ones for ko to be possible
-
-        // how do we solve the behaviour when neighboring cells will be null
-
-        // we store in koDelete The position that was deleted
-        // we check that against newly entered stone and stone can only be deleted when neighboring cells will be opposite
-        //
-
-        if (_getClusterFromPosition(i)!.data.length == 1) {
-          _setBoardState(board.copyWith(koDelete: neighbor));
-        }
-
-        // prisoners[Constants.playerColors.indexWhere(
-        //         (element) => element != stoneAt(i)?.value?.color)]
-        //     .value += 1;
-
         board.prisoners[1 - _stoneAt(i)!.player] += 1;
         board.playgroundMap.remove(i);
 
@@ -207,12 +202,8 @@ class StoneLogic {
 
     Position? thisCurrentCell = position;
 
-    final lastValid = BoardState(
-      rows: 6,
-      cols: 6,
-      koDelete: null,
-      playgroundMap: Map.from(board.playgroundMap),
-      prisoners: [],
+    var lastValid = board.copyWith(
+      playgroundMap: Map.fromEntries(board.playgroundMap.entries),
     );
 
     if (checkInsertable(position, stone)) {
@@ -228,7 +219,7 @@ class StoneLogic {
       );
 
       // if stone can be inserted at this position
-      _setBoardState(board.copyWith(koDelete: null));
+      _setBoardState(board);
       doActionOnNeighbors(position, _addAllOfNeighborToCurpos);
       _updateAllInTheClusterWithCorrectCluster(currentCluster);
       doActionOnNeighbors(position, _deleteStonesInDeletableCluster);
@@ -252,6 +243,8 @@ class StoneLogic {
   bool _positionIsSuperKo(
     BoardState newBoardState,
   ) {
+    // This also includes basic ko
+
     final newBoardStateMap = newBoardState.playgroundMap;
 
     for (final prevBoardState in _prevBoardStates) {

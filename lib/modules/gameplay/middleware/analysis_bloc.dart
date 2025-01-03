@@ -100,6 +100,7 @@ class AnalysisBloc extends ChangeNotifier {
 
   int highestLineDepth = 0;
   int highestMoveLevel = 0;
+
   final Map<int, int> moveLevel = {};
 
   MoveBranch? currentMove;

@@ -35,39 +35,36 @@ class BoardState {
   final int rows;
   final int cols;
   // koDelete assumes that this position was deleted in the last move by the opposing player
-  final Position? koDelete;
   final List<int> prisoners;
   final DetailedBoardRepresentation playgroundMap;
 
   BoardState(
       {required this.rows,
       required this.cols,
-      required this.koDelete,
       required this.prisoners,
       required this.playgroundMap});
 
   BoardState copyWith({
     int? rows,
     int? cols,
-    Position? koDelete,
     List<int>? prisoners,
     Map<Position, Stone>? playgroundMap,
   }) {
     return BoardState(
       rows: rows ?? this.rows,
       cols: cols ?? this.cols,
-      koDelete: koDelete,
       prisoners: prisoners ?? this.prisoners,
       playgroundMap: playgroundMap ?? this.playgroundMap,
     );
   }
 
-  BoardState.simplePositionalBoard(int rows, int cols, List<Stone> stones,
-      [Position? koDelete])
-      : this(
+  BoardState.simplePositionalBoard(
+    int rows,
+    int cols,
+    List<Stone> stones,
+  ) : this(
             rows: rows,
             cols: cols,
-            koDelete: koDelete,
             playgroundMap:
                 Map.fromEntries(stones.map((e) => MapEntry(e.position, e))),
             prisoners: [0, 0]);
@@ -85,8 +82,7 @@ class BoardStateUtilities {
     var simpleB = map.toLowLevelBoardRepresentation(BoardSizeData(rows, cols));
     var clusters = getClusters(simpleB);
     var stones = getStones(clusters);
-    var board = BoardState.simplePositionalBoard(
-        rows, cols, stones, game.koPositionInLastMove);
+    var board = BoardState.simplePositionalBoard(rows, cols, stones);
 
     return board;
   }
@@ -95,8 +91,7 @@ class BoardStateUtilities {
       List<List<int>> simpleB, Position? koPosition) {
     var clusters = getClusters(simpleB);
     var stones = getStones(clusters);
-    var board =
-        BoardState.simplePositionalBoard(rows, cols, stones, koPosition);
+    var board = BoardState.simplePositionalBoard(rows, cols, stones);
 
     return board;
   }

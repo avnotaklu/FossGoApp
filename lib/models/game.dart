@@ -268,7 +268,7 @@ extension GameExts on Game {
     return copyWith(
       playgroundMap:
           b.playgroundMap.mapValue((a) => StoneType.values[a.player]),
-      koPositionInLastMove: b.koDelete,
+      koPositionInLastMove: null,
       prisoners: b.prisoners,
     );
   }

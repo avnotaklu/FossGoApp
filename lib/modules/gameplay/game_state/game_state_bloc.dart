@@ -45,6 +45,8 @@ class DisplayablePlayerData {
 class GameStateBloc extends ChangeNotifier {
   Game game;
 
+  final StoneLogic stoneLogic;
+
   int get turn => game.moves.length;
   int get playerTurn => game.moves.length % 2;
 
@@ -119,7 +121,8 @@ class GameStateBloc extends ChangeNotifier {
     this.gameOracle,
     this.systemUtilities,
     this.settingsProvider,
-  ) : _controller = [
+  )   : stoneLogic = StoneLogic(game),
+        _controller = [
           TimerController(
             autoStart: false,
             updateInterval: const Duration(milliseconds: 100),
@@ -142,7 +145,7 @@ class GameStateBloc extends ChangeNotifier {
     Position position,
     BoardStateBloc bloc,
   ) {
-    final tmpStoneLogic = StoneLogic(game);
+    final tmpStoneLogic = stoneLogic.makeCopy();
 
     bool canPlayMove = gameOracle.isThisAccountsTurn(game);
     var updateStone = gameOracle.thisAccountStone(game);
@@ -174,6 +177,13 @@ class GameStateBloc extends ChangeNotifier {
     MovePosition move,
   ) async {
     return (await gameOracle.playMove(game, move)).map((g) {
+      if (!g.moves.last.isPass()) {
+        var move = g.moves.last;
+        var res = stoneLogic.handleStoneUpdate(
+            move.toPosition(), StoneTypeExt.fromMoveNumber(turn - 1));
+        assert(res.result);
+      }
+
       return updateStateFromGame(g);
     });
   }

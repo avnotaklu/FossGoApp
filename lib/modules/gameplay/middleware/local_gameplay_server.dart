@@ -142,7 +142,6 @@ class LocalGameplayServer {
               .zip(_prisoners)
               .map((a) => a.$1 + a.$2)
               .toList();
-          _koPositionInLastMove = res.board.koDelete;
         } else {
           log("Couldn't play at position");
           return left(AppError(message: "Couldn't play at position"));
