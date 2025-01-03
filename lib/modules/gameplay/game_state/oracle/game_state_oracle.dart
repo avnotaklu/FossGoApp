@@ -63,8 +63,6 @@ extension GameUpdateExt on GameUpdate {
       players: this.game?.players ?? game.players,
       prisoners: this.game?.prisoners ?? game.prisoners,
       startTime: this.game?.startTime ?? game.startTime,
-      koPositionInLastMove:
-          this.game?.koPositionInLastMove ?? game.koPositionInLastMove,
       gameState: this.game?.gameState ?? game.gameState,
       deadStones: this.game?.deadStones ?? game.deadStones,
       result: this.game?.result ?? game.result,

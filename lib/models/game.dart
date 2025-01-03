@@ -86,7 +86,6 @@ class GameFieldNames {
   static const String Prisoners = "prisoners";
   static const String StartTime = "startTime";
   static const String EndTime = "endTime";
-  static const String KoPositionInLastMove = "koPositionInLastMove";
   static const String GameState = "gameState";
   static const String DeadStones = "deadStones";
   static const String Result = "result";
@@ -268,7 +267,6 @@ extension GameExts on Game {
     return copyWith(
       playgroundMap:
           b.playgroundMap.mapValue((a) => StoneType.values[a.player]),
-      koPositionInLastMove: null,
       prisoners: b.prisoners,
     );
   }
@@ -348,7 +346,6 @@ class Game {
   final List<PlayerTimeSnapshot> playerTimeSnapshots;
   final List<String> players;
   final DateTime? startTime;
-  final Position? koPositionInLastMove;
   final GameState gameState;
   final List<Position> deadStones;
   final GameResult? result;
@@ -374,7 +371,6 @@ class Game {
     required this.players,
     required this.prisoners,
     required this.startTime,
-    required this.koPositionInLastMove,
     required this.gameState,
     required this.deadStones,
     required this.result,
@@ -407,7 +403,6 @@ class Game {
       GameFieldNames.Players: players,
       GameFieldNames.Prisoners: prisoners,
       GameFieldNames.StartTime: startTime?.toIso8601String(),
-      GameFieldNames.KoPositionInLastMove: koPositionInLastMove?.toString(),
       GameFieldNames.GameState: gameState.index,
       GameFieldNames.DeadStones: deadStones.map((e) => e.toString()).toList(),
       GameFieldNames.Result: result?.index,
@@ -454,10 +449,6 @@ class Game {
       startTime: map[GameFieldNames.StartTime] == null
           ? null
           : DateTime.parse(map[GameFieldNames.StartTime] as String),
-      koPositionInLastMove: map[GameFieldNames.KoPositionInLastMove] != null
-          ? Position.fromString(
-              map[GameFieldNames.KoPositionInLastMove] as String)
-          : null,
       gameState: GameState.values[map[GameFieldNames.GameState] as int],
       deadStones: List<Position>.from(
         (map[GameFieldNames.DeadStones] as List).map<Position>(
@@ -513,7 +504,6 @@ class Game {
     List<GameMove>? moves,
     List<String>? players,
     DateTime? startTime,
-    Position? koPositionInLastMove,
     GameState? gameState,
     List<Position>? deadStones,
     double? komi,
@@ -540,7 +530,6 @@ class Game {
       moves: moves ?? this.moves,
       players: players ?? this.players,
       startTime: startTime ?? this.startTime,
-      koPositionInLastMove: koPositionInLastMove ?? this.koPositionInLastMove,
       gameState: gameState ?? this.gameState,
       deadStones: deadStones ?? this.deadStones,
       result: result ?? this.result,

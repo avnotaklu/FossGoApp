@@ -42,7 +42,6 @@ class LocalGameplayServer {
   late List<PlayerTimeSnapshot> _playerTimeSnapshots;
   late List<String> _players;
   late DateTime _startTime;
-  Position? _koPositionInLastMove;
   late GameState _gameState;
   late Map<Position, DeadStoneState> _stoneStates;
 
@@ -84,7 +83,6 @@ class LocalGameplayServer {
       _timeControl.getStartingSnapshot(_startTime, false),
     ];
     _players = ["bottom", "top"];
-    _koPositionInLastMove = null;
     _gameState = GameState.playing;
     _stoneStates = {};
     _result = null;
@@ -105,7 +103,6 @@ class LocalGameplayServer {
       players: _players,
       prisoners: _prisoners,
       startTime: _startTime,
-      koPositionInLastMove: _koPositionInLastMove,
       gameState: _gameState,
       deadStones: deadStones,
       result: _result,
