@@ -15,14 +15,15 @@ import 'package:provider/provider.dart';
 
 class GameplayStage extends Stage {
   final GameStateBloc gameStateBloc;
+  final BoardStateBloc boardStateBloc;
 
-  GameplayStage(this.gameStateBloc);
+  GameplayStage(this.boardStateBloc, this.gameStateBloc);
 
   @override
   void initializeWhenAllMiddlewareAvailable(BuildContext context) {
     final gameStateBloc = context.read<GameStateBloc>();
     gameStateBloc.startPausedTimerOfActivePlayer();
-    // listenNewStone = gameStateBloc.listenForMove();
+    boardStateBloc.resetToReal();
     context.read<ScoreCalculationBloc>().calculateScore();
   }
 
