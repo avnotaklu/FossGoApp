@@ -65,7 +65,7 @@ class SettingsPage extends StatelessWidget {
           Consumer<SettingsProvider>(
             builder: (context, pro, child) {
               return settingsKeyVal(
-                  context, 'Notation', const MoveInputDropDown());
+                  context, 'Move input', const MoveInputDropDown());
             },
           ),
         ]),
