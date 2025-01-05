@@ -111,7 +111,7 @@ class AnalysisBloc extends ChangeNotifier {
   AnalysisBloc(this.gameStateBloc, this.systemUtilities, this.settingsProvider)
       : stoneLogic = StoneLogic(gameStateBloc.game) {
     gameStateBloc.gameMoveStream.listen((event) {
-      addReal(event.toPosition());
+      addReal(event.$1.toPosition());
     });
 
     for (var (idx, move) in game.moves.indexed) {

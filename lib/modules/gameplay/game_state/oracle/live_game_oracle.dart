@@ -104,7 +104,10 @@ class LiveGameOracle extends GameStateOracle {
     listenFromMove = gameMessageStream.asyncExpand((message) async* {
       if (message.type == SignalRMessageTypes.newMove) {
         final moveMessage = message.data as NewMoveMessage;
-        moveUpdateC.add(moveMessage.game.moves.last);
+        moveUpdateC.add((
+          moveMessage.game.moves.last,
+          moveMessage.game.moves.length - 1,
+        ));
         yield moveMessage;
       }
     });

@@ -33,7 +33,6 @@ import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/player_rating.dart';
 
-
 // This assumes the game is already started at time of creation
 // This assumes the two player's ids are "bottom" and "top"
 
@@ -109,7 +108,7 @@ class FaceToFaceGameOracle extends GameStateOracle {
     var newGame = gp.makeMove(move, thisAccountStone(game));
 
     newGame.fold(identity, (r) {
-      moveUpdateC.add(r.moves.last);
+      moveUpdateC.add((r.moves.last, r.moves.length - 1));
     });
 
     return newGame;

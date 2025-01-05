@@ -103,7 +103,7 @@ class GameStateBloc extends ChangeNotifier {
   late final StreamSubscription<GameUpdate> gameUpdateListener;
 
   Stream<Null> get gameEndStream => gameOracle.gameEndStream;
-  Stream<GameMove> get gameMoveStream => gameOracle.moveUpdate;
+  Stream<(GameMove, int)> get gameMoveStream => gameOracle.moveUpdate;
   Stream<ConnectionStrength>? get opponentConnection =>
       gameOracle.opponentConnection;
 
@@ -130,6 +130,19 @@ class GameStateBloc extends ChangeNotifier {
     gameUpdateListener = gameOracle.gameUpdate.listen((event) {
       updateStateFromGame(event.makeCopyFromOldGame(game));
     });
+
+    gameMoveStream.listen((move) {
+      if (!move.$1.isPass()) {
+        var res = stoneLogic.handleStoneUpdate(
+            move.$1.toPosition(), StoneTypeExt.fromMoveNumber(move.$2));
+
+        if (settingsProvider.sound) {
+          systemUtilities.playSound(SoundAsset.placeStone);
+        }
+
+        assert(res.result);
+      }
+    });
   }
 
   void resetBoard(BoardStateBloc board) {
@@ -155,7 +168,6 @@ class GameStateBloc extends ChangeNotifier {
       return left(AppError(message: "You can't play here"));
     }
 
-
     bloc.updateBoard(tmpStoneLogic.board);
 
     final move = MovePosition(
@@ -173,19 +185,7 @@ class GameStateBloc extends ChangeNotifier {
     BoardStateBloc bloc,
   ) async {
     return (await gameOracle.playMove(game, move)).map((g) {
-      if (!g.moves.last.isPass()) {
-        var move = g.moves.last;
-        var res = stoneLogic.handleStoneUpdate(
-            move.toPosition(), StoneTypeExt.fromMoveNumber(turn - 1));
-        bloc.intermediate = null;
-
-        if (settingsProvider.sound) {
-          systemUtilities.playSound(SoundAsset.placeStone);
-        }
-
-        assert(res.result);
-      }
-
+      bloc.intermediate = null;
       return updateStateFromGame(g);
     });
   }

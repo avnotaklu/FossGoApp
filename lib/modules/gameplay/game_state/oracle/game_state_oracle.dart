@@ -127,8 +127,8 @@ abstract class GameStateOracle {
   final StreamController<Null> gameEndC = StreamController.broadcast();
   Stream<Null> get gameEndStream => gameEndC.stream;
 
-  final StreamController<GameMove> moveUpdateC = StreamController.broadcast();
-  Stream<GameMove> get moveUpdate => moveUpdateC.stream;
+  final StreamController<(GameMove,int)> moveUpdateC = StreamController.broadcast();
+  Stream<(GameMove, int)> get moveUpdate => moveUpdateC.stream;
 
   Stream<ConnectionStrength>? get opponentConnection;
 

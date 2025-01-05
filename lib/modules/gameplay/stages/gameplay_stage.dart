@@ -44,7 +44,8 @@ class GameplayStage extends Stage {
 
     var player = boardStone?.toStoneType();
 
-    if (gameBoard.intermediate != null &&
+    if (player == null &&
+        gameBoard.intermediate != null &&
         position == gameBoard.intermediate!.pos) {
       player = StoneTypeExt.fromMoveNumber(gameStateBloc.playerTurn);
     }
@@ -137,8 +138,6 @@ class GameplayStage extends Stage {
           }
         }
       };
-
-  static void makeMove(BuildContext context, Position? position) {}
 
   @override
   void disposeStage() {
