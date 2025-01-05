@@ -7,9 +7,13 @@ import 'package:go/models/variant_type.dart';
 import 'package:go/modules/gameplay/game_state/board_state_bloc.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
+import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/settings/settings_provider.dart';
+import 'package:go/services/move_position.dart';
+import 'package:go/utils/board_size_data.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:test/test.dart';
 import 'stone_widget.dart';
 import '../../../models/position.dart';
 
@@ -54,37 +58,53 @@ class _BoardState extends State<Board> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        InteractiveViewer(
-          child: Center(
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                // return StatefulBuilder(
-                //   builder: (BuildContext context, StateSetter setState) {
-                //     print("${constraints.maxHeight}, ${constraints.maxWidth}");
-                return Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
-                      child: AspectRatio(
-                        aspectRatio: 1.0,
-                        child: Container(
-                          height: constraints.maxHeight,
-                          width: constraints.maxWidth,
-                          //color: Colors.black,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage(Constants.assets['board']!),
-                                fit: BoxFit.fill),
-                          ),
+        // InteractiveViewer(
+        //   panEnabled: false,
+        //   child:
+        Center(
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              final cons = BoxConstraints(
+                maxWidth: constraints.maxWidth,
+                maxHeight: constraints.maxWidth,
+              );
+
+              return Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
+                    child: AspectRatio(
+                      aspectRatio: 1.0,
+                      child: Container(
+                        height: cons.maxHeight,
+                        width: cons.maxWidth,
+                        //color: Colors.black,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: AssetImage(Constants.assets['board']!),
+                              fit: BoxFit.fill),
                         ),
                       ),
                     ),
-                    Container(
-                      height: constraints.maxWidth,
-                      width: constraints.maxWidth,
-                      child: BorderGrid(
-                        GridInfo(
-                          constraints,
+                  ),
+                  Container(
+                    height: cons.maxHeight,
+                    width: cons.maxWidth,
+                    child: BorderGrid(
+                      GameBoardSpace(
+                        cons,
+                        stoneSpacing,
+                        widget.rows,
+                        widget.cols,
+                        stoneInset,
+                      ),
+                    ),
+                  ),
+                  Consumer<BoardStateBloc>(
+                    builder: (context, bloc, child) => Consumer<AnalysisBloc>(
+                      builder: (context, bloc, child) => StoneLayoutGrid(
+                        GameBoardSpace(
+                          cons,
                           stoneSpacing,
                           widget.rows,
                           widget.cols,
@@ -92,25 +112,13 @@ class _BoardState extends State<Board> {
                         ),
                       ),
                     ),
-                    Consumer<BoardStateBloc>(
-                      builder: (context, bloc, child) => Consumer<AnalysisBloc>(
-                        builder: (context, bloc, child) => StoneLayoutGrid(
-                          GridInfo(
-                            constraints,
-                            stoneSpacing,
-                            widget.rows,
-                            widget.cols,
-                            stoneInset,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
+        // ),
         // context.read<GameStateBloc>()
         // Center(
         //   child: Text(
@@ -126,31 +134,22 @@ class _BoardState extends State<Board> {
   }
 }
 
-class GridInfo {
-  BoxConstraints constraints;
-  double stoneSpacing;
-  double stoneInset;
-  int rows;
-  int cols;
-
-  BoardSize get board => Constants.BoardSizeData(rows, cols).boardSize;
-
-  GridInfo(this.constraints, this.stoneSpacing, this.rows, this.cols,
-      this.stoneInset);
-}
-
 class BorderGrid extends StatelessWidget {
-  final GridInfo info;
+  final GameBoardSpace info;
   const BorderGrid(this.info, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
-      builder: (context, settings, child) => CustomPaint(
-        painter: BorderPainter(
-          info,
-          showLeftTop: settings.notationPosition.showLeftTop,
-          showRightBottom: settings.notationPosition.showRightBottom,
+    return Consumer<BoardStateBloc>(
+      builder: (context, boardState, child) => Consumer<SettingsProvider>(
+        builder: (context, settings, child) => CustomPaint(
+          painter: BorderPainter(
+            info,
+            showLeftTop: settings.notationPosition.showLeftTop,
+            showRightBottom: settings.notationPosition.showRightBottom,
+            intermediatePosition: boardState.intermediate,
+            primaryColor: context.theme.colorScheme.primary,
+          ),
         ),
       ),
     );
@@ -158,9 +157,11 @@ class BorderGrid extends StatelessWidget {
 }
 
 class BorderPainter extends CustomPainter {
-  final GridInfo info;
+  final GameBoardSpace info;
   final bool showLeftTop;
   final bool showRightBottom;
+  final Color primaryColor;
+  final MovePosition? intermediatePosition;
 
   Color get myColor => Colors.black;
 
@@ -171,6 +172,8 @@ class BorderPainter extends CustomPainter {
     this.info, {
     required this.showLeftTop,
     required this.showRightBottom,
+    required this.primaryColor,
+    required this.intermediatePosition,
   });
 
   @override
@@ -204,21 +207,29 @@ class BorderPainter extends CustomPainter {
     final start_grid_x = hOff + left;
     final start_grid_y = vOff + top;
 
-    final paint = Paint()
-      ..color = myColor
-      ..strokeWidth = bWidth
-      ..style = PaintingStyle.stroke;
-
     var rowSep = (gh / info.rows);
     double extraRowSep = rowSep / (info.rows - 1);
     var totRowSep = rowSep + extraRowSep;
 
     for (var i = 0; i < info.rows; i++) {
       double thisRowY = i * totRowSep + start_grid_y;
+      var isIntermediate =
+          intermediatePosition != null && intermediatePosition!.x == i;
+
+      var color = isIntermediate ? primaryColor : myColor;
+      var strokeWidth = isIntermediate ? bWidth * 10 : bWidth;
+
+      var startX = isIntermediate ? hOff : start_grid_x;
+
+      var endX = isIntermediate ? start_grid_x + gw + right : start_grid_x + gw;
+
       canvas.drawLine(
-        Offset(start_grid_x, thisRowY),
-        Offset(start_grid_x + gw, thisRowY),
-        paint,
+        Offset(startX, thisRowY),
+        Offset(endX, thisRowY),
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke,
       );
     }
 
@@ -229,10 +240,24 @@ class BorderPainter extends CustomPainter {
     for (var i = 0; i < info.cols; i++) {
       var thisColX = i * totColSep + start_grid_x;
 
+      var isIntermediate =
+          intermediatePosition != null && intermediatePosition!.y == i;
+
+      var color = isIntermediate ? primaryColor : myColor;
+      var strokeWidth = isIntermediate ? bWidth * 10 : bWidth;
+
+      var startY = isIntermediate ? vOff : start_grid_y;
+
+      var endY =
+          isIntermediate ? start_grid_y + gh + bottom : start_grid_y + gh;
+
       canvas.drawLine(
-        Offset(thisColX, start_grid_y),
-        Offset(thisColX, start_grid_y + gh),
-        paint,
+        Offset(thisColX, startY),
+        Offset(thisColX, endY),
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke,
       );
     }
 
@@ -253,7 +278,7 @@ class BorderPainter extends CustomPainter {
         text: TextSpan(
           text: text,
           style: TextStyle(
-            color: Colors.black,
+            color: myColor,
             fontFamily: GoogleFonts.spaceMono().fontFamily,
             fontSize: fontSize,
           ),
@@ -268,25 +293,55 @@ class BorderPainter extends CustomPainter {
       return painter;
     }
 
+    void paintNotationText(
+        bool isIntermediate, Offset off, TextPainter textPainter) {
+      if (isIntermediate) {
+        canvas.drawCircle(
+            off +
+                Offset(
+                  textPainter.width / 2,
+                  textPainter.height / 2,
+                ),
+            14,
+            Paint()..color = primaryColor);
+      }
+
+      textPainter.paint(
+        canvas,
+        Offset(
+          off.dx,
+          off.dy,
+        ),
+      );
+    }
+
     if (showRightBottom || showLeftTop) {
       for (var i = 0; i < info.rows; i++) {
+        var isIntermediate =
+            intermediatePosition != null && intermediatePosition!.x == i;
+
         final textPainter = getTextPainter((i + 1).toString());
 
         final line = start_grid_y + (i * totRowSep) - textPainter.height / 2;
         if (showLeftTop) {
-          textPainter.paint(
-            canvas,
+          paintNotationText(
+            isIntermediate,
             Offset(textPainter.width / 2 + 4, line),
+            textPainter,
           );
         }
         if (showRightBottom) {
-          textPainter.paint(
-            canvas,
+          paintNotationText(
+            isIntermediate,
             Offset(w - 10 - textPainter.width / 2, line),
+            textPainter,
           );
         }
       }
       for (var i = 0; i < info.rows; i++) {
+        var isIntermediate =
+            intermediatePosition != null && intermediatePosition!.y == i;
+
         final char = String.fromCharCode('A'.runes.first + i);
         final iSkippedChar = String.fromCharCode(
             char.runes.first + ((char.runes.first >= 'I'.runes.first) ? 1 : 0));
@@ -296,21 +351,17 @@ class BorderPainter extends CustomPainter {
         final line = start_grid_x + (i * totColSep) - textPainter.width / 2;
 
         if (showLeftTop) {
-          textPainter.paint(
-            canvas,
-            Offset(
-              line,
-              0 + 4,
-            ),
+          paintNotationText(
+            isIntermediate,
+            Offset(line, 0 + 4),
+            textPainter,
           );
         }
         if (showRightBottom) {
-          textPainter.paint(
-            canvas,
-            Offset(
-              line,
-              h - 10 - textPainter.height / 2,
-            ),
+          paintNotationText(
+            isIntermediate,
+            Offset(line, h - 10 - textPainter.height / 2),
+            textPainter,
           );
         }
       }
@@ -346,50 +397,8 @@ class BorderPainter extends CustomPainter {
   }
 }
 
-class BorderGridS extends StatelessWidget {
-  GridInfo info;
-  BorderGridS(this.info, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final bWidth = 2.0;
-    final showNotation = true;
-
-    final grid = (info.rows - 1) * (info.cols - 1);
-
-    return GridView.builder(
-      shrinkWrap: true,
-      padding: /*EdgeInsets.all(0)*/ EdgeInsets.all(info.stoneInset +
-          (((info.constraints.maxWidth / info.rows) / 2) - info.stoneSpacing)),
-      itemCount: grid,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: info.rows - 1,
-          childAspectRatio: 1,
-          crossAxisSpacing: 0,
-          mainAxisSpacing: 0),
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            /*color: Colors.transparent,*/
-            border: Border(
-              right: BorderSide(color: Colors.red, width: bWidth),
-              bottom: BorderSide(color: Colors.red, width: bWidth),
-              left: (index % (info.rows - 1) == 0)
-                  ? BorderSide(color: Colors.red, width: bWidth)
-                  : BorderSide.none,
-              top: (index < (info.rows - 1))
-                  ? BorderSide(color: Colors.red, width: bWidth)
-                  : BorderSide.none,
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
 class StoneLayoutGrid extends StatefulWidget {
-  final GridInfo info;
+  final GameBoardSpace info;
 
   const StoneLayoutGrid(this.info, {super.key} /*, this.playgroundMap*/);
   @override
@@ -404,30 +413,52 @@ class _StoneLayoutGridState extends State<StoneLayoutGrid> {
     return Padding(
       padding: EdgeInsets.all(widget.info.stoneInset),
       child: Consumer<SettingsProvider>(
-        builder: (context, settings, child) => GridView.builder(
-          shrinkWrap: true,
-          padding: EdgeInsets.only(
-            top: settings.notationPosition.showLeftTop ? edgeOffset : 0,
-            left: settings.notationPosition.showLeftTop ? edgeOffset : 0,
-            right: settings.notationPosition.showRightBottom ? edgeOffset : 0,
-            bottom: settings.notationPosition.showRightBottom ? edgeOffset : 0,
-          ),
-          itemCount: (widget.info.rows) * (widget.info.cols),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: (widget.info.rows),
-            childAspectRatio: 1,
-            crossAxisSpacing: widget.info.stoneSpacing,
-            mainAxisSpacing: widget.info.stoneSpacing,
-          ),
-          itemBuilder: (context, index) => SizedBox(
-            child: Stack(
-              children: [
-                Cell(Position(((index) ~/ widget.info.cols),
-                    ((index) % widget.info.rows).toInt())),
-              ],
+        builder: (context, settings, child) {
+          var boardSize = widget.info.board;
+
+          var padding = widget.info.boardPadding(settings.notationPosition);
+
+          var boardPanUpdateCallback = context.read<Stage>().onBoardPanUpdate;
+
+          var boardPanEndCallback = context.read<Stage>().onBoardPanEnd;
+
+          return GestureDetector(
+            onPanEnd: boardPanEndCallback == null
+                ? null
+                : (loc) {
+                    final pos = widget.info.from(loc.localPosition, padding);
+                    boardPanEndCallback.call(pos, context);
+                  },
+            onPanUpdate: boardPanUpdateCallback == null
+                ? null
+                : (loc) {
+                    final pos = widget.info.from(loc.localPosition, padding);
+                    boardPanUpdateCallback.call(pos, context);
+                  },
+            child: Padding(
+              padding: padding,
+              child: GridView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: (widget.info.rows) * (widget.info.cols),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: (widget.info.rows),
+                  childAspectRatio: 1,
+                  crossAxisSpacing: widget.info.stoneSpacing,
+                  mainAxisSpacing: widget.info.stoneSpacing,
+                ),
+                itemBuilder: (context, index) => SizedBox(
+                  child: Stack(
+                    children: [
+                      Cell(Position(((index) ~/ widget.info.cols),
+                          ((index) % widget.info.rows).toInt())),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

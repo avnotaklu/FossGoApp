@@ -4,10 +4,21 @@ import 'package:go/models/position.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
+import 'package:go/services/move_position.dart';
 
 class BoardStateBloc extends ChangeNotifier {
   late BoardState board;
   final GameStateBloc gameState;
+
+  MovePosition? _intermediate;
+
+  // ignore: unnecessary_getters_setters
+  MovePosition? get intermediate => _intermediate;
+
+  set intermediate(MovePosition? pos) {
+    _intermediate = pos;
+    notifyListeners();
+  }
 
   void updateBoard(BoardState b) {
     board = b;
@@ -20,7 +31,7 @@ class BoardStateBloc extends ChangeNotifier {
       gameState.game.columns,
     ).boardStateFromGame(gameState.game);
 
-    gameState.intermediate = null;
+    intermediate = null;
 
     notifyListeners();
   }

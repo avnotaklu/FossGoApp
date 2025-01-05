@@ -52,8 +52,8 @@ class ActionButtonWidget extends StatelessWidget {
                       size: 18,
                     ),
                     Text(actionType.label,
-                        style:
-                            context.textTheme.labelSmall?.copyWith(fontSize: 12)),
+                        style: context.textTheme.labelSmall
+                            ?.copyWith(fontSize: 12)),
                   ],
                 ),
               ),
@@ -152,11 +152,11 @@ class Submit extends StatelessWidget {
     final gameStateBloc = context.read<GameStateBloc>();
     return Consumer<BoardStateBloc>(
       builder: (context, boardStateBloc, child) => ActionButtonWidget(
-          (gameStateBloc.intermediate == null)
+          (boardStateBloc.intermediate == null)
               ? null
               : () {
-                  gameStateBloc.makeMove(gameStateBloc.intermediate!);
-                  gameStateBloc.intermediate = null;
+                  gameStateBloc.makeMove(
+                      boardStateBloc.intermediate!, boardStateBloc);
                 },
           ActionType.submit),
     );
@@ -169,7 +169,10 @@ class Pass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButtonWidget(() {
-      context.read<GameStateBloc>().makeMove(MovePosition(x: null, y: null));
+      context.read<GameStateBloc>().makeMove(
+            MovePosition(x: null, y: null),
+            context.read<BoardStateBloc>(),
+          );
     }, ActionType.pass);
   }
 }

@@ -211,7 +211,9 @@ class _WrapperGameState extends State<WrapperGame> {
 
   @override
   Widget build(BuildContext context) {
-    context.read<Stage>().initializeWhenAllMiddlewareAvailable(context);
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      context.read<Stage>().initializeWhenAllMiddlewareAvailable(context);
+    });
 
     if (widget.compact_ui) {
       return CompactGameUi(

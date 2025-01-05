@@ -18,11 +18,25 @@ class Cell extends StatelessWidget {
     BoardStateBloc gameBoard = context.read();
     final stone = gameBoard.stoneAt(position);
     final stage = context.read<Stage>();
-    return GestureDetector(
-      onTap: () {
-        stage.onClickCell(position, context);
-      },
-      child: stage.drawCell(position, null, context),
+    return Container(
+      child: GestureDetector(
+        onTap: stage.onCellTap == null
+            ? null
+            : () {
+                stage.onCellTap!(position, context);
+              },
+        onTapUp: stage.onCellTapUp == null
+            ? null
+            : (details) {
+                stage.onCellTapUp!(position, context);
+              },
+        onTapDown: stage.onCellTapDown == null
+            ? null
+            : (details) {
+                stage.onCellTapDown!(position, context);
+              },
+        child: stage.drawCell(position, null, context),
+      ),
     );
   }
 }

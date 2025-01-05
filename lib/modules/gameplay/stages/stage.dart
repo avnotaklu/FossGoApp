@@ -31,11 +31,24 @@ extension Constructor on StageType {
 }
 
 abstract class Stage extends ChangeNotifier {
-  Stage() {
+  Stage({
+    this.onCellTapDown,
+    this.onCellTapUp,
+    this.onCellTap,
+    this.onBoardPanUpdate,
+    this.onBoardPanEnd,
+  }) {
     notifyListeners();
   }
 
-  void onClickCell(Position? position, BuildContext context);
+  final Function(Position? position, BuildContext context)? onCellTapDown;
+
+  final Function(Position? position, BuildContext context)? onCellTapUp;
+
+  final Function(Position? position, BuildContext context)? onCellTap;
+
+  final Function(Position? position, BuildContext context)? onBoardPanUpdate;
+  final Function(Position? position, BuildContext context)? onBoardPanEnd;
 
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context);
 

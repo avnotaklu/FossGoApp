@@ -207,7 +207,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
 
   int? getFinalScore(Game game, StoneType stone) {
     if (game.gameOverMethod == GameOverMethod.Score) {
-      return game.finalScore[stone.index] + game.prisoners[stone.index];
+      return game.finalScore[stone.index];
     }
     return null;
   }
@@ -215,7 +215,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
   Widget gameOverScore(Game game, StoneType stone) {
     return game.gameOverMethod == GameOverMethod.Score
         ? Text(
-            " = ${game.finalScore[stone.index] + game.prisoners[stone.index] + (stone.index * game.komi)}",
+            " = ${game.finalScore[stone.index] + (stone.index * game.komi)}",
             style: context.textTheme.labelLarge,
           )
         : const SizedBox.shrink();

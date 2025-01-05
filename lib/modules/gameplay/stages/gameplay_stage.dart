@@ -21,7 +21,13 @@ class GameplayStage extends Stage {
   final GameStateBloc gameStateBloc;
   final BoardStateBloc boardStateBloc;
 
-  GameplayStage(this.boardStateBloc, this.gameStateBloc);
+  GameplayStage(this.boardStateBloc, this.gameStateBloc)
+      : super(
+          onCellTapDown: _onTapDown(),
+          onCellTapUp: _onTapUp(),
+          onBoardPanUpdate: _onBoardPanUpdate(),
+          onBoardPanEnd: _onBoardPanEnd(),
+        );
 
   @override
   void initializeWhenAllMiddlewareAvailable(BuildContext context) {
@@ -38,8 +44,8 @@ class GameplayStage extends Stage {
 
     var player = boardStone?.toStoneType();
 
-    if (gameStateBloc.intermediate != null &&
-        position == gameStateBloc.intermediate!.pos) {
+    if (gameBoard.intermediate != null &&
+        position == gameBoard.intermediate!.pos) {
       player = StoneTypeExt.fromMoveNumber(gameStateBloc.playerTurn);
     }
 
@@ -53,7 +59,7 @@ class GameplayStage extends Stage {
             constants.playerColors[player.index],
             position,
           ),
-        if (move?.toPosition() == position)
+        if (move?.toPosition() == position && player != null)
           Center(
             child: Padding(
               padding: EdgeInsets.all(board.circleIconPaddingForCells),
@@ -62,7 +68,7 @@ class GameplayStage extends Stage {
                   fit: BoxFit.fill,
                   child: Icon(
                     Icons.circle_outlined,
-                    color: player!.other.materialColor,
+                    color: player.other.materialColor,
                   ),
                 ),
               ),
@@ -75,31 +81,64 @@ class GameplayStage extends Stage {
     );
   }
 
-  @override
-  void onClickCell(Position? position, BuildContext context) {
-    makeMove(context, position);
-  }
+  static Function(Position? position, BuildContext context) _onTapDown() =>
+      (position, context) {
+        GameStateBloc gameStatBloc = context.read();
+        BoardStateBloc boardBloc = context.read();
 
-  static void makeMove(BuildContext context, Position? position) {
-    SettingsProvider settings = context.read();
-    GameStateBloc gameStatBloc = context.read();
-    BoardStateBloc boardBloc = context.read();
+        if (position != null) {
+          gameStatBloc.placeStone(position, boardBloc);
+        }
+      };
 
-    if (position != null) {
-      if (settings.moveInput == MoveInputMode.immediate) {
-        var move = gameStatBloc.placeStone(position, boardBloc);
-        move.fold((l) {}, (r) {
-          gameStatBloc.makeMove(r);
-        });
-      } else if (settings.moveInput == MoveInputMode.submitButton) {
-        var move = gameStatBloc.placeStone(position, boardBloc);
+  static Function(Position? position, BuildContext context)
+      _onBoardPanUpdate() => (position, context) {
+            GameStateBloc gameStatBloc = context.read();
+            BoardStateBloc boardBloc = context.read();
 
-        move.fold((l) {}, (r) {
-          gameStatBloc.intermediate = r;
-        });
-      }
-    }
-  }
+            if (position != null) {
+              var move = gameStatBloc.placeStone(position, boardBloc);
+
+              move.fold((l) {
+                gameStatBloc.resetBoard(boardBloc);
+              }, (r) {});
+            } else {
+              gameStatBloc.resetBoard(boardBloc);
+            }
+          };
+
+  static Function(Position? position, BuildContext context) _onTapUp() =>
+      (position, context) {
+        GameStateBloc gameStatBloc = context.read();
+        BoardStateBloc boardBloc = context.read();
+        SettingsProvider settings = context.read();
+
+        if (position != null) {
+          if (settings.moveInput == MoveInputMode.immediate) {
+            var move = gameStatBloc.placeStone(position, boardBloc);
+            move.fold((l) {}, (r) {
+              gameStatBloc.makeMove(r, boardBloc);
+            });
+          }
+        }
+      };
+
+  static Function(Position? position, BuildContext context) _onBoardPanEnd() =>
+      (position, context) {
+        GameStateBloc gameStatBloc = context.read();
+        BoardStateBloc boardBloc = context.read();
+        SettingsProvider settings = context.read();
+
+        if (position != null) {
+          if (settings.moveInput == MoveInputMode.immediate) {
+            var move = boardBloc.intermediate;
+
+            if (move != null) gameStatBloc.makeMove(move, boardBloc);
+          }
+        }
+      };
+
+  static void makeMove(BuildContext context, Position? position) {}
 
   @override
   void disposeStage() {

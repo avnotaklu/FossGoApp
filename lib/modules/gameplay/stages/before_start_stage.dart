@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 
 // class BeforeStartStage extends Stage<BeforeStartStage> {
 class BeforeStartStage extends Stage {
-  BeforeStartStage();
+  BeforeStartStage() : super(onCellTap: _onTap());
 
   @override
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
@@ -21,13 +21,14 @@ class BeforeStartStage extends Stage {
   }
 
   @override
-  void onClickCell(Position? position, BuildContext context) {
-    final bloc = context.read<GameStateBloc>();
+  static Function(Position? position, BuildContext context) _onTap() =>
+      (position, context) {
+        final bloc = context.read<GameStateBloc>();
 
-    if (bloc.game.bothPlayersIn()) {
-      GameplayStage.makeMove(context, position);
-    }
-  }
+        if (bloc.game.bothPlayersIn()) {
+          GameplayStage.makeMove(context, position);
+        }
+      };
 
   @override
   disposeStage() {}

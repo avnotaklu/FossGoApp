@@ -99,11 +99,6 @@ class GameEndStage extends Stage {
   }
 
   @override
-  void onClickCell(Position? position, BuildContext context) {
-    // After game ended do nothing on cell click
-  }
-
-  @override
   disposeStage() {}
 
   @override

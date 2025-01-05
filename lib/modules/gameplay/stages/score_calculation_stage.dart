@@ -33,7 +33,8 @@ class ScoreCalculationStage extends Stage {
     context.read<ScoreCalculationBloc>().setupScore();
   }
 
-  ScoreCalculationStage(this.boardStateBloc, this.gameStateBloc);
+  ScoreCalculationStage(this.boardStateBloc, this.gameStateBloc)
+      : super(onCellTap: _onTap(boardStateBloc));
 
   @override
   Widget drawCell(
@@ -120,13 +121,6 @@ class ScoreCalculationStage extends Stage {
   }
 
   @override
-  onClickCell(Position? position, BuildContext context) {
-    if (position != null && boardStateBloc.stoneAt(position) != null) {
-      context.read<ScoreCalculationBloc>().onClickStone(position);
-    }
-  }
-
-  @override
   disposeStage() {
     removedClusterSubscription?.cancel();
     opponentConfirmationStream?.cancel();
@@ -134,4 +128,13 @@ class ScoreCalculationStage extends Stage {
 
   @override
   StageType get getType => StageType.scoreCalculation;
+
+  static void Function(Position? position, BuildContext context) _onTap(
+      BoardStateBloc boardStateBloc) {
+    return (Position? position, BuildContext context) {
+      if (position != null && boardStateBloc.stoneAt(position) != null) {
+        context.read<ScoreCalculationBloc>().onClickStone(position);
+      }
+    };
+  }
 }

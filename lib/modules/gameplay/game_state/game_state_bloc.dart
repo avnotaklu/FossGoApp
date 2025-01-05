@@ -98,15 +98,6 @@ class GameStateBloc extends ChangeNotifier {
   final SystemUtilities systemUtilities;
   final SettingsProvider settingsProvider;
 
-  MovePosition? _intermediate;
-
-  // ignore: unnecessary_getters_setters
-  MovePosition? get intermediate => _intermediate;
-
-  set intermediate(MovePosition? pos) {
-    _intermediate = pos;
-  }
-
   late final TimerController headsUpTimeController;
 
   late final StreamSubscription<GameUpdate> gameUpdateListener;
@@ -141,6 +132,11 @@ class GameStateBloc extends ChangeNotifier {
     });
   }
 
+  void resetBoard(BoardStateBloc board) {
+    board.intermediate = null;
+    board.updateBoard(stoneLogic.board);
+  }
+
   Either<AppError, MovePosition> placeStone(
     Position position,
     BoardStateBloc bloc,
@@ -159,9 +155,6 @@ class GameStateBloc extends ChangeNotifier {
       return left(AppError(message: "You can't play here"));
     }
 
-    if (settingsProvider.sound) {
-      systemUtilities.playSound(SoundAsset.placeStone);
-    }
 
     bloc.updateBoard(tmpStoneLogic.board);
 
@@ -170,17 +163,26 @@ class GameStateBloc extends ChangeNotifier {
       y: position.y,
     );
 
+    bloc.intermediate = move;
+
     return right(move);
   }
 
   Future<Either<AppError, Game>> makeMove(
     MovePosition move,
+    BoardStateBloc bloc,
   ) async {
     return (await gameOracle.playMove(game, move)).map((g) {
       if (!g.moves.last.isPass()) {
         var move = g.moves.last;
         var res = stoneLogic.handleStoneUpdate(
             move.toPosition(), StoneTypeExt.fromMoveNumber(turn - 1));
+        bloc.intermediate = null;
+
+        if (settingsProvider.sound) {
+          systemUtilities.playSound(SoundAsset.placeStone);
+        }
+
         assert(res.result);
       }
 

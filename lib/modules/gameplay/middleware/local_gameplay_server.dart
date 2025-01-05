@@ -178,6 +178,8 @@ class LocalGameplayServer {
   }
 
   void _setTimes(DateTime time) {
+    _timer.cancel();
+
     var times = timeCalculator.recalculateTurnPlayerTimeSnapshots(
       StoneType.values[turnPlayer],
       _playerTimeSnapshots,
@@ -189,7 +191,6 @@ class LocalGameplayServer {
 
     var turnPlayerMS = _playerTimeSnapshots[turnPlayer].mainTimeMilliseconds;
     if (turnPlayerMS != 0) {
-      _timer.cancel();
       _timer = Timer(Duration(milliseconds: turnPlayerMS), _timeoutTimer);
 
       log("Reset clock to ${_playerTimeSnapshots[turnPlayer].mainTimeMilliseconds / 1000} seconds");
@@ -201,7 +202,6 @@ class LocalGameplayServer {
 
     if (_playerTimeSnapshots[turnPlayer].mainTimeMilliseconds == 0) {
       _endGame(GameOverMethod.Timeout, StoneType.values[turnPlayer].other);
-      _timer.cancel();
     } else {
       gameUpdateC.add(
         GameUpdate(

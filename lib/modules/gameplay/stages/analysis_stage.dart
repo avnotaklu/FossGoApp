@@ -14,11 +14,11 @@ class AnalysisStage extends Stage {
   final AnalysisBloc analysisBloc;
   final GameStateBloc gameStateBloc;
 
-  AnalysisStage(this.analysisBloc, this.gameStateBloc);
+  AnalysisStage(this.analysisBloc, this.gameStateBloc)
+      : super(onCellTap: _onTap(analysisBloc));
 
   @override
   void disposeStage() {
-    //
   }
 
   @override
@@ -80,8 +80,10 @@ class AnalysisStage extends Stage {
     //
   }
 
-  @override
-  void onClickCell(Position? position, BuildContext context) {
-    analysisBloc.addAlternative(position);
+  static Function(Position? position, BuildContext context) _onTap(
+      AnalysisBloc bloc) {
+    return (Position? position, BuildContext context) {
+      bloc.addAlternative(position);
+    };
   }
 }
