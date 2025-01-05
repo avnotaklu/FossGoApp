@@ -270,7 +270,7 @@ class BorderPainter extends CustomPainter {
 
     if (showRightBottom || showLeftTop) {
       for (var i = 0; i < info.rows; i++) {
-        final textPainter = getTextPainter(i.toString());
+        final textPainter = getTextPainter((i + 1).toString());
 
         final line = start_grid_y + (i * totRowSep) - textPainter.height / 2;
         if (showLeftTop) {
