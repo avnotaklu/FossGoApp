@@ -22,7 +22,7 @@ import 'package:go/services/google_o_auth_model.dart';
 import 'package:go/services/guest_user.dart';
 import 'package:go/services/guest_user_result.dart';
 import 'package:go/services/move_position.dart';
-import 'package:go/services/my_games.dart';
+import 'package:go/services/ongoing_games.dart';
 import 'package:go/services/new_move_result.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/register_player_dto.dart';
@@ -320,9 +320,9 @@ class Api {
     return convert(res, (a) => AvailableGames.fromJson(a));
   }
 
-  Future<Either<AppError, MyGames>> getMyGames(String token) async {
-    var res = await get(Uri.parse("$baseUrl/Player/MyGames"), token);
-    return convert(res, (a) => MyGames.fromJson(a));
+  Future<Either<AppError, OngoingGames>> getMyGames(String token) async {
+    var res = await get(Uri.parse("$baseUrl/Player/OngoingGames"), token);
+    return convert(res, (a) => OngoingGames.fromJson(a));
   }
 
   static ApiError getErrorFromResponse(http.Response res) {

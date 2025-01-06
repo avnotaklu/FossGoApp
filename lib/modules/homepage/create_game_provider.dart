@@ -21,9 +21,7 @@ typedef GameCreationParams = ({
 });
 
 class CreateGameProvider extends ChangeNotifier {
-  // final Future<Either<AppError, Game>> Function(
-  //         StoneSelectionType stone, TimeControlDto time, BoardSizeData board)
-  //     onCreate;
+
   final Completer<GameCreationParams> paramsCompleter;
 
   var api = Api();

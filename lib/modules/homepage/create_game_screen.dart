@@ -16,6 +16,7 @@ import 'package:go/modules/gameplay/game_state/oracle/face_to_face_game_oracle.d
 import 'package:go/modules/gameplay/middleware/local_gameplay_server.dart';
 import 'package:go/modules/homepage/custom_games_page.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
+import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
@@ -26,6 +27,7 @@ import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/game_creation_dto.dart';
+import 'package:go/services/ongoing_games.dart';
 import 'package:go/services/time_control_dto.dart';
 
 import 'package:go/widgets/buttons.dart';
@@ -120,6 +122,8 @@ void showLiveCreateCustomGameDialog(BuildContext context) async {
   final signalRBloc = context.read<SignalRProvider>();
   final authPro = context.read<AuthProvider>();
   final statsRepo = context.read<IStatsRepository>();
+  final homepageBloc = context.read<HomepageBloc>();
+
   final Completer<GameCreationParams> paramsCompleter = Completer();
 
   final res = await showDialog(
@@ -156,6 +160,12 @@ void showLiveCreateCustomGameDialog(BuildContext context) async {
         }
       }, (r) {
         final statRepo = context.read<IStatsRepository>();
+        homepageBloc.addNewGame(
+          OnGoingGame(
+            game: r,
+            opposingPlayer: null,
+          ),
+        );
         Navigator.push(
             context,
             MaterialPageRoute<void>(
@@ -270,7 +280,9 @@ class CreateGameScreen extends StatelessWidget {
                     sectionHeading(context, "Time Control"),
                     flatDropdown(
                       context,
-                      TimeStandard.values.take(3).toList(), // TODO: Add correspondance as well, after proper correspondance support
+                      TimeStandard.values
+                          .take(3)
+                          .toList(), // TODO: Add correspondance as well, after proper correspondance support
                       cgp.timeStandard,
                       cgp.changeTimeStandard,
                       (t) => t.standardName,

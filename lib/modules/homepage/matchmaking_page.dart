@@ -35,7 +35,10 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => MatchmakingProvider(context.read<SignalRProvider>()),
+      create: (context) => MatchmakingProvider(
+        context.read<SignalRProvider>(),
+        context.read<HomepageBloc>(),
+      ),
       builder: (context, child) => Scaffold(
         // backgroundColor: Color(0xff111118),
         // backgroundColor: Colors.red,
@@ -189,18 +192,20 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
               Text("Ongoing games", style: context.textTheme.headlineSmall),
               const SizedBox(height: 20),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: context.read<HomepageBloc>().myGames.length,
-                    itemBuilder: (context, index) {
-                      final game = context.read<HomepageBloc>().myGames[index];
-                      return GameCard(
-                        game: game.game,
-                        otherPlayerData: game.opposingPlayer,
-                      );
-                    },
+                child: Consumer<HomepageBloc>(
+                  builder: (context, homeBloc, child) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: homeBloc.myGames.length,
+                      itemBuilder: (context, index) {
+                        final game = homeBloc.myGames[index];
+                        return GameCard(
+                          game: game.game,
+                          otherPlayerData: game.opposingPlayer,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),

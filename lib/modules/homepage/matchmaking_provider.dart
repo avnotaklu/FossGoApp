@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
+import 'package:go/modules/homepage/homepage_bloc.dart';
+import 'package:go/services/ongoing_games.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/services/find_match_dto.dart';
@@ -21,14 +23,20 @@ class MatchmakingProvider extends ChangeNotifier {
   bool findingMatch = false;
 
   final SignalRProvider signalRProvider;
+  final HomepageBloc homepageBloc;
 
-  MatchmakingProvider(this.signalRProvider) {
+  MatchmakingProvider(this.signalRProvider, this.homepageBloc) {
     // TODO: this should also maybe have some notification to the user
 
     signalRProvider.userMessagesStream.listen((event) {
       if (event.type == SignalRMessageTypes.matchFound) {
         debugPrint("Got matchmaking update");
-        onMatchmakingUpdated.add(event.data as GameJoinMessage);
+        var join = event.data as GameJoinMessage;
+        onMatchmakingUpdated.add(join);
+        homepageBloc.addNewGame(OnGoingGame(
+          game: join.game,
+          opposingPlayer: join.otherPlayerData,
+        ));
         findingMatch = false;
         notifyListeners();
       }

@@ -11,7 +11,7 @@ import 'package:go/services/user_account.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/available_game.dart';
 import 'package:go/services/game_join_dto.dart';
-import 'package:go/services/my_games.dart';
+import 'package:go/services/ongoing_games.dart';
 import 'package:go/services/signal_r_message.dart';
 
 class HomepageBloc extends ChangeNotifier {
@@ -20,7 +20,8 @@ class HomepageBloc extends ChangeNotifier {
   List<AvailableGame> get availableGames => _availableGames
       .where((a) => !a.game.didStart() && !a.game.didEnd())
       .toList();
-  List<MyGame> myGames = [];
+
+  List<OnGoingGame> myGames = [];
 
   var api = Api();
   final SignalRProvider signalRProvider;
@@ -65,14 +66,16 @@ class HomepageBloc extends ChangeNotifier {
       if (message.type == SignalRMessageTypes.newGame) {
         debugPrint("New game was recieved");
         final newGameMessage = (message.data as NewGameCreatedMessage);
-        if (newGameMessage.game.creatorInfo.id == authBloc.myId) {
-          myGames.add(
-              MyGame(game: newGameMessage.game.game, opposingPlayer: null));
-        } else {
+        if (newGameMessage.game.creatorInfo.id != authBloc.myId) {
           _availableGames.add(newGameMessage.game);
         }
         notifyListeners();
       }
     });
+  }
+
+  void addNewGame(OnGoingGame g) {
+    myGames.add(g);
+    notifyListeners();
   }
 }

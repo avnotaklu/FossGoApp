@@ -14,7 +14,6 @@ import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/my_app_drawer.dart';
 import 'package:provider/provider.dart';
 
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -28,9 +27,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    var homepageBloc = context.read<HomepageBloc>();
-    homepageBloc.getAvailableGames(context.read<AuthProvider>().token!);
-    homepageBloc.getMyGames(context.read<AuthProvider>().token!);
+    WidgetsBinding.instance.addPostFrameCallback((d) {
+      var homepageBloc = context.read<HomepageBloc>();
+      homepageBloc.getAvailableGames(context.read<AuthProvider>().token!);
+      homepageBloc.getMyGames(context.read<AuthProvider>().token!);
+    });
   }
 
   int currentPageIndex = 0;

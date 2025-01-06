@@ -4,11 +4,11 @@ import 'dart:convert';
 import 'package:go/models/game.dart';
 import 'package:go/services/public_user_info.dart';
 
-class MyGame {
+class OnGoingGame {
   final Game game;
   final PublicUserInfo? opposingPlayer;
 
-  MyGame({
+  OnGoingGame({
     required this.game,
     required this.opposingPlayer,
   });
@@ -20,8 +20,8 @@ class MyGame {
     };
   }
 
-  factory MyGame.fromMap(Map<String, dynamic> map) {
-    return MyGame(
+  factory OnGoingGame.fromMap(Map<String, dynamic> map) {
+    return OnGoingGame(
       game: Game.fromMap(map['game'] as Map<String, dynamic>),
       opposingPlayer: map['opposingPlayer'] == null
           ? null
@@ -32,14 +32,14 @@ class MyGame {
 
   String toJson() => json.encode(toMap());
 
-  factory MyGame.fromJson(String source) =>
-      MyGame.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory OnGoingGame.fromJson(String source) =>
+      OnGoingGame.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
-class MyGames {
-  final List<MyGame> games;
+class OngoingGames {
+  final List<OnGoingGame> games;
 
-  MyGames({required this.games});
+  OngoingGames({required this.games});
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -47,17 +47,17 @@ class MyGames {
     };
   }
 
-  factory MyGames.fromMap(Map<String, dynamic> map) {
-    return MyGames(
-      games: List<MyGame>.from(
-        (map['games'] as List).map<MyGame>(
-          (x) => MyGame.fromMap(x as Map<String, dynamic>),
+  factory OngoingGames.fromMap(Map<String, dynamic> map) {
+    return OngoingGames(
+      games: List<OnGoingGame>.from(
+        (map['games'] as List).map<OnGoingGame>(
+          (x) => OnGoingGame.fromMap(x as Map<String, dynamic>),
         ),
       ),
     );
   }
 
   String toJson() => json.encode(toMap());
-  factory MyGames.fromJson(String source) =>
-      MyGames.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory OngoingGames.fromJson(String source) =>
+      OngoingGames.fromMap(json.decode(source) as Map<String, dynamic>);
 }
