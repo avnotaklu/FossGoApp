@@ -60,21 +60,19 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: context
-                                .read<HomepageBloc>()
-                                .availableGames
-                                .length,
-                            itemBuilder: (context, index) {
-                              final game = context
-                                  .read<HomepageBloc>()
-                                  .availableGames[index];
-                              return GameCard(
-                                game: game.game,
-                                otherPlayerData: game.creatorInfo,
-                              );
-                            },
+                          child: Consumer<HomepageBloc>(
+                            builder: (context, homeBloc, child) =>
+                                ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: homeBloc.availableGames.length,
+                              itemBuilder: (context, index) {
+                                final game = homeBloc.availableGames[index];
+                                return GameCard(
+                                  game: game.game,
+                                  otherPlayerData: game.creatorInfo,
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),

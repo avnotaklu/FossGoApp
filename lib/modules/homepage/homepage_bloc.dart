@@ -16,10 +16,7 @@ import 'package:go/services/signal_r_message.dart';
 
 class HomepageBloc extends ChangeNotifier {
   List<UserAccount> otherActivePlayers = [];
-  List<AvailableGame> _availableGames = [];
-  List<AvailableGame> get availableGames => _availableGames
-      .where((a) => !a.game.didStart() && !a.game.didEnd())
-      .toList();
+  List<AvailableGame> availableGames = [];
 
   List<OnGoingGame> myGames = [];
 
@@ -38,6 +35,19 @@ class HomepageBloc extends ChangeNotifier {
   Future<Either<AppError, GameEntranceData>> joinGame(
       String gameId, String token) async {
     var game = await api.joinGame(GameJoinDto(gameId: gameId), token);
+
+    game.fold((l) {
+      myGames.removeWhere((e) => e.game.gameId == gameId);
+      availableGames.removeWhere((element) => element.game.gameId == gameId);
+      notifyListeners();
+    }, (r) {
+      availableGames.removeWhere((element) => element.game.gameId == gameId);
+
+      addNewGame(OnGoingGame(
+        game: r.game,
+        opposingPlayer: r.otherPlayerData,
+      ));
+    });
     return game;
   }
 
@@ -46,7 +56,7 @@ class HomepageBloc extends ChangeNotifier {
     game.fold((e) {
       debugPrint("Couldn't get available games");
     }, (games) {
-      _availableGames.addAll(games.games);
+      availableGames.addAll(games.games);
       notifyListeners();
     });
   }
@@ -67,7 +77,7 @@ class HomepageBloc extends ChangeNotifier {
         debugPrint("New game was recieved");
         final newGameMessage = (message.data as NewGameCreatedMessage);
         if (newGameMessage.game.creatorInfo.id != authBloc.myId) {
-          _availableGames.add(newGameMessage.game);
+          availableGames.add(newGameMessage.game);
         }
         notifyListeners();
       }
@@ -75,6 +85,10 @@ class HomepageBloc extends ChangeNotifier {
   }
 
   void addNewGame(OnGoingGame g) {
+    if (myGames.any((element) => element.game.gameId == g.game.gameId)) {
+      return;
+    }
+
     myGames.add(g);
     notifyListeners();
   }
