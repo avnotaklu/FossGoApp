@@ -10,6 +10,7 @@ class LocalDatasource {
   final String _compactGameUIKey = 'compactGameUI';
   final String _notationPositionKey = 'compactGameUI';
   final String _soundKey = 'soundEnabled';
+  final String _showCrosshairKey = 'showCrosshair';
   final String _moveInputKey = 'moveInput';
 
   Future<void> storeToken(String token) async {
@@ -41,6 +42,10 @@ class LocalDatasource {
     await sharedPrefs.setInt(_moveInputKey, mode.index);
   }
 
+  Future<void> storeShowCrosshair(bool value) async {
+    await sharedPrefs.setBool(_showCrosshairKey, value);
+  }
+
   Future<String?> getToken() async {
     return await sharedPrefs.getString(_tokenDataKey);
   }
@@ -63,6 +68,10 @@ class LocalDatasource {
     return await sharedPrefs.getBool(_soundKey);
   }
 
+  Future<bool?> getShowCrosshair() async {
+    return await sharedPrefs.getBool(_showCrosshairKey);
+  }
+
   Future<NotationPosition?> getNotationPosition() async {
     final notationPosition = await sharedPrefs.getInt(_notationPositionKey);
     if (notationPosition == null) return null;
@@ -82,5 +91,7 @@ class LocalDatasource {
     await sharedPrefs.remove(_compactGameUIKey);
     await sharedPrefs.remove(_soundKey);
     await sharedPrefs.remove(_notationPositionKey);
+    await sharedPrefs.remove(_moveInputKey);
+    await sharedPrefs.remove(_showCrosshairKey);
   }
 }

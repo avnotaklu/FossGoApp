@@ -47,6 +47,15 @@ class SettingsPage extends StatelessWidget {
           Consumer<SettingsProvider>(
             builder: (context, pro, child) {
               return settingsKeyVal(
+                  context, 'Move Crosshair', showCrosshairSwitch(context));
+            },
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Consumer<SettingsProvider>(
+            builder: (context, pro, child) {
+              return settingsKeyVal(
                   context, 'Compact Game UI', const GameUIToggle());
             },
           ),
@@ -113,6 +122,25 @@ class SettingsPage extends StatelessWidget {
       selected: {context.read<SettingsProvider>().themeSetting},
       selectedIcon: SizedBox.shrink(),
     );
+  }
+
+  Widget showCrosshairSwitch(BuildContext context) {
+    return Switch(
+        thumbIcon: WidgetStateProperty.resolveWith(
+          (state) => state.contains(WidgetState.selected)
+              ? Icon(
+                  Icons.check,
+                  color: context.theme.colorScheme.primary,
+                )
+              : null,
+        ),
+        value: context.read<SettingsProvider>().showCrosshair,
+        onChanged: (v) {
+          if (v) {
+            SystemSound.play(SystemSoundType.click);
+          }
+          context.read<SettingsProvider>().setShowCrosshair(v);
+        });
   }
 
   Widget soundSwitch(BuildContext context) {

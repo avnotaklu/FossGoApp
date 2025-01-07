@@ -149,6 +149,7 @@ class BorderGrid extends StatelessWidget {
             showRightBottom: settings.notationPosition.showRightBottom,
             intermediatePosition: boardState.intermediate,
             primaryColor: context.theme.colorScheme.primary,
+            showCrosshair: settings.showCrosshair,
           ),
         ),
       ),
@@ -162,6 +163,7 @@ class BorderPainter extends CustomPainter {
   final bool showRightBottom;
   final Color primaryColor;
   final MovePosition? intermediatePosition;
+  final bool showCrosshair;
 
   Color get myColor => Colors.black;
 
@@ -174,6 +176,7 @@ class BorderPainter extends CustomPainter {
     required this.showRightBottom,
     required this.primaryColor,
     required this.intermediatePosition,
+    required this.showCrosshair,
   });
 
   @override
@@ -216,12 +219,15 @@ class BorderPainter extends CustomPainter {
       var isIntermediate =
           intermediatePosition != null && intermediatePosition!.x == i;
 
-      var color = isIntermediate ? primaryColor : myColor;
-      var strokeWidth = isIntermediate ? bWidth * 10 : bWidth;
+      var crosshairVisible = showCrosshair && isIntermediate;
 
-      var startX = isIntermediate ? hOff : start_grid_x;
+      var color = crosshairVisible ? primaryColor : myColor;
+      var strokeWidth = crosshairVisible ? bWidth * 10 : bWidth;
 
-      var endX = isIntermediate ? start_grid_x + gw + right : start_grid_x + gw;
+      var startX = crosshairVisible ? hOff : start_grid_x;
+
+      var endX =
+          crosshairVisible ? start_grid_x + gw + right : start_grid_x + gw;
 
       canvas.drawLine(
         Offset(startX, thisRowY),
@@ -243,13 +249,15 @@ class BorderPainter extends CustomPainter {
       var isIntermediate =
           intermediatePosition != null && intermediatePosition!.y == i;
 
-      var color = isIntermediate ? primaryColor : myColor;
-      var strokeWidth = isIntermediate ? bWidth * 10 : bWidth;
+      var crosshairVisible = showCrosshair && isIntermediate;
 
-      var startY = isIntermediate ? vOff : start_grid_y;
+      var color = crosshairVisible ? primaryColor : myColor;
+      var strokeWidth = crosshairVisible ? bWidth * 10 : bWidth;
+
+      var startY = crosshairVisible ? vOff : start_grid_y;
 
       var endY =
-          isIntermediate ? start_grid_y + gh + bottom : start_grid_y + gh;
+          crosshairVisible ? start_grid_y + gh + bottom : start_grid_y + gh;
 
       canvas.drawLine(
         Offset(thisColX, startY),
@@ -295,7 +303,7 @@ class BorderPainter extends CustomPainter {
 
     void paintNotationText(
         bool isIntermediate, Offset off, TextPainter textPainter) {
-      if (isIntermediate) {
+      if (isIntermediate && showCrosshair) {
         canvas.drawCircle(
             off +
                 Offset(

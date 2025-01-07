@@ -10,7 +10,6 @@ enum GameUI {
 }
 
 extension CompactGameUISettingExt on CompactGameUISetting {
-
   bool isCompact(StageType stage) {
     return false;
     switch (this) {
@@ -78,6 +77,9 @@ class SettingsProvider extends ChangeNotifier {
   bool _sound = false;
   bool get sound => _sound;
 
+  bool _showCrosshair = false;
+  bool get showCrosshair => _showCrosshair;
+
   MoveInputMode _moveInput = MoveInputMode.immediate;
   MoveInputMode get moveInput => _moveInput;
 
@@ -100,6 +102,7 @@ class SettingsProvider extends ChangeNotifier {
         await localDatasource.getNotationPosition() ?? NotationPosition.both;
     _moveInput =
         await localDatasource.getMoveInputMode() ?? MoveInputMode.immediate;
+    _showCrosshair = await localDatasource.getShowCrosshair() ?? false;
   }
 
   void setThemeSetting(ThemeSetting themeSetting) {
@@ -129,6 +132,12 @@ class SettingsProvider extends ChangeNotifier {
   void setMoveInput(MoveInputMode moveInput) {
     _moveInput = moveInput;
     localDatasource.storeMoveInputMode(moveInput);
+    notifyListeners();
+  }
+
+  void setShowCrosshair(bool value) {
+    _showCrosshair = value;
+    localDatasource.storeShowCrosshair(value);
     notifyListeners();
   }
 }
