@@ -317,16 +317,14 @@ extension GameExts on Game {
   int? scoreForPlayer(StoneType stone) {
     if (!didEnd()) return null;
     if (finalScore.length < 2) return null;
-    return stone == StoneType.white
-        ? finalScore[1]
-        : finalScore[0];
+    return stone == StoneType.white ? finalScore[1] : finalScore[0];
   }
 
   int? finalScoreDifferenceForWinner() {
     if (!didEnd()) return null;
     if (finalScore.length < 2) return null;
-    var score= (finalScore[0] - finalScore[1]).abs();
-    if(score == 0) return null;
+    var score = (finalScore[0] - finalScore[1]).abs();
+    if (score == 0) return null;
     return score;
   }
 
@@ -447,7 +445,7 @@ class Game {
       prisoners: List<int>.from((map[GameFieldNames.Prisoners])),
       startTime: map[GameFieldNames.StartTime] == null
           ? null
-          : DateTime.parse(map[GameFieldNames.StartTime] as String),
+          : DateTime.parse(map[GameFieldNames.StartTime] as String).toLocal(),
       gameState: GameState.values[map[GameFieldNames.GameState] as int],
       deadStones: List<Position>.from(
         (map[GameFieldNames.DeadStones] as List).map<Position>(
@@ -458,14 +456,13 @@ class Game {
           ? null
           : GameResult.values[(map[GameFieldNames.Result] as int)],
       komi: map[GameFieldNames.Komi] as double,
-      finalScore:
-          List<int>.from(map[GameFieldNames.FinalScore] as List),
+      finalScore: List<int>.from(map[GameFieldNames.FinalScore] as List),
       gameOverMethod: map[GameFieldNames.GameOverMethod] == null
           ? null
           : GameOverMethod.values[map[GameFieldNames.GameOverMethod] as int],
       endTime: map[GameFieldNames.EndTime] == null
           ? null
-          : DateTime.parse(map[GameFieldNames.EndTime] as String),
+          : DateTime.parse(map[GameFieldNames.EndTime] as String).toLocal(),
       stoneSelectionType: StoneSelectionType
           .values[map[GameFieldNames.StoneSelectionType] as int],
       gameCreator: map[GameFieldNames.GameCreator] as String?,
@@ -484,7 +481,7 @@ class Game {
           List<int>.from(map[GameFieldNames.PlayersRatingsDiff] as List),
       gameType: GameType.values[map[GameFieldNames.GameType] as int],
       usernames: List<String>.from(map[GameFieldNames.Usernames] as List),
-      creationTime: DateTime.parse(map[GameFieldNames.CreationTime] as String),
+      creationTime: DateTime.parse(map[GameFieldNames.CreationTime] as String).toLocal(),
     );
   }
 
@@ -576,7 +573,7 @@ class PlayerTimeSnapshot {
   factory PlayerTimeSnapshot.fromMap(Map<String, dynamic> map) {
     return PlayerTimeSnapshot(
       snapshotTimestamp:
-          DateTime.parse(map[GameFieldNames.SnapshotTimestamp] as String),
+          DateTime.parse(map[GameFieldNames.SnapshotTimestamp] as String).toLocal(),
       mainTimeMilliseconds: map[GameFieldNames.MainTimeMilliseconds] as int,
       byoYomisLeft: map[GameFieldNames.ByoYomisLeft] as int?,
       byoYomiActive: map[GameFieldNames.ByoYomiActive] as bool,

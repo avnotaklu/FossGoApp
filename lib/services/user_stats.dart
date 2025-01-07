@@ -199,10 +199,10 @@ class Streak {
   factory Streak.fromMap(Map<String, dynamic> map) {
     return Streak(
       streakLength: map['streakLength'] as int,
-      streakFrom: DateTime.parse(map['streakFrom'] as String),
+      streakFrom: DateTime.parse(map['streakFrom'] as String).toLocal(),
       startingGameId: map['startingGameId'] as String,
       endingGameId: map['endingGameId'] as String,
-      streakTo: DateTime.parse(map['streakTo'] as String),
+      streakTo: DateTime.parse(map['streakTo'] as String).toLocal(),
     );
   }
 
@@ -277,7 +277,7 @@ class GameResultStat {
     return GameResultStat(
       opponentRating: map['opponentRating'] as int,
       opponentName: map['opponentName'] as String,
-      resultAt: DateTime.parse(map['resultAt'] as String),
+      resultAt: DateTime.parse(map['resultAt'] as String).toLocal(),
       gameId: map['gameId'] as String,
     );
   }

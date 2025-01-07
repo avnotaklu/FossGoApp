@@ -388,7 +388,7 @@ class GameJoinMessage extends SignalRMessageType {
 
   factory GameJoinMessage.fromMap(Map<String, dynamic> map) {
     return GameJoinMessage(
-      joinTime: DateTime.parse(map['joinTime'] as String),
+      joinTime: DateTime.parse(map['joinTime'] as String).toLocal(),
       otherPlayerData: map['otherPlayerData'] == null
           ? null
           : PublicUserInfo.fromMap(

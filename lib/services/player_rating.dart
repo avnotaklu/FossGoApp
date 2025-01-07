@@ -87,7 +87,7 @@ class PlayerRatingData {
         (map['recent'] as List),
       ),
       latest: map['latest'] != null
-          ? DateTime.parse(map['latest'] as String)
+          ? DateTime.parse(map['latest'] as String).toLocal()
           : null,
     );
   }

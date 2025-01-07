@@ -127,8 +127,8 @@ class UserAccount implements AbstractUserAccount {
       userName: map['userName'] as String,
       fullName: map['fullName'] != null ? map['fullName'] as String : null,
       bio: map['bio'] != null ? map['bio'] as String : null,
-      creationDate: DateTime.parse(map['creationDate'] as String),
-      lastSeen: DateTime.parse(map['lastSeen'] as String),
+      creationDate: DateTime.parse(map['creationDate'] as String).toLocal(),
+      lastSeen: DateTime.parse(map['lastSeen'] as String).toLocal(),
       nationality:
           map['nationality'] != null ? map['nationality'] as String : null,
     );

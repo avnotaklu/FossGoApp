@@ -46,7 +46,7 @@ class GameEntranceData {
   factory GameEntranceData.fromMap(Map<String, dynamic> map) {
     return GameEntranceData(
       joinTime: map['joinTime'] != null
-          ? DateTime.parse(map['joinTime'] as String)
+          ? DateTime.parse(map['joinTime'] as String).toLocal()
           : null,
       otherPlayerData: map['otherPlayerData'] != null
           ? PublicUserInfo.fromMap(
