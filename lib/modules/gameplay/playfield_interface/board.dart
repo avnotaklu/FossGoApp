@@ -222,7 +222,7 @@ class BorderPainter extends CustomPainter {
       var crosshairVisible = showCrosshair && isIntermediate;
 
       var color = crosshairVisible ? primaryColor : myColor;
-      var strokeWidth = crosshairVisible ? bWidth * 10 : bWidth;
+      var strokeWidth = crosshairVisible ? bWidth * 5 : bWidth;
 
       var startX = crosshairVisible ? hOff : start_grid_x;
 
@@ -252,7 +252,7 @@ class BorderPainter extends CustomPainter {
       var crosshairVisible = showCrosshair && isIntermediate;
 
       var color = crosshairVisible ? primaryColor : myColor;
-      var strokeWidth = crosshairVisible ? bWidth * 10 : bWidth;
+      var strokeWidth = crosshairVisible ? bWidth * 5 : bWidth;
 
       var startY = crosshairVisible ? vOff : start_grid_y;
 
@@ -310,7 +310,7 @@ class BorderPainter extends CustomPainter {
                   textPainter.width / 2,
                   textPainter.height / 2,
                 ),
-            14,
+            info.boardSize.nonOtherBoardSize.notationHighlightCrosshairSize,
             Paint()..color = primaryColor);
       }
 
@@ -500,4 +500,34 @@ extension BoardParams on BoardSize {
         BoardSize.nineteen => 2,
         BoardSize.other => throw Exception("Can't draw decor for other boards"),
       };
+
+  double get notationHighlightCrosshairSize => switch (this) {
+        BoardSize.nine => 12,
+        BoardSize.thirteen => 8,
+        BoardSize.nineteen => 6,
+        BoardSize.other => throw Exception("Can't figure out highlight size"),
+      };
+}
+
+extension BoardSizeDataExt on Constants.BoardSizeData {
+  BoardSize get nonOtherBoardSize {
+    var bSize = boardSize;
+
+    if (bSize != BoardSize.other) {
+      if ((rows + cols) / 2 < 9) {
+        return BoardSize.nine;
+      }
+
+      if ((rows + cols) / 2 < 13) {
+        return BoardSize.thirteen;
+      }
+
+      if ((rows + cols) / 2 < 19) {
+        return BoardSize.nineteen;
+      }
+
+      return BoardSize.nineteen;
+    }
+    return bSize;
+  }
 }
