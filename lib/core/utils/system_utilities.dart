@@ -3,7 +3,7 @@ import 'package:audioplayers/audioplayers.dart';
 const systemUtils = SystemUtilities();
 
 enum SoundAsset {
-  placeStone(path: "audio/placeStone.mp3");
+  placeStone(path: "audio/placeStone2.wav");
 
   final String path;
 
