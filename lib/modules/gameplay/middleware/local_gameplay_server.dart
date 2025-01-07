@@ -60,6 +60,7 @@ class LocalGameplayServer {
   int get turnPlayer => turn % 2;
 
   final List<StoneType> _scoresAcceptedBy = [];
+  late final StoneLogic stoneLogic;
 
   LocalGameplayServer(this._rows, this._columns, this._timeControl)
       : systemUtilities = systemUtils,
@@ -90,6 +91,10 @@ class LocalGameplayServer {
     _gameOverMethod = null;
     _finalScores = [];
     _endTime = null;
+
+    final game = getGame();
+
+    stoneLogic = StoneLogic(game);
   }
 
   Game getGame() {
@@ -127,7 +132,6 @@ class LocalGameplayServer {
 
   Either<AppError, Game> makeMove(MovePosition move, StoneType stone) {
     assert(turnPlayer == stone.index, "It's not this player's turn");
-    final stoneLogic = StoneLogic(getGame());
     try {
       if (!move.isPass()) {
         var res =
@@ -135,10 +139,7 @@ class LocalGameplayServer {
         if (res.result) {
           _playgroundMap =
               res.board.playgroundMap.toHighLevelBoardRepresentation();
-          _prisoners = res.board.prisoners
-              .zip(_prisoners)
-              .map((a) => a.$1 + a.$2)
-              .toList();
+          _prisoners = res.board.prisoners;
         } else {
           log("Couldn't play at position");
           return left(AppError(message: "Couldn't play at position"));
@@ -269,7 +270,6 @@ class LocalGameplayServer {
     StoneType? winner,
   ) {
     final List<int> scores = [];
-    final stoneLogic = StoneLogic(getGame());
 
     if (method == GameOverMethod.Score) {
       final calc = ScoreCalculator(
