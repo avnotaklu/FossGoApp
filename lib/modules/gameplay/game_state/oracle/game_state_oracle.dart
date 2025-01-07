@@ -135,7 +135,7 @@ abstract class GameStateOracle {
   Duration get headsUpTime;
 
   DisplayablePlayerData myPlayerData(Game game);
-  DisplayablePlayerData? otherPlayerData(Game game);
+  DisplayablePlayerData otherPlayerData(Game game);
 
   Future<Either<AppError, Game>> resignGame(Game game);
   Future<Either<AppError, Game>> acceptScores(Game game);

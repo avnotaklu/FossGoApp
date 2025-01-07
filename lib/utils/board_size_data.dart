@@ -25,7 +25,6 @@ extension GridInfoExt on GameBoardSpace {
 
       if (x >= 0 && x < cols && y >= 0 && y < rows) {
         var pos = Position(y, x);
-        debugPrint('Position: $pos');
         return pos;
       }
 

@@ -30,8 +30,10 @@ class DisplayablePlayerData {
   final double? komi;
   final int? prisoners;
   final int? score;
+  final bool waiting;
 
   DisplayablePlayerData({
+    required this.waiting,
     required this.displayName,
     required this.stoneType,
     required this.rating,
@@ -84,7 +86,7 @@ class GameStateBloc extends ChangeNotifier {
 
   DisplayablePlayerData get bottomPlayerUserInfo =>
       gameOracle.myPlayerData(game);
-  DisplayablePlayerData? get topPlayerUserInfo =>
+  DisplayablePlayerData get topPlayerUserInfo =>
       gameOracle.otherPlayerData(game);
 
   // List<Duration> times;

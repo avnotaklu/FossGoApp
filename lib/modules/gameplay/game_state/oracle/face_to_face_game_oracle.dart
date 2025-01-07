@@ -63,6 +63,7 @@ class FaceToFaceGameOracle extends GameStateOracle {
     StoneType stone = game.getStoneFromPlayerId(myPlayerId)!;
 
     return DisplayablePlayerData(
+      waiting: false,
       displayName: stone.color,
       stoneType: stone,
       rating: null, // No rating for face to face games
@@ -78,6 +79,7 @@ class FaceToFaceGameOracle extends GameStateOracle {
     StoneType stone = game.getStoneFromPlayerId(otherPlayerId)!;
 
     return DisplayablePlayerData(
+      waiting: false,
       displayName: stone.color,
       stoneType: stone,
       rating: null, // No rating for face to face games

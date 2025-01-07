@@ -112,7 +112,7 @@ class CompactPlayerCard extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Constants.playerColors[playerData!.stoneType!.index]
+        color: Constants.playerColors[playerData!.stoneType?.index ?? 0]
             .withOpacity(0.7),
         boxShadow: [
           BoxShadow(
@@ -124,29 +124,33 @@ class CompactPlayerCard extends StatelessWidget {
       ),
       child: Theme(
           data: context.theme.copyWith(
-              textTheme: Constants.buildTextTheme(
-                  Constants.playerColors[playerData!.stoneType!.other.index])),
+              textTheme: Constants.buildTextTheme(Constants
+                  .playerColors[playerData!.stoneType?.other.index ?? 1])),
           child: Builder(builder: (context) {
             return Padding(
               padding: const EdgeInsets.all(4.0),
-              child: playerData == null
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(
-                          "Waiting ...",
-                          style: context.theme.textTheme.titleLarge,
+              child: playerData!.waiting 
+                  ? Column(
+                    children: [
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text(
+                              "Waiting ...",
+                              style: context.theme.textTheme.titleLarge,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Container(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(),
+                            )
+                          ],
                         ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Container(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(),
-                        )
-                      ],
-                    )
+                    ],
+                  )
                   : Row(
                       children: [
                         Column(

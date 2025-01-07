@@ -281,6 +281,7 @@ class LiveGameOracle extends GameStateOracle {
     }
 
     return DisplayablePlayerData(
+      waiting: false,
       displayName: publicInfo.username ?? "Anonymous",
       stoneType: stone,
       rating: game.didEnd()
@@ -294,23 +295,16 @@ class LiveGameOracle extends GameStateOracle {
   }
 
   @override
-  DisplayablePlayerData? otherPlayerData(Game game) {
+  DisplayablePlayerData otherPlayerData(Game game) {
     var publicInfo = otherPlayerInfo;
     var rating = publicInfo?.rating?.getRatingForGame(game);
     StoneType? stone;
 
-    if (game.bothPlayersIn()) {
-      stone = game.getStoneFromPlayerId(publicInfo!.id);
-    } else if (game.gameCreator == publicInfo?.id) {
-      stone = game.stoneSelectionType.type;
-    }
-
-    if (publicInfo == null) {
-      return null;
-    }
+    stone = myPlayerData(game).stoneType?.other;
 
     return DisplayablePlayerData(
-      displayName: publicInfo.username ?? "Anonymous",
+      waiting: publicInfo == null,
+      displayName: publicInfo?.username ?? "Anonymous",
       stoneType: stone,
       rating: game.didEnd()
           ? stone?.getValueFromPlayerList(game.ratingsBefore())

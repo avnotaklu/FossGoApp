@@ -19,7 +19,7 @@ import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_timer.dart';
 
 class PlayerDataUi extends StatefulWidget {
-  final DisplayablePlayerData? playerInfo;
+  final DisplayablePlayerData playerInfo;
   final Stream<ConnectionStrength>? connectionStream;
   final Game game;
 
@@ -38,7 +38,7 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
   Widget build(BuildContext context) {
     final game = widget.game;
     final player = widget.playerInfo;
-    final ratings = widget.playerInfo?.rating;
+    final ratings = widget.playerInfo.rating;
 
     final size = MediaQuery.of(context).size;
 
@@ -55,11 +55,11 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                     children: [
                       SizedBox(
                         width: size.width * 0.09,
-                        child: player == null
+                        child: player!.waiting
                             ? const Center(
                                 child: SizedBox(
-                                    width: 25,
-                                    height: 25,
+                                    width: 20,
+                                    height: 20,
                                     child: CircularProgressIndicator()),
                               )
                             : widget.connectionStream == null
@@ -69,17 +69,17 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                                   ),
                       ),
                       Text(
-                        player?.displayName ?? "Unknown",
+                        player.waiting ? "Waiting" : player.displayName,
                         textAlign: TextAlign.center,
                         style: context.textTheme.bodyLarge,
                       ),
-                      if (widget.playerInfo?.rating != null)
+                      if (widget.playerInfo.rating != null)
                         ratingText(widget.playerInfo!.rating!),
                     ],
                   ),
                   if (game.bothPlayersIn() &&
                       game.gameState == GameState.waitingForStart &&
-                      player?.stoneType == StoneType.black)
+                      player.stoneType == StoneType.black)
                     Row(
                       children: [
                         Container(
@@ -105,15 +105,15 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                           width: size.width * 0.09,
                         ),
 
-                        if (player?.stoneType != null)
+                        if (player.stoneType != null)
                           if (getFinalScore(game, player!.stoneType!) != null)
                             Text(
                               " + ${getFinalScore(game, player!.stoneType!)} Points",
                               style: context.textTheme.labelLarge,
                             ),
 
-                        if (player?.stoneType != null &&
-                            player?.stoneType == StoneType.white)
+                        if (player.stoneType != null &&
+                            player.stoneType == StoneType.white)
                           Text(
                             " + ${getKomi(game, player!.stoneType!)} Komi",
                             style: context.textTheme.labelLarge,
@@ -131,13 +131,13 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
                       Container(
                         width: size.width * 0.09,
                       ),
-                      if (player?.stoneType != null)
+                      if (player.stoneType != null)
                         gameOverScore(game, player!.stoneType!)
                     ],
                   ),
                 ],
               )),
-          if (player?.stoneType != null)
+          if (player.stoneType != null)
             Expanded(
               flex: 4,
               child: Consumer<GameStateBloc>(

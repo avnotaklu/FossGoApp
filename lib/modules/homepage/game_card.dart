@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
+import 'package:go/models/minimal_rating.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/game_state/game_entrance_data.dart';
 import 'package:go/modules/gameplay/playfield_interface/live_game_widget.dart';
@@ -13,6 +14,7 @@ import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
+import 'package:go/services/player_rating.dart';
 import 'package:go/services/public_user_info.dart';
 import 'package:go/services/signal_r_message.dart';
 import 'package:provider/provider.dart';
@@ -70,7 +72,10 @@ class GameCard extends StatelessWidget {
               children: [
                 otherPlayerData == null
                     ? const Text("Waiting")
-                    : OppositionInfoWidget(opposition: otherPlayerData!),
+                    : OppositionInfoWidget(
+                        opposition: otherPlayerData!,
+                        game: game,
+                      ),
                 const SizedBox(height: 10),
                 MyStoneInfoWidget(game: game, otherPlayerData: otherPlayerData)
               ],
@@ -199,12 +204,19 @@ class OppositionInfoWidget extends StatelessWidget {
   const OppositionInfoWidget({
     super.key,
     required this.opposition,
+    required this.game,
   });
 
   final PublicUserInfo opposition;
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
+    final rating = opposition.rating?.getRatingForGame(game);
+
+    final minRat =
+        rating == null ? null : MinimalRating.fromRatingData(rating.glicko);
+
     return RichText(
       // ignore: prefer_const_constructors
       text: TextSpan(
@@ -215,6 +227,11 @@ class OppositionInfoWidget extends StatelessWidget {
             text: opposition.username ?? "Anonymous",
             style: context.textTheme.labelLarge,
           ),
+          if (minRat != null)
+            TextSpan(
+              text: "( ${minRat.stringify()} )",
+              style: context.textTheme.labelLarge,
+            ),
         ],
       ),
     );
