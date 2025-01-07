@@ -11,7 +11,6 @@ enum GameUI {
 
 extension CompactGameUISettingExt on CompactGameUISetting {
   bool isCompact(StageType stage) {
-    return false;
     switch (this) {
       case CompactGameUISetting.never:
         return false;
