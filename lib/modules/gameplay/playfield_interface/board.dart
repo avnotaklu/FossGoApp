@@ -52,9 +52,9 @@ GlobalKey _boardKey = GlobalKey();
 class _BoardState extends State<Board> {
   @override
   Widget build(BuildContext context) {
-    double stoneInset = 10;
-    double stoneSpacing =
-        2; // Don't make spacing so large that to get that spacing Stones start to move out of position
+    double stoneInset = context.width / 35;
+    double stoneSpacing = context.width /
+        300; // Don't make spacing so large that to get that spacing Stones start to move out of position
 
     //double boardInset = stoneInsetstoneSpacing;
     return Stack(
@@ -183,7 +183,7 @@ class BorderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final bWidth = 0.5;
+    const bWidth = 0.5;
 
     // ignore: prefer_const_declarations
 
@@ -282,16 +282,24 @@ class BorderPainter extends CustomPainter {
       );
     }
 
+    var fontSize = fontSizeFactor *
+        size.width *
+        0.3 /
+        info.rows /
+        max(
+            1,
+            ((size.width - 400) / 1200) +
+                1); // This stuff so text scales nicely;
+
     TextPainter getTextPainter(String text) {
       var painter = TextPainter(
         textAlign: TextAlign.center,
         text: TextSpan(
           text: text,
           style: TextStyle(
-            color: myColor,
-            fontFamily: GoogleFonts.spaceMono().fontFamily,
-            fontSize: fontSize,
-          ),
+              color: myColor,
+              fontFamily: GoogleFonts.spaceMono().fontFamily,
+              fontSize: fontSize),
         ),
         textDirection: TextDirection.ltr,
       );
@@ -312,7 +320,7 @@ class BorderPainter extends CustomPainter {
                   textPainter.width / 2,
                   textPainter.height / 2,
                 ),
-            info.boardSize.nonOtherBoardSize.notationHighlightCrosshairSize,
+            fontSize,
             Paint()..color = primaryColor);
       }
 
@@ -394,10 +402,10 @@ class BorderPainter extends CustomPainter {
         BoardSize.other => throw Exception("Can't draw decor for other boards"),
       };
 
-  double get fontSize => switch (info.board) {
-        BoardSize.nine => 14,
-        BoardSize.thirteen => 10,
-        BoardSize.nineteen => 7,
+  double get fontSizeFactor => switch (info.board) {
+        BoardSize.nine => 1,
+        BoardSize.thirteen => 0.7,
+        BoardSize.nineteen => 0.5,
         BoardSize.other => throw Exception("Can't draw decor for other boards"),
       };
 

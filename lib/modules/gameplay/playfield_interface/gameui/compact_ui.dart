@@ -75,19 +75,7 @@ class CompactGameUi extends StatelessWidget {
               ),
             ),
             Spacer(),
-            if (context.read<Stage>() is! GameEndStage)
-              context.read<Stage>() is ScoreCalculationStage
-                  ? const ScoreActions()
-                  : context.read<Stage>() is AnalysisStage
-                      ? AnalsisModeActions(
-                          openTree: () {},
-                          // openTree: () => openBottomSheet(
-                          //   context.read<AnalysisBloc>(),
-                          // ),
-                        )
-                      : const PlayingGameActions()
-            else
-              const PlayingEndedActions(),
+            Container(height: 70, child: actions(context)),
             SizedBox(
               height: 5,
             ),
@@ -95,6 +83,20 @@ class CompactGameUi extends StatelessWidget {
         ),
       );
     });
+  }
+
+  Widget actions(BuildContext context) {
+    if (context.read<Stage>() is! GameEndStage) {
+      return context.read<Stage>() is ScoreCalculationStage
+          ? const ScoreActions()
+          : context.read<Stage>() is AnalysisStage
+              ? AnalsisModeActions(
+                  openTree: () {},
+                )
+              : const PlayingGameActions();
+    } else {
+      return const PlayingEndedActions();
+    }
   }
 }
 
@@ -129,10 +131,10 @@ class CompactPlayerCard extends StatelessWidget {
           child: Builder(builder: (context) {
             return Padding(
               padding: const EdgeInsets.all(4.0),
-              child: playerData!.waiting 
+              child: playerData!.waiting
                   ? Column(
-                    children: [
-                      Row(
+                      children: [
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Text(
@@ -149,8 +151,8 @@ class CompactPlayerCard extends StatelessWidget {
                             )
                           ],
                         ),
-                    ],
-                  )
+                      ],
+                    )
                   : Row(
                       children: [
                         Column(

@@ -96,25 +96,30 @@ class _GameUiState extends State<GameUi> {
               ),
             ),
             Spacer(),
-            if (context.read<Stage>() is! GameEndStage)
-              context.read<Stage>() is ScoreCalculationStage
-                  ? const ScoreActions()
-                  : context.read<Stage>() is AnalysisStage
-                      ? AnalsisModeActions(
-                          openTree: () => openBottomSheet(
-                            context.read<AnalysisBloc>(),
-                          ),
-                        )
-                      : const PlayingGameActions()
-            else
-              const PlayingEndedActions(),
             SizedBox(
               height: 5,
             ),
+            Container(height: 70, child: actions(context)),
           ],
         );
       },
     );
+  }
+
+  Widget actions(BuildContext context) {
+    if (context.read<Stage>() is! GameEndStage) {
+      return context.read<Stage>() is ScoreCalculationStage
+          ? const ScoreActions()
+          : context.read<Stage>() is AnalysisStage
+              ? AnalsisModeActions(
+                  openTree: () => openBottomSheet(
+                    context.read<AnalysisBloc>(),
+                  ),
+                )
+              : const PlayingGameActions();
+    } else {
+      return const PlayingEndedActions();
+    }
   }
 
   String getWinningMethod(BuildContext context) {
