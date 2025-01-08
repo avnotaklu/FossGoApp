@@ -67,8 +67,8 @@ class MyApp extends StatelessWidget {
                         responsiveWidgetSetup(context, child),
                     debugShowCheckedModeBanner: false,
                     initialRoute: res.fold(
-                      (l) => "/",
-                      (r) => r == null ? "/" : "/HomePage",
+                      (l) => "/Root",
+                      (r) => r == null ? "/Root" : "/HomePage",
                     ),
                     themeMode: settingsProvider.themeSetting.themeMode,
                     theme: Constants.lightTheme,
@@ -99,7 +99,7 @@ class MyApp extends StatelessWidget {
 
   Map<String, WidgetBuilder> get routeConstructor {
     return <String, WidgetBuilder>{
-      '/': (BuildContext context) {
+      '/Root': (BuildContext context) {
         return const SignIn();
       },
       '/HomePage': (BuildContext context) {

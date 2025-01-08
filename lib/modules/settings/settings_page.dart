@@ -6,6 +6,7 @@ import 'package:go/modules/games_history/games_history_page.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/settings/settings_provider.dart';
 import 'package:go/services/local_datasource.dart';
+import 'package:go/widgets/my_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -21,8 +22,9 @@ class SettingsPage extends StatelessWidget {
     return MaxWidthBox(
       maxWidth: context.tabletBreakPoint.end,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Settings'),
+        appBar: MyAppBar(
+          'Settings',
+          showBackButton: true,
         ),
         body: Container(
           padding: EdgeInsets.all(10),

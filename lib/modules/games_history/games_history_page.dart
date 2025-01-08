@@ -34,109 +34,114 @@ class GamesHistoryPage extends StatelessWidget {
     return MultiProvider(
         builder: (context, child) {
           return Consumer<GamesHistoryProvider>(builder: (context, pro, child) {
-            return Scaffold(
-              appBar: AppBar(
-                title: Text('Games History'),
-              ),
-              body: MaxWidthBox(
-                maxWidth: context.width,
-                child: Container(
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: 90,
-                              child: MyDropDown(
-                                label: 'Board',
-                                items: [null, ...BoardSize.values],
-                                selectedItem: pro.boardSize,
-                                itemBuilder: (v) => DropdownMenuItem(
-                                  value: v,
-                                  child: Text(
-                                    v?.toDisplayString ?? "All",
-                                    style: context.textTheme.labelLarge,
+            return MaxWidthBox(
+              maxWidth: context.tabletBreakPoint.end,
+              child: Scaffold(
+                appBar: AppBar(
+                  title: Text('Games History'),
+                ),
+                body: MaxWidthBox(
+                  maxWidth: context.width,
+                  child: Container(
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 90,
+                                child: MyDropDown(
+                                  label: 'Board',
+                                  items: [null, ...BoardSize.values],
+                                  selectedItem: pro.boardSize,
+                                  itemBuilder: (v) => DropdownMenuItem(
+                                    value: v,
+                                    child: Text(
+                                      v?.toDisplayString ?? "All",
+                                      style: context.textTheme.labelLarge,
+                                    ),
                                   ),
+                                  onChanged: (v) =>
+                                      pro.setQueryParams(boardSize: v),
                                 ),
-                                onChanged: (v) =>
-                                    pro.setQueryParams(boardSize: v),
                               ),
-                            ),
-                            Spacer(),
-                            SizedBox(
-                              width: 90,
-                              child: MyDropDown(
-                                label: "Result",
-                                items: [null, ...PlayerResult.values],
-                                selectedItem: pro.result,
-                                itemBuilder: (v) => DropdownMenuItem(
-                                  value: v,
-                                  child: Text(
-                                    v?.name.capitalize() ?? "All",
-                                    style: context.textTheme.labelLarge,
-                                  ),
-                                ),
-                                onChanged: (v) => pro.setQueryParams(result: v),
-                              ),
-                            ),
-                            Spacer(),
-                            SizedBox(
-                              width: 150,
-                              child: MyDropDown(
-                                label: "Time",
-                                items: [null, ...TimeStandard.values],
-                                selectedItem: pro.timeStandard,
-                                itemBuilder: (v) => DropdownMenuItem(
-                                  value: v,
-                                  child: Text(
-                                    v?.standardName ?? "All",
-                                    style: context.textTheme.labelLarge,
-                                  ),
-                                ),
-                                onChanged: (v) =>
-                                    pro.setQueryParams(timeStandard: v),
-                              ),
-                            ),
-                            if (context.isDesktop) ...[
                               Spacer(),
-                              Card(child: gamePlayedFromFilter(context, pro))
-                            ]
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Container(
-                        padding: context.isMobile
-                            ? EdgeInsets.all(0)
-                            : EdgeInsets.all(20),
-                        height: context.isMobile
-                            ? context.height * 0.7
-                            : context.height * 0.8,
-                        child: PaginatedList(
-                          loadingIndicator: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                              SizedBox(
+                                width: 90,
+                                child: MyDropDown(
+                                  label: "Result",
+                                  items: [null, ...PlayerResult.values],
+                                  selectedItem: pro.result,
+                                  itemBuilder: (v) => DropdownMenuItem(
+                                    value: v,
+                                    child: Text(
+                                      v?.name.capitalize() ?? "All",
+                                      style: context.textTheme.labelLarge,
+                                    ),
+                                  ),
+                                  onChanged: (v) =>
+                                      pro.setQueryParams(result: v),
+                                ),
+                              ),
+                              Spacer(),
+                              SizedBox(
+                                width: 150,
+                                child: MyDropDown(
+                                  label: "Time",
+                                  items: [null, ...TimeStandard.values],
+                                  selectedItem: pro.timeStandard,
+                                  itemBuilder: (v) => DropdownMenuItem(
+                                    value: v,
+                                    child: Text(
+                                      v?.standardName ?? "All",
+                                      style: context.textTheme.labelLarge,
+                                    ),
+                                  ),
+                                  onChanged: (v) =>
+                                      pro.setQueryParams(timeStandard: v),
+                                ),
+                              ),
+                              if (context.isDesktop) ...[
+                                Spacer(),
+                                Card(child: gamePlayedFromFilter(context, pro))
+                              ]
+                            ],
                           ),
-                          shrinkWrap: true,
-                          items: pro.games,
-                          isRecentSearch: false,
-                          isLastPage: pro.isLastPage,
-                          onLoadMore: (index) => pro.loadGames(),
-                          builder: (game, index) => GameListTile(game: game),
                         ),
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      if (context.isMobile) gamePlayedFromFilter(context, pro),
-                    ],
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Container(
+                          padding: context.isMobile
+                              ? EdgeInsets.all(0)
+                              : EdgeInsets.all(20),
+                          height: context.isMobile
+                              ? context.height * 0.7
+                              : context.height * 0.8,
+                          child: PaginatedList(
+                            loadingIndicator: const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                            shrinkWrap: true,
+                            items: pro.games,
+                            isRecentSearch: false,
+                            isLastPage: pro.isLastPage,
+                            onLoadMore: (index) => pro.loadGames(),
+                            builder: (game, index) => GameListTile(game: game),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        if (context.isMobile)
+                          gamePlayedFromFilter(context, pro),
+                      ],
+                    ),
                   ),
                 ),
               ),

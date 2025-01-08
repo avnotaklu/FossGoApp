@@ -42,7 +42,7 @@ class _MyAppBarState extends State<MyAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: widget.showBackButton && context.isMobile
+      leading: widget.showBackButton && Navigator.of(context).canPop()
           ? IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
