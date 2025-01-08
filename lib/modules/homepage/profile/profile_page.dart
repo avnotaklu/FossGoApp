@@ -26,6 +26,7 @@ import 'package:go/widgets/loader_basic_button.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -73,13 +74,14 @@ class ProfilePage extends StatelessWidget {
                   ],
                 ),
               ),
-              (user) => Scaffold(
-                body: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 10,
-                  ),
-                  child: Center(
+              (user) => MaxWidthBox(
+                maxWidth: context.tabletBreakPoint.end,
+                child: Scaffold(
+                  body: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 10,
+                    ),
                     child: SingleChildScrollView(
                       child: Column(
                         children: <Widget>[
@@ -294,7 +296,6 @@ class ProfilePage extends StatelessWidget {
                             ),
                           ),
                           SectionDivider(),
-                          // stats.
 
                           FutureBuilder(
                               future: stats,
@@ -327,7 +328,7 @@ class ProfilePage extends StatelessWidget {
                                           ),
                                           Container(
                                             height: 40,
-                                            width: context.width * 0.4,
+                                            width: 150,
                                             child: MyDropDown(
                                               label: null,
                                               items: StatFilter.values,

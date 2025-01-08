@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:fpdart/fpdart.dart';
@@ -190,7 +191,10 @@ class CreateGameScreen extends StatelessWidget {
       child: Consumer<CreateGameProvider>(builder: (context, cgp, child) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.7,
-          width: MediaQuery.of(context).size.width * 0.8,
+          width: min(
+            MediaQuery.of(context).size.width * 0.8,
+            context.tabletBreakPoint.end,
+          ),
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -261,12 +265,17 @@ class CreateGameScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     sectionHeading(context, "Time Format"),
-                    flatDropdown(
-                      context,
-                      Constants.TimeFormat.values,
-                      cgp.timeFormat,
-                      cgp.changeTimeFormat,
-                      (t) => t.formatName,
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: flatDropdown(
+                        context,
+                        Constants.TimeFormat.values,
+                        cgp.timeFormat,
+                        cgp.changeTimeFormat,
+                        (t) => t.formatName,
+                      ),
                     )
                   ],
                 ),
@@ -278,7 +287,11 @@ class CreateGameScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     sectionHeading(context, "Time Control"),
-                    flatDropdown(
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                        child: flatDropdown(
                       context,
                       TimeStandard.values
                           .take(3)
@@ -286,7 +299,7 @@ class CreateGameScreen extends StatelessWidget {
                       cgp.timeStandard,
                       cgp.changeTimeStandard,
                       (t) => t.standardName,
-                    )
+                    )),
                   ],
                 ),
               ),
@@ -435,13 +448,16 @@ class CreateGameScreen extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: SizedBox(
-            height: 30,
-            width: 30,
-            child: StoneSelectionWidget(
-              type,
-            ),
-          ),
+          child: LayoutBuilder(builder: (context, cons) {
+            return Container(
+              padding: const EdgeInsets.all(2),
+              height: cons.maxHeight,
+              width: cons.maxHeight,
+              child: StoneSelectionWidget(
+                type,
+              ),
+            );
+          }),
         ),
       ),
     );
@@ -456,28 +472,25 @@ class CreateGameScreen extends StatelessWidget {
 
   Widget flatDropdown<T>(BuildContext context, List<T> altTimes, T selectedTime,
       void Function(T) onTap, String Function(T) formatter) {
-    return SizedBox(
-      width: context.width * 0.4,
-      child: MyDropDown<T>(
-        items: altTimes,
-        selectedItem: selectedTime,
-        itemBuilder: (entry) {
-          return DropdownMenuItem(
-            value: entry,
-            child: Container(
-              child: Text(
-                formatter(entry),
-                style: context.textTheme.labelSmall,
-              ),
+    return MyDropDown<T>(
+      items: altTimes,
+      selectedItem: selectedTime,
+      itemBuilder: (entry) {
+        return DropdownMenuItem(
+          value: entry,
+          child: Container(
+            child: Text(
+              formatter(entry),
+              style: context.textTheme.labelSmall,
             ),
-          );
-        },
-        label: null,
-        onChanged: (value) {
-          if (value == null) return;
-          onTap(value);
-        },
-      ),
+          ),
+        );
+      },
+      label: null,
+      onChanged: (value) {
+        if (value == null) return;
+        onTap(value);
+      },
     );
   }
 

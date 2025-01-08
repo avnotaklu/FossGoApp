@@ -12,59 +12,48 @@ import 'package:provider/provider.dart';
 
 class MyAppDrawer extends StatelessWidget {
   final bool showCompactUiSwitch;
+  final bool sidebar;
+  final List<ListTile>? navigationItems;
 
-  const MyAppDrawer({
+  MyAppDrawer({
+    this.navigationItems,
     this.showCompactUiSwitch = false,
+    this.sidebar = false,
     super.key,
   });
 
-  String getUserName(BuildContext context) {
-    return context.read<AuthProvider>().myUsername;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final mobile = !context.isDesktop;
+    final desktop = context.isDesktop;
+
     return Drawer(
       child: ListView(
         // Important: Remove any padding from the ListView.
         padding: EdgeInsets.zero,
         children: [
-          Container(
-            height: context.height * 0.12,
-            child: DrawerHeader(
-              decoration: BoxDecoration(),
-              child: Row(
-                children: [
-                  Container(
-                    child: Text(
-                      getUserName(context),
-                      style: context.textTheme.headlineLarge,
-                    ),
-                  ),
-                  Spacer(),
-                  ValueListenableBuilder(
-                      valueListenable:
-                          context.read<SignalRProvider>().connectionStrength,
-                      builder: (context, strength, child) {
-                        return SignalIndicator(strength: strength);
-                      }),
-                ],
-              ),
-            ),
-          ),
+          const DrawerHeader(child: UserInfoOverview()),
           if (showCompactUiSwitch)
             const ListTile(
               title: Text('Compact'),
               trailing: GameUIToggle(),
             ),
-          ListTile(
-            title: const Text('Home'),
-            leading: const Icon(Icons.home),
-            onTap: () {
-              Scaffold.of(context).closeDrawer();
-              Navigator.popUntil(context, ModalRoute.withName('/HomePage'));
-            },
-          ),
+          if (desktop) ...[
+            ...navigationItems!,
+            const Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Divider(),
+            ),
+          ],
+          if (mobile)
+            ListTile(
+              title: const Text('Home'),
+              leading: const Icon(Icons.home),
+              onTap: () {
+                Scaffold.of(context).closeDrawer();
+                Navigator.popUntil(context, ModalRoute.withName('/HomePage'));
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.create),
             title: const Text('Create Game'),
@@ -79,16 +68,49 @@ class MyAppDrawer extends StatelessWidget {
               showOverTheBoardCreateCustomGameDialog(context);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {
-              Scaffold.of(context).closeDrawer();
-              Navigator.pushNamed(context, '/Settings');
-            },
-          ),
+          if (mobile)
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                Scaffold.of(context).closeDrawer();
+                Navigator.pushNamed(context, '/Settings');
+              },
+            ),
         ],
       ),
     );
+  }
+}
+
+class UserInfoOverview extends StatelessWidget {
+  const UserInfoOverview({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: context.height * 0.12,
+      child: Row(
+        children: [
+          Container(
+            child: Text(
+              getUserName(context),
+              style: context.textTheme.headlineLarge,
+            ),
+          ),
+          Spacer(),
+          ValueListenableBuilder(
+              valueListenable:
+                  context.read<SignalRProvider>().connectionStrength,
+              builder: (context, strength, child) {
+                return SignalIndicator(strength: strength);
+              }),
+        ],
+      ),
+    );
+  }
+
+  String getUserName(BuildContext context) {
+    return context.read<AuthProvider>().myUsername;
   }
 }

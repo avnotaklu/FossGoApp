@@ -22,6 +22,7 @@ import 'package:go/widgets/basic_alert.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:paginated_list/paginated_list.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class GamesHistoryPage extends StatelessWidget {
   final IStatsRepository statsRepo;
@@ -37,166 +38,106 @@ class GamesHistoryPage extends StatelessWidget {
               appBar: AppBar(
                 title: Text('Games History'),
               ),
-              body: Container(
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 90,
-                            child: MyDropDown(
-                              label: 'Board',
-                              items: [null, ...BoardSize.values],
-                              selectedItem: pro.boardSize,
-                              itemBuilder: (v) => DropdownMenuItem(
-                                value: v,
-                                child: Text(
-                                  v?.toDisplayString ?? "All",
-                                  style: context.textTheme.labelLarge,
+              body: MaxWidthBox(
+                maxWidth: context.width,
+                child: Container(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 90,
+                              child: MyDropDown(
+                                label: 'Board',
+                                items: [null, ...BoardSize.values],
+                                selectedItem: pro.boardSize,
+                                itemBuilder: (v) => DropdownMenuItem(
+                                  value: v,
+                                  child: Text(
+                                    v?.toDisplayString ?? "All",
+                                    style: context.textTheme.labelLarge,
+                                  ),
                                 ),
+                                onChanged: (v) =>
+                                    pro.setQueryParams(boardSize: v),
                               ),
-                              onChanged: (v) =>
-                                  pro.setQueryParams(boardSize: v),
                             ),
-                          ),
-                          Spacer(),
-                          SizedBox(
-                            width: 90,
-                            child: MyDropDown(
-                              label: "Result",
-                              items: [null, ...PlayerResult.values],
-                              selectedItem: pro.result,
-                              itemBuilder: (v) => DropdownMenuItem(
-                                value: v,
-                                child: Text(
-                                  v?.name.capitalize() ?? "All",
-                                  style: context.textTheme.labelLarge,
+                            Spacer(),
+                            SizedBox(
+                              width: 90,
+                              child: MyDropDown(
+                                label: "Result",
+                                items: [null, ...PlayerResult.values],
+                                selectedItem: pro.result,
+                                itemBuilder: (v) => DropdownMenuItem(
+                                  value: v,
+                                  child: Text(
+                                    v?.name.capitalize() ?? "All",
+                                    style: context.textTheme.labelLarge,
+                                  ),
                                 ),
+                                onChanged: (v) => pro.setQueryParams(result: v),
                               ),
-                              onChanged: (v) => pro.setQueryParams(result: v),
                             ),
-                          ),
-                          Spacer(),
-                          SizedBox(
-                            width: 150,
-                            child: MyDropDown(
-                              label: "Time",
-                              items: [null, ...TimeStandard.values],
-                              selectedItem: pro.timeStandard,
-                              itemBuilder: (v) => DropdownMenuItem(
-                                value: v,
-                                child: Text(
-                                  v?.standardName ?? "All",
-                                  style: context.textTheme.labelLarge,
+                            Spacer(),
+                            SizedBox(
+                              width: 150,
+                              child: MyDropDown(
+                                label: "Time",
+                                items: [null, ...TimeStandard.values],
+                                selectedItem: pro.timeStandard,
+                                itemBuilder: (v) => DropdownMenuItem(
+                                  value: v,
+                                  child: Text(
+                                    v?.standardName ?? "All",
+                                    style: context.textTheme.labelLarge,
+                                  ),
                                 ),
+                                onChanged: (v) =>
+                                    pro.setQueryParams(timeStandard: v),
                               ),
-                              onChanged: (v) =>
-                                  pro.setQueryParams(timeStandard: v),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Container(
-                      height: context.height * 0.7,
-                      child: PaginatedList(
-                        loadingIndicator: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 20),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                            if (context.isDesktop) ...[
+                              Spacer(),
+                              Card(child: gamePlayedFromFilter(context, pro))
+                            ]
+                          ],
                         ),
-                        shrinkWrap: true,
-                        items: pro.games,
-                        isRecentSearch: false,
-                        isLastPage: pro.isLastPage,
-                        onLoadMore: (index) => pro.loadGames(),
-                        builder: (game, index) => GameListTile(game: game),
                       ),
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Text(
-                            "Games Played From ",
-                            style: context.textTheme.bodyLarge,
-                          ),
-                          IconButton(
-                            padding: EdgeInsets.all(8),
-                            onPressed: () async {
-                              final res = await showDatePicker(
-                                context: context,
-                                firstDate:
-                                    DateTime.fromMicrosecondsSinceEpoch(0),
-                                lastDate: pro.to ?? DateTime.now(),
-                              );
-
-                              if (res != null) {
-                                pro.setFromTime(res);
-                              }
-                            },
-                            icon: Column(
-                              children: [
-                                Icon(
-                                  Icons.calendar_month,
-                                  size: 16,
-                                ),
-                                Text(
-                                  "${fromTimeText(
-                                    pro.from,
-                                  )}",
-                                  style: context.textTheme.labelSmall,
-                                ),
-                              ],
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Container(
+                        padding: context.isMobile
+                            ? EdgeInsets.all(0)
+                            : EdgeInsets.all(20),
+                        height: context.isMobile
+                            ? context.height * 0.7
+                            : context.height * 0.8,
+                        child: PaginatedList(
+                          loadingIndicator: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Center(
+                              child: CircularProgressIndicator(),
                             ),
                           ),
-                          Text(
-                            "To",
-                            style: context.textTheme.bodyLarge,
-                          ),
-                          IconButton(
-                            padding: EdgeInsets.all(8),
-                            onPressed: () async {
-                              final res = await showDatePicker(
-                                context: context,
-                                firstDate: pro.from ??
-                                    DateTime.fromMicrosecondsSinceEpoch(0),
-                                lastDate: DateTime.now(),
-                              );
-
-                              if (res != null) {
-                                pro.setToTime(res);
-                              }
-                            },
-                            icon: Column(
-                              children: [
-                                Icon(
-                                  Icons.calendar_month,
-                                  size: 16,
-                                ),
-                                Text(
-                                  "${toTimeText(
-                                    pro.to,
-                                  )}",
-                                  style: context.textTheme.labelSmall,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                          shrinkWrap: true,
+                          items: pro.games,
+                          isRecentSearch: false,
+                          isLastPage: pro.isLastPage,
+                          onLoadMore: (index) => pro.loadGames(),
+                          builder: (game, index) => GameListTile(game: game),
+                        ),
                       ),
-                    ),
-                  ],
+                      SizedBox(
+                        height: 8,
+                      ),
+                      if (context.isMobile) gamePlayedFromFilter(context, pro),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -211,6 +152,81 @@ class GamesHistoryPage extends StatelessWidget {
           ),
           Provider<IStatsRepository>.value(value: statsRepo)
         ]);
+  }
+
+  Container gamePlayedFromFilter(
+      BuildContext context, GamesHistoryProvider pro) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Text(
+            "Games Played From ",
+            style: context.textTheme.bodyLarge,
+          ),
+          IconButton(
+            padding: EdgeInsets.all(8),
+            onPressed: () async {
+              final res = await showDatePicker(
+                context: context,
+                firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
+                lastDate: pro.to ?? DateTime.now(),
+              );
+
+              if (res != null) {
+                pro.setFromTime(res);
+              }
+            },
+            icon: Column(
+              children: [
+                Icon(
+                  Icons.calendar_month,
+                  size: 16,
+                ),
+                Text(
+                  "${fromTimeText(
+                    pro.from,
+                  )}",
+                  style: context.textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ),
+          Text(
+            "To",
+            style: context.textTheme.bodyLarge,
+          ),
+          IconButton(
+            padding: EdgeInsets.all(8),
+            onPressed: () async {
+              final res = await showDatePicker(
+                context: context,
+                firstDate: pro.from ?? DateTime.fromMicrosecondsSinceEpoch(0),
+                lastDate: DateTime.now(),
+              );
+
+              if (res != null) {
+                pro.setToTime(res);
+              }
+            },
+            icon: Column(
+              children: [
+                Icon(
+                  Icons.calendar_month,
+                  size: 16,
+                ),
+                Text(
+                  "${toTimeText(
+                    pro.to,
+                  )}",
+                  style: context.textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String fromTimeText(DateTime? fromTime) {

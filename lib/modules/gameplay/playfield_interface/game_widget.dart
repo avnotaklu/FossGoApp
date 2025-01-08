@@ -3,11 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/foundation/string.dart';
+import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
 import 'package:go/modules/gameplay/middleware/score_calculation.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/compact_ui.dart';
+import 'package:go/modules/gameplay/playfield_interface/gameui/desktop_game_ui.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_over_card.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/models/time_control.dart';
@@ -83,9 +85,11 @@ class _GameWidgetState extends State<GameWidget> {
           return Consumer<SettingsProvider>(
             builder: (context, settingsProvider, child) => Scaffold(
               key: key,
-              drawer: const MyAppDrawer(
-                showCompactUiSwitch: true,
-              ),
+              drawer: context.isMobile
+                  ? MyAppDrawer(
+                      showCompactUiSwitch: true,
+                    )
+                  : null,
               appBar: PreferredSize(
                 preferredSize: const Size.fromHeight(50),
                 child: Consumer<GameStateBloc>(
@@ -215,18 +219,19 @@ class _WrapperGameState extends State<WrapperGame> {
       context.read<Stage>().initializeWhenAllMiddlewareAvailable(context);
     });
 
+    final board =
+        Board(widget.game.rows, widget.game.columns, widget.game.playgroundMap);
+
+    if (context.isDesktop) {
+      return DesktopGameUi(boardWidget: board);
+    }
+
     if (widget.compact_ui) {
-      return CompactGameUi(
-          boardWidget: Board(widget.game.rows, widget.game.columns,
-              widget.game.playgroundMap));
+      return CompactGameUi(boardWidget: board);
     }
 
     return GameUi(
-      boardWidget: Board(
-        widget.game.rows,
-        widget.game.columns,
-        widget.game.playgroundMap,
-      ),
+      boardWidget: board,
     );
   }
 }

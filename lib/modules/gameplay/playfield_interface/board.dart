@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
@@ -65,8 +67,8 @@ class _BoardState extends State<Board> {
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               final cons = BoxConstraints(
-                maxWidth: constraints.maxWidth,
-                maxHeight: constraints.maxWidth,
+                maxWidth: min(constraints.maxWidth, constraints.maxHeight),
+                maxHeight: min(constraints.maxWidth, constraints.maxHeight),
               );
 
               return Stack(

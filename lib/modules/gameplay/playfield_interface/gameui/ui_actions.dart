@@ -13,6 +13,7 @@ import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/settings/settings_provider.dart';
 import 'package:go/services/move_position.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class ActionButtonWidget extends StatelessWidget {
   const ActionButtonWidget(
@@ -45,16 +46,19 @@ class ActionButtonWidget extends StatelessWidget {
               onLongPressEnd: longPressEnd,
               child: Container(
                 padding: const EdgeInsets.only(top: 4),
-                child: Column(
-                  children: [
-                    Icon(
-                      actionType.icon,
-                      size: 18,
-                    ),
-                    Text(actionType.label,
-                        style: context.textTheme.labelSmall
-                            ?.copyWith(fontSize: 12)),
-                  ],
+                child: LayoutBuilder(
+                  builder: (context, cons) => Column(
+                    children: [
+                      Icon(
+                        actionType.icon,
+                        size: cons.maxHeight * 0.2,
+                      ),
+                      Text(actionType.label,
+                          style: context.textTheme.labelSmall?.copyWith(
+                            fontSize: cons.maxHeight * 0.2,
+                          )),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -133,14 +137,23 @@ class ActionStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: IntrinsicHeight(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: actions,
+    return LayoutBuilder(builder: (context, cons) {
+      return Container(
+        width: cons.maxWidth,
+        child: IntrinsicHeight(
+          child: ResponsiveRowColumn(
+            layout: cons.maxWidth > 300
+                ? ResponsiveRowColumnType.ROW
+                : ResponsiveRowColumnType.COLUMN,
+            rowMainAxisAlignment: MainAxisAlignment.spaceAround,
+            columnCrossAxisAlignment: CrossAxisAlignment.stretch,
+            columnSpacing: 20,
+            children:
+                actions.map((e) => ResponsiveRowColumnItem(child: e)).toList(),
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 

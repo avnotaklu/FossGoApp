@@ -40,124 +40,127 @@ class _PlayerDataUiState extends State<PlayerDataUi> {
     final player = widget.playerInfo;
     final ratings = widget.playerInfo.rating;
 
-    final size = MediaQuery.of(context).size;
+    return LayoutBuilder(builder: (context, cons) {
+      final size = Size(cons.maxWidth, cons.maxHeight);
 
-    return Container(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-              flex: 4,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: size.width * 0.09,
-                        child: player!.waiting
-                            ? const Center(
-                                child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator()),
-                              )
-                            : widget.connectionStream == null
-                                ? const SizedBox.shrink()
-                                : ConnectionDisplay(
-                                    connectionStream: widget.connectionStream!,
-                                  ),
-                      ),
-                      Text(
-                        player.waiting ? "Waiting" : player.displayName,
-                        textAlign: TextAlign.center,
-                        style: context.textTheme.bodyLarge,
-                      ),
-                      if (widget.playerInfo.rating != null)
-                        ratingText(widget.playerInfo!.rating!),
-                    ],
-                  ),
-                  if (game.bothPlayersIn() &&
-                      game.gameState == GameState.waitingForStart &&
-                      player.stoneType == StoneType.black)
+      return Container(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+                flex: 4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Row(
                       children: [
-                        Container(
+                        SizedBox(
                           width: size.width * 0.09,
+                          child: player!.waiting
+                              ? const Center(
+                                  child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator()),
+                                )
+                              : widget.connectionStream == null
+                                  ? const SizedBox.shrink()
+                                  : ConnectionDisplay(
+                                      connectionStream:
+                                          widget.connectionStream!,
+                                    ),
                         ),
-                        TimerDisplay(
-                          builder: (p0) {
-                            return Text(
-                              "Time for first move: ${p0.duration.smallRepr()}",
-                              style: context.textTheme.labelLarge,
-                            );
-                          },
-                          controller: context
-                              .read<GameStateBloc>()
-                              .headsUpTimeController,
-                        )
-                      ],
-                    )
-                  else
-                    Row(
-                      children: [
-                        Container(
-                          width: size.width * 0.09,
+                        Text(
+                          player.waiting ? "Waiting" : player.displayName,
+                          textAlign: TextAlign.center,
+                          style: context.textTheme.bodyLarge,
                         ),
-
-                        if (player.stoneType != null)
-                          if (getFinalScore(game, player!.stoneType!) != null)
-                            Text(
-                              " + ${getFinalScore(game, player!.stoneType!)} Points",
-                              style: context.textTheme.labelLarge,
-                            ),
-
-                        if (player.stoneType != null &&
-                            player.stoneType == StoneType.white)
-                          Text(
-                            " + ${getKomi(game, player!.stoneType!)} Komi",
-                            style: context.textTheme.labelLarge,
-                          ),
-                        // : const Spacer(
-                        //     flex: 2,
-                        //   ),
-                        const Spacer(
-                          flex: 3,
-                        ),
+                        if (widget.playerInfo.rating != null)
+                          ratingText(widget.playerInfo!.rating!),
                       ],
                     ),
-                  Row(
-                    children: [
-                      Container(
-                        width: size.width * 0.09,
+                    if (game.bothPlayersIn() &&
+                        game.gameState == GameState.waitingForStart &&
+                        player.stoneType == StoneType.black)
+                      Row(
+                        children: [
+                          Container(
+                            width: size.width * 0.09,
+                          ),
+                          TimerDisplay(
+                            builder: (p0) {
+                              return Text(
+                                "Time for first move: ${p0.duration.smallRepr()}",
+                                style: context.textTheme.labelLarge,
+                              );
+                            },
+                            controller: context
+                                .read<GameStateBloc>()
+                                .headsUpTimeController,
+                          )
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          Container(
+                            width: size.width * 0.09,
+                          ),
+
+                          if (player.stoneType != null)
+                            if (getFinalScore(game, player!.stoneType!) != null)
+                              Text(
+                                " + ${getFinalScore(game, player!.stoneType!)} Points",
+                                style: context.textTheme.labelLarge,
+                              ),
+
+                          if (player.stoneType != null &&
+                              player.stoneType == StoneType.white)
+                            Text(
+                              " + ${getKomi(game, player!.stoneType!)} Komi",
+                              style: context.textTheme.labelLarge,
+                            ),
+                          // : const Spacer(
+                          //     flex: 2,
+                          //   ),
+                          const Spacer(
+                            flex: 3,
+                          ),
+                        ],
                       ),
-                      if (player.stoneType != null)
-                        gameOverScore(game, player!.stoneType!)
-                    ],
-                  ),
-                ],
-              )),
-          if (player.stoneType != null)
-            Expanded(
-              flex: 4,
-              child: Consumer<GameStateBloc>(
-                builder: (context, bloc, child) {
-                  return GameTimer(
-                    controller: getTimerController(player!.stoneType!),
-                    player: player.stoneType!,
-                    isMyTurn: isPlayerTurn(player.stoneType!),
-                    timeControl: game.timeControl,
-                    playerTimeSnapshot:
-                        getPlayerTimeSnapshot(game, player.stoneType!),
-                  );
-                },
-              ),
-            )
-          else
-            const SizedBox.shrink(),
-        ],
-      ),
-    );
+                    Row(
+                      children: [
+                        Container(
+                          width: size.width * 0.09,
+                        ),
+                        if (player.stoneType != null)
+                          gameOverScore(game, player!.stoneType!)
+                      ],
+                    ),
+                  ],
+                )),
+            if (player.stoneType != null)
+              Expanded(
+                flex: 4,
+                child: Consumer<GameStateBloc>(
+                  builder: (context, bloc, child) {
+                    return GameTimer(
+                      controller: getTimerController(player!.stoneType!),
+                      player: player.stoneType!,
+                      isMyTurn: isPlayerTurn(player.stoneType!),
+                      timeControl: game.timeControl,
+                      playerTimeSnapshot:
+                          getPlayerTimeSnapshot(game, player.stoneType!),
+                    );
+                  },
+                ),
+              )
+            else
+              const SizedBox.shrink(),
+          ],
+        ),
+      );
+    });
   }
 
   Widget ratingText(MinimalRating rating) {

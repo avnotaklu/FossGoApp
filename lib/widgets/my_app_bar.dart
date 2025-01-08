@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/games_history/games_history_page.dart';
@@ -41,7 +42,7 @@ class _MyAppBarState extends State<MyAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: widget.showBackButton
+      leading: widget.showBackButton && context.isMobile
           ? IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
@@ -61,7 +62,8 @@ class _MyAppBarState extends State<MyAppBar> {
                   future: Future.delayed(Duration(seconds: 2)),
                   builder: (context, delayedFutureSnap) {
                     if (delayedFutureSnap.connectionState ==
-                        ConnectionState.waiting || !connectionSnap.data!) {
+                            ConnectionState.waiting ||
+                        !connectionSnap.data!) {
                       return Row(
                         children: [
                           Icon(

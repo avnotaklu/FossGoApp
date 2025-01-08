@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go/constants/constants.dart';
+import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/core/foundation/string.dart';
 import 'package:go/core/utils/intl/formatters.dart';
@@ -19,6 +20,7 @@ import 'package:go/services/user_stats.dart';
 import 'package:go/widgets/basic_alert.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class StatsPage extends StatelessWidget {
   final VariantType defaultVariant;
@@ -59,7 +61,9 @@ class StatsPage extends StatelessWidget {
                   builder: (context, _) {
                     return Consumer<StatsPageProvider>(
                       builder: (context, pro, child) => Scaffold(
-                        body: Container(
+                        body: MaxWidthBox(
+                          maxWidth: context.tabletBreakPoint.end,
+                          child: Container(
                             padding: const EdgeInsets.all(10),
                             child: CustomScrollView(
                               slivers: [
@@ -70,6 +74,16 @@ class StatsPage extends StatelessWidget {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
+                                      if (context.isTabletOrDesktop)
+                                        IconButton(
+                                          onPressed: () {
+                                            Navigator.popUntil(
+                                                context,
+                                                ModalRoute.withName(
+                                                    '/HomePage'));
+                                          },
+                                          icon: Icon(Icons.arrow_back),
+                                        ),
                                       Text(
                                         "Stats for",
                                         style: context.textTheme.headlineSmall,
@@ -124,70 +138,13 @@ class StatsPage extends StatelessWidget {
                                             horizontal: 24),
                                         child: Column(
                                           children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text(
-                                                  "Rating",
-                                                  style: context
-                                                      .textTheme.headlineSmall,
-                                                ),
-                                                InfoText(
-                                                  detail: pro
-                                                      .getRating()
-                                                      .glicko
-                                                      .minimal
-                                                      .stringify(),
-                                                  label: "Rating",
-                                                  maxWidth: 50,
-                                                ),
-                                                InfoText(
-                                                  detail: pro
-                                                      .getRating()
-                                                      .glicko
-                                                      .deviation
-                                                      .toStringAsFixed(2),
-                                                  label: "Deviation",
-                                                  maxWidth: 70,
-                                                ),
-                                              ],
-                                            ),
+                                            ratingInfo(context, pro),
                                             SizedBox(
                                               height: 20,
                                             ),
                                             pro.getStats().fold(
-                                                  (l) => SizedBox(
-                                                    height:
-                                                        context.height * 0.5,
-                                                    width: context.width * 0.5,
-                                                    child: Center(
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Text(
-                                                            l.message,
-                                                            style: context
-                                                                .textTheme
-                                                                .headlineSmall,
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                          ),
-                                                          Text(
-                                                            "Play some games to see stats",
-                                                            style: context
-                                                                .textTheme
-                                                                .bodySmall,
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
+                                                  (l) => playEnoughGames(
+                                                      context, l),
                                                   (r) => Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
@@ -202,197 +159,56 @@ class StatsPage extends StatelessWidget {
                                                                     .headlineLarge,
                                                               ),
                                                             ),
-                                                            (r) => Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Text(
-                                                                  "Games",
-                                                                  style: context
-                                                                      .textTheme
-                                                                      .headlineSmall,
-                                                                ),
-                                                                InfoText(
-                                                                  detail: r
-                                                                      .total
-                                                                      .toString(),
-                                                                  label:
-                                                                      "Games",
-                                                                  maxWidth: 60,
-                                                                ),
-                                                                InfoText(
-                                                                  detail: r.wins
-                                                                      .toString(),
-                                                                  label: "Wins",
-                                                                  maxWidth: 50,
-                                                                ),
-                                                                InfoText(
-                                                                  detail: r
-                                                                      .losses
-                                                                      .toString(),
-                                                                  label:
-                                                                      "Losses",
-                                                                  maxWidth: 70,
-                                                                ),
-                                                              ],
-                                                            ),
+                                                            (r) => gamesInfo(
+                                                                context, r),
                                                           ),
                                                       SizedBox(
                                                         height: 20,
                                                       ),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Text(
-                                                            "Play Time",
-                                                            style: context
-                                                                .textTheme
-                                                                .headlineSmall,
-                                                          ),
-                                                          Text(
-                                                            pro
-                                                                .timePlayed(r)
-                                                                .bigRepr(2),
-                                                            style: context
-                                                                .textTheme
-                                                                .bodySmall,
-                                                          ),
-                                                        ],
-                                                      ),
+                                                      playTimeInfo(
+                                                          context, pro, r),
                                                       SizedBox(
                                                         height: 20,
                                                       ),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Text(
-                                                            "Records",
-                                                            style: context
-                                                                .textTheme
-                                                                .headlineSmall,
-                                                          ),
-                                                          InfoText(
-                                                              detail: pro
-                                                                      .highestRating(
-                                                                          r)
-                                                                      ?.toString() ??
-                                                                  "N/A",
-                                                              label:
-                                                                  "Highest rating",
-                                                              maxWidth: 90),
-                                                          InfoText(
-                                                              detail: pro
-                                                                      .lowestRating(
-                                                                          r)
-                                                                      ?.toString() ??
-                                                                  "N/A",
-                                                              label:
-                                                                  "lowest rating",
-                                                              maxWidth: 90)
-                                                        ],
+                                                      recordInfo(
+                                                          context, pro, r),
+                                                      // SectionDivider(),
+                                                      SizedBox(
+                                                        height: 20,
                                                       ),
-                                                      SectionDivider(),
-                                                      Center(
-                                                        child: Text(
-                                                          "Streaks",
-                                                          style: context
-                                                              .textTheme
-                                                              .headlineLarge
-                                                              ?.italicify
-                                                              .underlinify,
-                                                        ),
+                                                      Text(
+                                                        "Streaks",
+                                                        style: context
+                                                            .textTheme
+                                                            .headlineLarge
+                                                            ?.italicify
+                                                            .underlinify,
                                                       ),
                                                       pro
                                                           .unavailabiltyReasonOrStreakData(
                                                               r)
                                                           .fold(
-                                                            (l) => Center(
-                                                              child: Text(
-                                                                l.message,
-                                                                style: context
-                                                                    .textTheme
-                                                                    .bodyLarge,
-                                                              ),
+                                                            (l) => Text(
+                                                              l.message,
+                                                              style: context
+                                                                  .textTheme
+                                                                  .bodySmall,
                                                             ),
-                                                            (r) => Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Text(
-                                                                  "Winning",
-                                                                  style: context
-                                                                      .textTheme
-                                                                      .headlineSmall
-                                                                      ?.copyWith(
-                                                                          fontStyle:
-                                                                              FontStyle.italic),
-                                                                ),
-                                                                SizedBox(
-                                                                  width: 140,
-                                                                  child:
-                                                                      Divider(
-                                                                    height: 2,
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 10,
-                                                                ),
-                                                                if (r.winningStreaks ==
-                                                                    null)
-                                                                  Text(
-                                                                      "No winning streaks")
-                                                                else
-                                                                  CurrentAndGreatestStreak(
-                                                                      streak: r
-                                                                          .winningStreaks!),
-                                                                SizedBox(
-                                                                    height: 20),
-                                                                Text(
-                                                                  "Losing",
-                                                                  style: context
-                                                                      .textTheme
-                                                                      .headlineSmall
-                                                                      ?.copyWith(
-                                                                          fontStyle:
-                                                                              FontStyle.italic),
-                                                                ),
-                                                                SizedBox(
-                                                                  width: 140,
-                                                                  child:
-                                                                      Divider(
-                                                                    height: 2,
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 10,
-                                                                ),
-                                                                if (r.losingStreaks ==
-                                                                    null)
-                                                                  Text(
-                                                                      "No losing streaks")
-                                                                else
-                                                                  CurrentAndGreatestStreak(
-                                                                      streak: r
-                                                                          .losingStreaks!)
-                                                              ],
-                                                            ),
+                                                            (r) => streakInfo(
+                                                                context, r),
                                                           ),
-                                                      SectionDivider(),
-                                                      Center(
-                                                        child: Text(
-                                                          "Greatest Wins",
-                                                          style: context
-                                                              .textTheme
-                                                              .headlineLarge
-                                                              ?.italicify
-                                                              .underlinify,
-                                                        ),
+
+                                                      SizedBox(
+                                                        height: 20,
+                                                      ),
+                                                      // SectionDivider(),
+                                                      Text(
+                                                        "Greatest Wins",
+                                                        style: context
+                                                            .textTheme
+                                                            .headlineLarge
+                                                            ?.italicify
+                                                            .underlinify,
                                                       ),
                                                       if (pro.getGreatestWins(
                                                               r) ==
@@ -452,7 +268,9 @@ class StatsPage extends StatelessWidget {
                                   ),
                                 )
                               ],
-                            )),
+                            ),
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -462,6 +280,169 @@ class StatsPage extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget streakInfo(BuildContext context, ResultStreakData r) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Winning",
+          style: context.textTheme.titleLarge
+              ?.copyWith(fontStyle: FontStyle.italic),
+        ),
+        SizedBox(
+          width: 140,
+          child: Divider(
+            height: 2,
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        if (r.winningStreaks == null)
+          Text("No winning streaks")
+        else
+          CurrentAndGreatestStreak(streak: r.winningStreaks!),
+        SizedBox(height: 20),
+        Text(
+          "Losing",
+          style: context.textTheme.titleLarge
+              ?.copyWith(fontStyle: FontStyle.italic),
+        ),
+        SizedBox(
+          width: 140,
+          child: Divider(
+            height: 2,
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        if (r.losingStreaks == null)
+          Text("No losing streaks")
+        else
+          CurrentAndGreatestStreak(streak: r.losingStreaks!)
+      ],
+    );
+  }
+
+  Row playTimeInfo(
+      BuildContext context, StatsPageProvider pro, UserStatForVariant r) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Play Time",
+          style: context.textTheme.titleLarge,
+        ),
+        SizedBox(
+          width: 20,
+        ),
+        Text(
+          pro.timePlayed(r).bigRepr(2),
+          style: context.textTheme.bodySmall,
+        ),
+        if (context.isTabletOrDesktop) Spacer(),
+      ],
+    );
+  }
+
+  Row recordInfo(
+      BuildContext context, StatsPageProvider pro, UserStatForVariant r) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Records",
+          style: context.textTheme.titleLarge,
+        ),
+        InfoText(
+            detail: pro.highestRating(r)?.toString() ?? "N/A",
+            label: "Highest rating",
+            maxWidth: 90),
+        InfoText(
+            detail: pro.lowestRating(r)?.toString() ?? "N/A",
+            label: "lowest rating",
+            maxWidth: 90),
+        if (context.isTabletOrDesktop) Spacer(),
+      ],
+    );
+  }
+
+  Row gamesInfo(BuildContext context, GameStatCounts r) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Games",
+          style: context.textTheme.titleLarge,
+        ),
+        InfoText(
+          detail: r.total.toString(),
+          label: "Games",
+          maxWidth: 60,
+        ),
+        InfoText(
+          detail: r.wins.toString(),
+          label: "Wins",
+          maxWidth: 50,
+        ),
+        InfoText(
+          detail: r.losses.toString(),
+          label: "Losses",
+          maxWidth: 70,
+        ),
+        if (context.isTabletOrDesktop) Spacer(),
+      ],
+    );
+  }
+
+  Row ratingInfo(BuildContext context, StatsPageProvider pro) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Rating",
+          style: context.textTheme.titleLarge,
+        ),
+        InfoText(
+          detail: pro.getRating().glicko.minimal.stringify(),
+          label: "Rating",
+          maxWidth: 50,
+        ),
+        InfoText(
+          detail: pro.getRating().glicko.deviation.toStringAsFixed(2),
+          label: "Deviation",
+          maxWidth: 70,
+        ),
+        if (context.isTabletOrDesktop) Spacer(),
+      ],
+    );
+  }
+
+  SizedBox playEnoughGames(BuildContext context, AppError l) {
+    return SizedBox(
+      height: context.height * 0.5,
+      width: context.width * 0.5,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              l.message,
+              style: context.textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              "Play some games to see stats",
+              style: context.textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -500,7 +481,8 @@ class GameResultWidget extends StatelessWidget {
           },
           (r) {
             Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return LiveGameWidget(r.game, GameEntranceData.fromGameAndOpponent(r), statsRepo);
+              return LiveGameWidget(
+                  r.game, GameEntranceData.fromGameAndOpponent(r), statsRepo);
             }));
           },
         );
@@ -606,16 +588,20 @@ class InfoText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: maxWidth,
+    return Container(
+      padding:
+          EdgeInsets.symmetric(horizontal: context.isTabletOrDesktop ? 20 : 0),
       child: Column(
         children: [
           Text(
             detail,
             style: context.textTheme.labelSmall,
           ),
-          Divider(
-            height: 1,
+          Container(
+            width: maxWidth,
+            child: Divider(
+              height: 1,
+            ),
           ),
           Text(
             label,

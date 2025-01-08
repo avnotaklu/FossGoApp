@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/modules/games_history/games_history_page.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/settings/settings_provider.dart';
 import 'package:go/services/local_datasource.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -16,72 +18,73 @@ class SettingsPage extends StatelessWidget {
     // ChangeNotifierProvider(
     //   create: (context) => SettingsProvider(localDatasource: LocalDatasource()),
     // builder: (context, child) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: Container(
-        padding: EdgeInsets.all(10),
-        child: Column(children: [
-          Consumer<SettingsProvider>(
-            builder: (context, pro, child) {
-              return settingsKeyVal(
-                context,
-                'Theme',
-                themeToggle(context),
-              );
-            },
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Consumer<SettingsProvider>(
-            builder: (context, pro, child) {
-              return settingsKeyVal(
-                  context, 'Enable Sound', soundSwitch(context));
-            },
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Consumer<SettingsProvider>(
-            builder: (context, pro, child) {
-              return settingsKeyVal(
-                  context, 'Move Crosshair', showCrosshairSwitch(context));
-            },
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Consumer<SettingsProvider>(
-            builder: (context, pro, child) {
-              return settingsKeyVal(
-                  context, 'Compact Game UI', const GameUIToggle());
-            },
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Consumer<SettingsProvider>(
-            builder: (context, pro, child) {
-              return settingsKeyVal(
-                  context, 'Notation', const NotationPositionDropDown());
-            },
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Consumer<SettingsProvider>(
-            builder: (context, pro, child) {
-              return settingsKeyVal(
-                  context, 'Move input', const MoveInputDropDown());
-            },
-          ),
-        ]),
+    return MaxWidthBox(
+      maxWidth: context.tabletBreakPoint.end,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Settings'),
+        ),
+        body: Container(
+          padding: EdgeInsets.all(10),
+          child: Column(children: [
+            Consumer<SettingsProvider>(
+              builder: (context, pro, child) {
+                return settingsKeyVal(
+                  context,
+                  'Theme',
+                  themeToggle(context),
+                );
+              },
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Consumer<SettingsProvider>(
+              builder: (context, pro, child) {
+                return settingsKeyVal(
+                    context, 'Enable Sound', soundSwitch(context));
+              },
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Consumer<SettingsProvider>(
+              builder: (context, pro, child) {
+                return settingsKeyVal(
+                    context, 'Move Crosshair', showCrosshairSwitch(context));
+              },
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Consumer<SettingsProvider>(
+              builder: (context, pro, child) {
+                return settingsKeyVal(
+                    context, 'Compact Game UI', const GameUIToggle());
+              },
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Consumer<SettingsProvider>(
+              builder: (context, pro, child) {
+                return settingsKeyVal(
+                    context, 'Notation', const NotationPositionDropDown());
+              },
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Consumer<SettingsProvider>(
+              builder: (context, pro, child) {
+                return settingsKeyVal(
+                    context, 'Move input', const MoveInputDropDown());
+              },
+            ),
+          ]),
+        ),
       ),
     );
-    //   },
-    // );
   }
 
   Widget settingsKeyVal(
@@ -95,7 +98,7 @@ class SettingsPage extends StatelessWidget {
         children: [
           Text(
             key,
-            style: context.textTheme.titleLarge,
+            style: context.textTheme.bodySmall,
           ),
           Spacer(),
           val,
