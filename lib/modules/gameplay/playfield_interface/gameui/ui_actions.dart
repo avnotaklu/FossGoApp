@@ -34,7 +34,12 @@ class ActionButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return 
+    ConstrainedBox(
+      constraints: const BoxConstraints(
+        minHeight: 50,
+        maxHeight: 70,
+      ),
       child: Material(
         child: InkWell(
           onTap: action,

@@ -103,7 +103,7 @@ class DesktopGameUi extends StatelessWidget {
                           // if (!)
                             Container(
                               width: sideInfoWidth,
-                              height: showMoveTreeAtSide ? 80 : 250,
+                              height: showMoveTreeAtSide ? 80 : 500,
                               child: actionButtons(context),
                             )
                         ],

@@ -11,13 +11,13 @@ import 'package:go/widgets/signal_indicator.dart';
 import 'package:provider/provider.dart';
 
 class MyAppDrawer extends StatelessWidget {
-  final bool showCompactUiSwitch;
+  final bool gameWidgetDrawer;
   final bool sidebar;
   final List<ListTile>? navigationItems;
 
   MyAppDrawer({
     this.navigationItems,
-    this.showCompactUiSwitch = false,
+    this.gameWidgetDrawer = false,
     this.sidebar = false,
     super.key,
   });
@@ -33,7 +33,7 @@ class MyAppDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           const DrawerHeader(child: UserInfoOverview()),
-          if (showCompactUiSwitch)
+          if (gameWidgetDrawer)
             const ListTile(
               title: Text('Compact'),
               trailing: GameUIToggle(),
@@ -45,7 +45,7 @@ class MyAppDrawer extends StatelessWidget {
               child: Divider(),
             ),
           ],
-          if (mobile)
+          if (mobile || gameWidgetDrawer)
             ListTile(
               title: const Text('Home'),
               leading: const Icon(Icons.home),
@@ -68,7 +68,7 @@ class MyAppDrawer extends StatelessWidget {
               showOverTheBoardCreateCustomGameDialog(context);
             },
           ),
-          if (mobile)
+          if (mobile || gameWidgetDrawer)
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),

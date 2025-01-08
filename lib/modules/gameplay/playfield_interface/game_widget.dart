@@ -75,8 +75,6 @@ class _GameWidgetState extends State<GameWidget> {
         GameState.paused => StageType.beforeStart,
       };
 
-  // bool compact_ui = true;
-
   // Board
   @override
   Widget build(BuildContext context) {
@@ -87,31 +85,31 @@ class _GameWidgetState extends State<GameWidget> {
           return Consumer<SettingsProvider>(
             builder: (context, settingsProvider, child) => Scaffold(
               key: key,
-              drawer: context.isMobile
-                  ? MyAppDrawer(
-                      showCompactUiSwitch: true,
-                    )
-                  : null,
+              drawer: MyAppDrawer(
+                gameWidgetDrawer: true,
+                navigationItems: [],
+              ),
               appBar: PreferredSize(
                 preferredSize: const Size.fromHeight(50),
                 child: Consumer<GameStateBloc>(
-                  builder: (context, gameStateBloc, child) => settingsProvider
-                          .compactGameUISetting
-                          .isCompact(context.read<GameStateBloc>().curStageType)
-                      ? SizedBox.shrink()
-                      : MyAppBar(
-                          gameTitle(context.read<GameStateBloc>().game),
-                          leading: IconButton(
-                            onPressed: () {
-                              if (key.currentState!.isDrawerOpen) {
-                                key.currentState!.closeDrawer();
-                              } else {
-                                key.currentState!.openDrawer();
-                              }
-                            },
-                            icon: const Icon(Icons.menu),
-                          ),
-                        ),
+                  builder: (context, gameStateBloc, child) =>
+                      settingsProvider.compactGameUISetting.isCompact(
+                                  context.read<GameStateBloc>().curStageType) &&
+                              !context.isTabletOrDesktop
+                          ? SizedBox.shrink()
+                          : MyAppBar(
+                              gameTitle(context.read<GameStateBloc>().game),
+                              leading: IconButton(
+                                onPressed: () {
+                                  if (key.currentState!.isDrawerOpen) {
+                                    key.currentState!.closeDrawer();
+                                  } else {
+                                    key.currentState!.openDrawer();
+                                  }
+                                },
+                                icon: const Icon(Icons.menu),
+                              ),
+                            ),
                 ),
               ),
               body: Consumer<GameStateBloc>(
