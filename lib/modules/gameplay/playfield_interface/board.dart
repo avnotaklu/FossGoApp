@@ -224,7 +224,10 @@ class BorderPainter extends CustomPainter {
       var crosshairVisible = showCrosshair && isIntermediate;
 
       var color = crosshairVisible ? primaryColor : myColor;
-      var strokeWidth = crosshairVisible ? bWidth * 5 : bWidth;
+
+      var strokeWidth = crosshairVisible
+          ? bWidth * 5 * max(1, (size.width - 400) / 400) * 1.12
+          : bWidth;
 
       var startX = crosshairVisible ? hOff : start_grid_x;
 
@@ -254,7 +257,10 @@ class BorderPainter extends CustomPainter {
       var crosshairVisible = showCrosshair && isIntermediate;
 
       var color = crosshairVisible ? primaryColor : myColor;
-      var strokeWidth = crosshairVisible ? bWidth * 5 : bWidth;
+
+      var strokeWidth = crosshairVisible
+          ? bWidth * 5 * max(1, (size.width - 400) / 400) * 1.12
+          : bWidth;
 
       var startY = crosshairVisible ? vOff : start_grid_y;
 

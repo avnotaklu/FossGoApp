@@ -57,4 +57,10 @@ abstract class Stage extends ChangeNotifier {
   void initializeWhenAllMiddlewareAvailable(BuildContext context);
 
   StageType get getType;
+
+  @override
+  void dispose() {
+    disposeStage();
+    super.dispose();
+  }
 }

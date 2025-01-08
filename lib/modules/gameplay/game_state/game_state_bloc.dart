@@ -161,25 +161,7 @@ class GameStateBloc extends ChangeNotifier {
     bool canPlayMove = gameOracle.isThisAccountsTurn(game);
     var updateStone = gameOracle.thisAccountStone(game);
 
-    if (canPlayMove) {
-      canPlayMove =
-          tmpStoneLogic.handleStoneUpdate(position, updateStone).result;
-    }
-
-    if (!canPlayMove) {
-      return left(AppError(message: "You can't play here"));
-    }
-
-    bloc.updateBoard(tmpStoneLogic.board);
-
-    final move = MovePosition(
-      x: position.x,
-      y: position.y,
-    );
-
-    bloc.intermediate = move;
-
-    return right(move);
+    return bloc.placeStone(position, stoneLogic, updateStone);
   }
 
   Future<Either<AppError, Game>> makeMove(

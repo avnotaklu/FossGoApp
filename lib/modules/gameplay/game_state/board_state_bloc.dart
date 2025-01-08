@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
+import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/services/move_position.dart';
 
 class BoardStateBloc extends ChangeNotifier {
@@ -49,5 +52,28 @@ class BoardStateBloc extends ChangeNotifier {
       game.rows,
       game.columns,
     ).boardStateFromGame(game);
+  }
+
+  Either<AppError, MovePosition> placeStone(
+      Position position, StoneLogic stoneLogic, StoneType newStone) {
+    final tmpStoneLogic = stoneLogic.deepCopy();
+
+    final canPlayMove =
+        tmpStoneLogic.handleStoneUpdate(position, newStone).result;
+
+    if (!canPlayMove) {
+      return left(AppError(message: "You can't play here"));
+    }
+
+    updateBoard(tmpStoneLogic.board);
+
+    final move = MovePosition(
+      x: position.x,
+      y: position.y,
+    );
+
+    intermediate = move;
+
+    return right(move);
   }
 }

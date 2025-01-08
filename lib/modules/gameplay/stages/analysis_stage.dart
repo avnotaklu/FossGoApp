@@ -18,8 +18,7 @@ class AnalysisStage extends Stage {
       : super(onCellTap: _onTap(analysisBloc));
 
   @override
-  void disposeStage() {
-  }
+  void disposeStage() {}
 
   @override
   Widget drawCell(Position position, StoneWidget? stone, BuildContext context) {
@@ -34,7 +33,6 @@ class AnalysisStage extends Stage {
 
     return Stack(
       children: [
-        if (stoneWidget != null) stoneWidget,
         if (nextMove != null && nextMove.position == position)
           Center(
             child: Padding(
@@ -50,6 +48,7 @@ class AnalysisStage extends Stage {
               ),
             ),
           ),
+        if (stoneWidget != null) stoneWidget,
         if (currentMove?.position == position)
           Center(
             child: Padding(
@@ -67,6 +66,7 @@ class AnalysisStage extends Stage {
           ),
         Container(
           color: Colors.transparent,
+          child: stoneWidget == null ? stone : null,
         )
       ],
     );

@@ -77,6 +77,7 @@ class GameplayStage extends Stage {
           ),
         Container(
           decoration: const BoxDecoration(color: Colors.transparent),
+          child: player == null ? stone : null,
         ),
       ],
     );
@@ -141,7 +142,7 @@ class GameplayStage extends Stage {
 
   @override
   void disposeStage() {
-    // Empty
+    boardStateBloc.intermediate = null;
   }
 
   @override

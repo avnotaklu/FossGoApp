@@ -2,6 +2,7 @@
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
+import 'package:go/core/foundation/provider.dart';
 import 'package:go/core/foundation/string.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/system_utilities.dart';
@@ -45,6 +46,7 @@ class GameWidget extends StatefulWidget {
 
 class _GameWidgetState extends State<GameWidget> {
   final key = GlobalKey<ScaffoldState>();
+  Stage? prevStage;
 
   String? byoYomiTime(TimeControl time) {
     return time.byoYomiTime != null
@@ -149,6 +151,12 @@ class _GameWidgetState extends State<GameWidget> {
                                 context.read<BoardStateBloc>(),
                                 context.read<AnalysisBloc>(),
                               );
+
+                          if (prevStage.runtimeType != stage.runtimeType) {
+                            prevStage?.dispose();
+                          }
+                          prevStage = stage;
+
                           return ChangeNotifierProvider<Stage>.value(
                             value: stage,
                             builder: (context, child) {
