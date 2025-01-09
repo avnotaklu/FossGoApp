@@ -1,5 +1,6 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:go/firebase_options.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go/modules/homepage/homepage_bloc.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/homepage/home_page.dart';
@@ -25,8 +26,13 @@ void main() async {
   // await Firebase.initializeApp(
   //   options: DefaultFirebaseOptions.currentPlatform,
   // );
-  final dir = await getApplicationDocumentsDirectory();
-  Hive.init(dir.path);
+  if (!kIsWeb) {
+    final dir = await getApplicationDocumentsDirectory();
+    Hive.init(dir.path);
+  } else {
+    Hive.init(null);
+  }
+
   (await Hive.openBox<String>('stats'));
 
   runApp(const MyApp());

@@ -43,7 +43,7 @@ class SignalRProvider extends ChangeNotifier {
     try {
       hubConnection = HubConnectionBuilder()
           .withUrl(
-        serverUrl,
+        Uri.http(Api.basePath, "/mainHub", {"token": token}).toString(),
         options: HttpConnectionOptions(
           accessTokenFactory: () async => token,
         ),

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/api_error.dart';
@@ -66,16 +64,18 @@ class Api {
 
       log("Response: ${res.body}");
       return right(res);
-    } on SocketException {
+    } on Exception catch (e) {
       log("Socket Exception: ${url.toString()}");
       return left(HttpError(message: "No internet connection"));
-    } on HttpException {
-      log("Http Exception: ${url.toString()}");
-      return left(HttpError(message: "Can't find the server"));
-    } on FormatException {
-      log("Format Exception: ${url.toString()}");
-      rethrow;
     }
+    // on  SocketException {
+    // } on HttpException {
+    //   log("Http Exception: ${url.toString()}");
+    //   return left(HttpError(message: "Can't find the server"));
+    // } on FormatException {
+    //   log("Format Exception: ${url.toString()}");
+    //   rethrow;
+    // }
   }
 
   Future<Either<HttpError, http.Response>> post(
@@ -94,16 +94,21 @@ class Api {
 
       log("Response: ${res.body}");
       return right(res);
-    } on SocketException {
+    } on Exception catch (e) {
       log("Socket Exception: ${url.toString()}");
       return left(HttpError(message: "No internet connection"));
-    } on HttpException {
-      log("Http Exception: ${url.toString()}");
-      return left(HttpError(message: "Can't find the server"));
-    } on FormatException {
-      log("Format Exception: ${url.toString()}");
-      rethrow;
     }
+
+    // on SocketException {
+    //   log("Socket Exception: ${url.toString()}");
+    //   return left(HttpError(message: "No internet connection"));
+    // } on HttpException {
+    //   log("Http Exception: ${url.toString()}");
+    //   return left(HttpError(message: "Can't find the server"));
+    // } on FormatException {
+    //   log("Format Exception: ${url.toString()}");
+    //   rethrow;
+    // }
   }
 
   static String flagUrl(String countryCode) {

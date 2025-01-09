@@ -769,10 +769,11 @@ packages:
   signalr_netcore:
     dependency: "direct main"
     description:
-      name: signalr_netcore
-      sha256: bf42db085aee4adeafb772e436fb51a4af0baa06dee91bb193d7ca3cdfa55518
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: master
+      resolved-ref: "1875b0fae236a9f1d035ec6cf866c04e6342aae0"
+      url: "git@github.com:avnotaklu/signalr_client.git"
+    source: git
     version: "1.4.0"
   sky_engine:
     dependency: transitive
