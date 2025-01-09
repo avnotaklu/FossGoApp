@@ -288,14 +288,11 @@ class BorderPainter extends CustomPainter {
       );
     }
 
-    var fontSize = fontSizeFactor *
-        size.width *
-        0.3 /
-        info.rows /
-        max(
-            1,
-            ((size.width - 400) / 1200) +
-                1); // This stuff so text scales nicely;
+    var scaleAvailableWidth = max(1,
+        ((size.width - 400) / 1200) + 1); // This stuff so text scales nicely;
+
+    var fontSize =
+        fontSizeFactor * size.width * 0.3 / info.rows / scaleAvailableWidth;
 
     TextPainter getTextPainter(String text) {
       var painter = TextPainter(
@@ -357,7 +354,7 @@ class BorderPainter extends CustomPainter {
         if (showRightBottom) {
           paintNotationText(
             isIntermediate,
-            Offset(w - 10 - textPainter.width / 2, line),
+            Offset(w - textPainter.width * 2, line),
             textPainter,
           );
         }
@@ -384,7 +381,7 @@ class BorderPainter extends CustomPainter {
         if (showRightBottom) {
           paintNotationText(
             isIntermediate,
-            Offset(line, h - 10 - textPainter.height / 2),
+            Offset(line, h  - textPainter.height - 5),
             textPainter,
           );
         }
@@ -410,8 +407,8 @@ class BorderPainter extends CustomPainter {
 
   double get fontSizeFactor => switch (info.board) {
         BoardSize.nine => 1,
-        BoardSize.thirteen => 0.7,
-        BoardSize.nineteen => 0.5,
+        BoardSize.thirteen => 1.2,
+        BoardSize.nineteen => 1.4,
         BoardSize.other => throw Exception("Can't draw decor for other boards"),
       };
 
