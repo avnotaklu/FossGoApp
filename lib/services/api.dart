@@ -242,7 +242,7 @@ class Api {
   ) async {
     var res = await rawPost(
       Uri.parse("$baseUrl/Authentication/RefreshToken"),
-      authCreds.refreshToken,
+      authCreds.toJson(),
       authCreds.token,
     );
 
