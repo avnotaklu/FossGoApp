@@ -12,10 +12,13 @@ import 'package:go/services/user_details_dto.dart';
 
 class SignUpProvider {
   final AuthProvider authBloc;
+
   SignUpProvider({
     required this.authBloc,
+    required this.api,
   });
-  final api = Api();
+
+  final Api api;
 
   Validator<String?, String> usernameValidator() {
     return RequiredValidator(
@@ -55,7 +58,7 @@ class SignUpProvider {
 
     var res = logInRes.flatMap(
       (r) => TaskEither(
-        () => authBloc.authenticateNormalUser(r.user, r.token),
+        () => authBloc.authenticateNormalUser(r.user, r.creds),
       ),
     );
 

@@ -6,6 +6,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
+import 'package:go/services/auth_creds.dart';
 import 'package:go/services/google_o_auth_model.dart';
 import 'package:go/services/local_datasource.dart';
 import 'package:go/services/user_account.dart';
@@ -25,8 +26,9 @@ import 'package:signalr_netcore/hub_connection.dart';
 class AuthProvider {
   final LocalDatasource localDatasource;
   final SignalRProvider signlRBloc;
-  // final authService = Auth();
-  final api = Api();
+
+  final Api api;
+
   final googleSignIn = GoogleSignIn(
       scopes: [
         // 'https://www.googleapis.com/auth/userinfo.email',
@@ -59,21 +61,21 @@ class AuthProvider {
   // PublicUserInfo? _currentUserInfo;
   // PublicUserInfo get currentUserInfo => _currentUserInfo!;
 
-  String? _token;
-  String? get token => _token;
+  AuthCreds? get _authCreds => api.authCreds;
+  set _authCreds(AuthCreds? creds) => api.authCreds = creds;
 
   Completer<Either<AppError, UserAccount?>> initialAuth = Completer();
 
   // bool locallyInitialedAuth = false;
-  AuthProvider(this.signlRBloc, this.localDatasource) {
+  AuthProvider(this.signlRBloc, this.localDatasource, this.api) {
     getToken().then((value) {
       if (value != null) {
-        _token = value;
+        _authCreds = value;
         getUser(value).then((authRes) {
           authRes.fold((e) {
             debugPrint(e.toString());
           }, (m) async {
-            var res = await authenticateNormalUser(m.user, m.token);
+            var res = await authenticateNormalUser(m.user, m.creds);
             initialAuth.complete(res);
           });
         });
@@ -113,7 +115,7 @@ class AuthProvider {
           return TaskEither(() {
             return (authenticateNormalUser(
               r.user,
-              r.token,
+              r.creds,
             ));
           });
         });
@@ -146,12 +148,12 @@ class AuthProvider {
     }
   }
 
-  void _setUser(String token, AbstractUserAccount user) {
+  void _setUser(AuthCreds creds, AbstractUserAccount user) {
     _currentUserRaw = user;
-    _token = token;
+    _authCreds = creds;
 
     if (user is UserAccount) {
-      storeToken(token);
+      storeToken(creds);
       storeUser(user);
     }
 
@@ -159,11 +161,11 @@ class AuthProvider {
   }
 
   Future<Either<AppError, UserAccount>> authenticateNormalUser(
-      UserAccount user, String token) async {
-    final registerTas = connectUser(token, user.id);
+      UserAccount user, AuthCreds creds) async {
+    final registerTas = connectUser(user.id, creds);
 
     var res = (await registerTas.run()).flatMap((r) {
-      _setUser(token, user);
+      _setUser(creds, user);
       return right(user);
     }).mapLeft((e) {
       signlRBloc.disconnect();
@@ -178,16 +180,16 @@ class AuthProvider {
     var task = TaskEither(() => api.guestLogin());
 
     return task.flatMap((r) {
-      return TaskEither(() => authenticateGuestUser(r.user, r.token));
+      return TaskEither(() => authenticateGuestUser(r.user, r.creds));
     }).run();
   }
 
   Future<Either<AppError, GuestUser>> authenticateGuestUser(
-      GuestUser user, String token) async {
-    final registerTas = connectUser(token, user.id);
+      GuestUser user, AuthCreds creds) async {
+    final registerTas = connectUser(user.id, creds);
 
     var res = (await registerTas.run()).flatMap((r) {
-      _setUser(token, user);
+      _setUser(creds, user);
       return right(user);
     }).mapLeft((e) {
       signlRBloc.disconnect();
@@ -198,10 +200,8 @@ class AuthProvider {
     return res;
   }
 
-  TaskEither<AppError, String> connectUser(String token, String userId) {
-    var signalRConnectionId =
-        TaskEither(() => signlRBloc.connectSignalR(token));
-
+  TaskEither<AppError, String> connectUser(String userId, AuthCreds creds) {
+    var signalRConnectionId = TaskEither(() => signlRBloc.connectSignalR(creds));
     return signalRConnectionId;
   }
 
@@ -209,7 +209,6 @@ class AuthProvider {
       String token, String signalRConnectionId) async {
     var registerRes = await api.registerPlayer(
       RegisterPlayerDto(connectionId: signalRConnectionId),
-      token,
     );
     return registerRes;
   }
@@ -218,7 +217,6 @@ class AuthProvider {
       String token, String userId) async {
     var registerRes = await api.getUserRating(
       userId,
-      token,
     );
     return registerRes;
   }
@@ -227,13 +225,12 @@ class AuthProvider {
       String token, String userId) async {
     var registerRes = await api.getUserStats(
       userId,
-      token,
     );
     return registerRes;
   }
 
-  void storeToken(String token) {
-    localDatasource.storeToken(token);
+  void storeToken(AuthCreds creds) {
+    localDatasource.storeAuthCreds(creds);
   }
 
   void storeUser(UserAccount user) {
@@ -242,18 +239,18 @@ class AuthProvider {
 
   void updateUserAccount(UserAccount user) {
     _setUser(
-      token!,
+      _authCreds!,
       user,
     );
   }
 
-  Future<String?> getToken() {
-    return localDatasource.getToken();
+  Future<AuthCreds?> getToken() {
+    return localDatasource.getAuthCreds();
   }
 
   Future<Either<AppError, UserAuthenticationModel>> getUser(
-      String token) async {
-    var res = await api.getUser(token);
+      AuthCreds creds) async {
+    var res = await api.getUser(creds);
     return res;
   }
 
@@ -268,6 +265,6 @@ class AuthProvider {
 
     _authResultStreamController.add(right(null));
     _currentUserRaw = null;
-    _token = null;
+    _authCreds = null;
   }
 }

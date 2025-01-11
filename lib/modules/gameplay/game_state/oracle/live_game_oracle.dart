@@ -318,23 +318,22 @@ class LiveGameOracle extends GameStateOracle {
 
   @override
   Future<Either<AppError, Game>> resignGame(Game game) async {
-    return (await api.resignGame(authBloc.token!, game.gameId));
+    return (await api.resignGame(game.gameId));
   }
 
   @override
   Future<Either<AppError, Game>> acceptScores(Game game) async {
-    return (await api.acceptScores(authBloc.token!, game.gameId));
+    return (await api.acceptScores(game.gameId));
   }
 
   @override
   Future<Either<AppError, Game>> continueGame(Game game) async {
-    return (await api.continueGame(authBloc.token!, game.gameId));
+    return (await api.continueGame(game.gameId));
   }
 
   @override
   Future<Either<AppError, Game>> playMove(Game game, MovePosition move) async {
-    return (await api.makeMove(move, authBloc.token!, game.gameId))
-        .map((a) => a.game);
+    return (await api.makeMove(move, game.gameId)).map((a) => a.game);
   }
 
   @override
@@ -342,7 +341,6 @@ class LiveGameOracle extends GameStateOracle {
       Game game, Position pos, DeadStoneState state) async {
     final res = await api.editDeadStoneCluster(
       EditDeadStoneClusterDto(position: pos, state: state),
-      authBloc.token!,
       game.gameId,
     );
     return res;

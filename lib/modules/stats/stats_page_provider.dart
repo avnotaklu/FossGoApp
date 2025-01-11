@@ -199,7 +199,6 @@ class StatsPageProvider extends ChangeNotifier {
   }
 
   Future<Either<AppError, GameAndOpponent>> loadGame(String gameId) {
-    final t = authPro.token!;
-    return api.getGameAndOpponent(gameId, t);
+    return api.getGameAndOpponent(gameId);
   }
 }

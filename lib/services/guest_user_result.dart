@@ -1,28 +1,29 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:go/services/auth_creds.dart';
 import 'package:go/services/guest_user.dart';
 import 'package:go/services/user_account.dart';
 
 class GuestUserResult {
   final GuestUser user;
-  final String token;
+  final AuthCreds creds;
   GuestUserResult({
     required this.user,
-    required this.token,
+    required this.creds,
   });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'user': user.toMap(),
-      'token': token,
+      'creds': creds.toMap(),
     };
   }
 
   factory GuestUserResult.fromMap(Map<String, dynamic> map) {
     return GuestUserResult(
       user: GuestUser.fromMap(map['user'] as Map<String, dynamic>),
-      token: map['token'] as String,
+      creds: AuthCreds.fromMap(map['creds'] as Map<String, dynamic>),
     );
   }
 

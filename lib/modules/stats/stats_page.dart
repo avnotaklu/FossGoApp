@@ -53,7 +53,7 @@ class StatsPage extends StatelessWidget {
                 return ChangeNotifierProvider(
                   create: (context) => StatsPageProvider(
                     context.read<AuthProvider>(),
-                    Api(),
+                    context.read<Api>(),
                     defaultVariant,
                     data.$1,
                     data.$2,

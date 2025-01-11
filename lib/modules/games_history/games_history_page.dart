@@ -152,7 +152,7 @@ class GamesHistoryPage extends StatelessWidget {
           ChangeNotifierProvider(
             create: (context) => GamesHistoryProvider(
               auth: context.read(),
-              api: Api(),
+              api:context.read(),
             )..loadGames(),
           ),
           Provider<IStatsRepository>.value(value: statsRepo)

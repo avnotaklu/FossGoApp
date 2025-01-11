@@ -87,14 +87,14 @@ class StatsRepository extends IStatsRepository {
         stat,
       );
 
-      if(s != null) {
+      if (s != null) {
         stat.stats[boardVariant] = s;
       }
     }
 
     for (var time in allTimes) {
       var timeVariant = VariantType(null, time);
-      var s  = _statForCombinedVariant(
+      var s = _statForCombinedVariant(
         time,
         allBoards.toList(),
         (a) => VariantType(null, a),
@@ -102,7 +102,7 @@ class StatsRepository extends IStatsRepository {
         stat,
       );
 
-      if(s != null) {
+      if (s != null) {
         stat.stats[timeVariant] = s;
       }
     }
@@ -116,7 +116,7 @@ class StatsRepository extends IStatsRepository {
       stat,
     );
 
-    if(s != null) {
+    if (s != null) {
       stat.stats[overall] = s;
     }
 
@@ -293,11 +293,10 @@ class StatsRepository extends IStatsRepository {
   }
 
   Future<Either<AppError, (UserStat, PlayerRating)>> _updateStats() async {
-    final token = _auth.token!;
     final userId = _auth.myId;
 
-    final stats = TaskEither(() => _api.getUserStats(userId, token));
-    final ratings = TaskEither(() => _api.getUserRating(userId, token));
+    final stats = TaskEither(() => _api.getUserStats(userId));
+    final ratings = TaskEither(() => _api.getUserRating(userId));
 
     final res = await stats
         .flatMap((s) => ratings.map((r) {

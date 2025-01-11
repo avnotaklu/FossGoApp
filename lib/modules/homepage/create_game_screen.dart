@@ -53,16 +53,16 @@ import 'package:provider/provider.dart';
 // }
 
 Future<Either<AppError, Game>> Function(GameCreationParams) liveGameCreate(
-    String token, Api api) {
+    Api api) {
   return (params) {
     return api.createGame(
-        GameCreationDto(
-          rows: params.board.rows,
-          columns: params.board.cols,
-          timeControl: params.time,
-          firstPlayerStone: params.stone,
-        ),
-        token);
+      GameCreationDto(
+        rows: params.board.rows,
+        columns: params.board.cols,
+        timeControl: params.time,
+        firstPlayerStone: params.stone,
+      ),
+    );
   };
 }
 
@@ -84,7 +84,8 @@ void showOverTheBoardCreateCustomGameDialog(BuildContext context) async {
               providers: [
                 ChangeNotifierProvider(
                   create: (context) =>
-                      CreateGameProvider(paramsCompleter)..init(),
+                      CreateGameProvider(paramsCompleter, context.read<Api>())
+                        ..init(),
                 ),
               ],
               builder: (context, child) {
@@ -124,6 +125,7 @@ void showLiveCreateCustomGameDialog(BuildContext context) async {
   final authPro = context.read<AuthProvider>();
   final statsRepo = context.read<IStatsRepository>();
   final homepageBloc = context.read<HomepageBloc>();
+  var api = context.read<Api>();
 
   final Completer<GameCreationParams> paramsCompleter = Completer();
 
@@ -136,9 +138,8 @@ void showLiveCreateCustomGameDialog(BuildContext context) async {
                 ),
                 Provider.value(value: statsRepo),
                 ChangeNotifierProvider(
-                  create: (context) => CreateGameProvider(
-                    paramsCompleter,
-                  )..init(),
+                  create: (context) =>
+                      CreateGameProvider(paramsCompleter, api)..init(),
                 ),
               ],
               builder: (context, child) {
@@ -147,7 +148,7 @@ void showLiveCreateCustomGameDialog(BuildContext context) async {
 
   if (paramsCompleter.isCompleted) {
     final params = await paramsCompleter.future;
-    final res = await liveGameCreate(authPro.token!, Api())(params);
+    final res = await liveGameCreate(api)(params);
 
     if (context.mounted) {
       res.fold((l) {
@@ -409,14 +410,7 @@ class CreateGameScreen extends StatelessWidget {
               const Spacer(),
               BadukButton(
                 onPressed: () async {
-                  final token = context.read<AuthProvider>().token;
-                  final res =
-                      context.read<CreateGameProvider>().createGame(token!);
-
-                  // res.fold((e) {
-                  // }, (game) {
-                  //   cgp.gameCompleter.complete(game);
-                  // });
+                  final res = context.read<CreateGameProvider>().createGame();
                   Navigator.pop(context);
                 },
                 child: const Text("Create"),

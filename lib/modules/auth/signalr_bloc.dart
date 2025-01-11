@@ -6,6 +6,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/error_handling/signal_r_error.dart';
 import 'package:go/services/api.dart';
+import 'package:go/services/auth_creds.dart';
 
 import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/find_match_dto.dart';
@@ -15,6 +16,8 @@ class SignalRProvider extends ChangeNotifier {
   // The location of the SignalR Server.
   final serverUrl = "${Api.baseUrl}/mainHub";
   Either<SignalRError, String> connectionId;
+
+  final Api api;
 
   HubConnection? hubConnection;
 
@@ -29,7 +32,7 @@ class SignalRProvider extends ChangeNotifier {
   }
 
 // Creates the connection by using the HubConnectionBuilder.
-  SignalRProvider()
+  SignalRProvider(this.api)
       : connectionId = Either.left(
           SignalRError(
             message: "Connection not started",
@@ -39,13 +42,17 @@ class SignalRProvider extends ChangeNotifier {
 
   Timer? pingSchedule;
 
-  Future<Either<AppError, String>> connectSignalR(String token) async {
+  Future<Either<AppError, String>> connectSignalR(AuthCreds authCreds) async {
+    return _hubConnect(authCreds);
+  }
+
+  Future<Either<AppError, String>> _hubConnect(AuthCreds creds) async {
     try {
       hubConnection = HubConnectionBuilder()
           .withUrl(
-        Uri.http(Api.basePath, "/mainHub", {"token": token}).toString(),
+        Uri.http(Api.basePath, "/mainHub", {"token": creds.token}).toString(),
         options: HttpConnectionOptions(
-          accessTokenFactory: () async => token,
+          accessTokenFactory: () async => creds.token,
         ),
       )
           .withAutomaticReconnect(reconnectPolicy: null, retryDelays: [

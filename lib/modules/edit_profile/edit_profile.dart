@@ -50,11 +50,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return MaxWidthBox(
       maxWidth: context.tabletBreakPoint.end,
       child: Scaffold(
-        appBar: MyAppBar('Edit Profile',showBackButton: true,),
+        appBar: MyAppBar(
+          'Edit Profile',
+          showBackButton: true,
+        ),
         body: ChangeNotifierProvider<EditProfileProvider>(
           create: (context) => EditProfileProvider(
             auth: context.read<AuthProvider>(),
-            api: Api(),
+            api: context.read(),
           )..setup(setup),
           builder: (context, child) {
             return Consumer<EditProfileProvider>(

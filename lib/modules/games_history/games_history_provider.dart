@@ -27,9 +27,7 @@ class GamesHistoryProvider extends ChangeNotifier {
   GamesHistoryProvider({required this.auth, required this.api});
 
   Future<void> loadGames() async {
-    final token = auth.token!;
     final res = await api.getGamesHistory(
-      token,
       page,
       boardSize,
       timeStandard,
@@ -57,7 +55,6 @@ class GamesHistoryProvider extends ChangeNotifier {
 
   Future<Either<AppError, GameAndOpponent?>> getGameAndOpponent(
       Game game) async {
-    final token = auth.token!;
     final myId = auth.myId;
     final opponent = game.getOtherPlayerIdFromPlayerId(myId);
 
@@ -65,7 +62,7 @@ class GamesHistoryProvider extends ChangeNotifier {
       return right(null);
     }
 
-    final res = await api.getOpponent(opponent, token);
+    final res = await api.getOpponent(opponent);
 
     return res.map((r) => GameAndOpponent(game: game, opponent: r));
   }

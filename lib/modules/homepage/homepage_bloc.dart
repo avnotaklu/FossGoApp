@@ -20,21 +20,21 @@ class HomepageBloc extends ChangeNotifier {
 
   List<OnGoingGame> myGames = [];
 
-  var api = Api();
+  final Api api;
   final SignalRProvider signalRProvider;
 
   HomepageBloc({
     required this.signalRProvider,
     required this.authBloc,
+    required this.api,  
   }) {
     listenForNewGame();
   }
 
   final AuthProvider authBloc;
 
-  Future<Either<AppError, GameEntranceData>> joinGame(
-      String gameId, String token) async {
-    var game = await api.joinGame(GameJoinDto(gameId: gameId), token);
+  Future<Either<AppError, GameEntranceData>> joinGame(String gameId) async {
+    var game = await api.joinGame(GameJoinDto(gameId: gameId));
 
     game.fold((l) {
       myGames.removeWhere((e) => e.game.gameId == gameId);
@@ -51,8 +51,8 @@ class HomepageBloc extends ChangeNotifier {
     return game;
   }
 
-  Future<void> getAvailableGames(String token) async {
-    var game = await api.getAvailableGames(token);
+  Future<void> getAvailableGames() async {
+    var game = await api.getAvailableGames();
     game.fold((e) {
       debugPrint("Couldn't get available games");
     }, (games) {
@@ -61,8 +61,8 @@ class HomepageBloc extends ChangeNotifier {
     });
   }
 
-  Future<void> getMyGames(String token) async {
-    var game = await api.getMyGames(token);
+  Future<void> getMyGames() async {
+    var game = await api.getMyGames();
     game.fold((e) {
       debugPrint("Couldn't get my games");
     }, (games) {

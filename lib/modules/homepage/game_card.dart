@@ -34,8 +34,7 @@ class GameCard extends StatelessWidget {
     final signalRBloc = context.read<SignalRProvider>();
 
     var res = await homepageBloc.joinGame(
-      game.gameId,
-      context.read<AuthProvider>().token!,
+      game.gameId
     );
     res.fold((e) {
       ScaffoldMessenger.of(context).showSnackBar(

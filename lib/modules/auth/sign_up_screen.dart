@@ -25,7 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Provider<SignUpProvider>(
-      create: (context) => SignUpProvider(authBloc: context.read()),
+      create: (context) => SignUpProvider(authBloc: context.read(),api: context.read()),
       builder: (context, child) {
         final signUpPro = context.read<SignUpProvider>();
         return Scaffold(

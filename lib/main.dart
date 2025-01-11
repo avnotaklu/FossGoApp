@@ -8,6 +8,7 @@ import 'package:go/modules/auth/log_in_screen.dart';
 import 'package:go/modules/auth/sign_up_screen.dart';
 import 'package:go/modules/settings/settings_page.dart';
 import 'package:go/modules/settings/settings_provider.dart';
+import 'package:go/services/api.dart';
 import 'package:go/services/local_datasource.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -43,48 +44,55 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => SignalRProvider(),
-      builder: (context, child) => MultiProvider(
-        providers: [
-          Provider(
-              create: (context) => AuthProvider(
-                    context.read<SignalRProvider>(),
-                    LocalDatasource(),
-                  )),
-          ChangeNotifierProvider(
-              create: (context) => SettingsProvider(
-                    localDatasource: LocalDatasource(),
-                  )..setup()),
-        ],
-        builder: (context, child) {
-          return FutureBuilder(
-              future: context.read<AuthProvider>().initialAuth.future,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                var res = snapshot.data!;
-                return Consumer<SettingsProvider>(
-                  builder: (context, settingsProvider, child) => MaterialApp(
-                    darkTheme: Constants.darkTheme,
-                    builder: (context, child) =>
-                        responsiveWidgetSetup(context, child),
-                    debugShowCheckedModeBanner: false,
-                    initialRoute: res.fold(
-                      (l) => "/Root",
-                      (r) => r == null ? "/Root" : "/HomePage",
+    return Provider(
+        create: (context) => Api(),
+        builder: (context, child) => ChangeNotifierProvider(
+              create: (context) => SignalRProvider(context.read<Api>()),
+              builder: (context, child) => MultiProvider(
+                providers: [
+                  Provider(
+                    create: (context) => AuthProvider(
+                      context.read<SignalRProvider>(),
+                      LocalDatasource(),
+                      context.read<Api>(),
                     ),
-                    themeMode: settingsProvider.themeSetting.themeMode,
-                    theme: Constants.lightTheme,
-                    routes: routeConstructor,
                   ),
-                );
-              });
-        },
-      ),
-    );
+                  ChangeNotifierProvider(
+                      create: (context) => SettingsProvider(
+                            localDatasource: LocalDatasource(),
+                          )..setup()),
+                ],
+                builder: (context, child) {
+                  return FutureBuilder(
+                      future: context.read<AuthProvider>().initialAuth.future,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+
+                        var res = snapshot.data!;
+                        return Consumer<SettingsProvider>(
+                          builder: (context, settingsProvider, child) =>
+                              MaterialApp(
+                            darkTheme: Constants.darkTheme,
+                            builder: (context, child) =>
+                                responsiveWidgetSetup(context, child),
+                            debugShowCheckedModeBanner: false,
+                            initialRoute: res.fold(
+                              (l) => "/Root",
+                              (r) => r == null ? "/Root" : "/HomePage",
+                            ),
+                            themeMode: settingsProvider.themeSetting.themeMode,
+                            theme: Constants.lightTheme,
+                            routes: routeConstructor,
+                          ),
+                        );
+                      });
+                },
+              ),
+            ));
   }
 
   Widget responsiveWidgetSetup(BuildContext context, Widget? child) => SafeArea(
@@ -113,7 +121,10 @@ class MyApp extends StatelessWidget {
           providers: [
             ChangeNotifierProvider(
               create: (context) => HomepageBloc(
-                  signalRProvider: context.read(), authBloc: context.read()),
+                signalRProvider: context.read(),
+                authBloc: context.read(),
+                api: context.read(),
+              ),
             ),
           ],
           builder: (context, child) => const HomePage(),

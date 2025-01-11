@@ -14,12 +14,13 @@ class NewOAuthProvider {
   final AuthProvider authBloc;
   final String token;
 
-  NewOAuthProvider({
+  NewOAuthProvider(
+    this.token, {
     required this.authBloc,
-    required this.token,
+    required this.api,
   });
 
-  final api = Api();
+  final Api api;
 
   Validator<String?, String> usernameValidator() {
     return RequiredValidator(
@@ -33,17 +34,16 @@ class NewOAuthProvider {
     var usernameRes = usernameValidator().validate(username);
     return usernameRes.fold((l) async => Either.left(AppError(message: l)),
         (username) async {
-
       var logInRes = TaskEither(() => api.googleSignUp(
             GoogleSignUpBody(
               username: username,
             ),
-            token,
+            token
           ));
 
       var res = logInRes.flatMap(
         (r) => TaskEither(
-          () => authBloc.authenticateNormalUser(r.user, r.token),
+          () => authBloc.authenticateNormalUser(r.user, r.creds),
         ),
       );
 

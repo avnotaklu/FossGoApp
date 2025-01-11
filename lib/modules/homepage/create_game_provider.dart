@@ -24,7 +24,7 @@ class CreateGameProvider extends ChangeNotifier {
 
   final Completer<GameCreationParams> paramsCompleter;
 
-  var api = Api();
+  final Api api ;
 
   // static const title = 'Grid List';
   Constants.BoardSizeData _boardSize = Constants.boardSizes[0];
@@ -51,7 +51,7 @@ class CreateGameProvider extends ChangeNotifier {
 
   final byoYomiCountController = TextEditingController();
 
-  CreateGameProvider(this.paramsCompleter);
+  CreateGameProvider(this.paramsCompleter, this.api);
 
   void init() async {
     _mStoneType = StoneSelectionType.black;
@@ -107,7 +107,7 @@ class CreateGameProvider extends ChangeNotifier {
   }
 
   // Future<Either<AppError, Game>>
-  void createGame(String token) async {
+  void createGame() async {
     var timeControl = TimeControlDto(
       mainTimeSeconds: _mainTime.inSeconds,
       incrementSeconds: _timeFormat == Constants.TimeFormat.fischer

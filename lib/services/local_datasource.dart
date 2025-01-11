@@ -1,11 +1,12 @@
 import 'package:go/modules/settings/settings_provider.dart';
+import 'package:go/services/auth_creds.dart';
 import 'package:go/services/user_account.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalDatasource {
   final sharedPrefs = SharedPreferencesAsync();
   final String _userDataKey = 'user';
-  final String _tokenDataKey = 'token';
+  final String _authCredsDataKey = 'authCreds';
   final String _themeSettingKey = 'themeSetting';
   final String _compactGameUIKey = 'compactGameUI';
   final String _notationPositionKey = 'compactGameUI';
@@ -13,8 +14,8 @@ class LocalDatasource {
   final String _showCrosshairKey = 'showCrosshair';
   final String _moveInputKey = 'moveInput';
 
-  Future<void> storeToken(String token) async {
-    await sharedPrefs.setString(_tokenDataKey, token);
+  Future<void> storeAuthCreds(AuthCreds creds) async {
+    await sharedPrefs.setString(_authCredsDataKey, creds.toJson());
   }
 
   Future<void> storeUser(UserAccount user) async {
@@ -46,8 +47,13 @@ class LocalDatasource {
     await sharedPrefs.setBool(_showCrosshairKey, value);
   }
 
-  Future<String?> getToken() async {
-    return await sharedPrefs.getString(_tokenDataKey);
+  Future<AuthCreds?> getAuthCreds() async {
+    var creds = await sharedPrefs.getString(_authCredsDataKey);
+    if (creds == null) return null;
+
+    AuthCreds authCreds = AuthCreds.fromJson(creds);
+
+    return authCreds;
   }
 
   Future<UserAccount?> getUser() async {
@@ -86,7 +92,7 @@ class LocalDatasource {
 
   Future<void> clear() async {
     await sharedPrefs.remove(_userDataKey);
-    await sharedPrefs.remove(_tokenDataKey);
+    await sharedPrefs.remove(_authCredsDataKey);
     await sharedPrefs.remove(_themeSettingKey);
     await sharedPrefs.remove(_compactGameUIKey);
     await sharedPrefs.remove(_soundKey);

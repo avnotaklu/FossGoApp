@@ -29,8 +29,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((d) {
       var homepageBloc = context.read<HomepageBloc>();
-      homepageBloc.getAvailableGames(context.read<AuthProvider>().token!);
-      homepageBloc.getMyGames(context.read<AuthProvider>().token!);
+      homepageBloc.getAvailableGames();
+      homepageBloc.getMyGames();
     });
   }
 
@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Provider<IStatsRepository>(
       create: (BuildContext context) => StatsRepository(
-        Api(),
+        context.read<Api>(),
         context.read<AuthProvider>(),
         context.read<SignalRProvider>(),
       ),

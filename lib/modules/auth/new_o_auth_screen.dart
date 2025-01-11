@@ -25,8 +25,8 @@ class _NewOAuthAccountState extends State<NewOAuthAccountScreen> {
   @override
   Widget build(BuildContext context) {
     return Provider<NewOAuthProvider>(
-      create: (context) =>
-          NewOAuthProvider(authBloc: context.read(), token: widget.token),
+      create: (context) => NewOAuthProvider(widget.token,
+          authBloc: context.read(), api: context.read()),
       builder: (context, child) {
         final pro = context.read<NewOAuthProvider>();
         return Scaffold(

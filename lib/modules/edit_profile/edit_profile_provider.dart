@@ -81,7 +81,6 @@ class EditProfileProvider extends ChangeNotifier {
           nationality: r.nat,
         ),
         auth.myId,
-        auth.token!,
       );
 
       return res.map((a) {

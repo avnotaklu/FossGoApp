@@ -13,9 +13,10 @@ class LogInProvider {
   final AuthProvider authBloc;
   LogInProvider({
     required this.authBloc,
+    required this.api,
   });
 
-  final api = Api();
+  final Api api;
 
   Validator<String?, String> usernameValidator() {
     return RequiredValidator(
@@ -66,7 +67,7 @@ class LogInProvider {
 
       var res = logInRes.flatMap(
         (r) => TaskEither(
-          () => authBloc.authenticateNormalUser(r.user, r.token),
+          () => authBloc.authenticateNormalUser(r.user, r.creds),
         ),
       );
 

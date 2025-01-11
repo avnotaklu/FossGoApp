@@ -34,7 +34,7 @@ class LiveGameWidget extends StatelessWidget {
                       game: game,
                       gameOracle: LiveGameOracle(
                         gameId: game.gameId,
-                        api: Api(),
+                        api: context.read(),
                         systemUtilities: const SystemUtilities(),
                         authBloc: context.read<AuthProvider>(),
                         signalRbloc: context.read<SignalRProvider>(),
