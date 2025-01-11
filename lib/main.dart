@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
 
   Widget responsiveWidgetSetup(BuildContext context, Widget? child) => SafeArea(
         child: ResponsiveBreakpoints.builder(
-          child: child!,
+          child: Builder(builder: (context) => child!),
           breakpoints: [
             const Breakpoint(start: 0, end: 450, name: MOBILE),
             const Breakpoint(start: 451, end: 800, name: TABLET),
@@ -114,10 +114,10 @@ class MyApp extends StatelessWidget {
   Map<String, WidgetBuilder> get routeConstructor {
     return <String, WidgetBuilder>{
       '/Root': (BuildContext context) {
-        return const SignIn();
+        return responsiveWidgetSetup(context, const SignIn());
       },
       '/HomePage': (BuildContext context) {
-        return MultiProvider(
+        var widget = MultiProvider(
           providers: [
             ChangeNotifierProvider(
               create: (context) => HomepageBloc(
@@ -129,10 +129,15 @@ class MyApp extends StatelessWidget {
           ],
           builder: (context, child) => const HomePage(),
         );
+
+        return responsiveWidgetSetup(context, widget);
       },
-      '/SignUp': (BuildContext context) => const SignUpScreen(),
-      '/LogIn': (BuildContext context) => const LogInScreen(),
-      '/Settings': (BuildContext context) => const SettingsPage(),
+      '/SignUp': (BuildContext context) =>
+          responsiveWidgetSetup(context, const SignUpScreen()),
+      '/LogIn': (BuildContext context) =>
+          responsiveWidgetSetup(context, const LogInScreen()),
+      '/Settings': (BuildContext context) =>
+          responsiveWidgetSetup(context, const SettingsPage()),
     };
   }
 }

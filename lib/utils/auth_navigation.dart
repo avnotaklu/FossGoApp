@@ -26,7 +26,7 @@ void authNavigation(
         (route) => false,
       );
     } else {
-      Navigator.of(context).pushNamedAndRemoveUntil("/", (route) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil("/Root", (route) => false);
     }
   });
 }

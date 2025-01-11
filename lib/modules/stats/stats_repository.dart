@@ -202,14 +202,17 @@ class StatsRepository extends IStatsRepository {
     final masterV = masterCons(master);
 
     // Collecting the sub-performances
-    final validRatings = subs
+    final subRatings = subs
         .map((sub) => rating.ratings[subCons(master, sub)])
-        .where((perf) =>
-            perf != null &&
-            perf.latest != null &&
-            !perf.glicko.minimal.provisional)
+        .where((perf) => perf != null && perf.latest != null)
         .map((a) => a!)
         .toList();
+
+    var onlyUnprovisional =
+        subRatings.where((perf) => !perf.glicko.minimal.provisional);
+
+    var validRatings =
+        onlyUnprovisional.isNotEmpty ? onlyUnprovisional : subRatings;
 
     // Determining the latest date
     final latestStyle = validRatings
