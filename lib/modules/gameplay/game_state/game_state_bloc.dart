@@ -156,21 +156,34 @@ class GameStateBloc extends ChangeNotifier {
     Position position,
     BoardStateBloc bloc,
   ) {
+    if (bloc.intermediateIsPlayed) {
+      return right(bloc.intermediate!);
+    }
+
     final tmpStoneLogic = stoneLogic.deepCopy();
 
     bool canPlayMove = gameOracle.isThisAccountsTurn(game);
     var updateStone = gameOracle.thisAccountStone(game);
 
-    return bloc.placeStone(position, stoneLogic, updateStone);
+    if (canPlayMove) {
+      return bloc.placeStone(position, stoneLogic, updateStone);
+    }
+    else {
+      return left(AppError(message: "It's not your turn"));
+    }
   }
 
   Future<Either<AppError, Game>> makeMove(
     MovePosition move,
     BoardStateBloc bloc,
   ) async {
+    bloc.intermediateIsPlayed = true;
     return (await gameOracle.playMove(game, move)).map((g) {
       bloc.intermediate = null;
       return updateStateFromGame(g);
+    }).mapLeft((l) {
+      bloc.intermediate = null;
+      return l;
     });
   }
 

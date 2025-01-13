@@ -182,7 +182,7 @@ class GameTimerUpdateMessage extends SignalRMessageType {
 }
 
 extension ConnectionStrengthExt on ConnectionStrength {
-  bool get isStrong => ping < 100;
+  bool get isStrong => ping < 500;
 
   int get level {
     if (ping < 300) {

@@ -203,6 +203,10 @@ class SignalRProvider extends ChangeNotifier {
     final diff = now.difference(lastPingTime).inMilliseconds;
 
     connectionStrength.value = ConnectionStrength(ping: diff);
+
+    _connectionC.add(connectionStrength.value.isStrong
+        ? SignalRConnectionState.Connected
+        : SignalRConnectionState.Weak);
     _setupPingDecay();
   }
 

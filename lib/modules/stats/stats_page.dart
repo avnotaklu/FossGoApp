@@ -181,8 +181,7 @@ class StatsPage extends StatelessWidget {
                                                         style: context
                                                             .textTheme
                                                             .headlineLarge
-                                                            ?.italicify
-                                                            .underlinify,
+                                                            ?.underlinify,
                                                       ),
                                                       pro
                                                           .unavailabiltyReasonOrStreakData(
@@ -207,18 +206,17 @@ class StatsPage extends StatelessWidget {
                                                         style: context
                                                             .textTheme
                                                             .headlineLarge
-                                                            ?.italicify
-                                                            .underlinify,
+                                                            ?.underlinify,
                                                       ),
                                                       if (pro.getGreatestWins(
                                                               r) ==
                                                           null)
                                                         Center(
                                                           child: Text(
-                                                            "No data available",
+                                                            "No data available(not applicable for provisional ratings)",
                                                             style: context
                                                                 .textTheme
-                                                                .bodyLarge,
+                                                                .bodySmall,
                                                           ),
                                                         )
                                                       else
@@ -289,8 +287,7 @@ class StatsPage extends StatelessWidget {
       children: [
         Text(
           "Winning",
-          style: context.textTheme.titleLarge
-              ?.copyWith(fontStyle: FontStyle.italic),
+          style: context.textTheme.titleLarge?.italicify,
         ),
         SizedBox(
           width: 140,
@@ -308,8 +305,7 @@ class StatsPage extends StatelessWidget {
         SizedBox(height: 20),
         Text(
           "Losing",
-          style: context.textTheme.titleLarge
-              ?.copyWith(fontStyle: FontStyle.italic),
+          style: context.textTheme.titleLarge?.italicify,
         ),
         SizedBox(
           width: 140,

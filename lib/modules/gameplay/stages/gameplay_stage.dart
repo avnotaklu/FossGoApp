@@ -75,6 +75,23 @@ class GameplayStage extends Stage {
               ),
             ),
           ),
+        if (gameBoard.intermediateIsPlayed &&
+            gameBoard.intermediate != null &&
+            gameBoard.intermediate!.pos == position)
+          Center(
+            child: Padding(
+              padding: EdgeInsets.all(board.circleIconPaddingForCells),
+              child: SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Icon(
+                    Icons.add,
+                    color: player!.other.materialColor,
+                  ),
+                ),
+              ),
+            ),
+          ),
         Container(
           decoration: const BoxDecoration(color: Colors.transparent),
           child: player == null ? stone : null,

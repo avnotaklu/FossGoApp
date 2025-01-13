@@ -95,7 +95,7 @@ class _MyAppBarState extends State<MyAppBar> {
                       );
                     }
 
-                    if ((connectionSnap.data!.isConnected && !fW)) {
+                    if ((connectionSnap.data!.isConnected)) {
                       return Row(
                         children: [
                           Icon(Icons.circle, size: 20, color: Colors.green),

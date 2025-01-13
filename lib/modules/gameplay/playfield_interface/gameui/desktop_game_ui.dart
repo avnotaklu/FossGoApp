@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
+import 'package:go/modules/gameplay/game_state/oracle/game_state_oracle.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/move_tree.dart';
@@ -11,6 +12,7 @@ import 'package:go/modules/gameplay/stages/game_end_stage.dart';
 import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/services/games_history_batch.dart';
+import 'package:go/services/signal_r_message.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:provider/provider.dart';
 
@@ -69,15 +71,36 @@ class DesktopGameUi extends StatelessWidget {
                           ),
                           Container(
                             height: 70,
-                            child: PlayerDataUi(gameStateBloc.topPlayerUserInfo,
-                                gameStateBloc.game),
+                            child: PlayerDataUi(
+                              gameStateBloc.topPlayerUserInfo,
+                              gameStateBloc.game,
+                              connectionStream: gameStateBloc.gameOracle
+                                          .getPlatform() ==
+                                      GamePlatform.online
+                                  ? () async* {
+                                      yield ConnectionStrength(ping: 0);
+                                      yield* gameStateBloc.opponentConnection!;
+                                    }()
+                                  : null,
+                            ),
                           ),
                           SectionDivider(),
                           Container(
                             height: 70,
                             child: PlayerDataUi(
-                                gameStateBloc.bottomPlayerUserInfo,
-                                gameStateBloc.game),
+                              gameStateBloc.bottomPlayerUserInfo,
+                              gameStateBloc.game,
+                              connectionStream:
+                                  gameStateBloc.gameOracle.getPlatform() ==
+                                          GamePlatform.online
+                                      ? Stream.fromFuture(
+                                          Future.microtask(() async {
+                                          await Future.delayed(
+                                              Duration(seconds: 2));
+                                          return ConnectionStrength(ping: 0);
+                                        }))
+                                      : null,
+                            ),
                           ),
                           showMoveTreeAtSide
                               ? Column(
@@ -101,11 +124,11 @@ class DesktopGameUi extends StatelessWidget {
                             height: 30,
                           ),
                           // if (!)
-                            Container(
-                              width: sideInfoWidth,
-                              height: showMoveTreeAtSide ? 80 : 500,
-                              child: actionButtons(context),
-                            )
+                          Container(
+                            width: sideInfoWidth,
+                            height: showMoveTreeAtSide ? 80 : 500,
+                            child: actionButtons(context),
+                          )
                         ],
                       ),
                     )

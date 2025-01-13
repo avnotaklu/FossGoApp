@@ -14,12 +14,14 @@ class BoardStateBloc extends ChangeNotifier {
   final GameStateBloc gameState;
 
   MovePosition? _intermediate;
+  bool intermediateIsPlayed = false;
 
   // ignore: unnecessary_getters_setters
   MovePosition? get intermediate => _intermediate;
 
   set intermediate(MovePosition? pos) {
     _intermediate = pos;
+    intermediateIsPlayed = false;
     notifyListeners();
   }
 
