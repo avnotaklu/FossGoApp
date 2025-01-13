@@ -7,6 +7,7 @@ import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/settings/settings_page.dart';
 import 'package:go/modules/settings/settings_provider.dart';
+import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/signal_indicator.dart';
 import 'package:provider/provider.dart';
 
@@ -26,13 +27,17 @@ class MyAppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final mobile = !context.isDesktop;
     final desktop = context.isDesktop;
+    final showConnectionOverview = desktop && !gameWidgetDrawer;
 
     return Drawer(
-      child: ListView(
-        // Important: Remove any padding from the ListView.
-        padding: EdgeInsets.zero,
+      child: Column(
+        // // Important: Remove any padding from the ListView.
+
+        // padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(child: UserInfoOverview()),
+          DrawerHeader(
+              child: UserInfoOverview(
+                  showConnectionOverview: showConnectionOverview)),
           if (gameWidgetDrawer)
             const ListTile(
               title: Text('Compact'),
@@ -77,6 +82,7 @@ class MyAppDrawer extends StatelessWidget {
                 Navigator.pushNamed(context, '/Settings');
               },
             ),
+          Spacer(),
         ],
       ),
     );
@@ -84,27 +90,48 @@ class MyAppDrawer extends StatelessWidget {
 }
 
 class UserInfoOverview extends StatelessWidget {
-  const UserInfoOverview({super.key});
+  final bool showConnectionOverview;
+  const UserInfoOverview({required this.showConnectionOverview, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: context.height * 0.12,
-      child: Row(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            child: Text(
-              getUserName(context),
-              style: context.textTheme.headlineLarge,
-            ),
+          Row(
+            children: [
+              Container(
+                child: Text(
+                  getUserName(context),
+                  style: context.textTheme.headlineLarge,
+                ),
+              ),
+              Spacer(),
+              ValueListenableBuilder(
+                  valueListenable:
+                      context.read<SignalRProvider>().connectionStrength,
+                  builder: (context, strength, child) {
+                    return SignalIndicator(strength: strength);
+                  }),
+              if (showConnectionOverview) ...[
+                // Container(
+                //   height: 20,
+                // ),
+                Row(
+                  children: [
+                    Container(
+                      width: 20,
+                    ),
+                    ConnectionOverviewWidget(
+                        connStream:
+                            context.read<SignalRProvider>().connectionStream),
+                  ],
+                ),
+              ],
+            ],
           ),
-          Spacer(),
-          ValueListenableBuilder(
-              valueListenable:
-                  context.read<SignalRProvider>().connectionStrength,
-              builder: (context, strength, child) {
-                return SignalIndicator(strength: strength);
-              }),
         ],
       ),
     );

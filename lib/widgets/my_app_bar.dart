@@ -58,73 +58,83 @@ class _MyAppBarState extends State<MyAppBar> {
       title: Text(widget.title),
       actions: [
         if (widget.trailing != null) widget.trailing!,
-        StreamBuilder(
-          stream: connStream,
-          builder:
-              (context, AsyncSnapshot<SignalRConnectionState> connectionSnap) {
-            if (connectionSnap.hasData) {
-              return FutureBuilder<void>(
-                  future: Future.delayed(Duration(seconds: 2)),
-                  builder: (context, delayedFutureSnap) {
-                    final fW = delayedFutureSnap.connectionState ==
-                        ConnectionState.waiting;
-                    if (connectionSnap.data!.isReconnecting) {
-                      return Row(
-                        children: [
-                          Icon(
-                            Icons.circle,
-                            size: 20,
-                            color: Colors.red,
-                          ),
-                          Text("Reconnecting",
-                              style: context.textTheme.labelSmall)
-                        ],
-                      );
-                    }
-                    if (connectionSnap.data!.isWeak) {
-                      return Row(
-                        children: [
-                          Icon(
-                            Icons.circle,
-                            size: 20,
-                            color: Colors.amber,
-                          ),
-                          Text("Weak Signal",
-                              style: context.textTheme.labelSmall)
-                        ],
-                      );
-                    }
-
-                    if ((connectionSnap.data!.isConnected)) {
-                      return Row(
-                        children: [
-                          Icon(Icons.circle, size: 20, color: Colors.green),
-                          Text("Connected",
-                              style: context.textTheme.labelSmall)
-                        ],
-                      );
-                    } else if (connectionSnap.data!.isDisconnected) {
-                      return Row(
-                        children: [
-                          Text("Connect", style: context.textTheme.labelSmall),
-                          IconButton(
-                            onPressed: () async {
-                              context.read<AuthProvider>().connectUser();
-                            },
-                            icon: const Icon(Icons.refresh),
-                          )
-                        ],
-                      );
-                    }
-
-                    return SizedBox.shrink();
-                  });
-            } else {
-              return SizedBox.shrink();
-            }
-          },
-        ),
+        ConnectionOverviewWidget(connStream: connStream),
       ],
+    );
+  }
+}
+
+class ConnectionOverviewWidget extends StatelessWidget {
+  const ConnectionOverviewWidget({
+    super.key,
+    required this.connStream,
+  });
+
+  final Stream<SignalRConnectionState> connStream;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: connStream,
+      builder: (context, AsyncSnapshot<SignalRConnectionState> connectionSnap) {
+        if (connectionSnap.hasData) {
+          return FutureBuilder<void>(
+              future: Future.delayed(Duration(seconds: 2)),
+              builder: (context, delayedFutureSnap) {
+                final fW = delayedFutureSnap.connectionState ==
+                    ConnectionState.waiting;
+                if (connectionSnap.data!.isReconnecting) {
+                  return Row(
+                    children: [
+                      Icon(
+                        Icons.circle,
+                        size: 20,
+                        color: Colors.red,
+                      ),
+                      Text("Reconnecting", style: context.textTheme.labelSmall)
+                    ],
+                  );
+                }
+                if (connectionSnap.data!.isWeak) {
+                  return Row(
+                    children: [
+                      Icon(
+                        Icons.circle,
+                        size: 20,
+                        color: Colors.amber,
+                      ),
+                      Text("Weak Signal", style: context.textTheme.labelSmall)
+                    ],
+                  );
+                }
+
+                if ((connectionSnap.data!.isConnected)) {
+                  return Row(
+                    children: [
+                      Icon(Icons.circle, size: 20, color: Colors.green),
+                      Text("Connected", style: context.textTheme.labelSmall)
+                    ],
+                  );
+                } else if (connectionSnap.data!.isDisconnected) {
+                  return Row(
+                    children: [
+                      Text("Connect", style: context.textTheme.labelSmall),
+                      IconButton(
+                        onPressed: () async {
+                          context.read<AuthProvider>().connectUser();
+                        },
+                        icon: const Icon(Icons.refresh),
+                      )
+                    ],
+                  );
+                }
+
+                return SizedBox.shrink();
+              });
+        } else {
+          return SizedBox.shrink();
+        }
+      },
     );
   }
 }
