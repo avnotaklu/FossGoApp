@@ -12,6 +12,21 @@ import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/find_match_dto.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
+extension SignalRConnectionStateX on SignalRConnectionState {
+  bool get isConnected => this == SignalRConnectionState.Connected;
+  bool get isDisconnected => this == SignalRConnectionState.Disconnected;
+  bool get isReconnecting => this == SignalRConnectionState.Reconnecting;
+  bool get isWeak => this == SignalRConnectionState.Weak;
+}
+
+enum SignalRConnectionState {
+  Connected,
+  Disconnected,
+  Reconnecting,
+  Weak,
+  Connecting
+}
+
 class SignalRProvider extends ChangeNotifier {
   // The location of the SignalR Server.
   final serverUrl = "${Api.baseUrl}/mainHub";
@@ -38,7 +53,11 @@ class SignalRProvider extends ChangeNotifier {
             message: "Connection not started",
             connectionState: RegisterationConnectionState.Disconnected,
           ),
-        );
+        ) {
+    connectionStream.listen((l) {
+      _connectionState = l;
+    });
+  }
 
   Timer? pingSchedule;
 
@@ -48,31 +67,34 @@ class SignalRProvider extends ChangeNotifier {
 
   Future<Either<AppError, String>> _hubConnect(AuthCreds creds) async {
     try {
+      _connectionC.add(SignalRConnectionState.Connecting);
       hubConnection = HubConnectionBuilder()
           .withUrl(
-        Uri.http(Api.basePath, "/mainHub", {"token": creds.token}).toString(),
+        api.makeUri("/mainHub", {"token": creds.token}).toString(),
         options: HttpConnectionOptions(
           accessTokenFactory: () async => creds.token,
         ),
       )
           .withAutomaticReconnect(reconnectPolicy: null, retryDelays: [
-        ...List.generate(10, (index) => 6000),
+        ...List.generate(10, (index) => 3000),
       ]).build();
       hubConnection!.onclose(({Exception? error}) {
+        _connectionC.add(SignalRConnectionState.Disconnected);
         debugPrint("Connection closed: ${error.toString()}");
       });
 
       hubConnection!.onreconnecting(({Exception? error}) {
-        _reconnectionC.sink.add(false);
+        _connectionC.add(SignalRConnectionState.Reconnecting);
         debugPrint("Connection reconnecting: ${error.toString()}");
       });
 
       hubConnection!.onreconnected(({String? connectionId}) {
-        _reconnectionC.sink.add(true);
+        _connectionC.add(SignalRConnectionState.Connected);
         debugPrint("Connection reconnected with Id: $connectionId");
       });
 
       await hubConnection!.start();
+      _connectionC.add(SignalRConnectionState.Connected);
       final conId = hubConnection!.connectionId!;
       connectionId = (Either.right(conId));
 
@@ -84,12 +106,24 @@ class SignalRProvider extends ChangeNotifier {
 
       return right(conId);
     } catch (e) {
+      _connectionC.add(SignalRConnectionState.Disconnected);
       return left(AppError(message: e.toString()));
     }
   }
 
-  final StreamController<bool> _reconnectionC = StreamController.broadcast();
-  Stream<bool> get reconnectionStream => _reconnectionC.stream;
+  // final StreamController<bool> _closeC = StreamController.broadcast();
+  // Stream<bool> get closeStream => _closeC.stream;
+
+  // final StreamController<bool> _reconnectionC = StreamController.broadcast();
+  // Stream<bool> get reconnectionStream => _reconnectionC.stream;
+
+  final StreamController<SignalRConnectionState> _connectionC =
+      StreamController<SignalRConnectionState>.broadcast();
+
+  SignalRConnectionState _connectionState = SignalRConnectionState.Disconnected;
+  SignalRConnectionState get connectionState => _connectionState;
+
+  Stream<SignalRConnectionState> get connectionStream => _connectionC.stream;
 
   // Stream<SignalRMessage> get gameMessageStream => _gameMessageController.stream;
 
@@ -186,10 +220,15 @@ class SignalRProvider extends ChangeNotifier {
   }
 
   void _pingDecay() {
-    connectionStrength.value = ConnectionStrength(
-        ping: min(connectionStrength.value.ping * 2,
-            10000)); // TODO: Decay rate doubling is temporary
-    _setupPingDecay();
+    if (connectionStrength.value.ping < 10000) {
+      if (connectionState.isConnected) {
+        _connectionC.add(SignalRConnectionState.Weak);
+      }
+      connectionStrength.value = ConnectionStrength(
+          ping: min(connectionStrength.value.ping * 2,
+              10000)); // TODO: Decay rate doubling is temporary
+      _setupPingDecay();
+    }
   }
 
   // Utils

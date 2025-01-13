@@ -70,13 +70,16 @@ class AuthProvider {
   AuthProvider(this.signlRBloc, this.localDatasource, this.api) {
     getToken().then((value) {
       if (value != null) {
-        _authCreds = value;
         getUser(value).then((authRes) {
           authRes.fold((e) {
             debugPrint(e.toString());
           }, (m) async {
+            _authCreds = value;
             var res = await authenticateNormalUser(m.user, m.creds);
-            initialAuth.complete(res);
+            res.fold((l) {}, (r) {
+              _setUser(_authCreds!, r);
+              initialAuth.complete(res);
+            });
           });
         });
       } else {
@@ -162,7 +165,7 @@ class AuthProvider {
 
   Future<Either<AppError, UserAccount>> authenticateNormalUser(
       UserAccount user, AuthCreds creds) async {
-    final registerTas = connectUser(user.id, creds);
+    final registerTas = _connectUser(user.id, creds);
 
     var res = (await registerTas.run()).flatMap((r) {
       _setUser(creds, user);
@@ -186,7 +189,7 @@ class AuthProvider {
 
   Future<Either<AppError, GuestUser>> authenticateGuestUser(
       GuestUser user, AuthCreds creds) async {
-    final registerTas = connectUser(user.id, creds);
+    final registerTas = _connectUser(user.id, creds);
 
     var res = (await registerTas.run()).flatMap((r) {
       _setUser(creds, user);
@@ -200,8 +203,15 @@ class AuthProvider {
     return res;
   }
 
-  TaskEither<AppError, String> connectUser(String userId, AuthCreds creds) {
-    var signalRConnectionId = TaskEither(() => signlRBloc.connectSignalR(creds));
+
+  Future<Either<AppError, String>> connectUser() {
+    return signlRBloc.connectSignalR(_authCreds!);
+  }
+  
+
+  TaskEither<AppError, String> _connectUser(String userId, AuthCreds creds) {
+    var signalRConnectionId =
+        TaskEither(() => signlRBloc.connectSignalR(creds));
     return signalRConnectionId;
   }
 

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go/core/utils/my_responsive_framework/extensions.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
+import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/games_history/games_history_page.dart';
 import 'package:provider/provider.dart';
+import 'package:signalr_netcore/hub_connection.dart';
 
 class MyWidget extends StatelessWidget {
   const MyWidget({super.key});
@@ -41,6 +43,8 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _MyAppBarState extends State<MyAppBar> {
   @override
   Widget build(BuildContext context) {
+    final signalR = context.read<SignalRProvider>();
+    final connStream = signalR.connectionStream;
     return AppBar(
       leading: widget.showBackButton && Navigator.of(context).canPop()
           ? IconButton(
@@ -55,34 +59,65 @@ class _MyAppBarState extends State<MyAppBar> {
       actions: [
         if (widget.trailing != null) widget.trailing!,
         StreamBuilder(
-          stream: context.read<SignalRProvider>().reconnectionStream,
-          builder: (context, AsyncSnapshot<bool> connectionSnap) {
+          stream: connStream,
+          builder:
+              (context, AsyncSnapshot<SignalRConnectionState> connectionSnap) {
             if (connectionSnap.hasData) {
               return FutureBuilder<void>(
                   future: Future.delayed(Duration(seconds: 2)),
                   builder: (context, delayedFutureSnap) {
-                    if (delayedFutureSnap.connectionState ==
-                            ConnectionState.waiting ||
-                        !connectionSnap.data!) {
+                    final fW = delayedFutureSnap.connectionState ==
+                        ConnectionState.waiting;
+                    if (connectionSnap.data!.isReconnecting) {
                       return Row(
                         children: [
                           Icon(
                             Icons.circle,
                             size: 20,
-                            color: connectionSnap.data!
-                                ? Colors.green
-                                : Colors.red,
+                            color: Colors.red,
                           ),
-                          Text(
-                              connectionSnap.data!
-                                  ? "Reconnected"
-                                  : "Reconnecting",
+                          Text("Reconnecting",
                               style: context.textTheme.labelSmall)
                         ],
                       );
-                    } else {
-                      return SizedBox.shrink();
                     }
+                    if (connectionSnap.data!.isWeak) {
+                      return Row(
+                        children: [
+                          Icon(
+                            Icons.circle,
+                            size: 20,
+                            color: Colors.amber,
+                          ),
+                          Text("Weak Signal",
+                              style: context.textTheme.labelSmall)
+                        ],
+                      );
+                    }
+
+                    if ((connectionSnap.data!.isConnected && !fW)) {
+                      return Row(
+                        children: [
+                          Icon(Icons.circle, size: 20, color: Colors.green),
+                          Text("Connected",
+                              style: context.textTheme.labelSmall)
+                        ],
+                      );
+                    } else if (connectionSnap.data!.isDisconnected) {
+                      return Row(
+                        children: [
+                          Text("Connect", style: context.textTheme.labelSmall),
+                          IconButton(
+                            onPressed: () async {
+                              context.read<AuthProvider>().connectUser();
+                            },
+                            icon: const Icon(Icons.refresh),
+                          )
+                        ],
+                      );
+                    }
+
+                    return SizedBox.shrink();
                   });
             } else {
               return SizedBox.shrink();

@@ -42,9 +42,15 @@ import 'package:go/services/user_stats.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class Api {
-  static const String basePath = "192.168.83.22:8080";
+  static const String basePath = "badukserver.onrender.com";
   // static const String basePath = "192.168.170.71:8080";
-  static const String baseUrl = "http://$basePath";
+  static const String scheme = "https";
+  static const String baseUrl = "https://$basePath";
+
+  Uri makeUri(String unencodedPath, Map<String, dynamic>? queryParameters) =>
+      scheme == "https"
+          ? Uri.https(basePath, unencodedPath, queryParameters)
+          : Uri.http(basePath, unencodedPath, queryParameters);
 
   AuthCreds? _authCreds;
   AuthCreds? get authCreds => _authCreds;
@@ -252,7 +258,7 @@ class Api {
   Future<Either<AppError, UpdateProfileResult>> updateProfile(
       UpdateProfileDto data, String uid) async {
     var res = await post(
-      Uri.http(basePath, "/User/UpdateUserProfile", {'userId': uid}),
+      makeUri("/User/UpdateUserProfile", {'userId': uid}),
       data.toJson(),
       authCreds,
     );
@@ -288,7 +294,7 @@ class Api {
 
   Future<Either<AppError, PlayerRating>> getUserRating(String userId) async {
     var res = await get(
-      Uri.http(basePath, "/User/GetUserRatings", {'userId': userId}),
+      makeUri("/User/GetUserRatings", {'userId': userId}),
       authCreds,
     );
 
@@ -297,7 +303,7 @@ class Api {
 
   Future<Either<AppError, UserStat>> getUserStats(String userId) async {
     var res = await get(
-      Uri.http(basePath, "/User/GetUserStats", {'userId': userId}),
+      makeUri("/User/GetUserStats", {'userId': userId}),
       authCreds,
     );
 
@@ -334,8 +340,7 @@ class Api {
   ) async {
     var res = await get(
       // Uri.parse("$baseUrl/Player/MyGameHistory/$page"),
-      Uri.http(
-        basePath,
+      makeUri(
         "/Player/MyGameHistory/$page",
         {
           "boardSize": board?.index.toString(),
