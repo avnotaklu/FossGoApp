@@ -58,7 +58,10 @@ class _MyAppBarState extends State<MyAppBar> {
       title: Text(widget.title),
       actions: [
         if (widget.trailing != null) widget.trailing!,
-        ConnectionOverviewWidget(connStream: connStream),
+        Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: ConnectionOverviewWidget(connStream: connStream),
+        ),
       ],
     );
   }
