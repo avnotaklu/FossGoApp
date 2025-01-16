@@ -232,6 +232,12 @@ List<Duration> timeStandardByoYomiTimesCons(TimeStandard s) {
 // };
 
 const List<Color> playerColors = [(Colors.black), (Colors.white)];
+const List<String> stoneImages = [
+  // "assets/images/gostones-render/b.png",
+  // "assets/images/gostones-render/w1.png"
+  "assets/images/black.png",
+  "assets/images/white.png"
+];
 
 const Map<String, String> assets = {
   "board": "assets/images/board_light_free.jpg", //

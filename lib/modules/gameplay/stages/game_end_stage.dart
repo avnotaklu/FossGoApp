@@ -44,9 +44,9 @@ class GameEndStage extends Stage {
                   ? Center(
                       child: Stack(
                         children: [
-                          stoneColor != null
+                          stone != null
                               ? StoneWidget(
-                                  stoneColor.withOpacity(0.6), position)
+                                  stone.toStoneType(), opacity: 0.6, position)
                               : const SizedBox.shrink(),
                           Center(
                             child: FractionallySizedBox(
@@ -62,16 +62,18 @@ class GameEndStage extends Stage {
                     )
                   : () {
                       return stone != null
-                          ? (Stone? stone) {
-                              if (stone != null &&
-                                  context
-                                      .read<ScoreCalculationBloc>()
-                                      .removedClusters
-                                      .contains(stone!.cluster)) {
+                          ? (Stone stone) {
+                              if (context
+                                  .read<ScoreCalculationBloc>()
+                                  .removedClusters
+                                  .contains(stone!.cluster)) {
                                 return StoneWidget(
-                                    stoneColor!.withOpacity(0.6), position);
+                                    stone.toStoneType(),
+                                    opacity: (0.6),
+                                    position);
                               } else {
-                                return StoneWidget(stoneColor, position);
+                                return StoneWidget(
+                                    stone.toStoneType(), position);
                               }
                             }.call(stone)
                           : Container(

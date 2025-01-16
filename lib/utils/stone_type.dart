@@ -9,4 +9,10 @@ extension StoneTypeExtPlus on StoneType {
         ? Constants.playerColors[0]
         : Constants.playerColors[1];
   }
+
+  String get imageFile {
+    return this == StoneType.black
+        ? Constants.stoneImages[0]
+        : Constants.stoneImages[1];
+  }
 }

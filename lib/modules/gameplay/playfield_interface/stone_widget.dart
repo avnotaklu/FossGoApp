@@ -1,17 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
+import 'package:go/modules/gameplay/playfield_interface/cell.dart';
+import 'package:go/utils/stone_type.dart';
 
 class StoneWidget extends StatelessWidget {
-  final Color? color;
+  // final Color? color;
+  final StoneType stone;
   // Cluster cluster;
   final Position pos;
+  final double opacity;
 
-  const StoneWidget(this.color, this.pos, {super.key});
+  const StoneWidget(this.stone, this.pos, {super.key, this.opacity = 1});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      decoration: BoxDecoration(
+          image: DecorationImage(
+            opacity: opacity,
+            image: AssetImage(stone.imageFile),
+          ),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+                blurRadius: 10,
+                offset: Offset(4, 4),
+                color: Colors.grey.shade900,
+                spreadRadius: 0.1)
+          ]),
       // child: CustomPaint(
       //   painter: CrossPainter(),
       // ),

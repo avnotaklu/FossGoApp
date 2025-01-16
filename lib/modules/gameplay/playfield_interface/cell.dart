@@ -78,7 +78,10 @@ class _CellState extends State<Cell> {
               widget.position,
               stone != null && hovered
                   ? StoneWidget(
-                      stone.materialColor.withOpacity(0.6), widget.position)
+                      stone,
+                      opacity: 0.6,
+                      widget.position,
+                    )
                   : null,
               context),
         ),

@@ -57,7 +57,7 @@ class GameplayStage extends Stage {
       children: [
         if (player != null)
           StoneWidget(
-            constants.playerColors[player.index],
+            player,
             position,
           ),
         if (move?.toPosition() == position && player != null)

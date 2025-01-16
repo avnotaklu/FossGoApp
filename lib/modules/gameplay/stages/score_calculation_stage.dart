@@ -59,7 +59,10 @@ class ScoreCalculationStage extends Stage {
                         children: [
                           stone != null
                               ? StoneWidget(
-                                  stoneColor?.withOpacity(0.8), position)
+                                  stone.toStoneType(),
+                                  opacity: (0.8),
+                                  position,
+                                )
                               : const SizedBox.shrink(),
                           Center(
                             child: FractionallySizedBox(
@@ -84,9 +87,12 @@ class ScoreCalculationStage extends Stage {
                                           .stoneAt(position)!
                                           .cluster)) {
                                 return StoneWidget(
-                                    stoneColor!.withOpacity(0.8), position);
+                                    stone.toStoneType(),
+                                    opacity: (0.8),
+                                    position);
                               } else {
-                                return StoneWidget(stoneColor, position);
+                                return StoneWidget(
+                                    stone.toStoneType(), position);
                               }
                             }.call(stone)
                           : Center(

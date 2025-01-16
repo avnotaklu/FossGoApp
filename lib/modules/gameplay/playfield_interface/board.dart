@@ -32,7 +32,7 @@ class Board extends StatefulWidget {
         if (stonePos.keys.contains(tmpPos)) {
           final stoneType = stonePos[tmpPos]!;
           playgroundMap[Position(i, j)] = StoneWidget(
-            stoneType == StoneType.black ? Colors.black : Colors.white,
+            stoneType,
             tmpPos,
           );
         } else {
@@ -79,12 +79,13 @@ class _BoardState extends State<Board> {
                       child: Container(
                         height: cons.maxHeight,
                         width: cons.maxWidth,
-                        //color: Colors.black,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage(Constants.assets['board']!),
-                              fit: BoxFit.fill),
-                        ),
+                        color: const Color(0xffE7A65A),
+                        // color: const Color(0xffDCB35C),
+                        // decoration: BoxDecoration(
+                        //   image: DecorationImage(
+                        //       image: AssetImage(Constants.assets['board']!),
+                        // fit: BoxFit.fill),
+                        // ),
                       ),
                     ),
                   ),

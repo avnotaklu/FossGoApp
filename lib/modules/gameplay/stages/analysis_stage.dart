@@ -26,8 +26,7 @@ class AnalysisStage extends Stage {
     var currentMove = analysisBloc.currentMove;
     var nextMove = currentMove?.primary ?? analysisBloc.start.primary;
 
-    var stoneWidget =
-        stoneAt == null ? null : StoneWidget(stoneAt!.materialColor, position);
+    var stoneWidget = stoneAt == null ? null : StoneWidget(stoneAt, position);
 
     var board = gameStateBloc.game.getBoardSize();
 

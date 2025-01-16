@@ -69,7 +69,7 @@ class BoardStateBloc extends ChangeNotifier {
       return left(AppError(message: "You can't play here"));
     }
 
-    updateBoard(tmpStoneLogic.board);
+    // updateBoard(tmpStoneLogic.board);
 
     final move = MovePosition(
       x: position.x,
