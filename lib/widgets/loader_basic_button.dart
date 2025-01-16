@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
+import 'package:go/widgets/primary_button.dart';
 
 class LoaderBasicButton extends StatefulWidget {
   final Future<void> Function()? onPressed;
@@ -23,7 +24,7 @@ class _LoaderBasicButtonState extends State<LoaderBasicButton> {
               color: context.theme.colorScheme.onSurface,
             ),
           )
-        : FilledButton(
+        : PrimaryButton(
             onPressed: widget.onPressed == null
                 ? null
                 : () async {
@@ -35,7 +36,7 @@ class _LoaderBasicButtonState extends State<LoaderBasicButton> {
                       loading = false;
                     });
                   },
-            child: Text(widget.label),
+            text: widget.label,
           );
   }
 }

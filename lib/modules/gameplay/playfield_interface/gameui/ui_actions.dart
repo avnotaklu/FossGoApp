@@ -12,10 +12,11 @@ import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/settings/settings_provider.dart';
 import 'package:go/services/move_position.dart';
+import 'package:go/widgets/secondary_button.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-class ActionButtonWidget extends StatelessWidget {
+class ActionButtonWidget extends StatefulWidget {
   const ActionButtonWidget(
     this.action,
     this.actionType, {
@@ -23,8 +24,10 @@ class ActionButtonWidget extends StatelessWidget {
     this.longPress,
     this.longPressEnd,
     this.longPressStart,
+    this.twoStep = false,
   });
   final VoidCallback? longPress;
+  final bool twoStep;
 
   final void Function(LongPressStartDetails)? longPressStart;
   final void Function(LongPressEndDetails)? longPressEnd;
@@ -33,36 +36,67 @@ class ActionButtonWidget extends StatelessWidget {
   final ActionType actionType;
 
   @override
+  State<ActionButtonWidget> createState() => _ActionButtonWidgetState();
+}
+
+class _ActionButtonWidgetState extends State<ActionButtonWidget> {
+  bool overlay = false;
+
+  @override
   Widget build(BuildContext context) {
-    return 
-    ConstrainedBox(
-      constraints: const BoxConstraints(
-        minHeight: 50,
-        maxHeight: 70,
-      ),
-      child: Material(
-        child: InkWell(
-          onTap: action,
-          splashFactory: InkRipple.splashFactory,
-          child: Container(
-            child: GestureDetector(
-              onLongPress: longPress,
-              onLongPressStart: longPressStart,
-              onLongPressEnd: longPressEnd,
+    return Expanded(
+      child: Container(
+        constraints: const BoxConstraints(
+          minHeight: 40,
+          maxHeight: 60,
+        ),
+        // height: 30,
+        child: Material(
+          elevation: overlay ? 5 : 0,
+          shadowColor: Colors.blue,
+          borderRadius: BorderRadius.circular(10),
+          color: overlay ? SecondaryButton.color : null,
+          child: TapRegion(
+            onTapOutside: (ev) {
+              setState(() {
+                overlay = false;
+              });
+            },
+            child: InkWell(
+              onTap: !widget.twoStep || overlay
+                  ? () {
+                      widget.action?.call();
+                      setState(() {
+                        overlay = false;
+                      });
+                    }
+                  : () {
+                      setState(() {
+                        overlay = true;
+                      });
+                    },
+              splashFactory: InkRipple.splashFactory,
               child: Container(
-                padding: const EdgeInsets.only(top: 4),
-                child: LayoutBuilder(
-                  builder: (context, cons) => Column(
-                    children: [
-                      Icon(
-                        actionType.icon,
-                        size: cons.maxHeight * 0.2,
+                child: GestureDetector(
+                  onLongPress: widget.longPress,
+                  onLongPressStart: widget.longPressStart,
+                  onLongPressEnd: widget.longPressEnd,
+                  child: Container(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: LayoutBuilder(
+                      builder: (context, cons) => Column(
+                        children: [
+                          Icon(
+                            widget.actionType.icon,
+                            size: cons.maxHeight * 0.2,
+                          ),
+                          Text(widget.actionType.label,
+                              style: context.textTheme.labelSmall?.copyWith(
+                                fontSize: cons.maxHeight * 0.2,
+                              )),
+                        ],
                       ),
-                      Text(actionType.label,
-                          style: context.textTheme.labelSmall?.copyWith(
-                            fontSize: cons.maxHeight * 0.2,
-                          )),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -107,7 +141,7 @@ class PlayingGameActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, settingsProvider, child) => ActionStrip(actions: [
-        if (settingsProvider.moveInput == MoveInputMode.submitButton) Submit(),
+        if (settingsProvider.moveInput == MoveInputMode.twoStep) Submit(),
         EnterAnalysisButton(),
         Resign(),
         Pass(),
@@ -143,21 +177,21 @@ class ActionStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, cons) {
-      return Container(
-        width: cons.maxWidth,
-        child: IntrinsicHeight(
-          child: ResponsiveRowColumn(
-            layout: cons.maxWidth > 300
-                ? ResponsiveRowColumnType.ROW
-                : ResponsiveRowColumnType.COLUMN,
-            rowMainAxisAlignment: MainAxisAlignment.spaceAround,
-            columnCrossAxisAlignment: CrossAxisAlignment.stretch,
-            columnSpacing: 20,
-            children:
-                actions.map((e) => ResponsiveRowColumnItem(child: e)).toList(),
-          ),
-        ),
+      //   return IntrinsicWidth(
+      //     child: IntrinsicHeight(
+      //       child:
+      return ResponsiveRowColumn(
+        layout: cons.maxWidth > 300
+            ? ResponsiveRowColumnType.ROW
+            : ResponsiveRowColumnType.COLUMN,
+        rowMainAxisAlignment: MainAxisAlignment.spaceAround,
+        columnCrossAxisAlignment: CrossAxisAlignment.stretch,
+        columnSpacing: 20,
+        children:
+            actions.map((e) => ResponsiveRowColumnItem(child: e)).toList(),
       );
+      // )// ,
+      //   );
     });
   }
 }
@@ -181,18 +215,103 @@ class Submit extends StatelessWidget {
   }
 }
 
-class Pass extends StatelessWidget {
-  const Pass({super.key});
+class Pass extends StatefulWidget {
+  Pass() : super(key: GlobalKey());
+
+  @override
+  State<Pass> createState() => _PassState();
+}
+
+class _PassState extends State<Pass> {
+  // bool showHigh = false;
+  // OverlayEntry? entry;
 
   @override
   Widget build(BuildContext context) {
-    return ActionButtonWidget(() {
-      context.read<GameStateBloc>().makeMove(
-            MovePosition(x: null, y: null),
-            context.read<BoardStateBloc>(),
-          );
-    }, ActionType.pass);
+    return ActionButtonWidget(
+      () {
+        // if (context.read<SettingsProvider>().moveInput ==
+        //         MoveInputMode.immediate) {
+        pass(context);
+
+        // setState(() {
+        //   showHigh = false;
+        // });
+        // } else {
+        //   setState(() {
+        //     showHigh = true;
+        //   });
+        //   // showOverlay(context);
+        // }
+      },
+      ActionType.pass,
+      twoStep:
+          context.read<SettingsProvider>().moveInput == MoveInputMode.twoStep,
+    );
   }
+
+  void pass(BuildContext context) {
+    context.read<GameStateBloc>().makeMove(
+          MovePosition(x: null, y: null),
+          context.read<BoardStateBloc>(),
+        );
+  }
+
+  // void showOverlay(BuildContext context) {
+  //   RenderBox box = (widget.key as GlobalKey).currentContext!.findRenderObject()
+  //       as RenderBox;
+  //   Offset position = box.localToGlobal(Offset.zero); //this is global position
+  //   double x = position.dx;
+  //   double y = position.dy;
+
+  //   final gameState = context.read<GameStateBloc>();
+
+  //   gameState.gameStateStream.listen((l) {
+  //     removeOverlay();
+  //   });
+
+  //   entry = OverlayEntry(builder: (c) {
+  //     return Positioned(
+  //       left: x - 20,
+  //       top: y - 20,
+  //       child: TapRegion(
+  //         onTapOutside: (event) {
+  //           removeOverlay();
+  //         },
+  //         child: Container(
+  //           height: 100,
+  //           width: 100,
+  //           child: FittedBox(
+  //             fit: BoxFit.contain,
+  //             child: GestureDetector(
+  //                 onTap: () {
+  //                   pass(context);
+  //                   removeOverlay();
+  //                 },
+  //                 child: Card(
+  //                   child: Center(
+  //                     child: Text("Confirm"),
+  //                   ),
+  //                 )),
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   });
+
+  //   Overlay.of(context).insert(entry!);
+  // }
+
+  // void removeOverlay() {
+  //   entry?.remove();
+  //   entry = null;
+  // }
+
+  // @override
+  // void dispose() {
+  //   removeOverlay();
+  //   super.dispose();
+  // }
 }
 
 class AnalysisPass extends StatelessWidget {
@@ -212,7 +331,7 @@ class Accept extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gameStateBloc = context.read<GameStateBloc>();
-    return ActionButtonWidget(() {
+    return ActionButtonWidget(twoStep: true, () {
       gameStateBloc.acceptScores();
     }, ActionType.accept);
   }
@@ -223,7 +342,7 @@ class ContinueGame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ActionButtonWidget(() async {
+    return ActionButtonWidget(twoStep: true, () async {
       await context.read<GameStateBloc>().continueGame();
     }, ActionType.continueGame);
   }
@@ -234,7 +353,7 @@ class Resign extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ActionButtonWidget(() {
+    return ActionButtonWidget(twoStep: true, () {
       context.read<GameStateBloc>().resignGame();
     }, ActionType.resign);
   }

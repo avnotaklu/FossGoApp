@@ -75,7 +75,8 @@ class GameplayStage extends Stage {
               ),
             ),
           ),
-        if (gameBoard.intermediateIsPlayed &&
+        if ((gameBoard.intermediateIsPlayed ||
+                gameBoard.intermediateToBePlayed) &&
             gameBoard.intermediate != null &&
             gameBoard.intermediate!.pos == position)
           Center(
@@ -138,6 +139,8 @@ class GameplayStage extends Stage {
             move.fold((l) {}, (r) {
               gameStatBloc.makeMove(r, boardBloc);
             });
+          } else {
+            boardBloc.intermediateToBePlayed = true;
           }
         }
       };

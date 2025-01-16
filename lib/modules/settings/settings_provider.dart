@@ -35,7 +35,7 @@ enum NotationPosition {
   onlyRightBotton,
 }
 
-enum MoveInputMode { immediate, submitButton }
+enum MoveInputMode { immediate, twoStep }
 
 enum ThemeSetting {
   light,

@@ -103,11 +103,14 @@ class GameStateBloc extends ChangeNotifier {
   late final TimerController headsUpTimeController;
 
   late final StreamSubscription<GameUpdate> gameUpdateListener;
+  final StreamController<GameState> _gameStateUpdate =
+      StreamController.broadcast();
 
   Stream<Null> get gameEndStream => gameOracle.gameEndStream;
   Stream<(GameMove, int)> get gameMoveStream => gameOracle.moveUpdate;
   Stream<ConnectionStrength>? get opponentConnection =>
       gameOracle.opponentConnection;
+  Stream<GameState> get gameStateStream => _gameStateUpdate.stream;
 
   GameStateBloc(
     this.game,
@@ -247,6 +250,10 @@ class GameStateBloc extends ChangeNotifier {
   }
 
   Game updateStateFromGame(Game game) {
+    if (game.gameState != this.game.gameState) {
+      _gameStateUpdate.add(game.gameState);
+    }
+
     this.game = game;
     _updateStageType(game.gameState);
 

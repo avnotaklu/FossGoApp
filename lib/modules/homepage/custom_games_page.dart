@@ -11,6 +11,7 @@ import 'package:go/modules/homepage/game_card.dart';
 import 'package:go/modules/homepage/matchmaking_page.dart';
 import 'package:go/widgets/buttons.dart';
 import 'package:go/widgets/my_max_width_box.dart';
+import 'package:go/widgets/primary_button.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 

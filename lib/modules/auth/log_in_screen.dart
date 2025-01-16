@@ -25,7 +25,8 @@ class _LogInScreenState extends State<LogInScreen> {
   @override
   Widget build(BuildContext context) {
     return Provider<LogInProvider>(
-      create: (context) => LogInProvider(authBloc: context.read(), api: context.read()),
+      create: (context) =>
+          LogInProvider(authBloc: context.read(), api: context.read()),
       builder: (context, child) {
         final pro = context.read<LogInProvider>();
         return Scaffold(
@@ -64,6 +65,7 @@ class _LogInScreenState extends State<LogInScreen> {
                         ),
                         MyTextFormField(
                           controller: passwordController,
+                          obscureText: true,
                           hintText: 'Password',
                           validator:
                               pro.passwordValidator().flutterFieldValidate,

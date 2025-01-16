@@ -19,6 +19,7 @@ import 'package:go/utils/auth_navigation.dart';
 import 'package:go/widgets/buttons.dart';
 import 'package:go/widgets/loader_basic_button.dart';
 import 'package:go/widgets/my_max_width_box.dart';
+import 'package:go/widgets/primary_button.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';

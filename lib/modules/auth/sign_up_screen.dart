@@ -26,7 +26,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Provider<SignUpProvider>(
-      create: (context) => SignUpProvider(authBloc: context.read(),api: context.read()),
+      create: (context) =>
+          SignUpProvider(authBloc: context.read(), api: context.read()),
       builder: (context, child) {
         final signUpPro = context.read<SignUpProvider>();
         return Scaffold(
@@ -65,6 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         MyTextFormField(
                           hintText: "Password",
+                          obscureText: true,
                           controller: passwordController,
                           validator: (v) => signUpPro
                               .passwordValidator()

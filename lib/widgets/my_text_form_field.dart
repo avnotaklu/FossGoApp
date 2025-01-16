@@ -9,13 +9,16 @@ class MyTextFormField extends StatelessWidget {
       required this.controller,
       required this.validator,
       required this.hintText,
+      this.obscureText = false,
       this.enabled = true,
       this.onTap});
 
   final TextEditingController controller;
   final String? Function(String?) validator;
+
   final String hintText;
   final bool enabled;
+  final bool obscureText;
   final void Function()? onTap;
 
   @override
@@ -25,6 +28,7 @@ class MyTextFormField extends StatelessWidget {
       enabled: enabled,
       onTap: onTap,
       validator: validator,
+      obscureText: obscureText,
       
       textInputAction: TextInputAction.done,
       cursorColor: context.theme.colorScheme.tertiary,

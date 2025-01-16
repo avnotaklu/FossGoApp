@@ -299,8 +299,9 @@ class BorderPainter extends CustomPainter {
         text: TextSpan(
           text: text,
           style: TextStyle(
-              color: myColor,
-              fontSize: fontSize),
+            color: myColor,
+            fontSize: fontSize,
+          ),
         ),
         textDirection: TextDirection.ltr,
       );

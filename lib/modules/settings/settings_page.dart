@@ -272,8 +272,8 @@ extension MoveInputDisplay on MoveInputMode {
     switch (this) {
       case MoveInputMode.immediate:
         return 'Immediate';
-      case MoveInputMode.submitButton:
-        return 'Submit Button';
+      case MoveInputMode.twoStep:
+        return 'Two Step';
     }
   }
 }

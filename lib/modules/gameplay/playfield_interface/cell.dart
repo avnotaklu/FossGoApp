@@ -43,7 +43,9 @@ class _CellState extends State<Cell> {
     return MouseRegion(
       onEnter: (det) {
         if (context.read<Stage>() is GameplayStage) {
-          gameState.placeStone(widget.position, gameBoard);
+          if (!gameBoard.intermediateToBePlayed) {
+            gameState.placeStone(widget.position, gameBoard);
+          }
         } else if (context.read<Stage>() is AnalysisStage) {
           setState(() {
             hovered = true;

@@ -18,6 +18,7 @@ import 'package:go/services/time_control_dto.dart';
 import 'package:go/services/find_match_dto.dart';
 import 'package:go/modules/homepage/matchmaking_provider.dart';
 import 'package:go/widgets/my_max_width_box.dart';
+import 'package:go/widgets/primary_button.dart';
 import 'package:go/widgets/selection_badge.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:provider/provider.dart';
@@ -302,35 +303,3 @@ class FindButton extends StatelessWidget {
   }
 }
 
-class PrimaryButton extends StatelessWidget {
-  final void Function() onPressed;
-  final String text;
-
-  const PrimaryButton({
-    super.key,
-    required this.onPressed,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton(
-      style: ButtonStyle(
-        // elevation: WidgetStateProperty.all(100),
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-        ),
-        textStyle: WidgetStateProperty.all(context.textTheme.bodyLarge),
-        // side: WidgetStateProperty.all(
-        //   BorderSide(
-        //     // color: Colors.white,
-        //     color: context.theme.shadowColor,
-        //     width: 1,
-        //   ),
-        // ),
-      ),
-      onPressed: onPressed,
-      child: Text(text),
-    );
-  }
-}

@@ -13,6 +13,7 @@ import 'package:go/widgets/basic_alert.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:go/widgets/my_max_width_box.dart';
 import 'package:go/widgets/my_text_form_field.dart';
+import 'package:go/widgets/primary_button.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 

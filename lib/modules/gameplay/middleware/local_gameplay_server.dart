@@ -174,6 +174,13 @@ class LocalGameplayServer {
     assert(_gameState == GameState.playing, "Game is not in playing state");
     assert(hasPassedTwice(), "Both players haven't passed twice");
 
+    _setTimes(now);
+
+    _playerTimeSnapshots[turnPlayer] =
+        _playerTimeSnapshots[turnPlayer].copyWith(
+      timeActive: false,
+    );
+
     _gameState = GameState.scoreCalculation;
     _timer.cancel();
   }
