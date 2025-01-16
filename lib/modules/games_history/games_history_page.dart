@@ -19,6 +19,7 @@ import 'package:go/services/api.dart';
 import 'package:go/services/game_and_opponent.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/widgets/basic_alert.dart';
+import 'package:go/widgets/my_max_width_box.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:paginated_list/paginated_list.dart';
 import 'package:provider/provider.dart';
@@ -34,13 +35,13 @@ class GamesHistoryPage extends StatelessWidget {
     return MultiProvider(
         builder: (context, child) {
           return Consumer<GamesHistoryProvider>(builder: (context, pro, child) {
-            return MaxWidthBox(
+            return MyMaxWidthBox(
               maxWidth: context.tabletBreakPoint.end,
               child: Scaffold(
                 appBar: AppBar(
                   title: Text('Games History'),
                 ),
-                body: MaxWidthBox(
+                body: MyMaxWidthBox(
                   maxWidth: context.width,
                   child: Container(
                     child: Column(

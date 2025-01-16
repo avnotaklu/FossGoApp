@@ -73,7 +73,7 @@ class SettingsProvider extends ChangeNotifier {
   NotationPosition _notationPosition = NotationPosition.both;
   NotationPosition get notationPosition => _notationPosition;
 
-  bool _sound = false;
+  bool _sound = true;
   bool get sound => _sound;
 
   bool _showCrosshair = false;
@@ -95,7 +95,7 @@ class SettingsProvider extends ChangeNotifier {
     }
 
     final soundSetting = await localDatasource.getSoundEnabled();
-    _sound = soundSetting ?? false;
+    _sound = soundSetting ?? true;
 
     _notationPosition =
         await localDatasource.getNotationPosition() ?? NotationPosition.both;

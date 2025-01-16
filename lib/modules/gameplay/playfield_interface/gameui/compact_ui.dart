@@ -36,7 +36,7 @@ class CompactGameUi extends StatelessWidget {
               height: context.height * 0.02,
             ),
             Container(
-              height: context.height * 0.1,
+              height: context.height * 0.07,
               padding: EdgeInsets.symmetric(horizontal: 5),
               child: Row(
                 children: [
@@ -68,7 +68,7 @@ class CompactGameUi extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 5),
               decoration:
                   BoxDecoration(borderRadius: BorderRadius.circular(10)),
-              height: context.height * 0.25,
+              height: context.height * 0.3,
               child: MoveTree(
                 root: context.read<AnalysisBloc>().start,
                 direction: TreeDirection.horizontal,
@@ -201,7 +201,7 @@ class CompactPlayerCard extends StatelessWidget {
                                   children: [
                                     if (playerData!.komi != null)
                                       Text(
-                                        "Komi: ${playerData!.komi} | ",
+                                        "Komi: ${playerData!.komi}",
                                         style:
                                             context.theme.textTheme.labelLarge,
                                       ),
@@ -370,29 +370,26 @@ class CompactMyTimeDisplay extends StatelessWidget {
   }
 
   Text largeTimeStepText(BuildContext context, String text) {
-    return Text(
-      text,
-      style: (context.textTheme.bodyLarge)?.copyWith(
-        fontFamily: GoogleFonts.spaceMono().fontFamily,
-      ),
-    );
+    return Text(text, style: (context.textTheme.bodyLarge)
+        // ?.copyWith(
+        //   fontFamily: GoogleFonts.spaceMono().fontFamily,
+        // ),
+        );
   }
 
   Text smallTimeStepText(BuildContext context, String text) {
-    return Text(
-      text,
-      style: (context.textTheme.bodySmall)?.copyWith(
-        fontFamily: GoogleFonts.spaceMono().fontFamily,
-      ),
-    );
+    return Text(text, style: (context.textTheme.bodySmall)
+        // ?.copyWith(
+        //   fontFamily: GoogleFonts.spaceMono().fontFamily,
+        // ),
+        );
   }
 
   Text extraText(BuildContext context, String text) {
-    return Text(
-      text,
-      style: (context.textTheme.bodySmall)?.copyWith(
-          // fontFamily: GoogleFonts.spaceMono().fontFamily,
-          ),
-    );
+    return Text(text, style: (context.textTheme.bodySmall)
+        // ?.copyWith(
+        // // fontFamily: GoogleFonts.spaceMono().fontFamily,
+        // ),
+        );
   }
 }

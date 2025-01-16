@@ -10,6 +10,7 @@ import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/homepage/game_card.dart';
 import 'package:go/modules/homepage/matchmaking_page.dart';
 import 'package:go/widgets/buttons.dart';
+import 'package:go/widgets/my_max_width_box.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -41,7 +42,7 @@ class _CustomGamesPageState extends State<CustomGamesPage> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            return MaxWidthBox(
+            return MyMaxWidthBox(
               maxWidth: context.tabletBreakPoint.end,
               child: Scaffold(
                 body: Padding(

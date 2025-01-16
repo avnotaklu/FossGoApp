@@ -18,6 +18,7 @@ import 'package:go/services/api.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/user_stats.dart';
 import 'package:go/widgets/basic_alert.dart';
+import 'package:go/widgets/my_max_width_box.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -61,7 +62,7 @@ class StatsPage extends StatelessWidget {
                   builder: (context, _) {
                     return Consumer<StatsPageProvider>(
                       builder: (context, pro, child) => Scaffold(
-                        body: MaxWidthBox(
+                        body: MyMaxWidthBox(
                           maxWidth: context.tabletBreakPoint.end,
                           child: Container(
                             padding: const EdgeInsets.all(10),

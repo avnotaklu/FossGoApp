@@ -17,6 +17,7 @@ import 'package:go/services/signal_r_message.dart';
 import 'package:go/services/time_control_dto.dart';
 import 'package:go/services/find_match_dto.dart';
 import 'package:go/modules/homepage/matchmaking_provider.dart';
+import 'package:go/widgets/my_max_width_box.dart';
 import 'package:go/widgets/selection_badge.dart';
 import 'package:go/widgets/my_app_bar.dart';
 import 'package:provider/provider.dart';
@@ -41,7 +42,7 @@ class _MatchmakingPageState extends State<MatchmakingPage> {
         context.read<SignalRProvider>(),
         context.read<HomepageBloc>(),
       ),
-      builder: (context, child) => MaxWidthBox(
+      builder: (context, child) => MyMaxWidthBox(
         maxWidth: context.tabletBreakPoint.end,
         child: Scaffold(
           // backgroundColor: Color(0xff111118),

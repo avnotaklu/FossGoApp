@@ -89,7 +89,7 @@ class GameStateBloc extends ChangeNotifier {
   DisplayablePlayerData get topPlayerUserInfo =>
       gameOracle.otherPlayerData(game);
 
-  // List<Duration> times;
+  late final List<Duration> prevTimes;
   final List<TimerController> _controller;
 
   List<TimerController> get timerController => _controller;
@@ -127,6 +127,10 @@ class GameStateBloc extends ChangeNotifier {
             duration: Duration(seconds: game.timeControl.mainTimeSeconds),
           )
         ] {
+    prevTimes = [
+      timerController[0].duration,
+      timerController[1].duration,
+    ];
     updateStateFromGame(game);
 
     gameUpdateListener = gameOracle.gameUpdate.listen((event) {
@@ -145,6 +149,17 @@ class GameStateBloc extends ChangeNotifier {
         assert(res.result);
       }
     });
+
+    for (var i = 0; i < timerController.length; i++) {
+      timerController[i].durationUpdateStream.listen((d) {
+        if (d.inSeconds < 10 &&
+            prevTimes[i].inSeconds >= 10 &&
+            settingsProvider.sound) {
+          systemUtils.playSound(SoundAsset.message);
+        }
+        prevTimes[i] = d;
+      });
+    }
   }
 
   void resetBoard(BoardStateBloc board) {
@@ -167,8 +182,7 @@ class GameStateBloc extends ChangeNotifier {
 
     if (canPlayMove) {
       return bloc.placeStone(position, stoneLogic, updateStone);
-    }
-    else {
+    } else {
       return left(AppError(message: "It's not your turn"));
     }
   }

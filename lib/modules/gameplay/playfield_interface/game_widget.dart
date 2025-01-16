@@ -124,7 +124,7 @@ class _GameWidgetState extends State<GameWidget> {
                       ChangeNotifierProvider(
                         create: (context) => AnalysisBloc(
                           gameStateBloc,
-                          const SystemUtilities(),
+                          systemUtils,
                           context.read<SettingsProvider>(),
                         ),
                       ),

@@ -338,12 +338,14 @@ class BorderPainter extends CustomPainter {
 
     if (showRightBottom || showLeftTop) {
       for (var i = 0; i < info.rows; i++) {
-        var isIntermediate =
-            intermediatePosition != null && intermediatePosition!.x == i;
+        var isIntermediate = intermediatePosition != null &&
+            intermediatePosition!.x! == (i - info.rows + 1).abs();
 
         final textPainter = getTextPainter((i + 1).toString());
 
-        final line = start_grid_y + (i * totRowSep) - textPainter.height / 2;
+        final line = start_grid_y +
+            ((info.rows - i - 1) * totRowSep) -
+            textPainter.height / 2;
         if (showLeftTop) {
           paintNotationText(
             isIntermediate,
@@ -381,7 +383,7 @@ class BorderPainter extends CustomPainter {
         if (showRightBottom) {
           paintNotationText(
             isIntermediate,
-            Offset(line, h  - textPainter.height - 5),
+            Offset(line, h - textPainter.height - 5),
             textPainter,
           );
         }

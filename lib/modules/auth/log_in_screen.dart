@@ -5,6 +5,7 @@ import 'package:go/modules/auth/log_in_provider.dart';
 import 'package:go/utils/auth_navigation.dart';
 import 'package:go/widgets/loader_basic_button.dart';
 import 'package:go/widgets/my_app_bar.dart';
+import 'package:go/widgets/my_max_width_box.dart';
 import 'package:go/widgets/my_text_form_field.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -32,7 +33,7 @@ class _LogInScreenState extends State<LogInScreen> {
             "Log In",
             showBackButton: true,
           ),
-          body: MaxWidthBox(
+          body: MyMaxWidthBox(
             maxWidth: context.tabletBreakPoint.end,
             child: Form(
               key: formKey,

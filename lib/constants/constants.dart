@@ -409,26 +409,70 @@ class OtherColors {
   });
 }
 
-TextTheme buildTextTheme(Color tc) {
+TextTheme buildTextTheme(Color tc, {FontWeight? weight}) {
   return TextTheme(
-    headlineLarge:
-        headingL(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
-    headlineSmall:
-        headingS(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
-    titleLarge:
-        titleL(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
-    bodyLarge: bodyL(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
-    bodySmall: bodyS(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
-    labelLarge:
-        lableL(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
-    labelSmall:
-        lableS(tc).copyWith(fontFamily: GoogleFonts.poppins().fontFamily),
+    headlineLarge: headingL(tc).copyWith(
+      // fontFamily: GoogleFonts.poppins().fontFamily,
+      // fontFamily: GoogleFonts.notoSans().fontFamily,
+      // fontFamily: 'Poppins',
+      fontFamily: 'Nunito',
+      fontWeight: weight,
+    ),
+    headlineSmall: headingS(tc).copyWith(
+      // fontFamily: GoogleFonts.poppins().fontFamily,
+      // fontFamily: GoogleFonts.notoSans().fontFamily,
+      // fontFamily: 'Poppins',
+      fontFamily: 'Nunito',
+      fontWeight: weight,
+    ),
+    titleLarge: titleL(tc).copyWith(
+      // fontFamily: GoogleFonts.poppins().fontFamily,
+      // fontFamily: GoogleFonts.notoSans().fontFamily,
+      // fontFamily: 'Poppins',
+      fontFamily: 'Nunito',
+      fontWeight: weight,
+    ),
+    titleSmall: titleS(tc).copyWith(
+      // fontFamily: GoogleFonts.poppins().fontFamily,
+      // fontFamily: GoogleFonts.notoSans().fontFamily,
+      // fontFamily: 'Poppins',
+      fontFamily: 'Nunito',
+      fontWeight: weight,
+    ),
+    bodyLarge: bodyL(tc).copyWith(
+      // fontFamily: GoogleFonts.poppins().fontFamily,
+      // fontFamily: GoogleFonts.notoSans().fontFamily,
+      // fontFamily: 'Poppins',
+      fontFamily: 'Nunito',
+      fontWeight: weight,
+    ),
+    bodySmall: bodyS(tc).copyWith(
+      // fontFamily: GoogleFonts.poppins().fontFamily,
+      // fontFamily: GoogleFonts.notoSans().fontFamily,
+      // fontFamily: 'Poppins',
+      fontFamily: 'Nunito',
+      fontWeight: weight,
+    ),
+    labelLarge: lableL(tc).copyWith(
+      // fontFamily: GoogleFonts.poppins().fontFamily,
+      // fontFamily: GoogleFonts.notoSans().fontFamily,
+      // fontFamily: 'Poppins',
+      fontFamily: 'Nunito',
+      fontWeight: weight,
+    ),
+    labelSmall: lableS(tc).copyWith(
+      // fontFamily: GoogleFonts.poppins().fontFamily,
+      // fontFamily: GoogleFonts.notoSans().fontFamily,
+      // fontFamily: 'Poppins',
+      fontFamily: 'Nunito',
+      fontWeight: weight,
+    ),
   );
 }
 
 TextStyle headingL(Color col) {
   return TextStyle(
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: FontWeight.w400,
     color: col,
   );
@@ -436,13 +480,21 @@ TextStyle headingL(Color col) {
 
 TextStyle headingS(Color col) {
   return TextStyle(
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: FontWeight.w400,
     color: col,
   );
 }
 
 TextStyle titleL(Color col) {
+  return TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w400,
+    color: col,
+  );
+}
+
+TextStyle titleS(Color col) {
   return TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w400,

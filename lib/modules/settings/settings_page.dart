@@ -7,6 +7,7 @@ import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/settings/settings_provider.dart';
 import 'package:go/services/local_datasource.dart';
 import 'package:go/widgets/my_app_bar.dart';
+import 'package:go/widgets/my_max_width_box.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -19,7 +20,7 @@ class SettingsPage extends StatelessWidget {
     // ChangeNotifierProvider(
     //   create: (context) => SettingsProvider(localDatasource: LocalDatasource()),
     // builder: (context, child) {
-    return MaxWidthBox(
+    return MyMaxWidthBox(
       maxWidth: context.tabletBreakPoint.end,
       child: Scaffold(
         appBar: MyAppBar(

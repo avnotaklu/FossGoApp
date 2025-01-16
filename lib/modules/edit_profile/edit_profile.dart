@@ -11,6 +11,7 @@ import 'package:go/services/api.dart';
 import 'package:go/widgets/app_error_snackbar.dart';
 import 'package:go/widgets/basic_alert.dart';
 import 'package:go/widgets/my_app_bar.dart';
+import 'package:go/widgets/my_max_width_box.dart';
 import 'package:go/widgets/my_text_form_field.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -47,7 +48,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return MaxWidthBox(
+    return MyMaxWidthBox(
       maxWidth: context.tabletBreakPoint.end,
       child: Scaffold(
         appBar: MyAppBar(

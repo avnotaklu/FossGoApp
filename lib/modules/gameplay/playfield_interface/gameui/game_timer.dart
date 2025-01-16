@@ -3,6 +3,7 @@ import 'package:barebones_timer/timer_display.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go/core/foundation/duration.dart';
+import 'package:go/core/utils/system_utilities.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/time_control.dart';
@@ -53,7 +54,7 @@ class _GameTimerState extends State<GameTimer> {
   }
 }
 
-class MyTimeDisplay extends StatelessWidget {
+class MyTimeDisplay extends StatefulWidget {
   final TimeControl timeControl;
   final PlayerTimeSnapshot? playerTimeSnapshot;
   final TimerController controller;
@@ -68,89 +69,121 @@ class MyTimeDisplay extends StatelessWidget {
   });
 
   @override
+  State<MyTimeDisplay> createState() => _MyTimeDisplayState();
+}
+
+class _MyTimeDisplayState extends State<MyTimeDisplay> {
+  @override
   Widget build(BuildContext context) {
+    final sys = SystemUtilities();
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 8,
-        vertical: !compactUi ? 0 : 4,
+        vertical: !widget.compactUi ? 0 : 4,
       ),
       child: TimerDisplay(
-        controller: controller,
+        controller: widget.controller,
         builder: (controller) {
           var parts = controller.duration.getDurationReprParts();
+          final dur = controller.duration;
 
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
+          return Theme(
+            data: controller.duration.inSeconds < 10
+                ? context.theme.copyWith(
+                    textTheme: Constants.buildTextTheme(
+                      Colors.red,
+                      weight: FontWeight.w600,
+                    ),
+                  )
+                : context.theme,
+            child: Builder(
+              builder: (context) => Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.ideographic,
                 children: [
-                  if (parts.h > 0) ...[
-                    largeTimeStepText(context, parts.h.timeStepPadded()),
-                    largeTimeStepText(context, ":")
-                  ],
-                  largeTimeStepText(context, parts.m.timeStepPadded()),
-                  if (parts.h == 0) ...[
-                    largeTimeStepText(context, ":"),
-                    largeTimeStepText(context, parts.s.timeStepPadded()),
-                  ],
-                  SizedBox(
-                    width: 4,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.ideographic,
+                    children: [
+                      if (parts.h > 0) ...[
+                        largeTimeStepText(
+                            context, parts.h.timeStepPadded(), dur),
+                        largeTimeStepText(context, ":", dur)
+                      ],
+                      largeTimeStepText(context, parts.m.timeStepPadded(), dur),
+                      if (parts.h == 0) ...[
+                        largeTimeStepText(context, ":", dur),
+                        largeTimeStepText(
+                            context, parts.s.timeStepPadded(), dur),
+                      ],
+                      SizedBox(
+                        width: 4,
+                      ),
+                      if (parts.h > 0)
+                        smallTimeStepText(
+                            context, parts.s.timeStepPadded(), dur),
+                      if (parts.h == 0 && parts.m == 0 && parts.s < 10)
+                        smallTimeStepText(
+                            context, parts.d.timeStepPadded(), dur),
+                      if (widget.timeControl.byoYomiTime != null) ...[
+                        Spacer(),
+                        extraText(context, " +", dur),
+                        extraText(
+                          context,
+                          widget.playerTimeSnapshot != null
+                              ? (widget.playerTimeSnapshot!.byoYomisLeft ?? "")
+                                  .toString()
+                              : (widget.timeControl.byoYomiTime?.byoYomis ?? "")
+                                  .toString(),
+                          dur,
+                        ),
+                        extraText(
+                          context,
+                          "x${(Duration(seconds: widget.timeControl.byoYomiTime!.byoYomiSeconds)).smallRepr()}",
+                          dur,
+                        ),
+                      ]
+                    ],
                   ),
-                  if (parts.h > 0)
-                    smallTimeStepText(context, parts.s.timeStepPadded()),
-                  if (parts.h == 0 && parts.m == 0 && parts.s < 10)
-                    smallTimeStepText(context, parts.d.timeStepPadded()),
-                  if (timeControl.byoYomiTime != null) ...[
-                    Spacer(),
-                    extraText(context, " +"),
-                    extraText(
-                      context,
-                      playerTimeSnapshot != null
-                          ? (playerTimeSnapshot!.byoYomisLeft ?? "").toString()
-                          : (timeControl.byoYomiTime?.byoYomis ?? "")
-                              .toString(),
-                    ),
-                    extraText(
-                      context,
-                      " x ${(Duration(seconds: timeControl.byoYomiTime!.byoYomiSeconds)).smallRepr()}",
-                    ),
-                  ]
                 ],
               ),
-            ],
+            ),
           );
         },
       ),
     );
   }
 
-  Text largeTimeStepText(BuildContext context, String text) {
-    return Text(
-      text,
-      style: (context.textTheme.bodyLarge)?.copyWith(
-        fontFamily: GoogleFonts.spaceMono().fontFamily,
-      ),
-    );
+  Text largeTimeStepText(BuildContext context, String text, Duration dur) {
+    return Text(text,
+        style: dur.inSeconds < 10
+            ? (context.textTheme.titleSmall)
+            : (context.textTheme.bodyLarge)
+        // ?.copyWith(
+        //   fontFamily: GoogleFonts.notoSans().fontFamily,
+        // ),
+        );
   }
 
-  Text smallTimeStepText(BuildContext context, String text) {
-    return Text(
-      text,
-      style: (context.textTheme.bodySmall)?.copyWith(
-        fontFamily: GoogleFonts.spaceMono().fontFamily,
-      ),
-    );
+  Text smallTimeStepText(BuildContext context, String text, Duration dur) {
+    return Text(text,
+        style: dur.inSeconds < 10
+            ? (context.textTheme.bodyLarge)
+            : (context.textTheme.bodySmall)
+        // ?.copyWith(
+        //   fontFamily: GoogleFonts.notoSans().fontFamily,
+        // ),
+        );
   }
 
-  Text extraText(BuildContext context, String text) {
-    return Text(
-      text,
-      style: (context.textTheme.bodySmall)?.copyWith(
-          // fontFamily: GoogleFonts.spaceMono().fontFamily,
-          ),
-    );
+  Text extraText(BuildContext context, String text, Duration dur) {
+    return Text(text,
+        style: dur.inSeconds < 10
+            ? (context.textTheme.bodyLarge)
+            : (context.textTheme.bodySmall)
+        // ?.copyWith(
+        // fontFamily: GoogleFonts.spaceMono().fontFamily,
+        // ),
+        );
   }
 }

@@ -109,6 +109,11 @@ class UserInfoOverview extends StatelessWidget {
                 ),
               ),
               Spacer(),
+            ],
+          ),
+          SizedBox(height: 10,),
+          Row(
+            children: [
               ValueListenableBuilder(
                   valueListenable:
                       context.read<SignalRProvider>().connectionStrength,
@@ -131,7 +136,7 @@ class UserInfoOverview extends StatelessWidget {
                 ),
               ],
             ],
-          ),
+          )
         ],
       ),
     );

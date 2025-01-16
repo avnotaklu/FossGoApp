@@ -23,6 +23,7 @@ import 'package:go/services/public_user_info.dart';
 import 'package:go/services/user_account.dart';
 import 'package:go/utils/auth_navigation.dart';
 import 'package:go/widgets/loader_basic_button.dart';
+import 'package:go/widgets/my_max_width_box.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:go/widgets/stateful_card.dart';
 import 'package:provider/provider.dart';
@@ -51,30 +52,38 @@ class ProfilePage extends StatelessWidget {
                     Text(
                       "Login to view profile",
                     ),
+                    SizedBox(height: 20,),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamedAndRemoveUntil(
                           context,
-                          "/",
+                          "/Root",
                           (c) => false,
                         );
                       },
-                      child: RichText(
-                          text: TextSpan(children: [
-                        TextSpan(
-                          text: "Create an account",
-                          style: context.textTheme.titleLarge,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: context.theme.colorScheme.secondary,
                         ),
-                        TextSpan(
-                          text: " (you will be logged out)",
-                          style: context.textTheme.bodySmall,
-                        )
-                      ])),
+                        child: RichText(
+                            text: TextSpan(children: [
+                          TextSpan(
+                            text: "Create an account",
+                            style: context.textTheme.titleLarge,
+                          ),
+                          TextSpan(
+                            text: " (you will be logged out)",
+                            style: context.textTheme.bodySmall,
+                          )
+                        ])),
+                      ),
                     ),
                   ],
                 ),
               ),
-              (user) => MaxWidthBox(
+              (user) => MyMaxWidthBox(
                 maxWidth: context.tabletBreakPoint.end,
                 child: Scaffold(
                   body: Padding(
@@ -296,7 +305,6 @@ class ProfilePage extends StatelessWidget {
                             ),
                           ),
                           SectionDivider(),
-
                           FutureBuilder(
                               future: stats,
                               builder: (c, s) {
@@ -365,7 +373,6 @@ class ProfilePage extends StatelessWidget {
                                   );
                                 });
                               }),
-
                           SizedBox(
                             height: 20,
                           ),
