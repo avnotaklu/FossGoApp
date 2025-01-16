@@ -25,8 +25,8 @@ class StoneWidget extends StatelessWidget {
           boxShadow: [
             if (opacity == 1)
               BoxShadow(
-                  blurRadius: 10,
-                  offset: Offset(4, 4),
+                  blurRadius: 4,
+                  offset: Offset(3, 3),
                   color: Colors.grey.shade900,
                   spreadRadius: 0.1)
           ]),
