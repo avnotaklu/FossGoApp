@@ -23,11 +23,12 @@ class StoneWidget extends StatelessWidget {
           ),
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(
-                blurRadius: 10,
-                offset: Offset(4, 4),
-                color: Colors.grey.shade900,
-                spreadRadius: 0.1)
+            if (opacity == 1)
+              BoxShadow(
+                  blurRadius: 10,
+                  offset: Offset(4, 4),
+                  color: Colors.grey.shade900,
+                  spreadRadius: 0.1)
           ]),
       // child: CustomPaint(
       //   painter: CrossPainter(),
