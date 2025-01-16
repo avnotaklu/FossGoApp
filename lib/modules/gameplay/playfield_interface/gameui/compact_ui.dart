@@ -17,7 +17,6 @@ import 'package:go/modules/gameplay/stages/game_end_stage.dart';
 import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/widgets/stateful_card.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class CompactGameUi extends StatelessWidget {

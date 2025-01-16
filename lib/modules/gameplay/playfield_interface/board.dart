@@ -13,7 +13,6 @@ import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/settings/settings_provider.dart';
 import 'package:go/services/move_position.dart';
 import 'package:go/utils/board_size_data.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:test/test.dart';
 import 'stone_widget.dart';
@@ -301,7 +300,6 @@ class BorderPainter extends CustomPainter {
           text: text,
           style: TextStyle(
               color: myColor,
-              fontFamily: GoogleFonts.spaceMono().fontFamily,
               fontSize: fontSize),
         ),
         textDirection: TextDirection.ltr,

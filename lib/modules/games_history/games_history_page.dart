@@ -20,7 +20,6 @@ import 'package:go/services/game_and_opponent.dart';
 import 'package:go/services/game_over_message.dart';
 import 'package:go/widgets/basic_alert.dart';
 import 'package:go/widgets/my_max_width_box.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:paginated_list/paginated_list.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -153,7 +152,7 @@ class GamesHistoryPage extends StatelessWidget {
           ChangeNotifierProvider(
             create: (context) => GamesHistoryProvider(
               auth: context.read(),
-              api:context.read(),
+              api: context.read(),
             )..loadGames(),
           ),
           Provider<IStatsRepository>.value(value: statsRepo)
@@ -297,8 +296,7 @@ class GameListTile extends StatelessWidget {
                     children: [
                       Text(
                         game.title,
-                        style: context.textTheme.bodySmall?.copyWith(
-                            fontFamily: GoogleFonts.spaceMono().fontFamily),
+                        style: context.textTheme.bodySmall,
                       ),
                       RichText(
                           text: TextSpan(children: [

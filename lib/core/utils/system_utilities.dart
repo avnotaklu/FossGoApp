@@ -1,7 +1,6 @@
 // import 'package:just_audio/just_audio.dart';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:just_audio/just_audio.dart' as ja;
 
 final systemUtils = SystemUtilities();
 
@@ -18,7 +17,6 @@ enum SoundAsset {
 class SystemUtilities {
   static const String appName = "Go";
   static final AudioPlayer audioPlayer = AudioPlayer();
-  static final ja.AudioPlayer jaAudio = ja.AudioPlayer();
 
   DateTime get currentTime => DateTime.now();
 

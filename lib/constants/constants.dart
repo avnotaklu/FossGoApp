@@ -8,7 +8,6 @@ import 'package:go/models/time_control.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/services/player_rating.dart';
 import 'package:go/services/time_control_dto.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class BoardSizeData {
   final int rows;

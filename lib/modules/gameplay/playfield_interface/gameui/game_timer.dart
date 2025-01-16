@@ -10,7 +10,6 @@ import 'package:go/models/time_control.dart';
 
 import 'package:go/constants/constants.dart' as Constants;
 import 'package:go/widgets/stateful_card.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class GameTimer extends StatefulWidget {
   const GameTimer({
