@@ -30,9 +30,6 @@ class StoneWidget extends StatelessWidget {
                   color: Colors.grey.shade900,
                   spreadRadius: 0.1)
           ]),
-      // child: CustomPaint(
-      //   painter: CrossPainter(),
-      // ),
     );
   }
 }

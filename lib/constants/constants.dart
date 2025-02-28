@@ -115,22 +115,6 @@ List<Duration> timeStandardMainTimesCons(TimeStandard s) {
   );
 }
 
-// final Map<TimeStandard, List<Duration>> timeStandardMainTimeAlt = {
-//   TimeStandard.blitz: [
-//     const Duration(seconds: 180),
-//     timeStandardMainTime[TimeStandard.blitz]!,
-//   ],
-//   TimeStandard.rapid: [
-//     timeStandardMainTime[TimeStandard.rapid]!,
-//   ],
-//   TimeStandard.classical: [
-//     timeStandardMainTime[TimeStandard.classical]!,
-//   ],
-//   TimeStandard.correspondence: [
-//     timeStandardMainTime[TimeStandard.correspondence]!,
-//   ],
-// };
-
 const Map<TimeStandard, (Duration, Duration, Duration)> timeStandardIncrement =
     {
   TimeStandard.blitz: (
@@ -165,21 +149,6 @@ List<Duration> timeStandardIncrementCons(TimeStandard s) {
         Duration(seconds: i * timeStandardIncrement[s]!.$3.inSeconds),
   );
 }
-
-// final Map<TimeStandard, List<Duration>> timeStandardIncrementAlt = {
-//   TimeStandard.blitz: [
-//     timeStandardIncrement[TimeStandard.blitz]!,
-//   ],
-//   TimeStandard.rapid: [
-//     timeStandardIncrement[TimeStandard.rapid]!,
-//   ],
-//   TimeStandard.classical: [
-//     timeStandardIncrement[TimeStandard.classical]!,
-//   ],
-//   TimeStandard.correspondence: [
-//     timeStandardIncrement[TimeStandard.correspondence]!,
-//   ],
-// };
 
 const Map<TimeStandard, (Duration, Duration, Duration)>
     timeStandardByoYomiTime = {
@@ -216,25 +185,8 @@ List<Duration> timeStandardByoYomiTimesCons(TimeStandard s) {
   );
 }
 
-// final Map<TimeStandard, List<Duration>> timeStandardByoYomiTimeAlt = {
-//   TimeStandard.blitz: [
-//     timeStandardByoYomiTime[TimeStandard.blitz]!,
-//   ],
-//   TimeStandard.rapid: [
-//     timeStandardByoYomiTime[TimeStandard.rapid]!,
-//   ],
-//   TimeStandard.classical: [
-//     timeStandardByoYomiTime[TimeStandard.classical]!,
-//   ],
-//   TimeStandard.correspondence: [
-//     timeStandardByoYomiTime[TimeStandard.correspondence]!,
-//   ],
-// };
-
 const List<Color> playerColors = [(Colors.black), (Colors.white)];
 const List<String> stoneImages = [
-  // "assets/images/gostones-render/b.png",
-  // "assets/images/gostones-render/w1.png"
   "assets/images/black.png",
   "assets/images/white.png"
 ];
@@ -295,11 +247,6 @@ ThemeData buildTheme({
     useMaterial3: true,
     colorScheme: ColorScheme(
         brightness: b,
-        // primary: card,
-        // onPrimary: cardi,
-        // secondary: highlight,
-        // onSecondary: Colors.black,
-
         primary: highlight,
         onPrimary: Colors.black,
         secondary: card,
@@ -417,58 +364,34 @@ class OtherColors {
 TextTheme buildTextTheme(Color tc, {FontWeight? weight}) {
   return TextTheme(
     headlineLarge: headingL(tc).copyWith(
-      // fontFamily: GoogleFonts.poppins().fontFamily,
-      // fontFamily: GoogleFonts.notoSans().fontFamily,
-      // fontFamily: 'Poppins',
       fontFamily: 'Nunito',
       fontWeight: weight,
     ),
     headlineSmall: headingS(tc).copyWith(
-      // fontFamily: GoogleFonts.poppins().fontFamily,
-      // fontFamily: GoogleFonts.notoSans().fontFamily,
-      // fontFamily: 'Poppins',
       fontFamily: 'Nunito',
       fontWeight: weight,
     ),
     titleLarge: titleL(tc).copyWith(
-      // fontFamily: GoogleFonts.poppins().fontFamily,
-      // fontFamily: GoogleFonts.notoSans().fontFamily,
-      // fontFamily: 'Poppins',
       fontFamily: 'Nunito',
       fontWeight: weight,
     ),
     titleSmall: titleS(tc).copyWith(
-      // fontFamily: GoogleFonts.poppins().fontFamily,
-      // fontFamily: GoogleFonts.notoSans().fontFamily,
-      // fontFamily: 'Poppins',
       fontFamily: 'Nunito',
       fontWeight: weight,
     ),
     bodyLarge: bodyL(tc).copyWith(
-      // fontFamily: GoogleFonts.poppins().fontFamily,
-      // fontFamily: GoogleFonts.notoSans().fontFamily,
-      // fontFamily: 'Poppins',
       fontFamily: 'Nunito',
       fontWeight: weight,
     ),
     bodySmall: bodyS(tc).copyWith(
-      // fontFamily: GoogleFonts.poppins().fontFamily,
-      // fontFamily: GoogleFonts.notoSans().fontFamily,
-      // fontFamily: 'Poppins',
       fontFamily: 'Nunito',
       fontWeight: weight,
     ),
     labelLarge: lableL(tc).copyWith(
-      // fontFamily: GoogleFonts.poppins().fontFamily,
-      // fontFamily: GoogleFonts.notoSans().fontFamily,
-      // fontFamily: 'Poppins',
       fontFamily: 'Nunito',
       fontWeight: weight,
     ),
     labelSmall: lableS(tc).copyWith(
-      // fontFamily: GoogleFonts.poppins().fontFamily,
-      // fontFamily: GoogleFonts.notoSans().fontFamily,
-      // fontFamily: 'Poppins',
       fontFamily: 'Nunito',
       fontWeight: weight,
     ),
@@ -540,68 +463,16 @@ TextStyle lableS(Color col) {
 }
 
 VisualTheme defaultTheme = VisualTheme(
-  // backgroundColor: Colors.grey.shade800,
-  // disabledColor: Colors.grey.shade400,
-  // enabledColor: Colors.amber,
-
-// #003049, #d62828, #f77f00, #fcbf49, #eae2b7
-  // color1: const Color(0xFF003049),
-  // color2: const Color(0xFFd62828),
-  // color3: const Color(0xFFf77f00),
-  // color4: const Color(0xFFfcbf49),
-  // color5: const Color(0xFFeae2b7),
-
-// #D3CAE2 #E6C17A, #F6EDE3, #404041
-  // color1: const Color(0xFFD3CAE2),
-  // color2: const Color(0xFFE6C17A),
-  // color3: const Color(0xFFF6EDE3),
-  // color4: const Color(0xFF404041),
-  // color5: const Color(0xFFf77f00),
-
-// #cfdbd5, #e8eddf, #f5cb5c, #242423, #333533
-  // color1: const Color(0xFFcfdbd5),
-  // color2: const Color(0xFFe8eddf),
-  // color3: const Color(0xFFf5cb5c),
-  // color4: const Color(0xFF242423),
-  // color5: const Color(0xFF333533),
-
-  // #eae8ff, #adacb5, #f5cb5c, #2d3142, #071013
-
-  // magnolia =>
   color1: const Color(0xFFeae8ff),
-  // color1: magnolia,
   color2: const Color(0xFFDAD6FF),
-  // color2: const Color(0xFFEDEBFF),
-
   color3: const Color(0xFFf5cb5c),
-  // color4: const Color(0xFF2d3142),
-  // color5: const Color(0xFF071013),
-
-  // #dce1e9, #fef7ff, #f5cf66, #0a0212, #141414
-
-  // color1: const Color(0xFFFCF8F5),
-  // color2: const Color(0xFFfef7ff),
-  // color3: const Color(0xFFf5cf66),
-  // color4: const Color(0xFF0A0A0A),
-  // color5: const Color(0xFF141414),
-
-  // color5: Color(0xFF2E2E38), // color4: Color(0xFF282739),
-
   color5: Color(0xFF424261),
-  // color5: Color(0xFF1C1C22),
   color4: Color(0xFF282739),
-  // #
 );
 
 class VisualTheme {
   // final Color backgroundColor;
   Color get mainHighlightColor => color3;
-
-  // Color get disabledColor => color2;
-  // Color get enabledColor => color3;
-
-  // Color get darkCardColor => color5;
-  // Color get lightCardColor => color2;
 
   Color get darkBackground => Color(0xff111118);
 
@@ -612,17 +483,12 @@ class VisualTheme {
   Color get enabledColor => color3;
 
   Color get darkCardColor => color5;
-  // Color get darkCardColor => Color(0xFF1C1C22);
-  // Color get darkCardColor => Color(0xFF363636);
+
   Color get lightCardColor => color1;
 
   Color get darkDialogColor => color4;
-  // Color get darkCardColor => Color(0xFF1C1C22);
-  // Color get darkCardColor => Color(0xFF363636);
-  Color get lightDialogColor => color2;
 
-  // Color get mainTextColor => color5;
-  // Color get secondaryTextColor => color5;
+  Color get lightDialogColor => color2;
 
   Color get mainDarkTextColor => Colors.white.withOpacity(0.9);
   Color get mainLightTextColor => Colors.grey.shade800;
@@ -633,15 +499,9 @@ class VisualTheme {
         : mainDarkTextColor;
   }
 
-  // Color get secDarkTextColor => color5;
-  // Color get secLightTextColor => color5;
-
   Color get darkShadow => Colors.grey.shade700.withOpacity(0.9);
   Color get lightShadow => Colors.grey.shade700.withOpacity(0.3);
-  // Color get darkShadow => Colors.blueGrey.shade100;
-  // Color get lightShadow => Colors.blueGrey.shade700.withOpacity(0.3);
-  // Color get lightShadow => Colors.blueGrey.shade100;
-
+  
   final Color color1;
   final Color color2;
   final Color color3;
@@ -649,8 +509,6 @@ class VisualTheme {
   final Color color5;
 
   VisualTheme({
-    // required this.disabledColor,
-    // required this.enabledColor,
     required this.color1,
     required this.color2,
     required this.color3,

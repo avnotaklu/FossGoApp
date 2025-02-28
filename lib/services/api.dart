@@ -82,14 +82,6 @@ class Api {
       log("Socket Exception: ${url.toString()}");
       return left(HttpError(message: "No internet connection"));
     }
-    // on  SocketException {
-    // } on HttpException {
-    //   log("Http Exception: ${url.toString()}");
-    //   return left(HttpError(message: "Can't find the server"));
-    // } on FormatException {
-    //   log("Format Exception: ${url.toString()}");
-    //   rethrow;
-    // }
   }
 
   Future<Either<HttpError, http.Response>> post(

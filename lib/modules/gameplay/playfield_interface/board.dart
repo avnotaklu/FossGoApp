@@ -55,13 +55,9 @@ class _BoardState extends State<Board> {
     double stoneSpacing = context.width /
         300; // Don't make spacing so large that to get that spacing Stones start to move out of position
 
-    //double boardInset = stoneInsetstoneSpacing;
     return Stack(
       alignment: Alignment.center,
       children: [
-        // InteractiveViewer(
-        //   panEnabled: false,
-        //   child:
         Center(
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
@@ -80,12 +76,6 @@ class _BoardState extends State<Board> {
                         height: cons.maxHeight,
                         width: cons.maxWidth,
                         color: const Color(0xffE7A65A),
-                        // color: const Color(0xffDCB35C),
-                        // decoration: BoxDecoration(
-                        //   image: DecorationImage(
-                        //       image: AssetImage(Constants.assets['board']!),
-                        // fit: BoxFit.fill),
-                        // ),
                       ),
                     ),
                   ),
@@ -120,17 +110,6 @@ class _BoardState extends State<Board> {
             },
           ),
         ),
-        // ),
-        // context.read<GameStateBloc>()
-        // Center(
-        //   child: Text(
-        //     "3",
-        //     style: context.textTheme.headlineLarge?.copyWith(
-        //       fontSize: context.height * 0.15,
-        //       // color: Colors.black,
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }
