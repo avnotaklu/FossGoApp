@@ -6,10 +6,10 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/error_handling/signal_r_error.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/auth_creds.dart';
+import 'package:go/models/auth_creds.dart';
 
-import 'package:go/services/signal_r_message.dart';
-import 'package:go/services/find_match_dto.dart';
+import 'package:go/models/signal_r_message.dart';
+import 'package:go/models/find_match_dto.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
 extension SignalRConnectionStateX on SignalRConnectionState {

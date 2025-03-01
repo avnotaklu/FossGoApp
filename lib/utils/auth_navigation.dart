@@ -4,8 +4,8 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/auth/error_screen.dart';
 import 'package:go/modules/auth/new_o_auth_screen.dart';
-import 'package:go/services/user_account.dart';
-import 'package:go/services/user_authentication_model.dart';
+import 'package:go/models/user_account.dart';
+import 'package:go/models/user_authentication_model.dart';
 import 'package:provider/provider.dart';
 
 void authNavigation(

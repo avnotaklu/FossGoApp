@@ -3,13 +3,13 @@ import 'dart:convert';
 
 import 'package:go/models/game.dart';
 import 'package:go/models/position.dart';
-import 'package:go/services/available_game.dart';
-import 'package:go/services/edit_dead_stone_dto.dart';
-import 'package:go/services/find_match_result.dart';
-import 'package:go/services/game_and_opponent.dart';
-import 'package:go/services/game_over_message.dart';
-import 'package:go/services/public_user_info.dart';
-import 'package:go/services/stat_update_message.dart';
+import 'package:go/models/available_game.dart';
+import 'package:go/models/edit_dead_stone_dto.dart';
+import 'package:go/models/find_match_result.dart';
+import 'package:go/models/game_and_opponent.dart';
+import 'package:go/models/game_over_message.dart';
+import 'package:go/models/public_user_info.dart';
+import 'package:go/models/stat_update_message.dart';
 
 class SignalRMessage {
   final String type;

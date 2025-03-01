@@ -11,7 +11,7 @@ import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/middleware/analysis_bloc.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/settings/settings_provider.dart';
-import 'package:go/services/move_position.dart';
+import 'package:go/models/move_position.dart';
 import 'package:go/utils/board_size_data.dart';
 import 'package:provider/provider.dart';
 import 'package:test/test.dart';

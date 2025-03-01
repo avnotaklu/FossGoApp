@@ -11,8 +11,8 @@ import 'package:go/modules/gameplay/stages/analysis_stage.dart';
 import 'package:go/modules/gameplay/stages/game_end_stage.dart';
 import 'package:go/modules/gameplay/stages/score_calculation_stage.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
-import 'package:go/services/games_history_batch.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/games_history_batch.dart';
+import 'package:go/models/signal_r_message.dart';
 import 'package:go/widgets/section_divider.dart';
 import 'package:provider/provider.dart';
 

@@ -6,8 +6,8 @@ import 'package:go/core/validation/validator.dart';
 import 'package:go/modules/auth/sign_in_dto.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/services/public_user_info.dart';
-import 'package:go/services/user_account.dart';
+import 'package:go/models/public_user_info.dart';
+import 'package:go/models/user_account.dart';
 
 class LogInProvider {
   final AuthProvider authBloc;

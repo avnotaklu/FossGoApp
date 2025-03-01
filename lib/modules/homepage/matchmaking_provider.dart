@@ -6,10 +6,10 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/homepage/homepage_bloc.dart';
-import 'package:go/services/ongoing_games.dart';
-import 'package:go/services/signal_r_message.dart';
-import 'package:go/services/time_control_dto.dart';
-import 'package:go/services/find_match_dto.dart';
+import 'package:go/models/ongoing_games.dart';
+import 'package:go/models/signal_r_message.dart';
+import 'package:go/models/time_control_dto.dart';
+import 'package:go/models/find_match_dto.dart';
 import 'package:go/constants/constants.dart' as constants;
 
 // enum BoardSize {

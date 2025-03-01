@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:go/services/player_rating.dart';
+import 'package:go/models/player_rating.dart';
 
 enum PlayerType { normal, guest }
 

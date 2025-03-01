@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go/core/utils/theme_helpers/context_extensions.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/signal_r_message.dart';
 
 class SignalIndicator extends StatelessWidget {
   final ConnectionStrength strength;

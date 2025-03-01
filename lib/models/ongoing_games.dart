@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:go/models/game.dart';
-import 'package:go/services/public_user_info.dart';
+import 'package:go/models/public_user_info.dart';
 
 class OnGoingGame {
   final Game game;

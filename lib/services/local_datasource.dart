@@ -1,6 +1,6 @@
 import 'package:go/modules/settings/settings_provider.dart';
-import 'package:go/services/auth_creds.dart';
-import 'package:go/services/user_account.dart';
+import 'package:go/models/auth_creds.dart';
+import 'package:go/models/user_account.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalDatasource {

@@ -11,7 +11,7 @@ import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
-import 'package:go/services/game_over_message.dart';
+import 'package:go/models/game_over_message.dart';
 import 'package:go/models/variant_type.dart';
 
 extension StoneTypeExt on StoneType {

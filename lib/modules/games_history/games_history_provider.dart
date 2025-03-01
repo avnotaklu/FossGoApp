@@ -6,7 +6,7 @@ import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/modules/games_history/player_result.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/game_and_opponent.dart';
+import 'package:go/models/game_and_opponent.dart';
 
 class GamesHistoryProvider extends ChangeNotifier {
   int page = 0;

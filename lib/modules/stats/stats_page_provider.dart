@@ -4,9 +4,9 @@ import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/game_and_opponent.dart';
-import 'package:go/services/player_rating.dart';
-import 'package:go/services/user_stats.dart';
+import 'package:go/models/game_and_opponent.dart';
+import 'package:go/models/player_rating.dart';
+import 'package:go/models/user_stats.dart';
 
 extension BoardSizeFilteringExt on BoardSize? {
   FilteredBoardSize get statFiltered {

@@ -2,9 +2,9 @@
 import 'dart:convert';
 
 import 'package:go/models/variant_type.dart';
-import 'package:go/services/player_rating.dart';
-import 'package:go/services/signal_r_message.dart';
-import 'package:go/services/user_stats.dart';
+import 'package:go/models/player_rating.dart';
+import 'package:go/models/signal_r_message.dart';
+import 'package:go/models/user_stats.dart';
 
 class StatUpdateMessage extends SignalRMessageType {
   final UserStatForVariant stat;

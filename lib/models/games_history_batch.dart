@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:go/models/game.dart';
-import 'package:go/services/game_and_opponent.dart';
+import 'package:go/models/game_and_opponent.dart';
 
 extension GamesHistoryExt on GamesHistoryBatch {
   int get maxLength => 12;

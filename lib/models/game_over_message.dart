@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:go/models/game.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/signal_r_message.dart';
 
 extension GameOverMethodExt on GameOverMethod {
   String get displayString => switch (this) {

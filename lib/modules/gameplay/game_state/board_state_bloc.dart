@@ -7,7 +7,7 @@ import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/stone.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
-import 'package:go/services/move_position.dart';
+import 'package:go/models/move_position.dart';
 
 class BoardStateBloc extends ChangeNotifier {
   late BoardState board;

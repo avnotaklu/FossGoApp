@@ -5,10 +5,10 @@ import 'package:go/constants/constants.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/validation/validator.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/user_account.dart';
+import 'package:go/models/user_account.dart';
 import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/services/public_user_info.dart';
-import 'package:go/services/user_details_dto.dart';
+import 'package:go/models/public_user_info.dart';
+import 'package:go/models/user_details_dto.dart';
 
 class SignUpProvider {
   final AuthProvider authBloc;

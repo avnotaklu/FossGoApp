@@ -6,8 +6,8 @@ import 'package:go/core/foundation/duration.dart';
 import 'package:go/models/position.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/models/variant_type.dart';
-import 'package:go/services/player_rating.dart';
-import 'package:go/services/time_control_dto.dart';
+import 'package:go/models/player_rating.dart';
+import 'package:go/models/time_control_dto.dart';
 
 class BoardSizeData {
   final int rows;
@@ -570,7 +570,6 @@ class Validations {
     final RegExp reg = RegExp(
       r"^[A-Z][A-Z]$",
     );
-    // final RegExp fullNameRegex = RegExp(r"\p{Letter}");
 
     return !reg.hasMatch(nat) ? "Please enter a valid nationality" : null;
   }

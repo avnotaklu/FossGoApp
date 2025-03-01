@@ -13,7 +13,7 @@ import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/game_ui.dart';
 import 'package:go/models/position.dart';
 import 'package:go/modules/settings/settings_provider.dart';
-import 'package:go/services/move_position.dart';
+import 'package:go/models/move_position.dart';
 import 'package:go/utils/stone_type.dart';
 import 'package:provider/provider.dart';
 

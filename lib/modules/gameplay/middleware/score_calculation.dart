@@ -11,7 +11,7 @@ import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/gameplay/game_state/board_state_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/services/edit_dead_stone_dto.dart';
+import 'package:go/models/edit_dead_stone_dto.dart';
 
 import 'package:go/models/position.dart';
 

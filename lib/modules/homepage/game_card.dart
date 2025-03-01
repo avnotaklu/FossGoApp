@@ -14,9 +14,9 @@ import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/services/player_rating.dart';
-import 'package:go/services/public_user_info.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/player_rating.dart';
+import 'package:go/models/public_user_info.dart';
+import 'package:go/models/signal_r_message.dart';
 import 'package:provider/provider.dart';
 
 class GameCard extends StatelessWidget {

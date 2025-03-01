@@ -11,7 +11,7 @@ import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/stages/stage.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
 import 'package:go/modules/settings/settings_provider.dart';
-import 'package:go/services/move_position.dart';
+import 'package:go/models/move_position.dart';
 import 'package:go/widgets/secondary_button.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';

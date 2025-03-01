@@ -1,8 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:go/services/user_account.dart';
-import 'package:go/services/public_user_info.dart';
+import 'package:go/models/user_account.dart';
+import 'package:go/models/public_user_info.dart';
 
 // class RegisterUserResult {
 //   // final List<AppUser> otherActivePlayers;

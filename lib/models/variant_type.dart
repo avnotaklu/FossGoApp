@@ -1,4 +1,4 @@
-import 'package:go/services/player_rating.dart';
+import 'package:go/models/player_rating.dart';
 
 extension BoardSizeDataExt on BoardSize {
   RateableBoardSize? get rateable => switch (this) {

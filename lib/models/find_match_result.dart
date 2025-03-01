@@ -2,8 +2,8 @@
 import 'dart:convert';
 
 import 'package:go/models/game.dart';
-import 'package:go/services/public_user_info.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/public_user_info.dart';
+import 'package:go/models/signal_r_message.dart';
 
 // class FindMatchResult extends SignalRMessageType {
 //   final List<PublicUserInfo> joinedUsers;

@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:go/core/error_handling/app_error.dart';
 import 'package:go/core/utils/intl/formatters.dart';
-import 'package:go/services/player_rating.dart';
-import 'package:go/services/public_user_info.dart';
+import 'package:go/models/player_rating.dart';
+import 'package:go/models/public_user_info.dart';
 
 extension AbstractUserAccountExt on AbstractUserAccount {
   String get myId => switch (this) {

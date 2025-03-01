@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/signal_r_message.dart';
 
 class ConnectionDisplay extends StatelessWidget {
   final Stream<ConnectionStrength> connectionStream;

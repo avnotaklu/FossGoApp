@@ -16,9 +16,9 @@ import 'package:go/modules/gameplay/stages/stage.dart';
 
 import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/homepage/create_game_screen.dart';
-import 'package:go/services/game_over_message.dart';
+import 'package:go/models/game_over_message.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/player_card.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/signal_r_message.dart';
 import 'package:provider/provider.dart';
 
 class GameUi extends StatefulWidget {

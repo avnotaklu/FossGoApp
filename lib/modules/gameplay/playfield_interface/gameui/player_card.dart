@@ -9,9 +9,9 @@ import 'package:go/models/game.dart';
 import 'package:go/models/minimal_rating.dart';
 import 'package:go/modules/gameplay/playfield_interface/gameui/connection_display.dart';
 import 'package:go/modules/stats/stats_page.dart';
-import 'package:go/services/game_over_message.dart';
-import 'package:go/services/player_rating.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/game_over_message.dart';
+import 'package:go/models/player_rating.dart';
+import 'package:go/models/signal_r_message.dart';
 import 'package:provider/provider.dart';
 
 import 'package:go/constants/constants.dart' as Constants;

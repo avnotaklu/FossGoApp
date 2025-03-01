@@ -11,8 +11,8 @@ import 'package:go/modules/gameplay/middleware/time_calculator.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/gameplay/middleware/board_utility/board_utilities.dart';
 import 'package:go/modules/stats/stats_repository.dart';
-import 'package:go/services/game_and_opponent.dart';
-import 'package:go/services/user_account.dart';
+import 'package:go/models/game_and_opponent.dart';
+import 'package:go/models/user_account.dart';
 import 'package:signalr_netcore/errors.dart';
 
 import 'package:go/core/error_handling/app_error.dart';
@@ -26,12 +26,12 @@ import 'package:go/modules/gameplay/game_state/game_state_bloc.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/services/edit_dead_stone_dto.dart';
-import 'package:go/services/game_over_message.dart';
-import 'package:go/services/move_position.dart';
-import 'package:go/services/public_user_info.dart';
-import 'package:go/services/signal_r_message.dart';
-import 'package:go/services/player_rating.dart';
+import 'package:go/models/edit_dead_stone_dto.dart';
+import 'package:go/models/game_over_message.dart';
+import 'package:go/models/move_position.dart';
+import 'package:go/models/public_user_info.dart';
+import 'package:go/models/signal_r_message.dart';
+import 'package:go/models/player_rating.dart';
 
 class LiveGameOracle extends GameStateOracle {
   final Api api;

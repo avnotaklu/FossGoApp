@@ -27,9 +27,9 @@ import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
 import 'package:go/modules/auth/auth_provider.dart';
-import 'package:go/services/game_creation_dto.dart';
-import 'package:go/services/ongoing_games.dart';
-import 'package:go/services/time_control_dto.dart';
+import 'package:go/models/game_creation_dto.dart';
+import 'package:go/models/ongoing_games.dart';
+import 'package:go/models/time_control_dto.dart';
 
 import 'package:go/widgets/buttons.dart';
 import 'package:go/widgets/my_text_form_field.dart';

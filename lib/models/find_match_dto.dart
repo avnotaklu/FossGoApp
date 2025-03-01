@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:go/models/variant_type.dart';
-import 'package:go/services/time_control_dto.dart';
+import 'package:go/models/time_control_dto.dart';
 
 extension MatchableBoardSizesExtension on MatchableBoardSizes {
   String get boardName {

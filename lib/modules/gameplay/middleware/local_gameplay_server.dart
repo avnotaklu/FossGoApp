@@ -14,9 +14,9 @@ import 'package:go/modules/gameplay/middleware/score_calculator.dart';
 import 'package:go/modules/gameplay/middleware/stone_logic.dart';
 import 'package:go/modules/gameplay/middleware/time_calculator.dart';
 import 'package:go/modules/homepage/stone_selection_widget.dart';
-import 'package:go/services/edit_dead_stone_dto.dart';
-import 'package:go/services/game_over_message.dart';
-import 'package:go/services/move_position.dart';
+import 'package:go/models/edit_dead_stone_dto.dart';
+import 'package:go/models/game_over_message.dart';
+import 'package:go/models/move_position.dart';
 
 class LocalGameplayServer {
   final TimeCalculator timeCalculator;

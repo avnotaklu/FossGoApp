@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:go/models/game.dart';
 import 'package:go/modules/stats/stats_page.dart';
-import 'package:go/services/game_and_opponent.dart';
-import 'package:go/services/public_user_info.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/game_and_opponent.dart';
+import 'package:go/models/public_user_info.dart';
+import 'package:go/models/signal_r_message.dart';
 
 class GameEntranceData {
   final DateTime? joinTime;

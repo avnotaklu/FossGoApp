@@ -14,11 +14,11 @@ import 'package:go/models/game_move.dart';
 import 'package:go/models/position.dart';
 import 'package:go/modules/gameplay/game_state/oracle/game_state_oracle.dart';
 import 'package:go/modules/settings/settings_provider.dart';
-import 'package:go/services/edit_dead_stone_dto.dart';
-import 'package:go/services/game_over_message.dart';
-import 'package:go/services/move_position.dart';
-import 'package:go/services/player_rating.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/edit_dead_stone_dto.dart';
+import 'package:go/models/game_over_message.dart';
+import 'package:go/models/move_position.dart';
+import 'package:go/models/player_rating.dart';
+import 'package:go/models/signal_r_message.dart';
 
 import 'package:signalr_netcore/errors.dart';
 

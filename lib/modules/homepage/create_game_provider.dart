@@ -9,9 +9,9 @@ import 'package:go/models/game.dart';
 import 'package:go/models/time_control.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/game_creation_dto.dart';
+import 'package:go/models/game_creation_dto.dart';
 import 'package:go/constants/constants.dart' as Constants;
-import 'package:go/services/time_control_dto.dart';
+import 'package:go/models/time_control_dto.dart';
 import 'package:go/models/variant_type.dart';
 
 typedef GameCreationParams = ({

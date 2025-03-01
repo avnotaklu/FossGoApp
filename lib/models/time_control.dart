@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:go/core/foundation/duration.dart';
 import 'package:go/models/game.dart';
-import 'package:go/services/player_rating.dart';
+import 'package:go/models/player_rating.dart';
 import 'package:go/models/variant_type.dart';
-import 'package:go/services/time_control_dto.dart';
+import 'package:go/models/time_control_dto.dart';
 
 final TimeControl ultrabullet = TimeControl(
   mainTimeSeconds: 10,

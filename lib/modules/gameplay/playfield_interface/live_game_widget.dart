@@ -9,8 +9,8 @@ import 'package:go/modules/gameplay/game_state/oracle/live_game_oracle.dart';
 import 'package:go/modules/gameplay/playfield_interface/game_widget.dart';
 import 'package:go/modules/stats/stats_repository.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/game_and_opponent.dart';
-import 'package:go/services/signal_r_message.dart';
+import 'package:go/models/game_and_opponent.dart';
+import 'package:go/models/signal_r_message.dart';
 import 'package:provider/provider.dart';
 
 class LiveGameWidget extends StatelessWidget {

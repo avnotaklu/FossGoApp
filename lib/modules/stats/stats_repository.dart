@@ -9,15 +9,15 @@ import 'package:go/core/utils/hive/mapper.dart';
 import 'package:go/models/game.dart';
 import 'package:go/models/variant_type.dart';
 import 'package:go/modules/auth/signalr_bloc.dart';
-import 'package:go/services/player_rating.dart';
-import 'package:go/services/signal_r_message.dart';
-import 'package:go/services/stat_update_message.dart';
+import 'package:go/models/player_rating.dart';
+import 'package:go/models/signal_r_message.dart';
+import 'package:go/models/stat_update_message.dart';
 import 'package:hive/hive.dart';
 
 import 'package:go/modules/auth/auth_provider.dart';
 import 'package:go/services/api.dart';
-import 'package:go/services/public_user_info.dart';
-import 'package:go/services/user_stats.dart';
+import 'package:go/models/public_user_info.dart';
+import 'package:go/models/user_stats.dart';
 
 abstract interface class IStatsRepository {
   Future<Either<AppError, (UserStat, PlayerRating)>> getStats();
