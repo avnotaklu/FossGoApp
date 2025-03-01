@@ -42,26 +42,8 @@ class _SignInState extends State<SignIn> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // LoaderCustomButton(
-              //   onPressed: () async {
-              //     var result = await authBloc.loginGoogle();
-              //     if (context.mounted) {
-              //       googleOAuthNavigation(context, result);
-              //       ScaffoldMessenger.of(context).showSnackBar(
-              //         SnackBar(
-              //           content: Text(result.fold((l) => l.toString(),
-              //               (r) => "Successfully logged in")),
-              //         ),
-              //       );
-              //     }
-              //   },
-              //   buttonBuilder: (onPressed) => SignInButton(
-              //     Buttons.Google,
-              //     onPressed: onPressed,
-              //   ),
-              // ),
               Text(
-                "Play go",
+                "Foss-Go",
                 style: context.textTheme.headlineLarge?.copyWith(fontSize: 40),
               ),
               SizedBox(
